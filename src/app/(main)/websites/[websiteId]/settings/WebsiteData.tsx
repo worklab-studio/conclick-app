@@ -1,104 +1,56 @@
-import { Button, Modal, DialogTrigger, Dialog, Column } from '@umami/react-zen';
-import {
-  useLoginQuery,
-  useMessages,
-  useModified,
-  useUserTeamsQuery,
-  useNavigation,
-} from '@/components/hooks';
+import { useMessages, useModified, useNavigation } from '@/components/hooks';
 import { WebsiteDeleteForm } from './WebsiteDeleteForm';
-import { WebsiteResetForm } from './WebsiteResetForm';
-import { WebsiteTransferForm } from './WebsiteTransferForm';
-import { ActionForm } from '@/components/common/ActionForm';
-import { ROLES } from '@/lib/constants';
+import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Trash2 } from 'lucide-react';
+import { useState } from 'react';
 
 export function WebsiteData({ websiteId, onSave }: { websiteId: string; onSave?: () => void }) {
   const { formatMessage, labels, messages } = useMessages();
-  const { user } = useLoginQuery();
   const { touch } = useModified();
-  const { router, pathname, teamId, renderUrl } = useNavigation();
-  const { data: teams } = useUserTeamsQuery(user.id);
-  const isAdmin = pathname.startsWith('/admin');
-
-  const canTransferWebsite =
-    (
-      (!teamId &&
-        teams?.data?.filter(({ members }) =>
-          members.find(
-            ({ role, userId }) =>
-              [ROLES.teamOwner, ROLES.teamManager].includes(role) && userId === user.id,
-          ),
-        )) ||
-      []
-    ).length > 0 ||
-    (teamId &&
-      !!teams?.data
-        ?.find(({ id }) => id === teamId)
-        ?.members.find(({ role, userId }) => role === ROLES.teamOwner && userId === user.id));
+  const { router, renderUrl } = useNavigation();
+  const [open, setOpen] = useState(false);
 
   const handleSave = () => {
     touch('websites');
     onSave?.();
     router.push(renderUrl(`/websites`));
-  };
-
-  const handleReset = async () => {
-    onSave?.();
+    setOpen(false);
   };
 
   return (
-    <Column gap="6">
-      {!isAdmin && (
-        <ActionForm
-          label={formatMessage(labels.transferWebsite)}
-          description={formatMessage(messages.transferWebsite)}
-        >
-          <DialogTrigger>
-            <Button isDisabled={!canTransferWebsite}>{formatMessage(labels.transfer)}</Button>
-            <Modal>
-              <Dialog title={formatMessage(labels.transferWebsite)} style={{ width: 400 }}>
-                {({ close }) => (
-                  <WebsiteTransferForm websiteId={websiteId} onSave={handleSave} onClose={close} />
-                )}
-              </Dialog>
-            </Modal>
-          </DialogTrigger>
-        </ActionForm>
-      )}
-
-      <ActionForm
-        label={formatMessage(labels.resetWebsite)}
-        description={formatMessage(messages.resetWebsiteWarning)}
-      >
-        <DialogTrigger>
-          <Button>{formatMessage(labels.reset)}</Button>
-          <Modal>
-            <Dialog title={formatMessage(labels.resetWebsite)} style={{ width: 400 }}>
-              {({ close }) => (
-                <WebsiteResetForm websiteId={websiteId} onSave={handleReset} onClose={close} />
-              )}
-            </Dialog>
-          </Modal>
-        </DialogTrigger>
-      </ActionForm>
-
-      <ActionForm
-        label={formatMessage(labels.deleteWebsite)}
-        description={formatMessage(messages.deleteWebsiteWarning)}
-      >
-        <DialogTrigger>
-          <Button data-test="button-delete" variant="danger">
-            {formatMessage(labels.delete)}
-          </Button>
-          <Modal>
-            <Dialog title={formatMessage(labels.deleteWebsite)} style={{ width: 400 }}>
-              {({ close }) => (
-                <WebsiteDeleteForm websiteId={websiteId} onSave={handleSave} onClose={close} />
-              )}
-            </Dialog>
-          </Modal>
-        </DialogTrigger>
-      </ActionForm>
-    </Column>
+    <div className="space-y-4">
+      <div className="border border-red-200 dark:border-red-900/30 rounded-lg p-4 bg-red-50/50 dark:bg-red-900/10">
+        <div className="flex items-center justify-between">
+          <div className="space-y-1">
+            <h4 className="font-medium text-red-900 dark:text-red-200">{formatMessage(labels.deleteWebsite)}</h4>
+            <p className="text-sm text-red-700 dark:text-red-300">
+              {formatMessage(messages.deleteWebsiteWarning)}
+            </p>
+          </div>
+          <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger asChild>
+              <Button variant="destructive" className="gap-2">
+                <Trash2 className="h-4 w-4" />
+                {formatMessage(labels.delete)}
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[425px] bg-white dark:bg-[hsl(0,0%,8%)] dark:border-[hsl(0,0%,12%)]">
+              <DialogHeader>
+                <DialogTitle className="text-foreground">{formatMessage(labels.deleteWebsite)}</DialogTitle>
+              </DialogHeader>
+              <WebsiteDeleteForm websiteId={websiteId} onSave={handleSave} onClose={() => setOpen(false)} />
+            </DialogContent>
+          </Dialog>
+        </div>
+      </div>
+    </div>
   );
 }

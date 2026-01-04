@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { Text, StatusLight } from '@umami/react-zen';
-import { useMessages, useActyiveUsersQuery } from '@/components/hooks';
+import { useMessages, useActiveUsersQuery } from '@/components/hooks';
 
 export function ActiveUsers({
   websiteId,
@@ -12,7 +12,7 @@ export function ActiveUsers({
   refetchInterval?: number;
 }) {
   const { formatMessage, labels } = useMessages();
-  const { data } = useActyiveUsersQuery(websiteId, { refetchInterval });
+  const { data } = useActiveUsersQuery(websiteId, { refetchInterval });
 
   const count = useMemo(() => {
     if (websiteId) {

@@ -1,7 +1,8 @@
 import Link from 'next/link';
-import { WebsitesTable } from './WebsitesTable';
+import { WebsiteCard } from './WebsiteCard';
 import { DataGrid } from '@/components/common/DataGrid';
 import { useLoginQuery, useNavigation, useUserWebsitesQuery } from '@/components/hooks';
+import { useMemo } from 'react';
 
 export function WebsitesDataTable({
   userId,
@@ -24,16 +25,22 @@ export function WebsitesDataTable({
     <Link href={renderUrl(`/websites/${row.id}`, false)}>{row.name}</Link>
   );
 
+  const renderGreeting = () => (
+    <div className="text-foreground">
+      <span className="text-base">
+        Hey <span className="font-semibold">{user?.username || 'User'}</span>
+      </span>
+    </div>
+  );
+
   return (
-    <DataGrid query={queryResult} allowSearch allowPaging>
+    <DataGrid query={queryResult} allowSearch allowPaging renderGreeting={renderGreeting}>
       {({ data }) => (
-        <WebsitesTable
-          data={data}
-          showActions={showActions}
-          allowEdit={allowEdit}
-          allowView={allowView}
-          renderLink={renderLink}
-        />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {data.map((website: any) => (
+            <WebsiteCard key={website.id} website={website} />
+          ))}
+        </div>
       )}
     </DataGrid>
   );

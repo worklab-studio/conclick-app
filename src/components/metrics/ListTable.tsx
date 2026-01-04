@@ -42,7 +42,6 @@ export function ListTable({
   currency,
 }: ListTableProps) {
   const { formatMessage, labels } = useMessages();
-  const { isPhone } = useMobile();
 
   const getRow = (row: ListData, index: number) => {
     const { label, count, percent } = row;
@@ -57,7 +56,6 @@ export function ListTable({
         showPercentage={showPercentage}
         change={renderChange ? renderChange(row, index) : null}
         currency={currency}
-        isPhone={isPhone}
       />
     );
   };
@@ -67,14 +65,12 @@ export function ListTable({
   };
 
   return (
-    <Column gap>
-      <Grid alignItems="center" justifyContent="space-between" paddingLeft="2" columns="1fr 100px">
-        <Text weight="bold">{title}</Text>
-        <Text weight="bold" align="center">
-          {metric}
-        </Text>
-      </Grid>
-      <Column gap="1">
+    <div className="flex flex-col gap-4">
+      <div className="flex items-center justify-between px-2">
+        <div className="font-bold">{title}</div>
+        <div className="font-bold text-center w-[100px]">{metric}</div>
+      </div>
+      <div className="flex flex-col gap-1">
         {data?.length === 0 && <Empty />}
         {virtualize && data.length > 0 ? (
           <FixedSizeList
@@ -88,8 +84,8 @@ export function ListTable({
         ) : (
           data.map(getRow)
         )}
-      </Column>
-    </Column>
+      </div>
+    </div>
   );
 }
 
@@ -101,7 +97,6 @@ const AnimatedRow = ({
   animate,
   showPercentage = true,
   currency,
-  isPhone,
 }) => {
   const props = useSpring({
     width: percent,
@@ -111,42 +106,27 @@ const AnimatedRow = ({
   });
 
   return (
-    <Grid
-      columns="1fr 50px 50px"
-      paddingLeft="2"
-      alignItems="center"
-      hoverBackgroundColor="2"
-      borderRadius
-      gap
-    >
-      <Row alignItems="center">
-        <Text truncate={true} style={{ maxWidth: isPhone ? '200px' : '400px' }}>
+    <div className="grid grid-cols-[1fr_50px_50px] gap-4 px-2 py-1 items-center hover:bg-zinc-100 dark:hover:bg-[#18181b] rounded-md transition-colors">
+      <div className="flex items-center min-w-0">
+        <div className="truncate text-sm" style={{ maxWidth: '100%' }}>
           {label}
-        </Text>
-      </Row>
-      <Row alignItems="center" height="30px" justifyContent="flex-end">
+        </div>
+      </div>
+      <div className="flex items-center h-[30px] justify-end">
         {change}
-        <Text weight="bold">
+        <div className="font-bold text-sm">
           <AnimatedDiv title={props?.y as any}>
             {currency
               ? props.y?.to(n => formatLongCurrency(n, currency))
               : props.y?.to(formatLongNumber)}
           </AnimatedDiv>
-        </Text>
-      </Row>
+        </div>
+      </div>
       {showPercentage && (
-        <Row
-          alignItems="center"
-          justifyContent="flex-start"
-          position="relative"
-          border="left"
-          borderColor="8"
-          color="muted"
-          paddingLeft="3"
-        >
+        <div className="flex items-center justify-start relative border-l border-zinc-200 dark:border-zinc-800 text-muted-foreground pl-3 text-sm">
           <AnimatedDiv>{props.width.to(n => `${n?.toFixed?.(0)}%`)}</AnimatedDiv>
-        </Row>
+        </div>
       )}
-    </Grid>
+    </div>
   );
 };

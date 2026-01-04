@@ -1,9 +1,7 @@
 'use client';
 import { firstBy } from 'thenby';
-import { Grid } from '@umami/react-zen';
-import { GridRow } from '@/components/common/GridRow';
 import { PageBody } from '@/components/common/PageBody';
-import { Panel } from '@/components/common/Panel';
+import { Card, CardContent } from '@/components/ui/card';
 import { RealtimeChart } from '@/components/metrics/RealtimeChart';
 import { WorldMap } from '@/components/metrics/WorldMap';
 import { useMobile, useRealtimeQuery } from '@/components/hooks';
@@ -29,30 +27,46 @@ export function RealtimePage({ websiteId }: { websiteId: string }) {
   );
 
   return (
-    <Grid gap="3">
+    <div className="space-y-6 dark bg-[hsl(0,0%,8%)] min-h-screen p-6 text-foreground">
       <RealtimeHeader data={data} />
-      <Panel>
-        <RealtimeChart data={data} unit="minute" />
-      </Panel>
-      <Panel>
-        <RealtimeLog data={data} />
-      </Panel>
-      <GridRow layout="two">
-        <Panel>
-          <RealtimePaths data={data} />
-        </Panel>
-        <Panel>
-          <RealtimeReferrers data={data} />
-        </Panel>
-      </GridRow>
-      <GridRow layout="one-two">
-        <Panel>
-          <RealtimeCountries data={countries} />
-        </Panel>
-        <Panel gridColumn={isMobile ? null : 'span 2'} padding="0">
-          <WorldMap data={countries} />
-        </Panel>
-      </GridRow>
-    </Grid>
+
+      <Card className="bg-[hsl(0,0%,8%)] border-[hsl(0,0%,12%)]">
+        <CardContent className="pt-6">
+          <RealtimeChart data={data} unit="minute" />
+        </CardContent>
+      </Card>
+
+      <Card className="bg-[hsl(0,0%,8%)] border-[hsl(0,0%,12%)]">
+        <CardContent className="pt-6">
+          <RealtimeLog data={data} />
+        </CardContent>
+      </Card>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Card className="bg-[hsl(0,0%,8%)] border-[hsl(0,0%,12%)]">
+          <CardContent className="pt-6">
+            <RealtimePaths data={data} />
+          </CardContent>
+        </Card>
+        <Card className="bg-[hsl(0,0%,8%)] border-[hsl(0,0%,12%)]">
+          <CardContent className="pt-6">
+            <RealtimeReferrers data={data} />
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <Card className="bg-[hsl(0,0%,8%)] border-[hsl(0,0%,12%)]">
+          <CardContent className="pt-6">
+            <RealtimeCountries data={countries} />
+          </CardContent>
+        </Card>
+        <Card className="md:col-span-2 bg-[hsl(0,0%,8%)] border-[hsl(0,0%,12%)]">
+          <CardContent className="pt-6">
+            <WorldMap data={countries} />
+          </CardContent>
+        </Card>
+      </div>
+    </div>
   );
 }

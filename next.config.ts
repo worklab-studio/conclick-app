@@ -16,10 +16,12 @@ const trackerScriptURL = process.env.TRACKER_SCRIPT_URL || '';
 
 const contentSecurityPolicy = `
   default-src 'self';
-  img-src 'self' https: data:;
+  img-src 'self' https: data: blob:;
   script-src 'self' 'unsafe-eval' 'unsafe-inline';
   style-src 'self' 'unsafe-inline';
   connect-src 'self' https:;
+  worker-src 'self' blob:;
+  child-src 'self' blob:;
   frame-ancestors 'self' ${frameAncestors};
 `;
 
@@ -112,11 +114,6 @@ if (collectApiEndpoint) {
 }
 
 const redirects = [
-  {
-    source: '/settings',
-    destination: '/settings/preferences',
-    permanent: false,
-  },
   {
     source: '/teams/:id',
     destination: '/teams/:id/websites',

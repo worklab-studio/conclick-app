@@ -11,7 +11,11 @@ export function TeamsDataTable() {
 
   const renderLink = (row: any) => {
     return (
-      <Link key={row.id} href={`${isSettings ? '/settings' : ''}/teams/${row.id}`}>
+      <Link
+        key={row.id}
+        href={`${isSettings ? '/settings' : ''}/teams/${row.id}`}
+        className="font-semibold hover:underline"
+      >
         {row.name}
       </Link>
     );

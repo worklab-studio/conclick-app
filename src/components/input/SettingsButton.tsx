@@ -52,7 +52,7 @@ export function SettingsButton() {
         <Menu autoFocus="last" onAction={handleAction}>
           <MenuSection title={user.username}>
             <MenuSeparator />
-            <MenuItem id="/settings" icon={<Settings />} label={formatMessage(labels.settings)} />
+            <MenuItem id="/account" icon={<Settings />} label={formatMessage(labels.settings)} />
             {!cloudMode && user.isAdmin && (
               <MenuItem id="/admin" icon={<LockKeyhole />} label={formatMessage(labels.admin)} />
             )}

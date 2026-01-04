@@ -124,21 +124,24 @@ export function RealtimeLog({ data }: { data: any }) {
   const TableRow = ({ index, style }) => {
     const row = logs[index];
     return (
-      <Row alignItems="center" style={style} gap>
-        <Row minWidth="30px">
+      <div className="flex items-center gap-4 px-4 hover:bg-zinc-100 dark:hover:bg-[#18181b] transition-colors" style={style}>
+        <div className="min-w-[30px]">
           <Link href={updateParams({ session: row.sessionId })}>
             <Avatar seed={row.sessionId} size={32} />
           </Link>
-        </Row>
-        <Row minWidth="100px">
-          <Text wrap="nowrap">{getTime(row)}</Text>
-        </Row>
-        <IconLabel icon={getIcon(row)}>
-          <Text style={{ maxWidth: isPhone ? '400px' : null }} truncate>
-            {getDetail(row)}
-          </Text>
-        </IconLabel>
-      </Row>
+        </div>
+        <div className="min-w-[100px] text-sm text-muted-foreground">
+          {getTime(row)}
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2">
+            <div className="text-muted-foreground">{getIcon(row)}</div>
+            <div className="truncate text-sm" style={{ maxWidth: isPhone ? '400px' : undefined }}>
+              {getDetail(row)}
+            </div>
+          </div>
+        </div>
+      </div>
     );
   };
 
@@ -174,33 +177,33 @@ export function RealtimeLog({ data }: { data: any }) {
   }, [data, filter, formatValue, search]);
 
   return (
-    <Column gap>
-      <Heading size="2">{formatMessage(labels.activity)}</Heading>
+    <div className="space-y-4">
+      <h2 className="text-lg font-semibold">{formatMessage(labels.activity)}</h2>
       {isPhone ? (
         <>
-          <Row>
+          <div className="mb-2">
             <SearchField value={search} onSearch={setSearch} />
-          </Row>
-          <Row>
+          </div>
+          <div className="mb-2">
             <FilterButtons items={buttons} value={filter} onChange={setFilter} />
-          </Row>
+          </div>
         </>
       ) : (
-        <Row alignItems="center" justifyContent="space-between">
+        <div className="flex items-center justify-between gap-4">
           <SearchField value={search} onSearch={setSearch} />
           <FilterButtons items={buttons} value={filter} onChange={setFilter} />
-        </Row>
+        </div>
       )}
 
-      <Column>
+      <div className="min-h-[500px]">
         {logs?.length === 0 && <Empty />}
         {logs?.length > 0 && (
           <FixedSizeList width="100%" height={500} itemCount={logs.length} itemSize={50}>
             {TableRow}
           </FixedSizeList>
         )}
-      </Column>
+      </div>
       <SessionModal websiteId={website.id} />
-    </Column>
+    </div>
   );
 }

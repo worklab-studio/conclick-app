@@ -23,6 +23,7 @@ export interface DataGridProps {
   allowPaging?: boolean;
   autoFocus?: boolean;
   renderActions?: () => ReactNode;
+  renderGreeting?: () => ReactNode;
   renderEmpty?: () => ReactNode;
   children: ReactNode | ((data: any) => ReactNode);
 }
@@ -34,6 +35,7 @@ export function DataGrid({
   allowPaging = true,
   autoFocus,
   renderActions,
+  renderGreeting,
   renderEmpty = () => <Empty />,
   children,
 }: DataGridProps) {
@@ -65,14 +67,20 @@ export function DataGrid({
     <Column gap="4" minHeight="300px">
       {allowSearch && (
         <Row alignItems="center" justifyContent="space-between" wrap="wrap" gap>
-          <SearchField
-            value={search}
-            onSearch={handleSearch}
-            delay={searchDelay || DEFAULT_SEARCH_DELAY}
-            autoFocus={autoFocus}
-            placeholder={formatMessage(labels.search)}
-          />
-          {renderActions?.()}
+          {renderGreeting && renderGreeting()}
+          <div className="flex items-center gap-4 w-full md:w-auto md:ml-auto mt-4 md:mt-0">
+            <div className="w-full md:w-64">
+              <SearchField
+                className="rounded-lg border-none bg-background dark:bg-[hsl(0,0%,8%)] ring-0 outline-none w-full"
+                value={search}
+                onSearch={handleSearch}
+                delay={searchDelay || DEFAULT_SEARCH_DELAY}
+                autoFocus={autoFocus}
+                placeholder={formatMessage(labels.search)}
+              />
+            </div>
+            {renderActions?.()}
+          </div>
         </Row>
       )}
       <LoadingPanel

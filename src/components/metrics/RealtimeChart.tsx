@@ -45,6 +45,7 @@ export function RealtimeChart({ data, unit, ...props }: RealtimeChartProps) {
       unit={unit}
       data={chartData}
       animationDuration={animationDuration}
+      theme="dark"
     />
   );
 }

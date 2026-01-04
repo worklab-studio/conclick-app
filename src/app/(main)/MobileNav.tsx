@@ -1,4 +1,3 @@
-import { WebsiteNav } from '@/app/(main)/websites/[websiteId]/WebsiteNav';
 import { useMessages, useNavigation } from '@/components/hooks';
 import { Globe, Grid2x2, LinkIcon } from '@/components/icons';
 import { MobileMenuButton } from '@/components/input/MobileMenuButton';
@@ -7,13 +6,12 @@ import { Logo } from '@/components/svg';
 import { Grid, IconLabel, NavMenu, NavMenuItem, Row, Text } from '@umami/react-zen';
 import Link from 'next/link';
 import { AdminNav } from './admin/AdminNav';
-import { SettingsNav } from './settings/SettingsNav';
 
 export function MobileNav() {
   const { formatMessage, labels } = useMessages();
   const { pathname, websiteId, renderUrl } = useNavigation();
   const isAdmin = pathname.includes('/admin');
-  const isSettings = pathname.includes('/settings');
+  const isSettings = pathname.includes('/account');
 
   const links = [
     {
@@ -54,9 +52,7 @@ export function MobileNav() {
                   );
                 })}
               </NavMenu>
-              {websiteId && <WebsiteNav websiteId={websiteId} onItemClick={close} />}
               {isAdmin && <AdminNav onItemClick={close} />}
-              {isSettings && <SettingsNav onItemClick={close} />}
             </>
           );
         }}

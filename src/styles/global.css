@@ -1,43 +1,129 @@
-html,
-body {
-  font-family: var(--font-family), sans-serif;
-  color: var(--font-color);
-  font-size: var(--font-size);
-  background-color: var(--base-color-2);
-  width: 100%;
-  min-height: 100vh;
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    :root {
+        --background: #ffffff;
+        --foreground: #0a0a0a;
+        --card: #ffffff;
+        --card-foreground: #0a0a0a;
+        --popover: #ffffff;
+        --popover-foreground: #0a0a0a;
+        --primary: #171717;
+        --primary-foreground: #fafafa;
+        --secondary: #f5f5f5;
+        --secondary-foreground: #171717;
+        --muted: #f5f5f5;
+        --muted-foreground: #737373;
+        --accent: #f5f5f5;
+        --accent-foreground: #171717;
+        --destructive: #e7000b;
+        --border: 240 3.7% 15.9% / 0.2;
+        --input: #e5e5e5;
+        --ring: #a1a1a1;
+        --chart-1: #f54900;
+        --chart-2: #009689;
+        --chart-3: #104e64;
+        --chart-4: #ffb900;
+        --chart-5: #fe9a00;
+        --sidebar: #fafafa;
+        --sidebar-foreground: #0a0a0a;
+        --sidebar-primary: #171717;
+        --sidebar-primary-foreground: #fafafa;
+        --sidebar-accent: #f5f5f5;
+        --sidebar-accent-foreground: #171717;
+        --sidebar-border: #e5e5e5;
+        --sidebar-ring: oklch(0.708 0 0);
+        ;
+
+        --font-sans: 'Geist', 'Geist Fallback', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+        --font-serif: "Geist", "Geist Fallback", ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+        --font-mono: "Geist Mono", "Geist Mono Fallback", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+
+        --radius: 0.625rem;
+
+        --shadow-2xs: 0 1px 3px 0px rgb(0 0 0 / 0.05);
+        --shadow-xs: 0 1px 3px 0px rgb(0 0 0 / 0.05);
+        --shadow-sm: 0 1px 3px 0px rgb(0 0 0 / 0.10), 0 1px 2px -1px rgb(0 0 0 / 0.10);
+        --shadow: 0 1px 3px 0px rgb(0 0 0 / 0.10), 0 1px 2px -1px rgb(0 0 0 / 0.10);
+        --shadow-md: 0 1px 3px 0px rgb(0 0 0 / 0.10), 0 2px 4px -1px rgb(0 0 0 / 0.10);
+        --shadow-lg: 0 1px 3px 0px rgb(0 0 0 / 0.10), 0 4px 6px -1px rgb(0 0 0 / 0.10);
+        --shadow-xl: 0 1px 3px 0px rgb(0 0 0 / 0.10), 0 8px 10px -1px rgb(0 0 0 / 0.10);
+        --shadow-2xl: 0 1px 3px 0px rgb(0 0 0 / 0.25);
+    }
+
+    .dark,
+    [data-theme="dark"] {
+        --background: 0 0% 5%;
+        --foreground: 0 0% 100%;
+        --card: 0 0% 8%;
+        --card-foreground: 0 0% 100%;
+        --popover: 0 0% 3%;
+        --popover-foreground: 0 0% 100%;
+        --primary: 0 0% 98%;
+        --primary-foreground: 240 5.9% 10%;
+        --secondary: 0 0% 3%;
+        --secondary-foreground: 0 0% 100%;
+        --muted: 0 0% 6%;
+        --muted-foreground: 0 0% 63.9%;
+        --accent: 0 0% 6%;
+        --accent-foreground: 0 0% 100%;
+        --destructive: 0 62.8% 30.6%;
+        --destructive-foreground: 0 0% 98%;
+        --border: 0 0% 9%;
+        --input: 0 0% 9%;
+        --ring: 240 4.9% 83.9%;
+        --chart-1: 243 29% 50%;
+        --chart-2: 0 0% 100% / 0.5;
+        --chart-3: 0 0% 100% / 0.3;
+        --chart-4: 0 0% 100% / 0.1;
+        --chart-5: 0 0% 100% / 0.8;
+        --sidebar: #171717;
+        --sidebar-foreground: #fafafa;
+        --sidebar-primary: #1447e6;
+        --sidebar-primary-foreground: #fafafa;
+        --sidebar-accent: #262626;
+        --sidebar-accent-foreground: #fafafa;
+        --sidebar-border: #ffffff1a;
+        --sidebar-ring: #737373;
+
+        --shadow-2xs: 0 1px 3px 0px rgb(0 0 0 / 0.05);
+        --shadow-xs: 0 1px 3px 0px rgb(0 0 0 / 0.05);
+        --shadow-sm: 0 1px 3px 0px rgb(0 0 0 / 0.10), 0 1px 2px -1px rgb(0 0 0 / 0.10);
+        --shadow: 0 1px 3px 0px rgb(0 0 0 / 0.10), 0 1px 2px -1px rgb(0 0 0 / 0.10);
+        --shadow-md: 0 1px 3px 0px rgb(0 0 0 / 0.10), 0 2px 4px -1px rgb(0 0 0 / 0.10);
+        --shadow-lg: 0 1px 3px 0px rgb(0 0 0 / 0.10), 0 4px 6px -1px rgb(0 0 0 / 0.10);
+        --shadow-xl: 0 1px 3px 0px rgb(0 0 0 / 0.10), 0 8px 10px -1px rgb(0 0 0 / 0.10);
+        --shadow-2xl: 0 1px 3px 0px rgb(0 0 0 / 0.25);
+    }
 }
 
-html[style*='padding-right'] {
-  padding-right: 0 !important;
+
+@layer base {
+    * {
+        @apply border-border;
+    }
+
+    body {
+        @apply bg-background text-foreground;
+    }
+}
+
+html[style*='padding-right'],
+body[style*='padding-right'] {
+    padding-right: 0 !important;
 }
 
 a,
 a:active,
 a:hover {
-  color: var(--font-color);
-  text-decoration: none;
+    color: var(--font-color);
+    text-decoration: none;
 }
 
+/* Hide scrollbar for Chrome, Safari and Opera */
 ::-webkit-scrollbar {
-  width: 15px;
-  background: transparent;
-}
-
-::-webkit-scrollbar-track {
-  border: 7px solid rgba(0, 0, 0, 0);
-  background-color: var(--base-color-4);
-  background-clip: padding-box;
-}
-
-::-webkit-scrollbar-thumb {
-  border: 7px solid rgba(0, 0, 0, 0);
-  background-color: var(--base-color-9);
-  border-radius: var(--border-radius-full);
-  background-clip: padding-box;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  border: 4px solid rgba(0, 0, 0, 0);
-  background-clip: padding-box;
+    display: none;
+    width: 0;
 }

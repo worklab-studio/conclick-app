@@ -1,8 +1,11 @@
 import { FloatingTooltip, Column, useTheme, ColumnProps } from '@umami/react-zen';
 import { useState, useMemo } from 'react';
 import { ComposableMap, Geographies, Geography, ZoomableGroup } from 'react-simple-maps';
-import { colord } from 'colord';
+import { colord, extend } from 'colord';
+import mixPlugin from 'colord/plugins/mix';
 import { ISO_COUNTRIES, MAP_FILE } from '@/lib/constants';
+
+extend([mixPlugin]);
 import {
   useWebsiteMetricsQuery,
   useCountryNames,
@@ -42,11 +45,12 @@ export function WorldMap({ websiteId, data, ...props }: WorldMapProps) {
     const country = metrics?.find(({ x }) => x === code);
 
     if (!country) {
-      return colors.map.fillColor;
+      return '#27272a'; // Darker gray for empty state
     }
 
-    return colord(colors.map.baseColor)
-      [theme === 'light' ? 'lighten' : 'darken'](0.4 * (1.0 - country.z / 100))
+    // Blend dark base with primary purple based on percentage
+    return colord('#27272a')
+      .mix('#5e5ba4', Math.max(0.2, country.z / 100)) // Ensure at least 20% tint for visibility
       .toHex();
   };
 
@@ -65,13 +69,12 @@ export function WorldMap({ websiteId, data, ...props }: WorldMapProps) {
   };
 
   return (
-    <Column
-      {...props}
+    <div
       data-tip=""
       data-for="world-map-tooltip"
-      style={{ margin: 'auto 0', overflow: 'hidden' }}
+      style={{ width: '100%', height: '100%', minHeight: '400px' }}
     >
-      <ComposableMap projection="geoMercator">
+      <ComposableMap projection="geoMercator" style={{ width: '100%', height: '100%' }} preserveAspectRatio="xMidYMid slice">
         <ZoomableGroup zoom={0.8} minZoom={0.7} center={[0, 40]}>
           <Geographies geography={`${process.env.basePath || ''}${MAP_FILE}`}>
             {({ geographies }) => {
@@ -83,11 +86,11 @@ export function WorldMap({ websiteId, data, ...props }: WorldMapProps) {
                     key={geo.rsmKey}
                     geography={geo}
                     fill={getFillColor(code)}
-                    stroke={colors.map.strokeColor}
+                    stroke="#18181b"
                     opacity={getOpacity(code)}
                     style={{
                       default: { outline: 'none' },
-                      hover: { outline: 'none', fill: colors.map.hoverColor },
+                      hover: { outline: 'none', fill: getFillColor(code), stroke: '#5e5ba4', strokeWidth: 1.5 },
                       pressed: { outline: 'none' },
                     }}
                     onMouseOver={() => handleHover(code)}
@@ -100,6 +103,6 @@ export function WorldMap({ websiteId, data, ...props }: WorldMapProps) {
         </ZoomableGroup>
       </ComposableMap>
       {tooltip && <FloatingTooltip>{tooltip}</FloatingTooltip>}
-    </Column>
+    </div>
   );
 }

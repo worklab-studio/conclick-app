@@ -18,9 +18,10 @@ export interface PageviewsChartProps extends BarChartProps {
   unit: string;
 }
 
-export function PageviewsChart({ data, unit, minDate, maxDate, ...props }: PageviewsChartProps) {
+export function PageviewsChart({ data, unit, minDate, maxDate, theme: themeOverride, ...props }: PageviewsChartProps & { theme?: string }) {
   const { formatMessage, labels } = useMessages();
-  const { theme } = useTheme();
+  const { theme: globalTheme } = useTheme();
+  const theme = themeOverride || globalTheme;
   const { locale, dateLocale } = useLocale();
   const { colors } = useMemo(() => getThemeColors(theme), [theme]);
 
@@ -52,31 +53,31 @@ export function PageviewsChart({ data, unit, minDate, maxDate, ...props }: Pagev
         },
         ...(data.compare
           ? [
-              {
-                type: 'line',
-                label: `${formatMessage(labels.views)} (${formatMessage(labels.previous)})`,
-                data: generateTimeSeries(
-                  data.compare.pageviews,
-                  minDate,
-                  maxDate,
-                  unit,
-                  dateLocale,
-                ),
-                borderWidth: 2,
-                backgroundColor: '#8601B0',
-                borderColor: '#8601B0',
-                order: 1,
-              },
-              {
-                type: 'line',
-                label: `${formatMessage(labels.visitors)} (${formatMessage(labels.previous)})`,
-                data: generateTimeSeries(data.compare.sessions, minDate, maxDate, unit, dateLocale),
-                borderWidth: 2,
-                backgroundColor: '#f15bb5',
-                borderColor: '#f15bb5',
-                order: 2,
-              },
-            ]
+            {
+              type: 'line',
+              label: `${formatMessage(labels.views)} (${formatMessage(labels.previous)})`,
+              data: generateTimeSeries(
+                data.compare.pageviews,
+                minDate,
+                maxDate,
+                unit,
+                dateLocale,
+              ),
+              borderWidth: 2,
+              backgroundColor: '#8601B0',
+              borderColor: '#8601B0',
+              order: 1,
+            },
+            {
+              type: 'line',
+              label: `${formatMessage(labels.visitors)} (${formatMessage(labels.previous)})`,
+              data: generateTimeSeries(data.compare.sessions, minDate, maxDate, unit, dateLocale),
+              borderWidth: 2,
+              backgroundColor: '#f15bb5',
+              borderColor: '#f15bb5',
+              order: 2,
+            },
+          ]
           : []),
       ],
     };

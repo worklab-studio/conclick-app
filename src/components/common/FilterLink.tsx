@@ -32,7 +32,7 @@ export function FilterLink({ type, value, label, externalUrl, icon }: FilterLink
       {!value && `(${label || formatMessage(labels.unknown)})`}
       {value && (
         <Text title={label || value} truncate>
-          <Link href={updateParams({ [type]: `eq.${value}` })} replace>
+          <Link href={updateParams({ [type]: `eq.${value}` })} replace className="text-foreground hover:underline">
             {label || value}
           </Link>
         </Text>

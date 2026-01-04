@@ -81,4 +81,5 @@ export * from './usePageParameters';
 export * from './useRegionNames';
 export * from './useSlug';
 export * from './useSticky';
+export * from './useTheme';
 export * from './useTimezone';

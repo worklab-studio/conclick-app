@@ -9,6 +9,8 @@ import '@umami/react-zen/styles.css';
 import '@/styles/global.css';
 import '@/styles/variables.css';
 
+import { Toaster } from 'sonner';
+
 export default function ({ children }) {
   if (process.env.DISABLE_UI) {
     return (
@@ -35,6 +37,7 @@ export default function ({ children }) {
       <body>
         <Suspense>
           <Providers>{children}</Providers>
+          <Toaster richColors position="bottom-left" />
         </Suspense>
       </body>
     </html>

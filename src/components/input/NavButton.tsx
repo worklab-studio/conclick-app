@@ -54,7 +54,7 @@ export function NavButton({ showText = true }: TeamsButtonProps) {
     return cloudMode ? `${process.env.cloudUrl}${url}` : url;
   };
 
-  const handleAction = async () => {};
+  const handleAction = async () => { };
 
   return (
     <MenuTrigger>
@@ -108,7 +108,7 @@ export function NavButton({ showText = true }: TeamsButtonProps) {
                       ))}
                       {user?.teams?.length === 0 && (
                         <MenuItem id="manage-teams">
-                          <a href="/settings/teams" style={{ width: '100%' }}>
+                          <a href="/account" style={{ width: '100%' }}>
                             <Row alignItems="center" justifyContent="space-between" gap>
                               <Text align="center">Manage teams</Text>
                               <Icon>
@@ -126,7 +126,7 @@ export function NavButton({ showText = true }: TeamsButtonProps) {
             <MenuSeparator />
             <MenuItem
               id="settings"
-              href={getUrl('/settings')}
+              href={getUrl('/account')}
               icon={<Settings />}
               label={formatMessage(labels.settings)}
             />

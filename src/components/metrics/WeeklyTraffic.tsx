@@ -5,8 +5,9 @@ import { LoadingPanel } from '@/components/common/LoadingPanel';
 import { getDayOfWeekAsDate } from '@/lib/date';
 import { Focusable, Tooltip, TooltipTrigger } from '@umami/react-zen';
 
-export function WeeklyTraffic({ websiteId }: { websiteId: string }) {
-  const { data, isLoading, error } = useWeeklyTrafficQuery(websiteId);
+export function WeeklyTraffic({ websiteId, data: injectedData }: { websiteId: string; data?: any }) {
+  const { data: fetchedData, isLoading, error } = useWeeklyTrafficQuery(websiteId, {}, { enabled: !injectedData });
+  const data = injectedData || fetchedData;
   const { dateLocale } = useLocale();
   const { labels, formatMessage } = useMessages();
   const { weekStartsOn } = dateLocale.options;
@@ -16,27 +17,27 @@ export function WeeklyTraffic({ websiteId }: { websiteId: string }) {
 
   const [, max = 1] = data
     ? data.reduce((arr: number[], hours: number[], index: number) => {
-        const min = Math.min(...hours);
-        const max = Math.max(...hours);
+      const min = Math.min(...hours);
+      const max = Math.max(...hours);
 
-        if (index === 0) {
-          return [min, max];
-        }
+      if (index === 0) {
+        return [min, max];
+      }
 
-        if (min < arr[0]) {
-          arr[0] = min;
-        }
+      if (min < arr[0]) {
+        arr[0] = min;
+      }
 
-        if (max > arr[1]) {
-          arr[1] = max;
-        }
+      if (max > arr[1]) {
+        arr[1] = max;
+      }
 
-        return arr;
-      }, [])
+      return arr;
+    }, [])
     : [];
 
   return (
-    <LoadingPanel data={data} isLoading={isLoading} error={error}>
+    <LoadingPanel data={data} isLoading={isLoading && !injectedData} error={error && !injectedData}>
       <Grid columns="repeat(8, 1fr)" gap>
         {data && (
           <>
@@ -50,7 +51,7 @@ export function WeeklyTraffic({ websiteId }: { websiteId: string }) {
                   });
                   return (
                     <Row key={i} justifyContent="flex-end">
-                      <Text color="muted" size="2">
+                      <Text size="2" style={{ color: '#71717a' }}>
                         {label}
                       </Text>
                     </Row>
@@ -80,19 +81,17 @@ export function WeeklyTraffic({ websiteId }: { websiteId: string }) {
                           <Row
                             alignItems="center"
                             justifyContent="center"
-                            backgroundColor="2"
                             width="16px"
                             height="16px"
                             borderRadius="full"
-                            style={{ margin: '0 auto' }}
+                            style={{ margin: '0 auto', backgroundColor: '#27272a' }}
                             role="button"
                           >
                             <Row
-                              backgroundColor="primary"
                               width="16px"
                               height="16px"
                               borderRadius="full"
-                              style={{ opacity: pct, transform: `scale(${pct})` }}
+                              style={{ opacity: pct, transform: `scale(${pct})`, backgroundColor: '#5e5ba4' }}
                             />
                           </Row>
                         </Focusable>

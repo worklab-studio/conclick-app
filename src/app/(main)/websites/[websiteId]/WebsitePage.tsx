@@ -1,22 +1,29 @@
 'use client';
-import { Column } from '@umami/react-zen';
-import { Panel } from '@/components/common/Panel';
-import { WebsiteChart } from './WebsiteChart';
+
+import { WebsiteHeader } from './WebsiteHeader';
 import { WebsiteMetricsBar } from './WebsiteMetricsBar';
+import { WebsiteChart } from './WebsiteChart';
 import { WebsitePanels } from './WebsitePanels';
-import { WebsiteControls } from './WebsiteControls';
-import { ExpandedViewModal } from '@/app/(main)/websites/[websiteId]/ExpandedViewModal';
+import { useWebsiteQuery } from '@/components/hooks';
+
+import { useState } from 'react';
 
 export function WebsitePage({ websiteId }: { websiteId: string }) {
+  const { data: website, isLoading, error } = useWebsiteQuery(websiteId);
+  const [chartType, setChartType] = useState('overview');
+
+  if (isLoading || error) {
+    return null;
+  }
+
   return (
-    <Column gap>
-      <WebsiteControls websiteId={websiteId} />
-      <WebsiteMetricsBar websiteId={websiteId} showChange={true} />
-      <Panel minHeight="520px">
-        <WebsiteChart websiteId={websiteId} />
-      </Panel>
-      <WebsitePanels websiteId={websiteId} />
-      <ExpandedViewModal websiteId={websiteId} />
-    </Column>
+    <div className="mx-auto w-full px-3 md:px-6 py-8" style={{ maxWidth: '1320px' }}>
+      <div className="mx-4 space-y-6">
+        <WebsiteHeader websiteId={websiteId} />
+        <WebsiteMetricsBar websiteId={websiteId} chartType={chartType} />
+        <WebsiteChart websiteId={websiteId} chartType={chartType} onChartTypeChange={setChartType} />
+        <WebsitePanels websiteId={websiteId} />
+      </div>
+    </div>
   );
 }

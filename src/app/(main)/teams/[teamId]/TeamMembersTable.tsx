@@ -1,8 +1,17 @@
-import { DataColumn, DataTable, Row } from '@umami/react-zen';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import { useMessages } from '@/components/hooks';
 import { ROLES } from '@/lib/constants';
 import { TeamMemberRemoveButton } from './TeamMemberRemoveButton';
 import { TeamMemberEditButton } from './TeamMemberEditButton';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
 
 export function TeamMembersTable({
   data = [],
@@ -23,33 +32,57 @@ export function TeamMembersTable({
   };
 
   return (
-    <DataTable data={data}>
-      <DataColumn id="username" label={formatMessage(labels.username)}>
-        {(row: any) => row?.user?.username}
-      </DataColumn>
-      <DataColumn id="role" label={formatMessage(labels.role)}>
-        {(row: any) => roles[row?.role]}
-      </DataColumn>
-      {allowEdit && (
-        <DataColumn id="action" align="end">
-          {(row: any) => {
-            if (row?.role === ROLES.teamOwner) {
-              return null;
-            }
-
-            return (
-              <Row alignItems="center" maxHeight="20px">
-                <TeamMemberEditButton teamId={teamId} userId={row?.user?.id} role={row?.role} />
-                <TeamMemberRemoveButton
-                  teamId={teamId}
-                  userId={row?.user?.id}
-                  userName={row?.user?.username}
-                />
-              </Row>
-            );
-          }}
-        </DataColumn>
-      )}
-    </DataTable>
+    <div className="rounded-md border dark:border-zinc-800 overflow-hidden">
+      <Table>
+        <TableHeader className="bg-zinc-900/50">
+          <TableRow className="border-b border-zinc-800 hover:bg-transparent">
+            <TableHead className="font-semibold text-zinc-400 pl-4">{formatMessage(labels.username)}</TableHead>
+            <TableHead className="font-semibold text-zinc-400">{formatMessage(labels.role)}</TableHead>
+            {allowEdit && <TableHead className="text-right text-zinc-400 pr-4">Actions</TableHead>}
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {data.map((row) => (
+            <TableRow key={row.id} className="border-b border-dashed border-zinc-800/50 hover:bg-zinc-900/30 transition-colors">
+              <TableCell className="font-medium py-4 pl-4">
+                <div className="flex items-center gap-3">
+                  <Avatar className="h-8 w-8">
+                    <AvatarImage src={`https://avatar.vercel.sh/${row?.user?.username}`} />
+                    <AvatarFallback>{row?.user?.username?.[0]?.toUpperCase()}</AvatarFallback>
+                  </Avatar>
+                  <span className="text-foreground">{row?.user?.username}</span>
+                </div>
+              </TableCell>
+              <TableCell className="py-4">
+                <Badge variant="outline" className="font-normal border-zinc-700 text-zinc-300">
+                  {roles[row?.role]}
+                </Badge>
+              </TableCell>
+              {allowEdit && (
+                <TableCell className="text-right py-4 pr-4">
+                  {row?.role !== ROLES.teamOwner && (
+                    <div className="flex items-center justify-end gap-2">
+                      <TeamMemberEditButton teamId={teamId} userId={row?.user?.id} role={row?.role} />
+                      <TeamMemberRemoveButton
+                        teamId={teamId}
+                        userId={row?.user?.id}
+                        userName={row?.user?.username}
+                      />
+                    </div>
+                  )}
+                </TableCell>
+              )}
+            </TableRow>
+          ))}
+          {!data.length && (
+            <TableRow>
+              <TableCell colSpan={allowEdit ? 3 : 2} className="h-24 text-center text-muted-foreground">
+                No members found.
+              </TableCell>
+            </TableRow>
+          )}
+        </TableBody>
+      </Table>
+    </div>
   );
 }

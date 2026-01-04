@@ -3,7 +3,7 @@ import { useModified } from '../useModified';
 import { useDateParameters } from '../useDateParameters';
 import { useFilterParameters } from '@/components/hooks/useFilterParameters';
 
-export function useWeeklyTrafficQuery(websiteId: string, params?: Record<string, string | number>) {
+export function useWeeklyTrafficQuery(websiteId: string, params?: Record<string, string | number>, options?: any) {
   const { get, useQuery } = useApi();
   const { modified } = useModified(`sessions`);
   const { startAt, endAt, unit, timezone } = useDateParameters();
@@ -24,5 +24,6 @@ export function useWeeklyTrafficQuery(websiteId: string, params?: Record<string,
         ...filters,
       });
     },
+    ...options,
   });
 }

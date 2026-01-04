@@ -1,13 +1,11 @@
-import { Column } from '@umami/react-zen';
 import { useLoginQuery, useNavigation, useTeam } from '@/components/hooks';
 import { ROLES } from '@/lib/constants';
-import { Users } from '@/components/icons';
+import { Users } from 'lucide-react';
 import { TeamLeaveButton } from '@/app/(main)/teams/TeamLeaveButton';
 import { TeamManage } from './TeamManage';
 import { TeamEditForm } from './TeamEditForm';
 import { TeamMembersDataTable } from './TeamMembersDataTable';
-import { PageHeader } from '@/components/common/PageHeader';
-import { Panel } from '@/components/common/Panel';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 export function TeamSettings({ teamId }: { teamId: string }) {
   const team: any = useTeam();
@@ -29,21 +27,45 @@ export function TeamSettings({ teamId }: { teamId: string }) {
       user.role !== ROLES.viewOnly);
 
   return (
-    <Column gap="6">
-      <PageHeader title={team?.name} icon={<Users />}>
-        {!isTeamOwner && !isAdmin && <TeamLeaveButton teamId={team.id} teamName={team.name} />}
-      </PageHeader>
-      <Panel>
-        <TeamEditForm teamId={teamId} allowEdit={canEdit} showAccessCode={canEdit} />
-      </Panel>
-      <Panel>
-        <TeamMembersDataTable teamId={teamId} allowEdit={canEdit} />
-      </Panel>
+    <div className="space-y-6">
+      <Card className="dark:bg-[hsl(0,0%,8%)] dark:border-[hsl(0,0%,12%)]">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0">
+          <div className="flex items-center gap-2">
+            <Users className="h-5 w-5" />
+            <CardTitle>{team?.name}</CardTitle>
+          </div>
+          {!isTeamOwner && !isAdmin && <TeamLeaveButton teamId={team.id} teamName={team.name} />}
+        </CardHeader>
+      </Card>
+
+      <Card className="dark:bg-[hsl(0,0%,8%)] dark:border-[hsl(0,0%,12%)]">
+        <CardHeader>
+          <CardTitle>Details</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <TeamEditForm teamId={teamId} allowEdit={canEdit} showAccessCode={canEdit} />
+        </CardContent>
+      </Card>
+
+      <Card className="dark:bg-[hsl(0,0%,8%)] dark:border-[hsl(0,0%,12%)]">
+        <CardHeader>
+          <CardTitle>Members</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <TeamMembersDataTable teamId={teamId} allowEdit={canEdit} />
+        </CardContent>
+      </Card>
+
       {isTeamOwner && (
-        <Panel>
-          <TeamManage teamId={teamId} />
-        </Panel>
+        <Card className="border-red-200 dark:bg-[hsl(0,0%,8%)] dark:border-red-900/30">
+          <CardHeader>
+            <CardTitle className="text-red-600">Danger Zone</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <TeamManage teamId={teamId} />
+          </CardContent>
+        </Card>
       )}
-    </Column>
+    </div>
   );
 }
