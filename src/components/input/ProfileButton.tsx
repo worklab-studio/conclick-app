@@ -51,7 +51,7 @@ export function ProfileButton() {
       </Button>
       <Popover placement="bottom end">
         <Menu autoFocus="last">
-          <MenuSection title={user.username}>
+          <MenuSection title={user?.displayName || user?.username}>
             <MenuSeparator />
             {items.map(({ id, path, label, icon, separator }) => {
               return (
