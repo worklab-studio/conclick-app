@@ -96,44 +96,51 @@ export function WebsiteAddModalContent({
     const handleVerify = async () => {
         setIsVerifying(true);
 
-        // Open website in new tab
-        const url = createdWebsite.domain.startsWith('http')
-            ? createdWebsite.domain
-            : `https://${createdWebsite.domain}`;
+        try {
+            // Open website in new tab (user convenience)
+            const url = createdWebsite.domain.startsWith('http')
+                ? createdWebsite.domain
+                : `https://${createdWebsite.domain}`;
 
-        window.open(url, '_blank');
+            window.open(url, '_blank');
 
-        // Simulate verification for now
-        setTimeout(() => {
-            setIsVerifying(false);
-            setStep(Step.SUCCESS);
+            // Wait a moment for the new tab to potentially load (not strictly necessary but good UX pacing)
+            await new Promise(r => setTimeout(r, 2000));
 
-            // Full screen confetti
-            confetti({
-                particleCount: 150,
-                spread: 100,
-                origin: { y: 0.6 },
-                zIndex: 2147483647, // Max z-index to ensure it's on top of everything
+            const response = await fetch('/api/verify', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    url: createdWebsite.domain,
+                    websiteId: createdWebsite.id
+                }),
             });
 
-            // Fire a second burst for effect
-            setTimeout(() => {
+            const data = await response.json();
+
+            if (data.success) {
+                setStep(Step.SUCCESS);
+                // Confetti logic
                 confetti({
-                    particleCount: 100,
-                    angle: 60,
-                    spread: 55,
-                    origin: { x: 0 },
+                    particleCount: 150,
+                    spread: 100,
+                    origin: { y: 0.6 },
                     zIndex: 2147483647,
                 });
-                confetti({
-                    particleCount: 100,
-                    angle: 120,
-                    spread: 55,
-                    origin: { x: 1 },
-                    zIndex: 2147483647,
-                });
-            }, 250);
-        }, 5000);
+                setTimeout(() => {
+                    confetti({ particleCount: 100, angle: 60, spread: 55, origin: { x: 0 }, zIndex: 2147483647 });
+                    confetti({ particleCount: 100, angle: 120, spread: 55, origin: { x: 1 }, zIndex: 2147483647 });
+                }, 250);
+            } else {
+                // Show error (using simple alert or toast if available, here passing via form/state might be complex so utilizing console/alert for now or simple visual feedback)
+                alert('Verification failed. We could not find the tracking code on your website. Please ensure you have deployed the changes.');
+            }
+        } catch (e) {
+            console.error(e);
+            alert('An error occurred during verification.');
+        } finally {
+            setIsVerifying(false);
+        }
     };
 
     if (step === Step.FORM) {

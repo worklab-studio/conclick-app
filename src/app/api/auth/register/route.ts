@@ -6,7 +6,7 @@ import { ROLES } from '@/lib/constants';
 
 export async function POST(req: Request) {
     try {
-        const { username, password } = await req.json();
+        const { username, password, displayName } = await req.json();
 
         if (!username || !password) {
             return NextResponse.json(
@@ -36,6 +36,7 @@ export async function POST(req: Request) {
                 username,
                 password: hashedPassword,
                 role: ROLES.user,
+                displayName: displayName || '',
             },
         });
 

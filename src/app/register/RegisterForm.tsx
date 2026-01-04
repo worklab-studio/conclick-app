@@ -20,12 +20,9 @@ import { InteractiveGridPattern } from "@/components/ui/interactive-grid-pattern
 import { useState } from 'react';
 
 const formSchema = z.object({
-    username: z.string().min(1, 'Username is required').email('Please enter a valid email'),
+    displayName: z.string().min(1, 'Username is required'),
+    username: z.string().min(1, 'Email is required').email('Please enter a valid email'),
     password: z.string().min(6, 'Password must be at least 6 characters'),
-    confirmPassword: z.string().min(6, 'Password must be at least 6 characters'),
-}).refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords don't match",
-    path: ["confirmPassword"],
 });
 
 export default function RegisterForm() {
@@ -37,9 +34,9 @@ export default function RegisterForm() {
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
+            displayName: '',
             username: '',
             password: '',
-            confirmPassword: '',
         },
     });
 
@@ -54,8 +51,9 @@ export default function RegisterForm() {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    username: values.username,
+                    username: values.username, // Email
                     password: values.password,
+                    displayName: values.displayName, // Username
                 }),
             });
 
@@ -64,7 +62,6 @@ export default function RegisterForm() {
                 throw new Error(data.message || 'Something went wrong');
             }
 
-            // Automatically redirect to login after success
             router.push('/login');
         } catch (e: any) {
             setError(e.message || 'Something went wrong');
@@ -86,7 +83,6 @@ export default function RegisterForm() {
         }
       `}</style>
             <div className="relative flex items-center justify-center py-12 bg-black overflow-hidden">
-                {/* Interactive Grid Background */}
                 <InteractiveGridPattern
                     className="absolute inset-0 z-0 stroke-zinc-900 [mask-image:linear-gradient(to_bottom_right,white,transparent,transparent)]"
                     width={40}
@@ -108,6 +104,19 @@ export default function RegisterForm() {
                         <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4">
                             <FormField
                                 control={form.control}
+                                name="displayName"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel className="text-zinc-200">Username</FormLabel>
+                                        <FormControl>
+                                            <Input placeholder="JohnDoe" {...field} className="!bg-zinc-900 !border-zinc-800 text-white placeholder:text-zinc-500 focus-visible:ring-indigo-500" />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
                                 name="username"
                                 render={({ field }) => (
                                     <FormItem>
@@ -125,19 +134,6 @@ export default function RegisterForm() {
                                 render={({ field }) => (
                                     <FormItem>
                                         <FormLabel className="text-zinc-200">Password</FormLabel>
-                                        <FormControl>
-                                            <Input type="password" placeholder="••••••••" {...field} className="!bg-zinc-900 !border-zinc-800 text-white placeholder:text-zinc-500 focus-visible:ring-indigo-500" />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                            <FormField
-                                control={form.control}
-                                name="confirmPassword"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel className="text-zinc-200">Confirm Password</FormLabel>
                                         <FormControl>
                                             <Input type="password" placeholder="••••••••" {...field} className="!bg-zinc-900 !border-zinc-800 text-white placeholder:text-zinc-500 focus-visible:ring-indigo-500" />
                                         </FormControl>
