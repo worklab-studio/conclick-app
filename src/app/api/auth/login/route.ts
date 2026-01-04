@@ -23,7 +23,15 @@ export async function POST(request: Request) {
 
   const { username, password } = body;
 
-  const user = await getUserByUsername(username, { includePassword: true });
+  const user = await prisma.client.user.findFirst({
+    where: {
+      OR: [
+        { username },
+        { displayName: username }
+      ],
+      deletedAt: null
+    }
+  });
 
   if (!user || !checkPassword(password, user.password)) {
     return unauthorized({ code: 'incorrect-username-password' });

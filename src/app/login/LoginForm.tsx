@@ -112,7 +112,7 @@ export default function LoginForm() {
                 name="username"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-zinc-200">Username</FormLabel>
+                    <FormLabel className="text-zinc-200">Email or Username</FormLabel>
                     <FormControl>
                       <Input placeholder="admin" {...field} className="!bg-zinc-900 !border-zinc-800 text-white placeholder:text-zinc-500 focus-visible:ring-indigo-500" />
                     </FormControl>
@@ -166,7 +166,7 @@ export default function LoginForm() {
 
           <div className="mt-4 text-center text-sm text-zinc-400">
             Don&apos;t have an account?{" "}
-            <Link href="#" className="underline text-indigo-500 font-medium hover:text-indigo-400">
+            <Link href="/register" className="underline text-indigo-500 font-medium hover:text-indigo-400">
               Create account
             </Link>
           </div>
