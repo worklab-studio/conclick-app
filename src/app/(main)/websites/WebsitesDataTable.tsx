@@ -28,7 +28,7 @@ export function WebsitesDataTable({
   const renderGreeting = () => (
     <div className="text-foreground">
       <span className="text-base">
-        Hey <span className="font-semibold">{user?.username || 'User'}</span>
+        Hey <span className="font-semibold">{user?.displayName || user?.username || 'User'}</span>
       </span>
     </div>
   );
