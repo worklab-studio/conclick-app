@@ -79,6 +79,9 @@ model Website {
   user        User?         @relation("user", fields: [userId], references: [id])
   createUser  User?         @relation("createUser", fields: [createdBy], references: [id])
   team        Team?         @relation(fields: [teamId], references: [id])
+  stripeId             String?   @map("stripe_id") @db.VarChar(50)
+  stripeSecretKey      String?   @map("stripe_secret_key") @db.VarChar(255)
+  stripePublishableKey String?   @map("stripe_publishable_key") @db.VarChar(255)
   eventData   EventData[]
   reports     Report[]
   revenue     Revenue[]

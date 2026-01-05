@@ -1,3 +1,5 @@
+'use client';
+
 import { useLoginQuery, useMessages, useModified } from '@/components/hooks';
 import { useRouter } from 'next/navigation';
 import { LogOut } from 'lucide-react';

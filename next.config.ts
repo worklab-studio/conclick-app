@@ -115,16 +115,6 @@ if (collectApiEndpoint) {
 
 const redirects = [
   {
-    source: '/teams/:id',
-    destination: '/teams/:id/websites',
-    permanent: false,
-  },
-  {
-    source: '/teams/:id/settings',
-    destination: '/teams/:id/settings/preferences',
-    permanent: false,
-  },
-  {
     source: '/admin',
     destination: '/admin/users',
     permanent: false,
@@ -188,7 +178,7 @@ export default {
         destination: '/api/scripts/telemetry',
       },
       {
-        source: '/teams/:teamId/:path*',
+        source: '/teams/:teamId/:path+',
         destination: '/:path*',
       },
     ];

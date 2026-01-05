@@ -1,3 +1,5 @@
+'use client';
+
 import { TeamMembersTable } from './TeamMembersTable';
 import { useTeamMembersQuery } from '@/components/hooks';
 import { TeamMemberAddButton } from './TeamMemberAddButton';

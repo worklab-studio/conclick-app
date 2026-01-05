@@ -152,6 +152,7 @@
     "semver": "^7.7.3",
     "serialize-error": "^12.0.0",
     "sonner": "^2.0.7",
+    "stripe": "^20.1.0",
     "tailwind-merge": "^3.4.0",
     "tailwindcss-animate": "^1.0.7",
     "thenby": "^1.3.4",

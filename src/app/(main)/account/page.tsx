@@ -8,8 +8,21 @@ import { PreferenceSettings } from './preferences/PreferenceSettings';
 import { ProfileSettings } from './profile/ProfileSettings';
 import { TeamsSettings } from './teams/TeamsSettings';
 
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
+
 export default function SettingsPage() {
-    const [activeTab, setActiveTab] = useState<'profile' | 'preferences' | 'teams'>('profile');
+    const searchParams = useSearchParams();
+    const router = useRouter();
+    const pathname = usePathname();
+    const defaultTab = (searchParams.get('tab') as 'profile' | 'preferences' | 'teams') || 'profile';
+    const [activeTab, setActiveTabState] = useState<'profile' | 'preferences' | 'teams'>(defaultTab);
+
+    const setActiveTab = (tab: 'profile' | 'preferences' | 'teams') => {
+        setActiveTabState(tab);
+        const params = new URLSearchParams(searchParams);
+        params.set('tab', tab);
+        router.replace(`${pathname}?${params.toString()}`);
+    };
 
     return (
         <div className="flex flex-col md:flex-row gap-12 pt-6">

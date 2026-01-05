@@ -1,3 +1,5 @@
+'use client';
+
 import { useMessages, useModified } from '@/components/hooks';
 import { useRouter } from 'next/navigation';
 import { TeamDeleteForm } from './TeamDeleteForm';

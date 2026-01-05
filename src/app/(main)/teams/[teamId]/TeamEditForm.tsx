@@ -1,3 +1,5 @@
+'use client';
+
 import { getRandomChars } from '@/lib/generate';
 import { useMessages, useTeam, useUpdateQuery } from '@/components/hooks';
 import { RefreshCw } from 'lucide-react';

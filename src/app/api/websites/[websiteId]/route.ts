@@ -34,6 +34,9 @@ export async function POST(
     name: z.string().optional(),
     domain: z.string().optional(),
     shareId: z.string().regex(SHARE_ID_REGEX).nullable().optional(),
+    stripeId: z.string().optional(),
+    stripeSecretKey: z.string().optional(),
+    stripePublishableKey: z.string().optional(),
   });
 
   const { auth, body, error } = await parseRequest(request, schema);
@@ -43,14 +46,21 @@ export async function POST(
   }
 
   const { websiteId } = await params;
-  const { name, domain, shareId } = body;
+  const { name, domain, shareId, stripeId, stripeSecretKey, stripePublishableKey } = body;
 
   if (!(await canUpdateWebsite(auth, websiteId))) {
     return unauthorized();
   }
 
   try {
-    const website = await updateWebsite(websiteId, { name, domain, shareId });
+    const website = await updateWebsite(websiteId, {
+      name,
+      domain,
+      shareId,
+      stripeId,
+      stripeSecretKey,
+      stripePublishableKey,
+    });
 
     return Response.json(website);
   } catch (e: any) {

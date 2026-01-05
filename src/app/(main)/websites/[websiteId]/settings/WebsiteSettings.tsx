@@ -3,6 +3,7 @@ import { WebsiteShareForm } from './WebsiteShareForm';
 import { WebsiteTrackingCode } from './WebsiteTrackingCode';
 import { WebsiteData } from './WebsiteData';
 import { WebsiteEditForm } from './WebsiteEditForm';
+import { WebsiteStripeConfiguration } from './WebsiteStripeConfiguration';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 export function WebsiteSettings({ websiteId }: { websiteId: string; openExternal?: boolean }) {
@@ -35,6 +36,15 @@ export function WebsiteSettings({ websiteId }: { websiteId: string; openExternal
         </CardHeader>
         <CardContent>
           <WebsiteShareForm websiteId={websiteId} shareId={website.shareId} />
+        </CardContent>
+      </Card>
+
+      <Card className="dark:bg-[hsl(0,0%,8%)] dark:border-[hsl(0,0%,12%)]">
+        <CardHeader>
+          <CardTitle>Stripe Integration</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <WebsiteStripeConfiguration websiteId={websiteId} />
         </CardContent>
       </Card>
 
