@@ -1,5 +1,4 @@
 import { QueryFilters } from '@/lib/types';
-import { getCountryCoordinates } from '@/lib/country-coordinates';
 import { getRealtimeActivity } from '@/queries/sql/getRealtimeActivity';
 import { getPageviewStats } from '@/queries/sql/pageviews/getPageviewStats';
 import { getSessionStats } from '@/queries/sql/sessions/getSessionStats';
@@ -22,16 +21,6 @@ export async function getRealtimeData(websiteId: string, filters: QueryFilters) 
   ]);
 
   const uniques = new Set();
-  const visitors: Array<{
-    id: string;
-    country: string;
-    city: string | null;
-    region: string | null;
-    lat: number;
-    lng: number;
-    urlPath: string;
-    referrer: string | null;
-  }> = [];
 
   const { countries, urls, referrers, events } = activity.reverse().reduce(
     (
@@ -41,32 +30,15 @@ export async function getRealtimeData(websiteId: string, filters: QueryFilters) 
         urlPath: string;
         referrerDomain: string;
         country: string;
-        city?: string;
-        region?: string;
         eventName: string;
       },
     ) => {
       const { countries, urls, referrers, events } = obj;
-      const { sessionId, urlPath, referrerDomain, country, city, region, eventName } = event;
+      const { sessionId, urlPath, referrerDomain, country, eventName } = event;
 
       if (!uniques.has(sessionId)) {
         uniques.add(sessionId);
         increment(countries, country);
-
-        // Build visitor object with coordinates
-        const coords = getCountryCoordinates(country);
-        if (coords) {
-          visitors.push({
-            id: sessionId,
-            country: country || 'Unknown',
-            city: city || null,
-            region: region || null,
-            lat: coords.lat,
-            lng: coords.lng,
-            urlPath: urlPath || '/',
-            referrer: referrerDomain || null,
-          });
-        }
 
         events.push({ __type: 'session', ...event });
       }
@@ -91,7 +63,6 @@ export async function getRealtimeData(websiteId: string, filters: QueryFilters) 
     urls,
     referrers,
     events: events.reverse(),
-    visitors,
     series: {
       views: pageviews,
       visitors: sessions,
