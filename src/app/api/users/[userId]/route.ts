@@ -58,7 +58,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ use
     data.role = role;
   }
 
-  if (username && auth.user.isAdmin) {
+  if (username) {
     data.username = username;
   }
 

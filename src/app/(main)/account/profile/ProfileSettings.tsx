@@ -5,9 +5,10 @@ import { Input } from '@/components/ui/input';
 import { ROLES } from '@/lib/constants';
 import { PasswordChangeButton } from './PasswordChangeButton';
 
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
 
 export function ProfileSettings() {
   const { user } = useLoginQuery();
@@ -15,18 +16,61 @@ export function ProfileSettings() {
   const { cloudMode } = useConfig();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const [isEditingUsername, setIsEditingUsername] = useState(false);
+  const [newUsername, setNewUsername] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
+
+  useEffect(() => {
+    if (user?.username) {
+      setNewUsername(user.username);
+    }
+  }, [user]);
 
   if (!user) {
     return null;
   }
 
-  const { username, role } = user;
+  const { username, role, id } = user;
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       const url = URL.createObjectURL(file);
       setAvatarPreview(url);
+    }
+  };
+
+  const handleUsernameSave = async () => {
+    if (newUsername === username) {
+      setIsEditingUsername(false);
+      return;
+    }
+
+    if (!newUsername.trim()) {
+      toast.error('Username cannot be empty');
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      const response = await fetch(`/api/users/${id}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: newUsername }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.message || 'Failed to update username');
+      }
+
+      toast.success('Username updated successfully');
+      setIsEditingUsername(false);
+      window.location.reload(); // Simple reload to refresh user data
+    } catch (error: any) {
+      toast.error(error.message);
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -70,15 +114,56 @@ export function ProfileSettings() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="grid gap-2">
             <Label>{formatMessage(labels.username)}</Label>
-            <Input value={username} disabled readOnly className="dark:bg-[#18181b] dark:border-zinc-800" />
-          </div>
-          <div className="grid gap-2">
-            <Label>Email</Label>
-            <Input value="admin@example.com" disabled readOnly className="dark:bg-[#18181b] dark:border-zinc-800" />
+            <div className="flex gap-2">
+              <Input
+                value={isEditingUsername ? newUsername : username}
+                disabled={!isEditingUsername}
+                onChange={e => setNewUsername(e.target.value)}
+                className="dark:bg-[#18181b] dark:border-zinc-800"
+              />
+              {!isEditingUsername ? (
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setNewUsername(username);
+                    setIsEditingUsername(true);
+                  }}
+                >
+                  Edit
+                </Button>
+              ) : (
+                <div className="flex gap-1">
+                  <Button onClick={handleUsernameSave} disabled={isSaving}>
+                    {isSaving ? '...' : 'Save'}
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    onClick={() => setIsEditingUsername(false)}
+                    disabled={isSaving}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              )}
+            </div>
           </div>
           <div className="grid gap-2">
             <Label>{formatMessage(labels.role)}</Label>
-            <Input value={renderRole(role)} disabled readOnly className="dark:bg-[#18181b] dark:border-zinc-800" />
+            <Input
+              value={renderRole(role)}
+              disabled
+              readOnly
+              className="dark:bg-[#18181b] dark:border-zinc-800"
+            />
+          </div>
+          <div className="grid gap-2">
+            <Label>Email</Label>
+            <Input
+              value="admin@example.com"
+              disabled
+              readOnly
+              className="dark:bg-[#18181b] dark:border-zinc-800"
+            />
           </div>
           {!cloudMode && (
             <div className="grid gap-2">

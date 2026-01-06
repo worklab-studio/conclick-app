@@ -4,11 +4,22 @@ import { useDateRange, useTimezone } from '@/components/hooks';
 import { useApi } from '@/components/hooks/useApi';
 import { useWebsitePageviewsQuery } from '@/components/hooks/queries/useWebsitePageviewsQuery';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Area, AreaChart, ComposedChart, ResponsiveContainer, Tooltip, XAxis, YAxis, CartesianGrid, Bar, Legend } from 'recharts';
+import {
+  Area,
+  AreaChart,
+  ComposedChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Bar,
+  Legend,
+} from 'recharts';
 import { format, parseISO } from 'date-fns';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useMemo } from 'react';
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { StripeConnectPlaceholder } from './StripeConnectPlaceholder';
 
 const DEMO_WEBSITE_ID = '1be0acac-4fc3-4dc1-a4d2-02e6a2aae843';
@@ -29,9 +40,17 @@ export function WebsiteChart({
 
   const isDemo = websiteId === DEMO_WEBSITE_ID;
 
-  const { data: pageviewsData, isLoading: isLoadingPageviews, error: errorPageviews } = useWebsitePageviewsQuery({ websiteId });
+  const {
+    data: pageviewsData,
+    isLoading: isLoadingPageviews,
+    error: errorPageviews,
+  } = useWebsitePageviewsQuery({ websiteId });
 
-  const { data: revenueData, isLoading: isLoadingRevenue, error: errorRevenue } = useQuery({
+  const {
+    data: revenueData,
+    isLoading: isLoadingRevenue,
+    error: errorRevenue,
+  } = useQuery({
     queryKey: ['revenue', websiteId],
     queryFn: () => get(`/websites/${websiteId}/revenue`),
     enabled: !!websiteId && chartType === 'revenue' && !isDemo,
@@ -44,28 +63,24 @@ export function WebsiteChart({
       const start = new Date(startDate);
       const end = new Date(endDate);
 
-      let current = new Date(start);
+      const current = new Date(start);
 
       while (current <= end) {
-        // For hourly unit, include the hour in the key
+        // Use date-fns format to preserve local time date boundaries
         if (unit === 'hour') {
-          // Format: YYYY-MM-DDTHH:00 for hourly data
-          const isoString = current.toISOString();
-          const dateKey = isoString.substring(0, 13) + ':00'; // "2026-01-06T13:00"
-          dates.push(dateKey);
+          // Format: YYYY-MM-DDTHH:00 for hourly data (in local time)
+          dates.push(format(current, "yyyy-MM-dd'T'HH':00'"));
           current.setHours(current.getHours() + 1);
         } else if (unit === 'day') {
-          // Format: YYYY-MM-DD for daily data
-          dates.push(current.toISOString().split('T')[0]);
+          // Format: YYYY-MM-DD for daily data (in local time)
+          dates.push(format(current, 'yyyy-MM-dd'));
           current.setDate(current.getDate() + 1);
         } else if (unit === 'month') {
           // Format: YYYY-MM for monthly data
-          const year = current.getFullYear();
-          const month = String(current.getMonth() + 1).padStart(2, '0');
-          dates.push(`${year}-${month}`);
+          dates.push(format(current, 'yyyy-MM'));
           current.setMonth(current.getMonth() + 1);
         } else {
-          dates.push(current.toISOString().split('T')[0]);
+          dates.push(format(current, 'yyyy-MM-dd'));
           current.setDate(current.getDate() + 1);
         }
       }
@@ -88,20 +103,20 @@ export function WebsiteChart({
     });
 
     // Helper function to normalize date keys based on unit
+    // API returns UTC timestamps like "2025-12-30T00:00:00Z"
+    // We parse to Date (which converts to local), then format in local time
     const normalizeKey = (x: string) => {
-      if (unit === 'hour') {
-        // Try to parse and format to match our key format
-        try {
-          const d = new Date(x);
-          return d.toISOString().substring(0, 13) + ':00';
-        } catch {
-          return x;
+      try {
+        const d = new Date(x);
+        if (unit === 'hour') {
+          return format(d, "yyyy-MM-dd'T'HH':00'");
+        } else if (unit === 'month') {
+          return format(d, 'yyyy-MM');
         }
-      } else if (unit === 'month') {
-        // Extract YYYY-MM from various formats
-        return x.substring(0, 7);
+        return format(d, 'yyyy-MM-dd');
+      } catch {
+        return x;
       }
-      return x.split('T')[0]; // day format
     };
 
     // Fill in actual pageviews data if available
@@ -130,7 +145,7 @@ export function WebsiteChart({
 
     // For demo: generate mock revenue matching existing data points
     if (isDemo && chartType === 'revenue') {
-      dataMap.forEach((value, key) => {
+      dataMap.forEach(value => {
         value.revenue = Math.floor(Math.random() * 100) + 20;
       });
     } else if (revenueData?.chart) {
@@ -142,8 +157,8 @@ export function WebsiteChart({
       });
     }
 
-    return Array.from(dataMap.values()).sort((a, b) =>
-      new Date(a.date).getTime() - new Date(b.date).getTime()
+    return Array.from(dataMap.values()).sort(
+      (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
     );
   }, [pageviewsData, revenueData, isDemo, chartType, startDate, endDate, unit]);
 
@@ -153,8 +168,12 @@ export function WebsiteChart({
   if (isLoading) {
     return (
       <Card>
-        <CardHeader><CardTitle>Overview</CardTitle></CardHeader>
-        <CardContent><Skeleton className="h-[300px] w-full" /></CardContent>
+        <CardHeader>
+          <CardTitle>Overview</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Skeleton className="h-[300px] w-full" />
+        </CardContent>
       </Card>
     );
   }
@@ -188,7 +207,7 @@ export function WebsiteChart({
                   axisLine={false}
                   tickMargin={10}
                   interval={Math.max(0, Math.floor(chartData.length / 8) - 1)}
-                  tickFormatter={(str) => {
+                  tickFormatter={str => {
                     try {
                       // Parse the date string (handles both YYYY-MM-DD and YYYY-MM-DDTHH:00 formats)
                       const date = str.includes('T') ? new Date(str) : parseISO(str);
@@ -199,13 +218,20 @@ export function WebsiteChart({
                       } else {
                         return format(date, 'MMM yy'); // Jan 26
                       }
-                    } catch { return str; }
+                    } catch {
+                      return str;
+                    }
                   }}
                   style={{ fontSize: '12px', fill: '#71717a' }}
                 />
                 <YAxis yAxisId="left" tick={false} axisLine={false} width={0} />
                 <Tooltip
-                  cursor={{ strokeDasharray: '3 3', stroke: '#a1a1aa', strokeWidth: 1, opacity: 0.5 }}
+                  cursor={{
+                    strokeDasharray: '3 3',
+                    stroke: '#a1a1aa',
+                    strokeWidth: 1,
+                    opacity: 0.5,
+                  }}
                   content={({ active, payload, label }) => {
                     if (active && payload?.length) {
                       let date: Date;
@@ -221,24 +247,27 @@ export function WebsiteChart({
                       }
 
                       // Format based on unit
-                      const headerText = unit === 'hour'
-                        ? format(date, 'ha')
-                        : unit === 'month'
-                          ? format(date, 'MMMM yyyy')
-                          : format(date, 'EEEE');
-                      const subText = unit === 'month'
-                        ? null
-                        : format(date, 'MMM d, yyyy');
+                      const headerText =
+                        unit === 'hour'
+                          ? format(date, 'ha')
+                          : unit === 'month'
+                            ? format(date, 'MMMM yyyy')
+                            : format(date, 'EEEE');
+                      const subText = unit === 'month' ? null : format(date, 'MMM d, yyyy');
 
                       return (
                         <div className="bg-[hsl(0,0%,8%)] border border-[hsl(0,0%,12%)] rounded-lg shadow-xl p-3 min-w-[150px]">
-                          <div className="text-zinc-200 text-sm font-semibold mb-1">{headerText}</div>
+                          <div className="text-zinc-200 text-sm font-semibold mb-1">
+                            {headerText}
+                          </div>
                           {subText && <div className="text-zinc-500 text-sm mb-3">{subText}</div>}
                           <div className="border-b border-zinc-800 mb-3" />
                           {payload.map((entry: any, i: number) => (
                             <div key={i} className="flex justify-between gap-4 text-sm">
                               <span className="text-zinc-400">{entry.name}</span>
-                              <span className="text-zinc-100 font-bold">{entry.name === 'Pageviews' ? entry.payload.pageviews : entry.value}</span>
+                              <span className="text-zinc-100 font-bold">
+                                {entry.name === 'Pageviews' ? entry.payload.pageviews : entry.value}
+                              </span>
                             </div>
                           ))}
                         </div>
@@ -247,9 +276,24 @@ export function WebsiteChart({
                     return null;
                   }}
                 />
-                <Legend formatter={(v) => <span style={{ color: '#a1a1aa' }}>{v}</span>} />
-                <Bar yAxisId="left" dataKey="visitors" name="Visitors" stackId="a" fill="#5e5ba4" barSize={20} />
-                <Bar yAxisId="left" dataKey="pageviews_stacked" name="Pageviews" stackId="a" fill="#43415F" radius={[4, 4, 0, 0]} barSize={20} />
+                <Legend formatter={v => <span style={{ color: '#a1a1aa' }}>{v}</span>} />
+                <Bar
+                  yAxisId="left"
+                  dataKey="visitors"
+                  name="Visitors"
+                  stackId="a"
+                  fill="#5e5ba4"
+                  barSize={20}
+                />
+                <Bar
+                  yAxisId="left"
+                  dataKey="pageviews_stacked"
+                  name="Pageviews"
+                  stackId="a"
+                  fill="#43415F"
+                  radius={[4, 4, 0, 0]}
+                  barSize={20}
+                />
               </ComposedChart>
             </ResponsiveContainer>
           ) : showRevenueChart ? (
@@ -268,7 +312,7 @@ export function WebsiteChart({
                   axisLine={false}
                   tickMargin={10}
                   interval={Math.max(0, Math.floor(chartData.length / 8) - 1)}
-                  tickFormatter={(str) => {
+                  tickFormatter={str => {
                     try {
                       const date = str.includes('T') ? new Date(str) : parseISO(str);
                       if (unit === 'hour') {
@@ -278,11 +322,18 @@ export function WebsiteChart({
                       } else {
                         return format(date, 'MMM yy'); // Jan 26
                       }
-                    } catch { return str; }
+                    } catch {
+                      return str;
+                    }
                   }}
                   style={{ fontSize: '12px', fill: '#71717a' }}
                 />
-                <YAxis tickLine={false} axisLine={false} tickFormatter={(v) => `$${v}`} style={{ fontSize: '12px', fill: '#71717a' }} />
+                <YAxis
+                  tickLine={false}
+                  axisLine={false}
+                  tickFormatter={v => `$${v}`}
+                  style={{ fontSize: '12px', fill: '#71717a' }}
+                />
                 <Tooltip
                   content={({ active, payload, label }) => {
                     if (active && payload?.length) {
@@ -296,18 +347,19 @@ export function WebsiteChart({
                         date = parseISO(labelStr);
                       }
 
-                      const headerText = unit === 'hour'
-                        ? format(date, 'ha')
-                        : unit === 'month'
-                          ? format(date, 'MMMM yyyy')
-                          : format(date, 'EEEE');
-                      const subText = unit === 'month'
-                        ? null
-                        : format(date, 'MMM d, yyyy');
+                      const headerText =
+                        unit === 'hour'
+                          ? format(date, 'ha')
+                          : unit === 'month'
+                            ? format(date, 'MMMM yyyy')
+                            : format(date, 'EEEE');
+                      const subText = unit === 'month' ? null : format(date, 'MMM d, yyyy');
 
                       return (
                         <div className="bg-[hsl(0,0%,8%)] border border-[hsl(0,0%,12%)] rounded-lg shadow-xl p-3">
-                          <div className="text-zinc-200 text-sm font-semibold mb-1">{headerText}</div>
+                          <div className="text-zinc-200 text-sm font-semibold mb-1">
+                            {headerText}
+                          </div>
                           {subText && <div className="text-zinc-500 text-sm mb-3">{subText}</div>}
                           <div className="text-green-500 font-bold">${payload[0].value}</div>
                         </div>
@@ -316,7 +368,13 @@ export function WebsiteChart({
                     return null;
                   }}
                 />
-                <Area type="monotone" dataKey="revenue" stroke="#4ADE80" fillOpacity={1} fill="url(#colorRevenue)" />
+                <Area
+                  type="monotone"
+                  dataKey="revenue"
+                  stroke="#4ADE80"
+                  fillOpacity={1}
+                  fill="url(#colorRevenue)"
+                />
               </AreaChart>
             </ResponsiveContainer>
           ) : (
