@@ -11,6 +11,8 @@ import { cn } from '@/lib/utils';
 
 import { useResultQuery } from '@/components/hooks';
 
+const DEMO_WEBSITE_ID = '1be0acac-4fc3-4dc1-a4d2-02e6a2aae843';
+
 export function WebsiteMetricsBar({
   websiteId,
   chartType = 'overview',
@@ -20,6 +22,7 @@ export function WebsiteMetricsBar({
   showChange?: boolean;
   compareMode?: boolean;
 }) {
+  const isDemo = websiteId === DEMO_WEBSITE_ID;
   const { isAllTime } = useDateRange();
   const { formatMessage, labels } = useMessages();
   const { data, isLoading, error } = useWebsiteStatsQuery(websiteId);
@@ -41,12 +44,16 @@ export function WebsiteMetricsBar({
 
   const finalData = data;
 
-  // Calculate Total Revenue
-  const finalTotalRevenue = revenueStats?.chart?.reduce((acc: number, curr: any) => acc + curr.y, 0) || 0;
-  const finalRevenueChange = 0; // Real revenue change requires comparison query
+  // Calculate Total Revenue - use mock data for demo
+  const realTotalRevenue = revenueStats?.chart?.reduce((acc: number, curr: any) => acc + curr.y, 0) || 0;
+  const finalTotalRevenue = isDemo ? 2847 : realTotalRevenue;
+  const finalRevenueChange = isDemo ? 342 : 0;
 
   const { pageviews, visitors, visits, bounces, totaltime, comparison } = finalData || {};
-  const liveVisitors = realtime?.totals?.visitors || 0;
+
+  // Live Visitors - use mock data for demo
+  const realLiveVisitors = realtime?.totals?.visitors || 0;
+  const liveVisitors = isDemo ? 42 : realLiveVisitors;
 
   // Determine 5th Card Metric
   const lastCardMetric = chartType === 'revenue'

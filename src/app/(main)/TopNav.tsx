@@ -1,6 +1,5 @@
 'use client';
 import Link from 'next/link';
-import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -9,7 +8,7 @@ import {
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 import { useNavigation, useTheme, useLoginQuery } from '@/components/hooks';
-import { ChevronDown, MoreVertical, LogOut, Settings, CreditCard, Bell, User } from 'lucide-react';
+import { LogOut, CreditCard, User } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { NotificationDropdown } from '@/components/NotificationDropdown';
 
@@ -75,7 +74,7 @@ export function TopNav() {
                   <User className="mr-2 h-4 w-4" />
                   <span>Account</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem disabled>
+                <DropdownMenuItem onClick={() => router.push('/account/billing')} className="cursor-pointer focus:bg-[hsl(0,0%,12%)]">
                   <CreditCard className="mr-2 h-4 w-4" />
                   <span>Billing</span>
                 </DropdownMenuItem>

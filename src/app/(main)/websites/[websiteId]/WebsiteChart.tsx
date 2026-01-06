@@ -38,35 +38,95 @@ export function WebsiteChart({
   });
 
   const chartData = useMemo(() => {
-    if (!pageviewsData) return [];
+    // Generate date range based on selected period with proper granularity
+    const generateDateRange = () => {
+      const dates: string[] = [];
+      const start = new Date(startDate);
+      const end = new Date(endDate);
 
+      let current = new Date(start);
+
+      while (current <= end) {
+        // For hourly unit, include the hour in the key
+        if (unit === 'hour') {
+          // Format: YYYY-MM-DDTHH:00 for hourly data
+          const isoString = current.toISOString();
+          const dateKey = isoString.substring(0, 13) + ':00'; // "2026-01-06T13:00"
+          dates.push(dateKey);
+          current.setHours(current.getHours() + 1);
+        } else if (unit === 'day') {
+          // Format: YYYY-MM-DD for daily data
+          dates.push(current.toISOString().split('T')[0]);
+          current.setDate(current.getDate() + 1);
+        } else if (unit === 'month') {
+          // Format: YYYY-MM for monthly data
+          const year = current.getFullYear();
+          const month = String(current.getMonth() + 1).padStart(2, '0');
+          dates.push(`${year}-${month}`);
+          current.setMonth(current.getMonth() + 1);
+        } else {
+          dates.push(current.toISOString().split('T')[0]);
+          current.setDate(current.getDate() + 1);
+        }
+      }
+      return dates;
+    };
+
+    // Always create data map with all dates in range
     const dataMap = new Map();
+    const allDates = generateDateRange();
 
-    pageviewsData.pageviews?.forEach((item: any) => {
-      dataMap.set(item.x, {
-        date: item.x,
-        pageviews: item.y,
-        pageviews_stacked: item.y,
+    // Initialize all dates with zero values
+    allDates.forEach(date => {
+      dataMap.set(date, {
+        date,
+        pageviews: 0,
+        pageviews_stacked: 0,
         visitors: 0,
         revenue: 0,
       });
     });
 
-    pageviewsData.sessions?.forEach((item: any) => {
-      if (dataMap.has(item.x)) {
-        const existing = dataMap.get(item.x);
-        existing.visitors = item.y;
-        existing.pageviews_stacked = Math.max(0, existing.pageviews - item.y);
-      } else {
-        dataMap.set(item.x, {
-          date: item.x,
-          pageviews: 0,
-          pageviews_stacked: 0,
-          visitors: item.y,
-          revenue: 0,
-        });
+    // Helper function to normalize date keys based on unit
+    const normalizeKey = (x: string) => {
+      if (unit === 'hour') {
+        // Try to parse and format to match our key format
+        try {
+          const d = new Date(x);
+          return d.toISOString().substring(0, 13) + ':00';
+        } catch {
+          return x;
+        }
+      } else if (unit === 'month') {
+        // Extract YYYY-MM from various formats
+        return x.substring(0, 7);
       }
-    });
+      return x.split('T')[0]; // day format
+    };
+
+    // Fill in actual pageviews data if available
+    if (pageviewsData?.pageviews) {
+      pageviewsData.pageviews.forEach((item: any) => {
+        const key = normalizeKey(item.x);
+        if (dataMap.has(key)) {
+          const existing = dataMap.get(key);
+          existing.pageviews = item.y;
+          existing.pageviews_stacked = item.y;
+        }
+      });
+    }
+
+    // Fill in actual sessions/visitors data if available
+    if (pageviewsData?.sessions) {
+      pageviewsData.sessions.forEach((item: any) => {
+        const key = normalizeKey(item.x);
+        if (dataMap.has(key)) {
+          const existing = dataMap.get(key);
+          existing.visitors = item.y;
+          existing.pageviews_stacked = Math.max(0, existing.pageviews - item.y);
+        }
+      });
+    }
 
     // For demo: generate mock revenue matching existing data points
     if (isDemo && chartType === 'revenue') {
@@ -75,8 +135,9 @@ export function WebsiteChart({
       });
     } else if (revenueData?.chart) {
       revenueData.chart.forEach((item: any) => {
-        if (dataMap.has(item.x)) {
-          dataMap.get(item.x).revenue += item.y;
+        const key = normalizeKey(item.x);
+        if (dataMap.has(key)) {
+          dataMap.get(key).revenue += item.y;
         }
       });
     }
@@ -84,7 +145,7 @@ export function WebsiteChart({
     return Array.from(dataMap.values()).sort((a, b) =>
       new Date(a.date).getTime() - new Date(b.date).getTime()
     );
-  }, [pageviewsData, revenueData, isDemo, chartType]);
+  }, [pageviewsData, revenueData, isDemo, chartType, startDate, endDate, unit]);
 
   const isLoading = isLoadingPageviews || (isLoadingRevenue && !isDemo && chartType === 'revenue');
   const error = errorPageviews || (errorRevenue && !isDemo);
@@ -126,10 +187,18 @@ export function WebsiteChart({
                   tickLine={false}
                   axisLine={false}
                   tickMargin={10}
-                  minTickGap={30}
+                  interval={Math.max(0, Math.floor(chartData.length / 8) - 1)}
                   tickFormatter={(str) => {
                     try {
-                      return format(parseISO(str), unit === 'hour' ? 'HH:mm' : 'MMM d');
+                      // Parse the date string (handles both YYYY-MM-DD and YYYY-MM-DDTHH:00 formats)
+                      const date = str.includes('T') ? new Date(str) : parseISO(str);
+                      if (unit === 'hour') {
+                        return format(date, 'ha').toLowerCase(); // 2am, 5pm format
+                      } else if (unit === 'day') {
+                        return format(date, 'd MMM'); // 6 Jan
+                      } else {
+                        return format(date, 'MMM yy'); // Jan 26
+                      }
                     } catch { return str; }
                   }}
                   style={{ fontSize: '12px', fill: '#71717a' }}
@@ -139,11 +208,32 @@ export function WebsiteChart({
                   cursor={{ strokeDasharray: '3 3', stroke: '#a1a1aa', strokeWidth: 1, opacity: 0.5 }}
                   content={({ active, payload, label }) => {
                     if (active && payload?.length) {
-                      const date = parseISO(label as string);
+                      let date: Date;
+                      const labelStr = label as string;
+                      // Parse different date formats
+                      if (labelStr.includes('T')) {
+                        date = new Date(labelStr);
+                      } else if (labelStr.length === 7) {
+                        // YYYY-MM format for monthly data
+                        date = new Date(labelStr + '-01');
+                      } else {
+                        date = parseISO(labelStr);
+                      }
+
+                      // Format based on unit
+                      const headerText = unit === 'hour'
+                        ? format(date, 'ha')
+                        : unit === 'month'
+                          ? format(date, 'MMMM yyyy')
+                          : format(date, 'EEEE');
+                      const subText = unit === 'month'
+                        ? null
+                        : format(date, 'MMM d, yyyy');
+
                       return (
                         <div className="bg-[hsl(0,0%,8%)] border border-[hsl(0,0%,12%)] rounded-lg shadow-xl p-3 min-w-[150px]">
-                          <div className="text-zinc-500 text-sm mb-1">{format(date, unit === 'hour' ? 'HH:mm' : 'EEEE')}</div>
-                          <div className="text-zinc-200 text-sm font-semibold mb-3">{format(date, 'MMM d, yyyy')}</div>
+                          <div className="text-zinc-200 text-sm font-semibold mb-1">{headerText}</div>
+                          {subText && <div className="text-zinc-500 text-sm mb-3">{subText}</div>}
                           <div className="border-b border-zinc-800 mb-3" />
                           {payload.map((entry: any, i: number) => (
                             <div key={i} className="flex justify-between gap-4 text-sm">
@@ -177,10 +267,18 @@ export function WebsiteChart({
                   tickLine={false}
                   axisLine={false}
                   tickMargin={10}
-                  minTickGap={30}
+                  interval={Math.max(0, Math.floor(chartData.length / 8) - 1)}
                   tickFormatter={(str) => {
-                    try { return format(parseISO(str), unit === 'hour' ? 'HH:mm' : 'MMM d'); }
-                    catch { return str; }
+                    try {
+                      const date = str.includes('T') ? new Date(str) : parseISO(str);
+                      if (unit === 'hour') {
+                        return format(date, 'ha').toLowerCase(); // 2am, 5pm format
+                      } else if (unit === 'day') {
+                        return format(date, 'd MMM'); // 6 Jan
+                      } else {
+                        return format(date, 'MMM yy'); // Jan 26
+                      }
+                    } catch { return str; }
                   }}
                   style={{ fontSize: '12px', fill: '#71717a' }}
                 />
@@ -188,11 +286,29 @@ export function WebsiteChart({
                 <Tooltip
                   content={({ active, payload, label }) => {
                     if (active && payload?.length) {
-                      const date = parseISO(label as string);
+                      let date: Date;
+                      const labelStr = label as string;
+                      if (labelStr.includes('T')) {
+                        date = new Date(labelStr);
+                      } else if (labelStr.length === 7) {
+                        date = new Date(labelStr + '-01');
+                      } else {
+                        date = parseISO(labelStr);
+                      }
+
+                      const headerText = unit === 'hour'
+                        ? format(date, 'ha')
+                        : unit === 'month'
+                          ? format(date, 'MMMM yyyy')
+                          : format(date, 'EEEE');
+                      const subText = unit === 'month'
+                        ? null
+                        : format(date, 'MMM d, yyyy');
+
                       return (
                         <div className="bg-[hsl(0,0%,8%)] border border-[hsl(0,0%,12%)] rounded-lg shadow-xl p-3">
-                          <div className="text-zinc-500 text-sm mb-1">{format(date, unit === 'hour' ? 'HH:mm' : 'EEEE')}</div>
-                          <div className="text-zinc-200 text-sm font-semibold mb-3">{format(date, 'MMM d, yyyy')}</div>
+                          <div className="text-zinc-200 text-sm font-semibold mb-1">{headerText}</div>
+                          {subText && <div className="text-zinc-500 text-sm mb-3">{subText}</div>}
                           <div className="text-green-500 font-bold">${payload[0].value}</div>
                         </div>
                       );

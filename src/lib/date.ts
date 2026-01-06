@@ -164,52 +164,126 @@ export function parseDateRange(value: string, locale = 'en-US', timezone?: strin
 
   switch (unit) {
     case 'hour':
+      // Last N hours - align to hour boundaries for consistent chart rendering
       return {
-        startDate: num ? subHours(startOfHour(now), num) : startOfHour(now),
+        startDate: startOfHour(subHours(now, num || 24)),
         endDate: endOfHour(now),
         offset: 0,
-        num: num || 1,
-        unit,
+        num: num || 24,
+        unit: 'hour',
         value,
       };
     case 'day':
-      return {
-        startDate: num ? subDays(startOfDay(now), num) : startOfDay(now),
-        endDate: endOfDay(now),
-        unit: num ? 'day' : 'hour',
-        offset: 0,
-        num: num || 1,
-        value,
-      };
+      if (num === 0) {
+        // Today: start of today to now (or end of today for full day view)
+        return {
+          startDate: startOfDay(now),
+          endDate: endOfDay(now),
+          unit: 'hour',
+          offset: 0,
+          num: 1,
+          value,
+        };
+      } else if (num === 1) {
+        // Yesterday: only yesterday's 24 hours
+        return {
+          startDate: startOfDay(subDays(now, 1)),
+          endDate: endOfDay(subDays(now, 1)),
+          unit: 'hour',
+          offset: 0,
+          num: 1,
+          value,
+        };
+      } else {
+        // Last N days
+        return {
+          startDate: subDays(startOfDay(now), num),
+          endDate: endOfDay(now),
+          unit: 'day',
+          offset: 0,
+          num,
+          value,
+        };
+      }
     case 'week':
-      return {
-        startDate: num
-          ? subWeeks(startOfWeek(now, { locale: dateLocale }), num)
-          : startOfWeek(now, { locale: dateLocale }),
-        endDate: endOfWeek(now, { locale: dateLocale }),
-        unit: 'day',
-        offset: 0,
-        num: num || 1,
-        value,
-      };
+      if (num === 0) {
+        // Week to date: start of week to today (end of today)
+        return {
+          startDate: startOfWeek(now, { locale: dateLocale }),
+          endDate: endOfDay(now),
+          unit: 'day',
+          offset: 0,
+          num: 1,
+          value,
+        };
+      } else {
+        // Last N weeks
+        return {
+          startDate: subWeeks(startOfWeek(now, { locale: dateLocale }), num),
+          endDate: endOfWeek(now, { locale: dateLocale }),
+          unit: 'day',
+          offset: 0,
+          num,
+          value,
+        };
+      }
     case 'month':
-      return {
-        startDate: num ? subMonths(startOfMonth(now), num) : startOfMonth(now),
-        endDate: endOfMonth(now),
-        unit: num ? 'month' : 'day',
-        offset: 0,
-        num: num || 1,
-        value,
-      };
+      if (num === 0) {
+        // Month to date: start of month to today (end of today)
+        return {
+          startDate: startOfMonth(now),
+          endDate: endOfDay(now),
+          unit: 'day',
+          offset: 0,
+          num: 1,
+          value,
+        };
+      } else {
+        // Last N months
+        return {
+          startDate: subMonths(startOfMonth(now), num),
+          endDate: endOfMonth(now),
+          unit: 'month',
+          offset: 0,
+          num,
+          value,
+        };
+      }
     case 'year':
-      return {
-        startDate: num ? subYears(startOfYear(now), num) : startOfYear(now),
-        endDate: endOfYear(now),
-        unit: 'month',
-        offset: 0,
-        num: num || 1,
-        value,
-      };
+      if (num === 0) {
+        // Year to date: start of year to today - use 'day' unit for daily labels
+        return {
+          startDate: startOfYear(now),
+          endDate: endOfDay(now),
+          unit: 'day',
+          offset: 0,
+          num: 1,
+          value,
+        };
+      } else {
+        // Last N years
+        return {
+          startDate: subYears(startOfYear(now), num),
+          endDate: endOfYear(now),
+          unit: 'month',
+          offset: 0,
+          num,
+          value,
+        };
+      }
+    default:
+      // Handle 'all' time - show all data from 1 year ago to now with monthly granularity
+      if (value === 'all') {
+        return {
+          startDate: subYears(startOfMonth(now), 1),
+          endDate: endOfMonth(now),
+          unit: 'month',
+          offset: 0,
+          num: 12,
+          value,
+        };
+      }
+      return null;
   }
 }
 

@@ -43,7 +43,12 @@ export async function GET(
         const stripe = await getStripeClient(websiteId);
 
         if (!stripe) {
-            return badRequest({ message: 'Stripe not configured for this website.' });
+            // Return empty data instead of error - UI will handle gracefully
+            return NextResponse.json({
+                chart: [],
+                total: 0,
+                stripeNotConfigured: true
+            });
         }
 
         // Fetch Balance Transactions (simulating a "Revenue" feed)

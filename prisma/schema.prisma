@@ -20,6 +20,14 @@ model User {
   createdAt   DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt   DateTime? @updatedAt @map("updated_at") @db.Timestamptz(6)
   deletedAt   DateTime? @map("deleted_at") @db.Timestamptz(6)
+  
+  // Subscription fields (Lemon Squeezy)
+  subscriptionId      String?   @map("subscription_id") @db.VarChar(255)
+  subscriptionStatus  String?   @map("subscription_status") @db.VarChar(50)
+  subscriptionPlan    String?   @map("subscription_plan") @db.VarChar(50)
+  subscriptionEndsAt  DateTime? @map("subscription_ends_at") @db.Timestamptz(6)
+  customerId          String?   @map("customer_id") @db.VarChar(255)
+  email               String?   @db.VarChar(255)
 
   websites  Website[]  @relation("user")
   createdBy Website[]  @relation("createUser")
