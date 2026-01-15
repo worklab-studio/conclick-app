@@ -88,6 +88,7 @@ async function main() {
     console.log('Generating traffic data...');
 
     const endDate = new Date();
+    endDate.setDate(endDate.getDate() + 90);
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - 90);
 
@@ -202,7 +203,7 @@ async function main() {
             const createdAt = new Date(d);
             createdAt.setHours(hour, minute, 0, 0);
 
-            if (createdAt > new Date()) continue;
+            // if (createdAt > new Date()) continue; // Allow future data
 
             const browser = random(browsers);
             const os = random(osList);

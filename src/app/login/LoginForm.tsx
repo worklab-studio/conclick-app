@@ -117,7 +117,7 @@ export default function LoginForm() {
                     <FormLabel className="text-zinc-200">Email or Username</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="admin"
+                        placeholder="you@example.com or username"
                         {...field}
                         className="!bg-zinc-900 !border-zinc-800 text-white placeholder:text-zinc-500 focus-visible:ring-indigo-500"
                       />

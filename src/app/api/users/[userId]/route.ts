@@ -29,6 +29,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ use
     username: z.string().max(255).optional(),
     password: z.string().max(255).optional(),
     role: userRoleParam.optional(),
+    logoUrl: z.string().optional(),
   });
 
   const { auth, body, error } = await parseRequest(request, schema);
@@ -60,6 +61,11 @@ export async function POST(request: Request, { params }: { params: Promise<{ use
 
   if (username) {
     data.username = username;
+  }
+
+  // Allow updating logoUrl
+  if (body.logoUrl) {
+    data.logoUrl = body.logoUrl;
   }
 
   // Check when username changes

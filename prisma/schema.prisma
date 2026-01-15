@@ -27,7 +27,18 @@ model User {
   subscriptionPlan    String?   @map("subscription_plan") @db.VarChar(50)
   subscriptionEndsAt  DateTime? @map("subscription_ends_at") @db.Timestamptz(6)
   customerId          String?   @map("customer_id") @db.VarChar(255)
+  lemonOrderId        String?   @map("lemon_order_id") @db.VarChar(255)
+  currentPeriodEndsAt DateTime? @map("current_period_ends_at") @db.Timestamptz(6)
+  endsAt              DateTime? @map("ends_at") @db.Timestamptz(6)
   email               String?   @db.VarChar(255)
+  
+  // Trial fields
+  trialStartedAt      DateTime? @map("trial_started_at") @db.Timestamptz(6)
+  trialEndsAt         DateTime? @map("trial_ends_at") @db.Timestamptz(6)
+  
+  // Password reset fields
+  passwordResetToken   String?   @map("password_reset_token") @db.VarChar(255)
+  passwordResetExpires DateTime? @map("password_reset_expires") @db.Timestamptz(6)
 
   websites  Website[]  @relation("user")
   createdBy Website[]  @relation("createUser")
@@ -37,6 +48,15 @@ model User {
   reports   Report[]
 
   @@map("user")
+}
+
+model WebhookEvent {
+  id        String    @id @default(uuid()) @map("event_id") @db.Uuid
+  eventName String    @map("event_name") @db.VarChar(100)
+  payload   Json
+  createdAt DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@map("webhook_event")
 }
 
 model Session {

@@ -5,6 +5,7 @@ import { dateRangeParams, filterParams } from '@/lib/schema';
 import { getCompareDate } from '@/lib/date';
 import { unauthorized, json } from '@/lib/response';
 import { getPageviewStats, getSessionStats } from '@/queries/sql';
+import { isPaidOrTrialUser } from '@/lib/billing';
 
 export async function GET(
   request: Request,
@@ -19,6 +20,11 @@ export async function GET(
 
   if (error) {
     return error();
+  }
+
+  // Access Control: Strict Gating
+  if (!isPaidOrTrialUser(auth.user)) {
+    return unauthorized({ message: 'Subscription required to view analytics.' });
   }
 
   const { websiteId } = await params;

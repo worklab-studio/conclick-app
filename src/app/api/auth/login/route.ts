@@ -28,7 +28,8 @@ export async function POST(request: Request) {
     where: {
       OR: [
         { username },
-        { displayName: username }
+        { displayName: username },
+        { email: username },
       ],
       deletedAt: null
     }

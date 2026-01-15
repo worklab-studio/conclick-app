@@ -41,13 +41,19 @@ export default function ForgotPasswordForm() {
         setLoading(true);
 
         try {
-            // Mock API call
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            console.log('Password reset requested for:', values.email);
+            const response = await fetch('/api/auth/forgot-password', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: values.email }),
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to send reset email');
+            }
 
             setEmailSent(true);
             toast.success('If an account exists with this email, you will receive a password reset link.');
-        } catch (e: any) {
+        } catch {
             toast.error('Something went wrong. Please try again.');
         } finally {
             setLoading(false);

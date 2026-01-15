@@ -7,6 +7,7 @@ import { getQueryFilters, parseRequest } from '@/lib/request';
 import { pagingParams, searchParams } from '@/lib/schema';
 import { createWebsite, getWebsiteCount } from '@/queries/prisma';
 import { getAllUserWebsitesIncludingTeamOwner, getUserWebsites } from '@/queries/prisma/website';
+import { isPaidOrTrialUser } from '@/lib/billing';
 
 const CLOUD_WEBSITE_LIMIT = 3;
 
@@ -47,6 +48,11 @@ export async function POST(request: Request) {
 
   if (error) {
     return error();
+  }
+
+  // Access Control: Strict Gating
+  if (!isPaidOrTrialUser(auth.user)) {
+    return unauthorized({ message: 'Subscription required. Please upgrade your plan.' });
   }
 
   const { id, name, domain, shareId, teamId } = body;

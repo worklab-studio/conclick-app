@@ -4,11 +4,12 @@ import { WebsiteHeader } from './WebsiteHeader';
 import { WebsiteMetricsBar } from './WebsiteMetricsBar';
 import { WebsiteChart } from './WebsiteChart';
 import { WebsitePanels } from './WebsitePanels';
-import { useWebsiteQuery } from '@/components/hooks';
+import { useWebsiteQuery, useLoginQuery } from '@/components/hooks';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
-
-import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
 
 function LoadingSkeleton() {
   return (
@@ -71,12 +72,60 @@ function LoadingSkeleton() {
   );
 }
 
-export function WebsitePage({ websiteId }: { websiteId: string }) {
-  const { data: website, isLoading, error } = useWebsiteQuery(websiteId);
-  const [chartType, setChartType] = useState('overview');
+// Access logic helper (copied from BillingPage - safe to strictly check here, frontend side)
+function checkAccess(user: any) {
+  if (!user) return false;
 
-  if (isLoading) {
+  // Admin Override
+  if (user.role === 'admin') return true;
+  // Conclick Demo Bypass
+  if (user.username?.toLowerCase() === 'conclick') return true;
+
+  const now = new Date();
+  const trialEndsAt = user.trialEndsAt ? new Date(user.trialEndsAt) : null;
+  const subEndsAt = user.subscriptionEndsAt ? new Date(user.subscriptionEndsAt) : null;
+  const periodEndsAt = user.currentPeriodEndsAt ? new Date(user.currentPeriodEndsAt) : null;
+  const effectiveEndsAt = periodEndsAt && periodEndsAt > now ? periodEndsAt : subEndsAt;
+
+  const isLifetime = user.subscriptionPlan === 'lifetime' || user.lemonOrderId;
+  const isPaid = (user.subscriptionStatus === 'active' || (effectiveEndsAt && effectiveEndsAt > now)) && !isLifetime;
+
+  // Check PAID
+  if (isLifetime || isPaid) return true;
+
+  // Check TRIAL
+  const isTrial = user.subscriptionStatus === 'trial' || (trialEndsAt && trialEndsAt > now);
+  if (isTrial) {
+    if (trialEndsAt && trialEndsAt > now) return true;
+  }
+
+  return false;
+}
+
+export function WebsitePage({ websiteId }: { websiteId: string }) {
+  const { user, isLoading: isUserLoading } = useLoginQuery();
+  const { data: website, isLoading: isWebsiteLoading, error } = useWebsiteQuery(websiteId);
+  const [chartType, setChartType] = useState('overview');
+  const router = useRouter();
+
+  // Access Control Redirect
+  useEffect(() => {
+    if (!isUserLoading && user) {
+      const hasAccess = checkAccess(user);
+      if (!hasAccess) {
+        router.replace('/account/billing');
+        toast.error('Your trial has expired. Please upgrade to continue viewing analytics.');
+      }
+    }
+  }, [user, isUserLoading, router]);
+
+  if (isWebsiteLoading || isUserLoading) {
     return <LoadingSkeleton />;
+  }
+
+  // Double check access to prevent flash of content before redirect
+  if (user && !checkAccess(user)) {
+    return null;
   }
 
   if (error) {

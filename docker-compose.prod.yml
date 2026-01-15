@@ -1,0 +1,67 @@
+---
+# Production Docker Compose for Conclick
+# Usage: docker-compose -f docker-compose.prod.yml up -d --build
+
+services:
+  # PostgreSQL Database
+  db:
+    image: postgres:15-alpine
+    container_name: conclick-db
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-umami}
+      POSTGRES_USER: ${POSTGRES_USER:-umami}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-umami}
+    volumes:
+      - conclick-db-data:/var/lib/postgresql/data
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - conclick-network
+
+  # Conclick Application (Next.js)
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        DATABASE_TYPE: postgresql
+        BASE_PATH: ${BASE_PATH:-}
+    container_name: conclick-app
+    ports:
+      - "${APP_PORT:-3000}:3000"
+    environment:
+      # Database
+      DATABASE_URL: postgresql://${POSTGRES_USER:-umami}:${POSTGRES_PASSWORD:-umami}@db:5432/${POSTGRES_DB:-umami}
+      
+      # App settings
+      APP_SECRET: ${APP_SECRET:-your-super-secret-key-change-in-production}
+      
+      # Optional: Tracker customization
+      TRACKER_SCRIPT_NAME: ${TRACKER_SCRIPT_NAME:-script.js}
+      
+      # Optional: Disable telemetry
+      NEXT_TELEMETRY_DISABLED: 1
+      
+      # Optional: Billing (Lemon Squeezy)
+      LEMON_SQUEEZY_API_KEY: ${LEMON_SQUEEZY_API_KEY:-}
+      LEMON_SQUEEZY_STORE_ID: ${LEMON_SQUEEZY_STORE_ID:-}
+      LEMON_SQUEEZY_WEBHOOK_SECRET: ${LEMON_SQUEEZY_WEBHOOK_SECRET:-}
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: always
+    networks:
+      - conclick-network
+
+networks:
+  conclick-network:
+    driver: bridge
+
+volumes:
+  conclick-db-data:
