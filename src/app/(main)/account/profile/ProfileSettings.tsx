@@ -28,9 +28,14 @@ export function ProfileSettings() {
   const [isSaving, setIsSaving] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
 
+  // Email state
+  const [isEditingEmail, setIsEditingEmail] = useState(false);
+  const [newEmail, setNewEmail] = useState('');
+
   useEffect(() => {
-    if (user?.username) {
+    if (user) {
       setNewUsername(user.username);
+      setNewEmail(user.email || `${user.username.toLowerCase().replace(/\s+/g, '.')}@example.com`);
     }
   }, [user]);
 
@@ -44,11 +49,13 @@ export function ProfileSettings() {
     const checkAvailability = async () => {
       setIsCheckingUsername(true);
       try {
-        const res = await fetch(`/api/users/check-username?username=${encodeURIComponent(debouncedUsername)}`);
+        const res = await fetch(
+          `/api/users/check-username?username=${encodeURIComponent(debouncedUsername)}`,
+        );
         const data = await res.json();
         setUsernameAvailable(data.available);
-      } catch (error) {
-        console.error('Check failed', error);
+      } catch {
+        // fail silently
       } finally {
         setIsCheckingUsername(false);
       }
@@ -93,7 +100,7 @@ export function ProfileSettings() {
 
         toast.success('Profile picture updated');
         await refetch(); // Refresh user data
-      } catch (error) {
+      } catch {
         toast.error('Failed to upload picture');
         setAvatarPreview(null); // Revert preview on error
       } finally {
@@ -141,6 +148,47 @@ export function ProfileSettings() {
     }
   };
 
+  const handleEmailSave = async () => {
+    if (newEmail === user.email) {
+      setIsEditingEmail(false);
+      return;
+    }
+
+    if (!newEmail.trim()) {
+      toast.error('Email cannot be empty');
+      return;
+    }
+
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(newEmail)) {
+      toast.error('Invalid email address');
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      const response = await fetch(`/api/users/${id}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: newEmail }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.message || 'Failed to update email');
+      }
+
+      toast.success('Email updated successfully');
+      setIsEditingEmail(false);
+      await refetch();
+    } catch (error: any) {
+      toast.error(error.message);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   const renderRole = (value: string) => {
     if (value === ROLES.user) return formatMessage(labels.user);
     if (value === ROLES.admin) return formatMessage(labels.admin);
@@ -165,7 +213,12 @@ export function ProfileSettings() {
               </div>
             )}
           </Avatar>
-          <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()} disabled={isUploading}>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={isUploading}
+          >
             {isUploading ? 'Uploading...' : 'Change picture'}
           </Button>
           <input
@@ -187,8 +240,11 @@ export function ProfileSettings() {
                   value={isEditingUsername ? newUsername : username}
                   disabled={!isEditingUsername}
                   onChange={e => setNewUsername(e.target.value)}
-                  className={`dark:bg-[#18181b] dark:border-zinc-800 ${isEditingUsername && usernameAvailable === false ? 'border-red-500 focus:ring-red-500' : ''
-                    }`}
+                  className={`dark:bg-[#18181b] dark:border-zinc-800 ${
+                    isEditingUsername && usernameAvailable === false
+                      ? 'border-red-500 focus:ring-red-500'
+                      : ''
+                  }`}
                 />
 
                 {/* Edit / Action Buttons */}
@@ -204,7 +260,10 @@ export function ProfileSettings() {
                   </Button>
                 ) : (
                   <div className="flex gap-1">
-                    <Button onClick={handleUsernameSave} disabled={isSaving || usernameAvailable === false || isCheckingUsername}>
+                    <Button
+                      onClick={handleUsernameSave}
+                      disabled={isSaving || usernameAvailable === false || isCheckingUsername}
+                    >
                       {isSaving ? '...' : 'Save'}
                     </Button>
                     <Button
@@ -257,12 +316,49 @@ export function ProfileSettings() {
 
           <div className="grid gap-2">
             <Label>Email</Label>
-            <Input
-              value={user.email || "admin@example.com"} // Fallback or actual email
-              disabled
-              readOnly
-              className="dark:bg-[#18181b] dark:border-zinc-800"
-            />
+            <div className="space-y-2">
+              <div className="flex gap-2 relative">
+                <Input
+                  value={
+                    isEditingEmail
+                      ? newEmail
+                      : user.email || `${username.toLowerCase().replace(/\s+/g, '.')}@example.com`
+                  }
+                  disabled={!isEditingEmail}
+                  onChange={e => setNewEmail(e.target.value)}
+                  className="dark:bg-[#18181b] dark:border-zinc-800"
+                />
+
+                {!isEditingEmail ? (
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setNewEmail(
+                        user.email || `${username.toLowerCase().replace(/\s+/g, '.')}@example.com`,
+                      );
+                      setIsEditingEmail(true);
+                    }}
+                  >
+                    Edit
+                  </Button>
+                ) : (
+                  <div className="flex gap-1">
+                    <Button onClick={handleEmailSave} disabled={isSaving}>
+                      {isSaving ? '...' : 'Save'}
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      onClick={() => {
+                        setIsEditingEmail(false);
+                      }}
+                      disabled={isSaving}
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
 
           {!cloudMode && (

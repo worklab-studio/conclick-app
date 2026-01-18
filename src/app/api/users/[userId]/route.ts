@@ -30,6 +30,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ use
     password: z.string().max(255).optional(),
     role: userRoleParam.optional(),
     logoUrl: z.string().optional(),
+    email: z.string().email().max(255).optional(),
   });
 
   const { auth, body, error } = await parseRequest(request, schema);
@@ -44,7 +45,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ use
     return unauthorized();
   }
 
-  const { username, password, role } = body;
+  const { username, password, role, email } = body;
 
   const user = await getUser(userId);
 
@@ -61,6 +62,10 @@ export async function POST(request: Request, { params }: { params: Promise<{ use
 
   if (username) {
     data.username = username;
+  }
+
+  if (email) {
+    data.email = email;
   }
 
   // Allow updating logoUrl

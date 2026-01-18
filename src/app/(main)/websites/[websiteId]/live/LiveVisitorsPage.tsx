@@ -14,7 +14,7 @@ import {
   ChevronDown,
   RotateCw,
 } from 'lucide-react';
-import Map, { Popup, NavigationControl, FullscreenControl } from 'react-map-gl/maplibre';
+import MapGL, { Popup, NavigationControl, FullscreenControl } from 'react-map-gl/maplibre';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
 export function LiveVisitorsPage({ websiteId }: { websiteId: string }) {
@@ -110,45 +110,216 @@ export function LiveVisitorsPage({ websiteId }: { websiteId: string }) {
 
   // Mock visitors for demo account with lat/lng coordinates
   const DEMO_VISITORS = [
-    { id: 'demo-1', country: 'United States', city: 'New York', lat: 40.7128, lng: -74.0060, referrer: 'google.com', urlPath: '/pricing' },
-    { id: 'demo-2', country: 'United Kingdom', city: 'London', lat: 51.5074, lng: -0.1278, referrer: 'twitter.com', urlPath: '/' },
-    { id: 'demo-3', country: 'Germany', city: 'Berlin', lat: 52.5200, lng: 13.4050, referrer: 'Direct', urlPath: '/features' },
-    { id: 'demo-4', country: 'France', city: 'Paris', lat: 48.8566, lng: 2.3522, referrer: 'linkedin.com', urlPath: '/about' },
-    { id: 'demo-5', country: 'India', city: 'Mumbai', lat: 19.0760, lng: 72.8777, referrer: 'google.com', urlPath: '/pricing' },
-    { id: 'demo-6', country: 'Canada', city: 'Toronto', lat: 43.6532, lng: -79.3832, referrer: 'Direct', urlPath: '/' },
-    { id: 'demo-7', country: 'Australia', city: 'Sydney', lat: -33.8688, lng: 151.2093, referrer: 'facebook.com', urlPath: '/blog' },
-    { id: 'demo-8', country: 'Japan', city: 'Tokyo', lat: 35.6762, lng: 139.6503, referrer: 'google.com', urlPath: '/features' },
-    { id: 'demo-9', country: 'Brazil', city: 'São Paulo', lat: -23.5505, lng: -46.6333, referrer: 'Direct', urlPath: '/' },
-    { id: 'demo-10', country: 'Netherlands', city: 'Amsterdam', lat: 52.3676, lng: 4.9041, referrer: 'twitter.com', urlPath: '/pricing' },
-    { id: 'demo-11', country: 'United States', city: 'San Francisco', lat: 37.7749, lng: -122.4194, referrer: 'producthunt.com', urlPath: '/' },
-    { id: 'demo-12', country: 'Spain', city: 'Madrid', lat: 40.4168, lng: -3.7038, referrer: 'google.com', urlPath: '/about' },
-    { id: 'demo-13', country: 'Italy', city: 'Rome', lat: 41.9028, lng: 12.4964, referrer: 'Direct', urlPath: '/features' },
-    { id: 'demo-14', country: 'Singapore', city: 'Singapore', lat: 1.3521, lng: 103.8198, referrer: 'linkedin.com', urlPath: '/pricing' },
-    { id: 'demo-15', country: 'South Korea', city: 'Seoul', lat: 37.5665, lng: 126.9780, referrer: 'google.com', urlPath: '/' },
+    {
+      id: 'demo-1',
+      country: 'United States',
+      city: 'New York',
+      lat: 40.7128,
+      lng: -74.006,
+      referrer: 'google.com',
+      urlPath: '/pricing',
+    },
+    {
+      id: 'demo-2',
+      country: 'United Kingdom',
+      city: 'London',
+      lat: 51.5074,
+      lng: -0.1278,
+      referrer: 'twitter.com',
+      urlPath: '/',
+    },
+    {
+      id: 'demo-3',
+      country: 'Germany',
+      city: 'Berlin',
+      lat: 52.52,
+      lng: 13.405,
+      referrer: 'Direct',
+      urlPath: '/features',
+    },
+    {
+      id: 'demo-4',
+      country: 'France',
+      city: 'Paris',
+      lat: 48.8566,
+      lng: 2.3522,
+      referrer: 'linkedin.com',
+      urlPath: '/about',
+    },
+    {
+      id: 'demo-5',
+      country: 'India',
+      city: 'Mumbai',
+      lat: 19.076,
+      lng: 72.8777,
+      referrer: 'google.com',
+      urlPath: '/pricing',
+    },
+    {
+      id: 'demo-6',
+      country: 'Canada',
+      city: 'Toronto',
+      lat: 43.6532,
+      lng: -79.3832,
+      referrer: 'Direct',
+      urlPath: '/',
+    },
+    {
+      id: 'demo-7',
+      country: 'Australia',
+      city: 'Sydney',
+      lat: -33.8688,
+      lng: 151.2093,
+      referrer: 'facebook.com',
+      urlPath: '/blog',
+    },
+    {
+      id: 'demo-8',
+      country: 'Japan',
+      city: 'Tokyo',
+      lat: 35.6762,
+      lng: 139.6503,
+      referrer: 'google.com',
+      urlPath: '/features',
+    },
+    {
+      id: 'demo-9',
+      country: 'Brazil',
+      city: 'São Paulo',
+      lat: -23.5505,
+      lng: -46.6333,
+      referrer: 'Direct',
+      urlPath: '/',
+    },
+    {
+      id: 'demo-10',
+      country: 'Netherlands',
+      city: 'Amsterdam',
+      lat: 52.3676,
+      lng: 4.9041,
+      referrer: 'twitter.com',
+      urlPath: '/pricing',
+    },
+    {
+      id: 'demo-11',
+      country: 'United States',
+      city: 'San Francisco',
+      lat: 37.7749,
+      lng: -122.4194,
+      referrer: 'producthunt.com',
+      urlPath: '/',
+    },
+    {
+      id: 'demo-12',
+      country: 'Spain',
+      city: 'Madrid',
+      lat: 40.4168,
+      lng: -3.7038,
+      referrer: 'google.com',
+      urlPath: '/about',
+    },
+    {
+      id: 'demo-13',
+      country: 'Italy',
+      city: 'Rome',
+      lat: 41.9028,
+      lng: 12.4964,
+      referrer: 'Direct',
+      urlPath: '/features',
+    },
+    {
+      id: 'demo-14',
+      country: 'Singapore',
+      city: 'Singapore',
+      lat: 1.3521,
+      lng: 103.8198,
+      referrer: 'linkedin.com',
+      urlPath: '/pricing',
+    },
+    {
+      id: 'demo-15',
+      country: 'South Korea',
+      city: 'Seoul',
+      lat: 37.5665,
+      lng: 126.978,
+      referrer: 'google.com',
+      urlPath: '/',
+    },
   ];
 
-  const visitors = isDemo ? DEMO_VISITORS : (realtimeData?.visitors || []);
+  // Extract unique visitors from events (API returns 'events', not 'visitors')
+  const visitors = useMemo(() => {
+    if (isDemo) return DEMO_VISITORS;
+
+    const events = realtimeData?.events || [];
+    const sessionMap = new Map();
+
+    // Get unique sessions with their data
+    events.forEach((event: any) => {
+      if (event.__type === 'session' && !sessionMap.has(event.sessionId)) {
+        sessionMap.set(event.sessionId, {
+          id: event.sessionId,
+          country: event.country || 'Unknown',
+          city: event.city || 'Unknown',
+          referrer: event.referrerDomain || 'Direct',
+          urlPath: event.urlPath || '/',
+        });
+      }
+    });
+
+    return Array.from(sessionMap.values());
+  }, [isDemo, realtimeData?.events]);
+
+  // Coordinate mapping for demo/top cities (in real prod, use a geocoding service or DB)
+  const CITY_COORDINATES: Record<string, [number, number]> = {
+    'San Francisco': [37.7749, -122.4194],
+    'New York': [40.7128, -74.006],
+    London: [51.5074, -0.1278],
+    Berlin: [52.52, 13.405],
+    Paris: [48.8566, 2.3522],
+    Mumbai: [19.076, 72.8777],
+    Toronto: [43.6532, -79.3832],
+    Sydney: [-33.8688, 151.2093],
+    Tokyo: [35.6762, 139.6503],
+    'São Paulo': [-23.5505, -46.6333],
+    Amsterdam: [52.3676, 4.9041],
+    Madrid: [40.4168, -3.7038],
+    Rome: [41.9028, 12.4964],
+    Singapore: [1.3521, 103.8198],
+    Seoul: [37.5665, 126.978],
+    Bangalore: [12.9716, 77.5946],
+    Unknown: [0, 0],
+  };
+
+  const getCoordinates = (v: any): [number, number] => {
+    if (v.lng && v.lat) return [v.lng, v.lat];
+    if (v.city && CITY_COORDINATES[v.city])
+      return [CITY_COORDINATES[v.city][1], CITY_COORDINATES[v.city][0]]; // [lng, lat]
+    return [0, 0]; // Null island for unknown
+  };
 
   const visitorData = useMemo(() => {
     return {
       type: 'FeatureCollection',
-      features: visitors.map((v: any) => ({
-        type: 'Feature',
-        geometry: {
-          type: 'Point',
-          coordinates: [v.lng, v.lat], // Ensure API returns lng/lat
-        },
-        properties: {
-          ...v,
-          // Ensure these fields exist or provide defaults
-          id: v.id || Math.random().toString(),
-          country: v.country || 'Unknown',
-          city: v.city || 'Unknown',
-          referrer: v.referrer || 'Direct',
-          page: v.urlPath || '/',
-          time: 'Just now', // Realtime data is usually "now"
-        },
-      })),
+      features: visitors.map((v: any) => {
+        const coords = getCoordinates(v);
+        return {
+          type: 'Feature',
+          geometry: {
+            type: 'Point',
+            coordinates: coords,
+          },
+          properties: {
+            ...v,
+            id: v.id || Math.random().toString(),
+            country: v.country || 'Unknown',
+            city: v.city || 'Unknown',
+            referrer: v.referrer || 'Direct',
+            page: v.urlPath || '/',
+            time: 'Just now',
+          },
+        };
+      }),
     };
   }, [visitors]);
 
@@ -620,7 +791,7 @@ export function LiveVisitorsPage({ websiteId }: { websiteId: string }) {
       </div>
 
       {/* MapLibre Map */}
-      <Map
+      <MapGL
         onLoad={handleMapLoad}
         onMouseDown={handleInteractionStart}
         onMouseUp={handleInteractionEnd}
@@ -769,7 +940,7 @@ export function LiveVisitorsPage({ websiteId }: { websiteId: string }) {
             </div>
           </Popup>
         )}
-      </Map>
+      </MapGL>
     </div>
   );
 }

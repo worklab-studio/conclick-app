@@ -30,6 +30,8 @@ export async function getRealtimeData(websiteId: string, filters: QueryFilters) 
         urlPath: string;
         referrerDomain: string;
         country: string;
+        city: string;
+        region: string;
         eventName: string;
       },
     ) => {
@@ -70,6 +72,7 @@ export async function getRealtimeData(websiteId: string, filters: QueryFilters) 
     totals: {
       views: pageviews.reduce((sum: number, { y }: { y: number }) => Number(sum) + Number(y), 0),
       visitors: sessions.reduce((sum: number, { y }: { y: number }) => Number(sum) + Number(y), 0),
+      activeUsers: uniques.size,
       events: activity.filter(e => e.eventName).length,
       countries: Object.keys(countries).length,
     },

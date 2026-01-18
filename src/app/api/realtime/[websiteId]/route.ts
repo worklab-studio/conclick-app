@@ -32,5 +32,10 @@ export async function GET(
 
   const data = await getRealtimeData(websiteId, filters);
 
+  /* console.log('[API Debug] Realtime Data for', websiteId);
+  console.log('[API Debug] Filters:', JSON.stringify(filters));
+  console.log('[API Debug] Totals:', JSON.stringify(data.totals));
+  console.log('[API Debug] Events length:', data.events?.length); */
+
   return json(data);
 }

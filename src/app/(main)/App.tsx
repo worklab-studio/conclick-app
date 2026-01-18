@@ -2,6 +2,7 @@
 import { Loading } from '@umami/react-zen';
 import Script from 'next/script';
 import { UpdateNotice } from './UpdateNotice';
+import { TrialExpiredModal } from '@/components/common/TrialExpiredModal';
 import { TopNav } from '@/app/(main)/TopNav';
 import { useLoginQuery, useConfig, useNavigation } from '@/components/hooks';
 import { useEffect } from 'react';
@@ -37,9 +38,8 @@ export function App({ children }) {
   return (
     <div className="flex min-h-screen flex-col bg-background">
       {!pathname.endsWith('/live') && <TopNav />}
-      <main className="flex-1 w-full bg-background">
-        {children}
-      </main>
+      <main className="flex-1 w-full bg-background">{children}</main>
+      <TrialExpiredModal />
       <UpdateNotice user={user} config={config} />
       {process.env.NODE_ENV === 'production' && !pathname.includes('/share/') && (
         <Script src={`${process.env.basePath || ''}/telemetry.js`} />

@@ -1,0 +1,47 @@
+[STARTED] Backing up original state...
+[COMPLETED] Backed up original state in git stash (0d1f2def)
+[STARTED] Running tasks for staged files...
+[STARTED] package.json — 20 files
+[STARTED] **/*.{js,jsx,ts,tsx} — 19 files
+[STARTED] **/*.css — 0 files
+[STARTED] **/*.json — 0 files
+[SKIPPED] **/*.css — no files
+[SKIPPED] **/*.json — no files
+[STARTED] prettier --write
+[COMPLETED] prettier --write
+[STARTED] eslint
+[FAILED] eslint [FAILED]
+[FAILED] eslint [FAILED]
+[COMPLETED] Running tasks for staged files...
+[STARTED] Applying modifications from tasks...
+[SKIPPED] Skipped because of errors from tasks.
+[STARTED] Reverting to original state because of errors...
+[COMPLETED] Reverting to original state because of errors...
+[STARTED] Cleaning up temporary files...
+[COMPLETED] Cleaning up temporary files...
+
+✖ eslint:
+
+/Users/worklab/Conclick beta/umami/scripts/set-user-email.ts
+  12:3  error  Unexpected console statement  no-console
+  25:5  error  Unexpected console statement  no-console
+  32:5  error  Unexpected console statement  no-console
+  36:3  error  Unexpected console statement  no-console
+  43:3  error  Unexpected console statement  no-console
+  48:5  error  Unexpected console statement  no-console
+
+/Users/worklab/Conclick beta/umami/src/app/(main)/account/billing/BillingPage.tsx
+  6:38  error  'Calendar' is defined but never used    @typescript-eslint/no-unused-vars
+  6:38  error  'Calendar' is defined but never used    no-unused-vars
+  6:48  error  'ArrowRight' is defined but never used  @typescript-eslint/no-unused-vars
+  6:48  error  'ArrowRight' is defined but never used  no-unused-vars
+  6:67  error  'Star' is defined but never used        @typescript-eslint/no-unused-vars
+  6:67  error  'Star' is defined but never used        no-unused-vars
+
+✖ 12 problems (12 errors, 0 warnings)
+
+
+✖ eslint failed to spawn:
+Command failed with exit code 1: eslint '/Users/worklab/Conclick beta/umami/scripts/set-user-email.ts' '/Users/worklab/Conclick beta/umami/src/app/(main)/App.tsx' '/Users/worklab/Conclick beta/umami/src/app/(main)/account/billing/BillingPage.tsx' '/Users/worklab/Conclick beta/umami/src/app/(main)/account/profile/ProfileSettings.tsx' '/Users/worklab/Conclick beta/umami/src/app/(main)/websites/WebsiteAddButton.tsx' '/Users/worklab/Conclick beta/umami/src/app/(main)/websites/WebsiteCard.tsx' '/Users/worklab/Conclick beta/umami/src/app/(main)/websites/WebsitesDataTable.tsx' '/Users/worklab/Conclick beta/umami/src/app/(main)/websites/[websiteId]/WebsiteMetricsBar.tsx' '/Users/worklab/Conclick beta/umami/src/app/(main)/websites/[websiteId]/live/LiveVisitorsPage.tsx' '/Users/worklab/Conclick beta/umami/src/app/api/realtime/[websiteId]/route.ts' '/Users/worklab/Conclick beta/umami/src/app/api/users/[userId]/route.ts' '/Users/worklab/Conclick beta/umami/src/components/common/DataGrid.tsx' '/Users/worklab/Conclick beta/umami/src/components/common/TrialExpiredModal.tsx' '/Users/worklab/Conclick beta/umami/src/lib/constants.ts' '/Users/worklab/Conclick beta/umami/src/lib/detect.ts' '/Users/worklab/Conclick beta/umami/src/lib/types.ts' '/Users/worklab/Conclick beta/umami/src/queries/prisma/user.ts' '/Users/worklab/Conclick beta/umami/src/queries/sql/getRealtimeActivity.ts' '/Users/worklab/Conclick beta/umami/src/queries/sql/getRealtimeData.ts'
+undefined
+husky - pre-commit script failed (code 1)

@@ -63,7 +63,11 @@ function decodeHeader(s: string | undefined | null): string | undefined | null {
 export async function getLocation(ip: string = '', headers: Headers, hasPayloadIP: boolean) {
   // Ignore local ips
   if (!ip || (await isLocalhost(ip))) {
-    return null;
+    return {
+      country: 'US',
+      region: 'US-CA',
+      city: 'San Francisco',
+    };
   }
 
   if (!hasPayloadIP && !process.env.SKIP_LOCATION_HEADERS) {

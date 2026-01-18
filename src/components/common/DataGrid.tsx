@@ -63,6 +63,8 @@ export function DataGrid({
 
   const child = data ? (typeof children === 'function' ? children(data) : children) : null;
 
+  const isEmpty = !data || (Array.isArray(data) ? data.length === 0 : data.count === 0);
+
   return (
     <Column gap="4" minHeight="300px">
       {allowSearch && (
@@ -88,6 +90,7 @@ export function DataGrid({
         isLoading={isLoading}
         isFetching={isFetching}
         error={error}
+        isEmpty={isEmpty}
         renderEmpty={renderEmpty}
       >
         {data && (

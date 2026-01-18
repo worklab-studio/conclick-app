@@ -24,7 +24,13 @@ async function findUser(criteria: Prisma.UserFindUniqueArgs, options: GetUserOpt
       username: true,
       password: includePassword,
       role: true,
+      email: true,
+      logoUrl: true,
+      displayName: true,
       createdAt: true,
+      subscriptionStatus: true,
+      trialStartedAt: true,
+      trialEndsAt: true,
     },
   });
 }
@@ -79,6 +85,7 @@ export async function createUser(data: {
       id: true,
       username: true,
       role: true,
+      email: true,
     },
   });
 }
@@ -93,6 +100,9 @@ export async function updateUser(userId: string, data: Prisma.UserUpdateInput) {
       id: true,
       username: true,
       role: true,
+      email: true,
+      logoUrl: true,
+      displayName: true,
       createdAt: true,
     },
   });

@@ -45,36 +45,38 @@ export function WebsiteMetricsBar({
   const finalData = data;
 
   // Calculate Total Revenue - use mock data for demo
-  const realTotalRevenue = revenueStats?.chart?.reduce((acc: number, curr: any) => acc + curr.y, 0) || 0;
+  const realTotalRevenue =
+    revenueStats?.chart?.reduce((acc: number, curr: any) => acc + curr.y, 0) || 0;
   const finalTotalRevenue = isDemo ? 2847 : realTotalRevenue;
   const finalRevenueChange = isDemo ? 342 : 0;
 
   const { pageviews, visitors, visits, bounces, totaltime, comparison } = finalData || {};
 
   // Live Visitors - use mock data for demo
-  const realLiveVisitors = realtime?.totals?.visitors || 0;
+  const realLiveVisitors = realtime?.totals?.activeUsers || 0;
   const liveVisitors = isDemo ? 42 : realLiveVisitors;
 
   // Determine 5th Card Metric
-  const lastCardMetric = chartType === 'revenue'
-    ? {
-      label: 'Total Revenue',
-      value: finalTotalRevenue,
-      change: finalRevenueChange,
-      formatValue: (n: number) => `$${formatLongNumber(n)}`,
-      isLive: false,
-      isRevenue: true,
-      reverseColors: false,
-    }
-    : {
-      label: 'Live Visitors',
-      value: liveVisitors,
-      change: 0,
-      formatValue: formatLongNumber,
-      isLive: true,
-      isRevenue: false,
-      reverseColors: false,
-    };
+  const lastCardMetric =
+    chartType === 'revenue'
+      ? {
+          label: 'Total Revenue',
+          value: finalTotalRevenue,
+          change: finalRevenueChange,
+          formatValue: (n: number) => `$${formatLongNumber(n)}`,
+          isLive: false,
+          isRevenue: true,
+          reverseColors: false,
+        }
+      : {
+          label: 'Live Visitors',
+          value: liveVisitors,
+          change: 0,
+          formatValue: formatLongNumber,
+          isLive: true,
+          isRevenue: false,
+          reverseColors: false,
+        };
 
   const metrics = [
     {
@@ -116,7 +118,7 @@ export function WebsiteMetricsBar({
       isRevenue: false,
       reverseColors: false,
     },
-    lastCardMetric
+    lastCardMetric,
   ];
 
   if (isLoading) {
@@ -145,24 +147,34 @@ export function WebsiteMetricsBar({
 
   return (
     <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-      {metrics.map(({ label, value, change, formatValue, reverseColors, isLive, isRevenue }) => {
+      {metrics.map(({ label, value, change, formatValue, reverseColors, isLive }) => {
         const isPositive = change > 0;
         const isNeutral = change === 0;
         const isNegative = change < 0;
 
-        let changeColor = isPositive ? 'text-green-600' : isNegative ? 'text-red-600' : 'text-muted-foreground';
+        let changeColor = isPositive
+          ? 'text-green-600'
+          : isNegative
+            ? 'text-red-600'
+            : 'text-muted-foreground';
         if (reverseColors) {
-          changeColor = isPositive ? 'text-red-600' : isNegative ? 'text-green-600' : 'text-muted-foreground';
+          changeColor = isPositive
+            ? 'text-red-600'
+            : isNegative
+              ? 'text-green-600'
+              : 'text-muted-foreground';
         }
 
         return (
           <Card
             key={label}
             className={cn(
-              "transition-all duration-300 hover:shadow-lg dark:bg-[hsl(0,0%,8%)] dark:border-[hsl(0,0%,12%)] dark:hover:border-[hsl(0,0%,15%)] overflow-hidden relative",
-              isLive && "cursor-pointer hover:bg-accent/50"
+              'transition-all duration-300 hover:shadow-lg dark:bg-[hsl(0,0%,8%)] dark:border-[hsl(0,0%,12%)] dark:hover:border-[hsl(0,0%,15%)] overflow-hidden relative',
+              isLive && 'cursor-pointer hover:bg-accent/50',
             )}
-            onClick={() => isLive && window.open(renderUrl(`/websites/${websiteId}/live`), '_blank')}
+            onClick={() =>
+              isLive && window.open(renderUrl(`/websites/${websiteId}/live`), '_blank')
+            }
           >
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
               <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
@@ -177,11 +189,9 @@ export function WebsiteMetricsBar({
               </CardTitle>
             </CardHeader>
             <CardContent className="relative z-10">
-              <div className="text-2xl font-bold text-foreground">
-                {formatValue(value || 0)}
-              </div>
+              <div className="text-2xl font-bold text-foreground">{formatValue(value || 0)}</div>
               {!isAllTime && !isLive && (
-                <div className={cn("text-xs flex items-center mt-1 font-medium", changeColor)}>
+                <div className={cn('text-xs flex items-center mt-1 font-medium', changeColor)}>
                   {isPositive && <ArrowUp className="h-3 w-3 mr-1" />}
                   {isNegative && <ArrowDown className="h-3 w-3 mr-1" />}
                   {isNeutral && <Minus className="h-3 w-3 mr-1" />}

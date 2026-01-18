@@ -132,6 +132,7 @@ export interface RealtimeData {
     visitors: number;
     events: number;
     countries: number;
+    activeUsers: number;
   };
   urls: Record<string, number>;
   visitors: any[];
