@@ -15,6 +15,8 @@ export function getBearerToken(request: Request) {
   return auth?.split(' ')[1];
 }
 
+import { createClient } from '@/lib/supabase/server';
+
 export async function checkAuth(request: Request) {
   const token = getBearerToken(request);
   const payload = parseSecureToken(token, secret());
@@ -30,6 +32,21 @@ export async function checkAuth(request: Request) {
 
     if (key?.userId) {
       user = await getUser(key.userId);
+    }
+  }
+
+  // Fallback: Check Supabase Auth (Cookie-based)
+  if (!user && !shareToken) {
+    try {
+      const supabase = await createClient();
+      const { data: { user: supabaseUser }, error } = await supabase.auth.getUser();
+
+      if (supabaseUser && !error) {
+        user = await getUser(supabaseUser.id);
+        log('User authenticated via Supabase Cookie');
+      }
+    } catch (e) {
+      // Ignore error, just means no supabase session
     }
   }
 

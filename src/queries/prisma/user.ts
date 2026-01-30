@@ -31,6 +31,11 @@ async function findUser(criteria: Prisma.UserFindUniqueArgs, options: GetUserOpt
       subscriptionStatus: true,
       trialStartedAt: true,
       trialEndsAt: true,
+      subscriptionPlan: true,
+      subscriptionId: true,
+      subscriptionEndsAt: true,
+      lemonOrderId: true,
+      currentPeriodEndsAt: true,
     },
   });
 }

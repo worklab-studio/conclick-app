@@ -1,6 +1,7 @@
 import { SideMenu } from '@/components/common/SideMenu';
 import { useMessages, useNavigation } from '@/components/hooks';
 import { Globe, User, Users } from '@/components/icons';
+import { Bell } from 'lucide-react';
 
 export function AdminNav({ onItemClick }: { onItemClick?: () => void }) {
   const { formatMessage, labels } = useMessages();
@@ -17,16 +18,16 @@ export function AdminNav({ onItemClick }: { onItemClick?: () => void }) {
           icon: <User />,
         },
         {
-          id: 'websites',
-          label: formatMessage(labels.websites),
-          path: '/admin/websites',
-          icon: <Globe />,
-        },
-        {
           id: 'teams',
           label: formatMessage(labels.teams),
           path: '/admin/teams',
           icon: <Users />,
+        },
+        {
+          id: 'notifications',
+          label: 'Notifications',
+          path: '/admin/notifications',
+          icon: <Bell className="w-4 h-4" />,
         },
       ],
     },

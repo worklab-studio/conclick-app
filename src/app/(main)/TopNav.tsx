@@ -40,6 +40,12 @@ export function TopNav() {
             {/* Notification Bell */}
             <NotificationDropdown />
 
+            {user?.role === 'admin' && (
+              <Link href="/admin" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors mr-2">
+                Admin
+              </Link>
+            )}
+
             {/* Separator */}
             <div className="h-6 w-px bg-[hsl(0,0%,20%)] mx-1" />
 

@@ -5,7 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Check, Crown, ExternalLink, Clock, Zap } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 
 const PLANS = {
@@ -56,6 +56,14 @@ export function BillingPage() {
   const [isLoading, setIsLoading] = useState<string | null>(null);
   const [isAnnual, setIsAnnual] = useState(false);
 
+  // Set default view to match subscription
+  useEffect(() => {
+    const plan = user?.subscriptionPlan?.toLowerCase() || '';
+    if (plan.includes('annual') || plan.includes('year')) {
+      setIsAnnual(true);
+    }
+  }, [user?.subscriptionPlan]);
+
   // --- State Logic ---
   const now = new Date();
   const trialEndsAt = user?.trialEndsAt ? new Date(user.trialEndsAt) : null;
@@ -63,7 +71,7 @@ export function BillingPage() {
   const periodEndsAt = user?.currentPeriodEndsAt ? new Date(user.currentPeriodEndsAt) : null;
   const effectiveEndsAt = periodEndsAt && periodEndsAt > now ? periodEndsAt : subEndsAt;
 
-  const isLifetime = user?.subscriptionPlan === 'lifetime' || user?.lemonOrderId;
+  const isLifetime = user?.subscriptionPlan?.toLowerCase().includes('lifetime') || !!user?.lemonOrderId;
   const isPaid =
     (user?.subscriptionStatus === 'active' || (effectiveEndsAt && effectiveEndsAt > now)) &&
     !isLifetime;
@@ -73,6 +81,15 @@ export function BillingPage() {
     !hasPaidAccess && (user?.subscriptionStatus === 'trial' || (trialEndsAt && trialEndsAt > now));
   const isTrialExpired = !hasPaidAccess && trialEndsAt && trialEndsAt < now;
   const isNewUser = !hasPaidAccess && !isTrial && !isTrialExpired && !user?.trialStartedAt;
+
+  // Plan Check Helper
+  const checkPlan = (type: 'monthly' | 'annual') => {
+    const p = user?.subscriptionPlan?.toLowerCase() || '';
+    if (type === 'annual') return p.includes('annual') || p.includes('year');
+    if (type === 'monthly') return p.includes('month');
+    return false;
+  };
+
 
   // Days remaining
   const trialDaysRemaining =
@@ -135,34 +152,82 @@ export function BillingPage() {
   };
 
   // --- Components ---
-  const TrialProgressBar = () => {
-    if (!isTrial) return null;
+  const PlanStatusBanner = () => {
+    // 1. Paid State
+    if (hasPaidAccess) {
+      const planName = isLifetime
+        ? 'Lifetime Access'
+        : (user?.subscriptionPlan === 'annual' ? 'Pro Yearly' : 'Pro Monthly');
 
-    return (
-      <div className="relative w-full mb-8 overflow-hidden rounded-xl border border-indigo-500/30 bg-indigo-500/5 p-6 md:p-8">
-        <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/10 via-purple-500/5 to-transparent mix-blend-overlay" />
+      const renewalDate = effectiveEndsAt ? effectiveEndsAt.toLocaleDateString() : 'N/A';
 
-        <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="flex items-center gap-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-indigo-500/20 text-indigo-400 ring-1 ring-indigo-500/40 shadow-[0_0_15px_rgba(99,102,241,0.2)]">
-              <Zap className="h-6 w-6 fill-current" />
+      return (
+        <div className="relative w-full mb-8 overflow-hidden rounded-xl border border-emerald-500/30 bg-emerald-500/5 p-6 md:p-8">
+          <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/10 via-teal-500/5 to-transparent mix-blend-overlay" />
+          <div className="relative z-10 flex items-center gap-6">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-400 ring-1 ring-emerald-500/40 shadow-[0_0_15px_rgba(16,185,129,0.2)]">
+              <Check className="h-6 w-6" />
             </div>
             <div>
               <div className="flex items-center gap-2 mb-1">
-                <h3 className="text-lg font-bold text-white">Pro Trial Active</h3>
-                <span className="inline-flex items-center rounded-full bg-indigo-500/20 px-2 py-0.5 text-xs font-medium text-indigo-300 ring-1 ring-inset ring-indigo-500/30">
-                  Full Access
+                <h3 className="text-lg font-bold text-white">Active Plan: {planName}</h3>
+                <span className="inline-flex items-center rounded-full bg-emerald-500/20 px-2 py-0.5 text-xs font-medium text-emerald-300 ring-1 ring-inset ring-emerald-500/30">
+                  Active
+                </span>
+              </div>
+              <p className="text-zinc-400">
+                {isLifetime ? 'You have lifetime access to all features.' : `Your plan renews on ${renewalDate}.`}
+              </p>
+            </div>
+          </div>
+        </div>
+      )
+    }
+
+    // 2. Trial State
+    if (!isTrial && !isTrialExpired) return null;
+
+    return (
+      <div className={cn(
+        "relative w-full mb-8 overflow-hidden rounded-xl border p-6 md:p-8",
+        isTrialExpired ? "border-red-500/30 bg-red-500/5" : "border-indigo-500/30 bg-indigo-500/5"
+      )}>
+        <div className={cn(
+          "absolute inset-0 bg-gradient-to-r to-transparent mix-blend-overlay",
+          isTrialExpired ? "from-red-500/10 via-orange-500/5" : "from-indigo-500/10 via-purple-500/5"
+        )} />
+
+        <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="flex items-center gap-4">
+            <div className={cn(
+              "flex h-12 w-12 items-center justify-center rounded-full ring-1 shadow-[0_0_15px_rgba(0,0,0,0.2)]",
+              isTrialExpired ? "bg-red-500/20 text-red-400 ring-red-500/40 shadow-red-500/20" : "bg-indigo-500/20 text-indigo-400 ring-indigo-500/40 shadow-indigo-500/20"
+            )}>
+              {isTrialExpired ? <Clock className="h-6 w-6 fill-current" /> : <Zap className="h-6 w-6 fill-current" />}
+            </div>
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <h3 className="text-lg font-bold text-white">
+                  {isTrialExpired ? 'Trial Expired' : 'Pro Trial Active'}
+                </h3>
+                <span className={cn(
+                  "inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset",
+                  isTrialExpired ? "bg-red-500/20 text-red-300 ring-red-500/30" : "bg-indigo-500/20 text-indigo-300 ring-indigo-500/30"
+                )}>
+                  {isTrialExpired ? 'Upgrade Required' : 'Full Access'}
                 </span>
               </div>
               <p className="text-sm text-zinc-400 max-w-[400px]">
-                You have unlimited access to all Pro features.
+                {isTrialExpired
+                  ? 'Your trial has ended. Please upgrade to continue accessing your analytics.'
+                  : 'You have unlimited access to all Pro features.'}
               </p>
             </div>
           </div>
 
           <div className="w-full md:w-auto min-w-[280px]">
             <div className="flex items-end justify-between mb-2">
-              <span className="text-xs font-medium text-indigo-300 uppercase tracking-wider">
+              <span className={cn("text-xs font-medium uppercase tracking-wider", isTrialExpired ? "text-red-300" : "text-indigo-300")}>
                 Time Remaining
               </span>
               <span className="text-xl font-bold text-white tabular-nums">
@@ -172,27 +237,13 @@ export function BillingPage() {
             </div>
             <div className="h-3 w-full bg-zinc-900/50 rounded-full overflow-hidden ring-1 ring-white/5 backdrop-blur-sm">
               <div
-                className="h-full bg-indigo-600 rounded-full transition-all duration-1000 ease-out shadow-[0_0_10px_rgba(99,102,241,0.5)]"
-                style={{ width: `${(trialDaysRemaining / 30) * 100}%` }}
+                className={cn(
+                  "h-full rounded-full transition-all duration-1000 ease-out",
+                  isTrialExpired ? "bg-red-600 shadow-[0_0_10px_rgba(239,68,68,0.5)]" : "bg-indigo-600 shadow-[0_0_10px_rgba(99,102,241,0.5)]"
+                )}
+                style={{ width: `${Math.max(0, Math.min(100, (trialDaysRemaining / 30) * 100))}%` }}
               />
             </div>
-          </div>
-        </div>
-      </div>
-    );
-  };
-
-  const ExpiredBanner = () => {
-    if (!isTrialExpired) return null;
-    return (
-      <div className="w-full bg-red-500/10 border border-red-500/20 rounded-lg p-6 mb-8 flex items-center justify-between gap-4">
-        <div className="flex items-center gap-4">
-          <div className="p-2 bg-red-500 rounded-full text-white">
-            <Clock className="h-5 w-5" />
-          </div>
-          <div>
-            <h3 className="text-lg font-bold text-white">Trial Ended</h3>
-            <p className="text-zinc-400 text-sm">Please upgrade to a plan that suits you.</p>
           </div>
         </div>
       </div>
@@ -243,8 +294,7 @@ export function BillingPage() {
           </div>
         )}
       </div>
-      <TrialProgressBar />
-      <ExpiredBanner />
+      <PlanStatusBanner />
       {/* Pricing Section */}
       <div id="pricing-plans" className="space-y-6">
         {/* 2-Column Grid */}
@@ -256,6 +306,14 @@ export function BillingPage() {
               isPaid && !isLifetime && 'border-indigo-500/50 ring-1 ring-indigo-500/20',
             )}
           >
+            {hasPaidAccess && checkPlan(subPlanType) && (
+              <div className="absolute top-6 right-6">
+                <span className="bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1.5">
+                  <Check className="h-3 w-3" />
+                  ACTIVE
+                </span>
+              </div>
+            )}
             <CardContent className="p-8 flex-1 flex flex-col">
               <div className="mb-8">
                 <h3 className="text-xl font-bold text-white mb-2">{currentSub.name}</h3>
@@ -288,7 +346,7 @@ export function BillingPage() {
                 {isLoading === subPlanType
                   ? 'Loading...'
                   : hasPaidAccess
-                    ? user?.subscriptionPlan === subPlanType
+                    ? checkPlan(subPlanType)
                       ? 'Current Plan'
                       : `Switch to ${isAnnual ? 'Yearly' : 'Monthly'}`
                     : 'Upgrade'}
@@ -314,7 +372,15 @@ export function BillingPage() {
             )}
           >
             {/* Badge */}
-            {!isLifetime && (
+            {/* Badge */}
+            {isLifetime ? (
+              <div className="absolute top-6 right-6">
+                <span className="bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1.5">
+                  <Check className="h-3 w-3" />
+                  ACTIVE
+                </span>
+              </div>
+            ) : (
               <div className="absolute top-6 right-6">
                 <span className="bg-yellow-500/10 text-yellow-500 border border-yellow-500/20 px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1.5">
                   <Crown className="h-3 w-3 fill-current" />
@@ -342,7 +408,7 @@ export function BillingPage() {
                 className={cn(
                   'w-full border-zinc-700 bg-transparent hover:bg-zinc-800 text-white font-medium h-12 mb-8',
                   isLifetime &&
-                    'bg-yellow-500/10 border-yellow-500 text-yellow-500 hover:bg-yellow-500/20 hover:text-yellow-500',
+                  'bg-yellow-500/10 border-yellow-500 text-yellow-500 hover:bg-yellow-500/20 hover:text-yellow-500',
                 )}
                 disabled={isLoading === 'lifetime' || isLifetime}
                 onClick={() => handleUpgrade('lifetime')}

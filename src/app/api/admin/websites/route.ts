@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { parseRequest } from '@/lib/request';
+import { cookies } from 'next/headers';
 import { json, unauthorized } from '@/lib/response';
 import { pagingParams, searchParams } from '@/lib/schema';
 import { canViewAllWebsites } from '@/permissions';
@@ -12,14 +13,23 @@ export async function GET(request: Request) {
     ...searchParams,
   });
 
-  const { auth, query, error } = await parseRequest(request, schema);
+  // Skip auth in parseRequest so we can check cookie manually
+  const { auth, query, error } = await parseRequest(request, schema, { skipAuth: true });
 
   if (error) {
     return error();
   }
 
-  if (!(await canViewAllWebsites(auth))) {
-    return unauthorized();
+  const adminSession = (await cookies()).get('conclick_admin_session');
+  const isAdminCookie = adminSession?.value === 'authenticated';
+
+  if (!isAdminCookie) {
+    if (!auth) {
+      return unauthorized();
+    }
+    if (!(await canViewAllWebsites(auth))) {
+      return unauthorized();
+    }
   }
 
   const websites = await getWebsites(

@@ -4,7 +4,7 @@ import { useLoginQuery } from '@/components/hooks';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Crown, Lock } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 
 export function TrialExpiredModal() {
   const { user } = useLoginQuery();
@@ -27,8 +27,13 @@ export function TrialExpiredModal() {
   // Trial logic
   const isTrialExpired = !hasPaidAccess && trialEndsAt && trialEndsAt < now;
 
+  const pathname = usePathname();
+
   // Ensure admins or specific roles aren't blocked if not intended, but requirement implies strict blocking
   if (!isTrialExpired) return null;
+
+  // Don't show modal if already on billing page
+  if (pathname === '/account/billing') return null;
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-md">
