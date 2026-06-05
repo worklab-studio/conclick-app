@@ -10,14 +10,22 @@ import { TeamsSettings } from './teams/TeamsSettings';
 
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 
+type Tab = 'profile' | 'preferences' | 'teams';
+const TABS: Tab[] = ['profile', 'preferences', 'teams'];
+
 export default function SettingsPage() {
     const searchParams = useSearchParams();
     const router = useRouter();
     const pathname = usePathname();
-    const defaultTab = (searchParams.get('tab') as 'profile' | 'preferences' | 'teams') || 'profile';
-    const [activeTab, setActiveTabState] = useState<'profile' | 'preferences' | 'teams'>(defaultTab);
+    // Validate against the whitelist instead of a raw `as` cast — previously
+    // any invalid value (e.g. ?tab=foo) was preserved as activeTab, and since
+    // none of the render branches use strict equality with an invalid value,
+    // the content area rendered blank.
+    const rawTab = searchParams.get('tab');
+    const defaultTab: Tab = TABS.includes(rawTab as Tab) ? (rawTab as Tab) : 'profile';
+    const [activeTab, setActiveTabState] = useState<Tab>(defaultTab);
 
-    const setActiveTab = (tab: 'profile' | 'preferences' | 'teams') => {
+    const setActiveTab = (tab: Tab) => {
         setActiveTabState(tab);
         const params = new URLSearchParams(searchParams);
         params.set('tab', tab);

@@ -4,10 +4,19 @@ import prisma from '@/lib/prisma';
 import { ROLES } from '@/lib/constants';
 import bcrypt from 'bcryptjs';
 
+// Reject `next` values that would cross the origin (e.g. "//attacker.com" or
+// "/\attacker.com"). Only allow a relative path that starts with a single "/".
+function sanitizeNext(value: string | null): string {
+    if (!value) return '/websites';
+    if (!value.startsWith('/')) return '/websites';
+    if (value.startsWith('//') || value.startsWith('/\\')) return '/websites';
+    return value;
+}
+
 export async function GET(request: Request) {
     const { searchParams, origin } = new URL(request.url);
     const code = searchParams.get('code');
-    const next = searchParams.get('next') ?? '/websites';
+    const next = sanitizeNext(searchParams.get('next'));
 
     if (code) {
         const supabase = await createClient();

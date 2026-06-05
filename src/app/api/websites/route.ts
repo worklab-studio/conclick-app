@@ -69,7 +69,15 @@ export async function POST(request: Request) {
     }
   }
 
-  if ((teamId && !(await canCreateTeamWebsite(auth, teamId))) || !(await canCreateWebsite(auth))) {
+  // Pick the right permission gate based on ownership: team websites use the
+  // team-role permission, personal websites use the global one. The previous
+  // OR meant team-managers without global websiteCreate were denied even
+  // when creating a team-owned website.
+  const allowed = teamId
+    ? await canCreateTeamWebsite(auth, teamId)
+    : await canCreateWebsite(auth);
+
+  if (!allowed) {
     return unauthorized();
   }
 

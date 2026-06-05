@@ -34,9 +34,12 @@ export async function getUnreadCount(userId: string) {
     });
 }
 
-export async function markAsRead(notificationId: string) {
-    return prisma.client.notification.update({
-        where: { id: notificationId },
+export async function markAsRead(notificationId: string, userId: string) {
+    // Scope by userId so callers can't mark someone else's notifications read
+    // by guessing their notification id. updateMany returns count instead of
+    // throwing on no-match.
+    return prisma.client.notification.updateMany({
+        where: { id: notificationId, userId },
         data: { read: true },
     });
 }

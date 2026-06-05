@@ -3,7 +3,7 @@ import { formatInTimeZone } from 'date-fns-tz';
 import debug from 'debug';
 import { CLICKHOUSE } from '@/lib/db';
 import { DEFAULT_PAGE_SIZE, FILTER_COLUMNS, OPERATORS } from './constants';
-import { filtersObjectToArray } from './params';
+import { filtersObjectToArray, sanitizeOrderBy } from './params';
 import { QueryFilters, QueryOptions } from './types';
 
 export const CLICKHOUSE_DATE_FORMATS = {
@@ -187,9 +187,11 @@ async function pagedRawQuery(
   const size = +pageSize || DEFAULT_PAGE_SIZE;
   const offset = +size * (+page - 1);
   const direction = sortDescending ? 'desc' : 'asc';
+  // orderBy is a SQL identifier interpolated into the query — allowlist it.
+  const safeOrderBy = sanitizeOrderBy(orderBy);
 
   const statements = [
-    orderBy && `order by ${orderBy} ${direction}`,
+    safeOrderBy && `order by ${safeOrderBy} ${direction}`,
     +size > 0 && `limit ${+size} offset ${+offset}`,
   ]
     .filter(n => n)

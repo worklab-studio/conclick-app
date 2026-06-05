@@ -5,6 +5,17 @@ import { QueryFilters } from '@/lib/types';
 
 const FUNCTION_NAME = 'getValues';
 
+// decodeURIComponent throws URIError on malformed percent-escapes (e.g. "%ZZ"
+// or a stray "%"). Wrap it so a malformed search string returns the raw input
+// instead of crashing the request with a 500.
+function safeDecode(value: string): string {
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return value;
+  }
+}
+
 export async function getValues(
   ...args: [websiteId: string, column: string, filters: QueryFilters]
 ) {
@@ -28,8 +39,9 @@ async function relationalQuery(websiteId: string, column: string, filters: Query
   }
 
   if (search) {
-    if (decodeURIComponent(search).includes(',')) {
-      searchQuery = `AND (${decodeURIComponent(search)
+    const decoded = safeDecode(search);
+    if (decoded.includes(',')) {
+      searchQuery = `AND (${decoded
         .split(',')
         .slice(0, 5)
         .map((value: string, index: number) => {
@@ -88,8 +100,9 @@ async function clickhouseQuery(websiteId: string, column: string, filters: Query
   }
 
   if (search) {
-    if (decodeURIComponent(search).includes(',')) {
-      searchQuery = `AND (${decodeURIComponent(search)
+    const decoded = safeDecode(search);
+    if (decoded.includes(',')) {
+      searchQuery = `AND (${decoded
         .split(',')
         .slice(0, 5)
         .map((value: string, index: number) => {

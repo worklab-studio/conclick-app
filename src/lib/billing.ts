@@ -12,9 +12,6 @@ import { addDays } from 'date-fns';
 export function isPaidOrTrialUser(user: User): boolean {
     if (!user) return false;
 
-    // Conclick Demo Bypass
-    if (user.username.toLowerCase() === 'conclick') return true;
-
     const now = new Date();
 
     // 1. Check Lifetime

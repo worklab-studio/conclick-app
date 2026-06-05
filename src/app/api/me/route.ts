@@ -8,5 +8,9 @@ export async function GET(request: Request) {
     return error();
   }
 
-  return json(auth);
+  // Return only the user — never the whole auth object. The latter contains the
+  // bearer `token`, the Redis `authKey`, and any `shareToken`, which are session
+  // credentials that must not be reflected back into a response body (logs,
+  // caches, proxies). auth.user already excludes the password hash.
+  return json(auth.user);
 }

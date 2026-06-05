@@ -11,8 +11,12 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        // Get user's subscription ID from database
-        const user = await prisma.user.findUnique({
+        // Get user's subscription ID from database.
+        // NOTE: the prisma default export is { client, transaction, ... } — model
+        // accessors live on `prisma.client`, not on `prisma` directly. The previous
+        // `prisma.user.findUnique` threw "Cannot read properties of undefined"
+        // and made every portal request return 500.
+        const user = await prisma.client.user.findUnique({
             where: { id: auth.user.id },
             select: { subscriptionId: true, customerId: true },
         });

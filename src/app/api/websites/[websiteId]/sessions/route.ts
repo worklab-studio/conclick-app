@@ -9,8 +9,12 @@ export async function GET(
   request: Request,
   { params }: { params: Promise<{ websiteId: string }> },
 ) {
+  // Override startAt/endAt to required — without dates, getRequestDateRange
+  // produces Invalid Date objects that crash Prisma at parameter serialization.
   const schema = z.object({
     ...dateRangeParams,
+    startAt: z.coerce.number(),
+    endAt: z.coerce.number(),
     ...filterParams,
     ...pagingParams,
     ...searchParams,

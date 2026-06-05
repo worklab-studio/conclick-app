@@ -35,7 +35,11 @@ export function ProfileSettings() {
   useEffect(() => {
     if (user) {
       setNewUsername(user.username);
-      setNewEmail(user.email || `${user.username.toLowerCase().replace(/\s+/g, '.')}@example.com`);
+      // Don't synthesize a fake email here — if user.email is null, leave the
+      // edit field blank with placeholder text. Previously the synthesized
+      // "username@example.com" was seeded into state and would be POSTed back
+      // unchanged on Save, permanently corrupting the user's email field.
+      setNewEmail(user.email ?? '');
     }
   }, [user]);
 
@@ -149,7 +153,7 @@ export function ProfileSettings() {
   };
 
   const handleEmailSave = async () => {
-    if (newEmail === user.email) {
+    if (newEmail === (user.email ?? '')) {
       setIsEditingEmail(false);
       return;
     }
@@ -163,6 +167,13 @@ export function ProfileSettings() {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(newEmail)) {
       toast.error('Invalid email address');
+      return;
+    }
+
+    // Hard-reject the placeholder example.com address that the previous version
+    // could leak into state from older builds.
+    if (/@example\.com$/i.test(newEmail)) {
+      toast.error('Please enter a real email address.');
       return;
     }
 
@@ -319,11 +330,8 @@ export function ProfileSettings() {
             <div className="space-y-2">
               <div className="flex gap-2 relative">
                 <Input
-                  value={
-                    isEditingEmail
-                      ? newEmail
-                      : user.email || `${username.toLowerCase().replace(/\s+/g, '.')}@example.com`
-                  }
+                  value={isEditingEmail ? newEmail : user.email ?? ''}
+                  placeholder={user.email ? '' : 'No email set'}
                   disabled={!isEditingEmail}
                   onChange={e => setNewEmail(e.target.value)}
                   className="dark:bg-[#18181b] dark:border-zinc-800"
@@ -333,9 +341,7 @@ export function ProfileSettings() {
                   <Button
                     variant="outline"
                     onClick={() => {
-                      setNewEmail(
-                        user.email || `${username.toLowerCase().replace(/\s+/g, '.')}@example.com`,
-                      );
+                      setNewEmail(user.email ?? '');
                       setIsEditingEmail(true);
                     }}
                   >

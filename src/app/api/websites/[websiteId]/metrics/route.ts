@@ -17,8 +17,11 @@ export async function GET(
 ) {
   const schema = z.object({
     type: z.string(),
-    limit: z.coerce.number().optional(),
-    offset: z.coerce.number().optional(),
+    // Cap limit/offset so a caller can't materialize huge result sets and
+    // OOM the API process. limit/offset are string-interpolated into raw SQL
+    // (parameterized as numbers, not injection — just DoS surface).
+    limit: z.coerce.number().int().positive().max(1000).optional(),
+    offset: z.coerce.number().int().nonnegative().optional(),
     ...dateRangeParams,
     ...searchParams,
     ...filterParams,

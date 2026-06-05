@@ -20,7 +20,11 @@ export const dateRangeParams = {
   endDate: z.coerce.date().optional(),
   timezone: timezoneParam.optional(),
   unit: unitParam.optional(),
-  compare: z.string().optional(),
+  // Restricted to the values getCompareDate actually understands.
+  // Previously z.string().optional() allowed unknown values through,
+  // and getCompareDate returned {} for unknown inputs, leaving start/end
+  // undefined — which silently dropped the date filter and ran all-time queries.
+  compare: z.enum(['yoy', 'prev']).optional(),
 };
 
 export const filterParams = {
@@ -49,7 +53,8 @@ export const searchParams = {
 
 export const pagingParams = {
   page: z.coerce.number().int().positive().optional(),
-  pageSize: z.coerce.number().int().positive().optional(),
+  // Cap pageSize so a caller can't force the server to materialize the whole table in one response.
+  pageSize: z.coerce.number().int().positive().max(200).optional(),
 };
 
 export const sortingParams = {

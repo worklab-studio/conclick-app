@@ -1,4 +1,4 @@
-import { canDeleteTeamUser, canUpdateTeam } from '@/permissions';
+import { canDeleteTeamUser, canUpdateTeam, canViewTeam } from '@/permissions';
 import { parseRequest } from '@/lib/request';
 import { badRequest, json, ok, unauthorized } from '@/lib/response';
 import { deleteTeamUser, getTeamUser, updateTeamUser } from '@/queries/prisma';
@@ -17,8 +17,11 @@ export async function GET(
 
   const { teamId, userId } = await params;
 
-  if (!(await canUpdateTeam(auth, teamId))) {
-    return unauthorized({ message: 'You must be the owner/manager of this team.' });
+  // Viewing a single member only needs view access (any team member), matching
+  // the list endpoint. Previously this required canUpdateTeam (owner/manager),
+  // so a regular member could list all members but got 401 fetching one.
+  if (!(await canViewTeam(auth, teamId))) {
+    return unauthorized({ message: 'You must be a member of this team.' });
   }
 
   const teamUser = await getTeamUser(teamId, userId);

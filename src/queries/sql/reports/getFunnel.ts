@@ -61,7 +61,11 @@ async function relationalQuery(
 
         if (cv.value.startsWith('*') || cv.value.endsWith('*')) {
           operator = 'like';
-          paramValue = cv.value.replace(/^\*|\*$/g, '%');
+          // Escape LIKE metacharacters (\ % _) in the user-supplied value FIRST
+          // so an interior % or _ is matched literally, THEN map the leading/
+          // trailing '*' wildcard to '%'. Previously interior %/_ stayed live,
+          // producing incorrect funnel cohorts (e.g. "/foo%bar" matched "/fooXbar").
+          paramValue = cv.value.replace(/[\\%_]/g, '\\$&').replace(/^\*|\*$/g, '%');
         }
 
         if (levelNumber === 1) {
@@ -168,7 +172,11 @@ async function clickhouseQuery(
 
         if (cv.value.startsWith('*') || cv.value.endsWith('*')) {
           operator = 'like';
-          paramValue = cv.value.replace(/^\*|\*$/g, '%');
+          // Escape LIKE metacharacters (\ % _) in the user-supplied value FIRST
+          // so an interior % or _ is matched literally, THEN map the leading/
+          // trailing '*' wildcard to '%'. Previously interior %/_ stayed live,
+          // producing incorrect funnel cohorts (e.g. "/foo%bar" matched "/fooXbar").
+          paramValue = cv.value.replace(/[\\%_]/g, '\\$&').replace(/^\*|\*$/g, '%');
         }
 
         if (levelNumber === 1) {
@@ -236,12 +244,17 @@ async function clickhouseQuery(
 }
 
 const formatResults = (steps: { type: string; value: string }[]) => (results: unknown) => {
+  // Empty results (e.g. zero matching events for the first step) used to crash
+  // on `results[0].count`; the dropoff/remaining ratios also produced NaN/Infinity
+  // when previous or the first-step count was zero. Guard all three divisions.
+  const firstCount = Number(results[0]?.count) || 0;
+
   return steps.map((step: { type: string; value: string }, i: number) => {
     const visitors = Number(results[i]?.count) || 0;
     const previous = Number(results[i - 1]?.count) || 0;
     const dropped = previous > 0 ? previous - visitors : 0;
-    const dropoff = 1 - visitors / previous;
-    const remaining = visitors / Number(results[0].count);
+    const dropoff = previous > 0 ? 1 - visitors / previous : 0;
+    const remaining = firstCount > 0 ? visitors / firstCount : 0;
 
     return {
       ...step,

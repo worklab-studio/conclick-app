@@ -25,7 +25,12 @@ export async function getEventDataEvents(
 async function relationalQuery(websiteId: string, filters: QueryFilters) {
   const { rawQuery, parseFilters } = prisma;
   const { event } = filters;
-  const { queryParams } = parseFilters({
+  // Apply filterQuery / cohortQuery / joinSessionQuery so this branch behaves
+  // the same as the ClickHouse branch. Previously the Postgres path silently
+  // dropped all caller-supplied filters (path/country/eventType/etc.) and any
+  // cohort definition, producing different results on the two backends for
+  // the same input.
+  const { filterQuery, cohortQuery, joinSessionQuery, queryParams } = parseFilters({
     ...filters,
     websiteId,
   });
@@ -42,9 +47,13 @@ async function relationalQuery(websiteId: string, filters: QueryFilters) {
       from event_data
       inner join website_event
         on website_event.event_id = event_data.website_event_id
+        and website_event.website_id = event_data.website_id
+      ${joinSessionQuery}
+      ${cohortQuery}
       where event_data.website_id = {{websiteId::uuid}}
         and event_data.created_at between {{startDate}} and {{endDate}}
         and website_event.event_name = {{event}}
+        ${filterQuery}
       group by website_event.event_name, event_data.data_key, event_data.data_type, event_data.string_value
       order by 1 asc, 2 asc, 3 asc, 5 desc
       `,
@@ -63,8 +72,13 @@ async function relationalQuery(websiteId: string, filters: QueryFilters) {
     from event_data
     inner join website_event
       on website_event.event_id = event_data.website_event_id
+      and website_event.website_id = event_data.website_id
+    ${joinSessionQuery}
+    ${cohortQuery}
     where event_data.website_id = {{websiteId::uuid}}
       and event_data.created_at between {{startDate}} and {{endDate}}
+      ${filterQuery}
+    group by website_event.event_name, event_data.data_key, event_data.data_type
     limit 500
     `,
     queryParams,

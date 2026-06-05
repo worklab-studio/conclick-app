@@ -29,8 +29,9 @@ export async function POST(request: Request) {
   const schema = z.object({
     name: z.string().max(100),
     slug: z.string().max(100),
-    teamId: z.string().nullable().optional(),
-    id: z.uuid().nullable().optional(),
+    teamId: z.uuid().nullable().optional(),
+    // `id` intentionally not accepted — server generates the primary key
+    // (see links/route.ts for rationale).
   });
 
   const { auth, body, error } = await parseRequest(request, schema);
@@ -39,14 +40,18 @@ export async function POST(request: Request) {
     return error();
   }
 
-  const { id, name, slug, teamId } = body;
+  const { name, slug, teamId } = body;
 
-  if ((teamId && !(await canCreateTeamWebsite(auth, teamId))) || !(await canCreateWebsite(auth))) {
+  const allowed = teamId
+    ? await canCreateTeamWebsite(auth, teamId)
+    : await canCreateWebsite(auth);
+
+  if (!allowed) {
     return unauthorized();
   }
 
   const data: any = {
-    id: id ?? uuid(),
+    id: uuid(),
     name,
     slug,
     teamId,

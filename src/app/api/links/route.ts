@@ -30,8 +30,11 @@ export async function POST(request: Request) {
     name: z.string().max(100),
     url: z.string().max(500),
     slug: z.string().max(100),
-    teamId: z.string().nullable().optional(),
-    id: z.uuid().nullable().optional(),
+    // teamId must be a real UUID, not an arbitrary string.
+    teamId: z.uuid().nullable().optional(),
+    // NOTE: `id` is intentionally NOT accepted — the server always generates it.
+    // Letting the caller pick the primary key allows existence-probing other
+    // tenants' links (collision error vs success) and squatting known UUIDs.
   });
 
   const { auth, body, error } = await parseRequest(request, schema);
@@ -40,14 +43,18 @@ export async function POST(request: Request) {
     return error();
   }
 
-  const { id, name, url, slug, teamId } = body;
+  const { name, url, slug, teamId } = body;
 
-  if ((teamId && !(await canCreateTeamWebsite(auth, teamId))) || !(await canCreateWebsite(auth))) {
+  const allowed = teamId
+    ? await canCreateTeamWebsite(auth, teamId)
+    : await canCreateWebsite(auth);
+
+  if (!allowed) {
     return unauthorized();
   }
 
   const data: any = {
-    id: id ?? uuid(),
+    id: uuid(),
     name,
     url,
     slug,

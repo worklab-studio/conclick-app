@@ -10,6 +10,10 @@ export async function canViewPixel({ user }: Auth, pixelId: string) {
 
   const pixel = await getPixel(pixelId);
 
+  if (!pixel) {
+    return false;
+  }
+
   if (pixel.userId) {
     return user.id === pixel.userId;
   }
@@ -30,6 +34,10 @@ export async function canUpdatePixel({ user }: Auth, pixelId: string) {
 
   const pixel = await getPixel(pixelId);
 
+  if (!pixel) {
+    return false;
+  }
+
   if (pixel.userId) {
     return user.id === pixel.userId;
   }
@@ -49,6 +57,10 @@ export async function canDeletePixel({ user }: Auth, pixelId: string) {
   }
 
   const pixel = await getPixel(pixelId);
+
+  if (!pixel) {
+    return false;
+  }
 
   if (pixel.userId) {
     return user.id === pixel.userId;

@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { canUpdateUser, canViewUser, canDeleteUser } from '@/permissions';
 import { getUser, getUserByUsername, updateUser, deleteUser } from '@/queries/prisma';
-import { json, unauthorized, badRequest, ok } from '@/lib/response';
+import { json, unauthorized, badRequest, notFound, ok } from '@/lib/response';
 import { hashPassword } from '@/lib/password';
 import { parseRequest } from '@/lib/request';
 import { userRoleParam } from '@/lib/schema';
@@ -21,6 +21,10 @@ export async function GET(request: Request, { params }: { params: Promise<{ user
 
   const user = await getUser(userId);
 
+  if (!user) {
+    return notFound();
+  }
+
   return json(user);
 }
 
@@ -29,7 +33,18 @@ export async function POST(request: Request, { params }: { params: Promise<{ use
     username: z.string().max(255).optional(),
     password: z.string().max(255).optional(),
     role: userRoleParam.optional(),
-    logoUrl: z.string().optional(),
+    // Constrain logoUrl: bound length and accept only relative `/profile-images/...`
+    // paths (matching what /api/upload returns) or http(s) URLs. Previously
+    // any string was accepted, including `javascript:` URIs (stored XSS) and
+    // arbitrary internal URLs (SSRF if rendered/fetched server-side).
+    logoUrl: z
+      .string()
+      .max(2083)
+      .refine(
+        v => v.startsWith('/profile-images/') || /^https?:\/\//i.test(v),
+        { message: 'logoUrl must be a /profile-images/ path or http(s) URL.' },
+      )
+      .optional(),
     email: z.string().email().max(255).optional(),
   });
 
@@ -48,6 +63,10 @@ export async function POST(request: Request, { params }: { params: Promise<{ use
   const { username, password, role, email } = body;
 
   const user = await getUser(userId);
+
+  if (!user) {
+    return notFound();
+  }
 
   const data: any = {};
 
@@ -73,11 +92,13 @@ export async function POST(request: Request, { params }: { params: Promise<{ use
     data.logoUrl = body.logoUrl;
   }
 
-  // Check when username changes
+  // Check when username changes — renamed inner var so it no longer shadows
+  // the outer `user` (the original shadow masked the type error that produced
+  // a 500 when getUser returned null).
   if (data.username && user.username !== data.username) {
-    const user = await getUserByUsername(username);
+    const existing = await getUserByUsername(username);
 
-    if (user) {
+    if (existing) {
       return badRequest({ message: 'User already exists' });
     }
   }

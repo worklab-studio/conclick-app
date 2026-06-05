@@ -1,10 +1,10 @@
 import { z } from 'zod';
 import { hashPassword } from '@/lib/password';
 import { canCreateUser } from '@/permissions';
-import { ROLES } from '@/lib/constants';
 import { uuid } from '@/lib/crypto';
 import { parseRequest } from '@/lib/request';
 import { unauthorized, json, badRequest } from '@/lib/response';
+import { userRoleParam } from '@/lib/schema';
 import { createUser, getUserByUsername } from '@/queries/prisma';
 
 export async function POST(request: Request) {
@@ -12,7 +12,10 @@ export async function POST(request: Request) {
     id: z.uuid().optional(),
     username: z.string().max(255),
     password: z.string(),
-    role: z.string().regex(/admin|user|view-only/i),
+    // Strict enum instead of an unanchored regex — the previous regex
+    // /admin|user|view-only/i matched any string containing those substrings,
+    // e.g. "super-administrator", allowing arbitrary role strings to be persisted.
+    role: userRoleParam,
   });
 
   const { auth, body, error } = await parseRequest(request, schema);
@@ -37,7 +40,7 @@ export async function POST(request: Request) {
     id: id || uuid(),
     username,
     password: hashPassword(password),
-    role: role ?? ROLES.user,
+    role,
   });
 
   return json(user);

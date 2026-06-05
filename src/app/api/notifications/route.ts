@@ -22,8 +22,11 @@ export async function POST(req: Request) {
 
     if (type === 'markAll') {
         await markAllAsRead(auth.user.id);
-    } else if (id) {
-        await markAsRead(id);
+    } else if (id && typeof id === 'string') {
+        // Pass the caller's userId so markAsRead can scope the update — otherwise
+        // any authenticated user could mark every other user's notifications read
+        // by enumerating ids.
+        await markAsRead(id, auth.user.id);
     }
 
     return NextResponse.json({ success: true });

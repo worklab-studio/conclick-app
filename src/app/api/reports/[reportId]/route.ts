@@ -1,7 +1,7 @@
 import { parseRequest } from '@/lib/request';
 import { json, notFound, ok, unauthorized } from '@/lib/response';
 import { reportSchema } from '@/lib/schema';
-import { canDeleteWebsite, canUpdateWebsite, canViewReport } from '@/permissions';
+import { canDeleteReport, canUpdateReport, canViewReport } from '@/permissions';
 import { deleteReport, getReport, updateReport } from '@/queries/prisma';
 
 export async function GET(request: Request, { params }: { params: Promise<{ reportId: string }> }) {
@@ -14,6 +14,10 @@ export async function GET(request: Request, { params }: { params: Promise<{ repo
   const { reportId } = await params;
 
   const report = await getReport(reportId);
+
+  if (!report) {
+    return notFound();
+  }
 
   if (!(await canViewReport(auth, report))) {
     return unauthorized();
@@ -33,7 +37,7 @@ export async function POST(
   }
 
   const { reportId } = await params;
-  const { websiteId, type, name, description, parameters } = body;
+  const { type, name, description, parameters } = body;
 
   const report = await getReport(reportId);
 
@@ -41,13 +45,14 @@ export async function POST(
     return notFound();
   }
 
-  if (!(await canUpdateWebsite(auth, websiteId))) {
+  // Authorize against the report itself, not the body-supplied websiteId.
+  // Otherwise a user with write access to ANY website could hijack any
+  // other user's report by POSTing the victim's reportId with their own websiteId.
+  if (!(await canUpdateReport(auth, report))) {
     return unauthorized();
   }
 
   const result = await updateReport(reportId, {
-    websiteId,
-    userId: auth.user.id,
     type,
     name,
     description,
@@ -70,7 +75,14 @@ export async function DELETE(
   const { reportId } = await params;
   const report = await getReport(reportId);
 
-  if (!(await canDeleteWebsite(auth, report.websiteId))) {
+  if (!report) {
+    return notFound();
+  }
+
+  // Use report-level ownership check, not website-level — a team manager
+  // who can delete a website should not be able to nuke saved reports
+  // authored by other members on that website.
+  if (!(await canDeleteReport(auth, report))) {
     return unauthorized();
   }
 

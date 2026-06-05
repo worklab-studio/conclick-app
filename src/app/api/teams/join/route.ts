@@ -33,7 +33,16 @@ export async function POST(request: Request) {
     return badRequest({ message: 'User is already a team member.' });
   }
 
-  const user = await createTeamUser(auth.user.id, team.id, ROLES.teamMember);
-
-  return json(user);
+  // Catch unique-constraint races: two concurrent joins can both pass the
+  // existence check above. If the DB has a (teamId,userId) unique, Prisma
+  // throws P2002 — convert to a friendly 400.
+  try {
+    const user = await createTeamUser(auth.user.id, team.id, ROLES.teamMember);
+    return json(user);
+  } catch (e: any) {
+    if (e?.code === 'P2002') {
+      return badRequest({ message: 'User is already a team member.' });
+    }
+    throw e;
+  }
 }

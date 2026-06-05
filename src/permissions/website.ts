@@ -12,6 +12,12 @@ export async function canViewWebsite({ user, shareToken }: Auth, websiteId: stri
     return true;
   }
 
+  // shareToken can be present for a different websiteId, in which case user
+  // is null. Guard before dereferencing user.id below.
+  if (!user) {
+    return false;
+  }
+
   const website = await getWebsite(websiteId);
   const link = await getLink(websiteId);
   const pixel = await getPixel(websiteId);

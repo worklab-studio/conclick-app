@@ -1,9 +1,8 @@
 import { canViewWebsite } from '@/permissions';
-import { EVENT_COLUMNS, FILTER_COLUMNS, SEGMENT_TYPES, SESSION_COLUMNS } from '@/lib/constants';
+import { EVENT_COLUMNS, FILTER_COLUMNS, SESSION_COLUMNS } from '@/lib/constants';
 import { getQueryFilters, parseRequest } from '@/lib/request';
 import { badRequest, json, unauthorized } from '@/lib/response';
 import { getValues } from '@/queries/sql';
-import { getWebsiteSegments } from '@/queries/prisma';
 import { z } from 'zod';
 import { dateRangeParams, fieldsParam, searchParams } from '@/lib/schema';
 
@@ -31,20 +30,16 @@ export async function GET(
 
   const { type } = query;
 
-  if (!SESSION_COLUMNS.includes(type) && !EVENT_COLUMNS.includes(type) && !SEGMENT_TYPES[type]) {
+  // type is constrained by fieldsParam (a zod enum), which does NOT include
+  // 'segment' or 'cohort' — so the SEGMENT_TYPES branch that used to live here
+  // was dead code that would also have crashed (getWebsiteSegments was called
+  // with no filters arg). Removed.
+  if (!SESSION_COLUMNS.includes(type) && !EVENT_COLUMNS.includes(type)) {
     return badRequest();
   }
 
-  let values: any[];
+  const filters = await getQueryFilters(query, websiteId);
+  const values = await getValues(websiteId, FILTER_COLUMNS[type], filters);
 
-  if (SEGMENT_TYPES[type]) {
-    values = (await getWebsiteSegments(websiteId, type))?.data?.map(segment => ({
-      value: segment.name,
-    }));
-  } else {
-    const filters = await getQueryFilters(query, websiteId);
-    values = await getValues(websiteId, FILTER_COLUMNS[type], filters);
-  }
-
-  return json(values.filter(n => n).sort());
+  return json((values ?? []).filter(n => n).sort());
 }

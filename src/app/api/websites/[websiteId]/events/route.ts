@@ -10,8 +10,11 @@ export async function GET(
   { params }: { params: Promise<{ websiteId: string }> },
 ) {
   const schema = z.object({
-    startAt: z.coerce.number().optional(),
-    endAt: z.coerce.number().optional(),
+    // Required: getQueryFilters → getRequestDateRange does `new Date(+startAt)`,
+    // which produces Invalid Date when undefined; Invalid Date is truthy so it
+    // flows into the SQL filter and Prisma throws at parameter serialization.
+    startAt: z.coerce.number(),
+    endAt: z.coerce.number(),
     ...filterParams,
     ...pagingParams,
     ...searchParams,

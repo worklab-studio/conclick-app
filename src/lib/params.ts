@@ -60,3 +60,18 @@ export function filtersArrayToObject(filters: Filter[]) {
     return obj;
   }, {});
 }
+
+/**
+ * Sanitize a caller-supplied `orderBy` column for safe interpolation into raw
+ * SQL. orderBy is a SQL identifier (not a value), so it cannot be passed as a
+ * bound parameter — instead we restrict it to an optionally table-qualified
+ * column name: letters/digits/underscore, with at most one dot.
+ * Anything that doesn't match returns undefined so the caller drops the
+ * `order by` clause entirely rather than interpolating arbitrary SQL.
+ */
+export function sanitizeOrderBy(orderBy: unknown): string | undefined {
+  if (typeof orderBy !== 'string') return undefined;
+  return /^[a-zA-Z_][a-zA-Z0-9_]*(\.[a-zA-Z_][a-zA-Z0-9_]*)?$/.test(orderBy)
+    ? orderBy
+    : undefined;
+}

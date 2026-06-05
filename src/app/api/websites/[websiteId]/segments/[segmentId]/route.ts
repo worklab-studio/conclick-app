@@ -19,7 +19,18 @@ export async function GET(
 
   const segment = await getSegment(segmentId);
 
-  if (websiteId && !(await canViewWebsite(auth, websiteId))) {
+  if (!segment) {
+    return notFound();
+  }
+
+  // Cross-tenant guard: the segment must actually belong to the websiteId
+  // in the URL. Otherwise a user with view permission on website A could read
+  // any segment from website B by putting their websiteId in the path.
+  if (segment.websiteId !== websiteId) {
+    return notFound();
+  }
+
+  if (!(await canViewWebsite(auth, websiteId))) {
     return unauthorized();
   }
 
@@ -51,6 +62,10 @@ export async function POST(
     return notFound();
   }
 
+  if (segment.websiteId !== websiteId) {
+    return notFound();
+  }
+
   if (!(await canUpdateWebsite(auth, websiteId))) {
     return unauthorized();
   }
@@ -79,6 +94,10 @@ export async function DELETE(
   const segment = await getSegment(segmentId);
 
   if (!segment) {
+    return notFound();
+  }
+
+  if (segment.websiteId !== websiteId) {
     return notFound();
   }
 

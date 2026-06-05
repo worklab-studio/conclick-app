@@ -83,10 +83,20 @@ export function LiveVisitorsPage({ websiteId }: { websiteId: string }) {
 
     if (isMusicPlaying) {
       audioRef.current.pause();
+      setIsMusicPlaying(false);
     } else {
-      audioRef.current.play();
+      // play() returns a Promise that rejects under autoplay policy or on
+      // load failure. Catch it so it doesn't surface as an unhandled rejection
+      // and so the UI doesn't show music-playing state when nothing is.
+      audioRef.current
+        .play()
+        .then(() => setIsMusicPlaying(true))
+        .catch(err => {
+          // eslint-disable-next-line no-console
+          console.error('Audio play failed:', err);
+          setIsMusicPlaying(false);
+        });
     }
-    setIsMusicPlaying(!isMusicPlaying);
   };
 
   const toggleFullscreen = () => {

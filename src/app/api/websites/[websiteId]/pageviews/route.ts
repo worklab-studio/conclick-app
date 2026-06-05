@@ -22,12 +22,16 @@ export async function GET(
     return error();
   }
 
-  // Access Control: Strict Gating
-  if (!isPaidOrTrialUser(auth.user)) {
+  const { websiteId } = await params;
+
+  // Share tokens authenticate the request without a user, and the website
+  // owner has already paid. Only gate on subscription when this is a user
+  // session that does NOT have a matching share token for this website.
+  const hasMatchingShareToken = auth.shareToken?.websiteId === websiteId;
+
+  if (!hasMatchingShareToken && !isPaidOrTrialUser(auth.user)) {
     return unauthorized({ message: 'Subscription required to view analytics.' });
   }
-
-  const { websiteId } = await params;
 
   if (!(await canViewWebsite(auth, websiteId))) {
     return unauthorized();

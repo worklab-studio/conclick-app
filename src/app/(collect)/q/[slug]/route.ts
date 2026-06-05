@@ -57,5 +57,19 @@ export async function GET(request: Request, { params }: { params: Promise<{ slug
 
   await POST(req);
 
-  return NextResponse.redirect(link.url);
+  // Only redirect to http(s) targets. link.url is validated as a free string
+  // on create, so without this guard a stored `javascript:`/`data:` URL would
+  // turn this public endpoint into a scheme-elevation / open-redirect vector.
+  let safeTarget: string;
+  try {
+    const parsed = new URL(link.url);
+    if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+      return notFound();
+    }
+    safeTarget = parsed.toString();
+  } catch {
+    return notFound();
+  }
+
+  return NextResponse.redirect(safeTarget);
 }

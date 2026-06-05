@@ -4,7 +4,10 @@ import { parseRequest } from '@/lib/request';
 import { json, serverError } from '@/lib/response';
 import { anyObjectParam } from '@/lib/schema';
 
-const schema = z.array(anyObjectParam);
+// Cap the array size so an unauthenticated caller can't tie up a Node worker
+// with a million-element batch (each element runs the full event pipeline,
+// hitting Postgres/ClickHouse). 50 is plenty for legitimate batched tracking.
+const schema = z.array(anyObjectParam).max(50);
 
 export async function POST(request: Request) {
   try {

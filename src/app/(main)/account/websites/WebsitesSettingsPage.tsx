@@ -4,7 +4,7 @@ import { useMessages } from '@/components/hooks';
 import { WebsitesDataTable } from '@/app/(main)/websites/WebsitesDataTable';
 import { SectionHeader } from '@/components/common/SectionHeader';
 
-export function WebsitesSettingsPage({ teamId }: { teamId: string }) {
+export function WebsitesSettingsPage({ teamId }: { teamId?: string }) {
   const { formatMessage, labels } = useMessages();
 
   return (

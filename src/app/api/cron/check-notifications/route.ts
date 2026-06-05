@@ -1,14 +1,27 @@
 import { NextResponse } from 'next/server';
+import { timingSafeEqual } from 'crypto';
 import prisma from '@/lib/prisma';
 import { createNotification } from '@/lib/notifications';
 
+function isAuthorized(provided: string | null): boolean {
+    const expected = process.env.CRON_SECRET;
+    if (!expected || !provided) return false;
+    const a = Buffer.from(provided);
+    const b = Buffer.from(expected);
+    if (a.length !== b.length) return false;
+    return timingSafeEqual(a, b);
+}
+
 export async function GET(req: Request) {
-    // 1. Security Check (Optional but recommended for Cron)
+    // The previous handler had the 401 return commented out AND a
+    // `process.env.NODE_ENV === 'production'` clause that left dev/staging
+    // completely open. This is a heavyweight enumerator (every user × every
+    // website × count queries) — unauthenticated callers can trivially DoS
+    // the DB pool and leak which users got notifications.
     const { searchParams } = new URL(req.url);
     const key = searchParams.get('key');
-    if (key !== process.env.CRON_SECRET && process.env.NODE_ENV === 'production') {
-        // In dev we might skip this or use a dev key
-        // return new NextResponse('Unauthorized', { status: 401 });
+    if (!isAuthorized(key)) {
+        return new NextResponse('Unauthorized', { status: 401 });
     }
 
     try {

@@ -4,7 +4,7 @@ import { readReplicas } from '@prisma/extension-read-replicas';
 import { PrismaClient } from '@/generated/prisma/client';
 import { SESSION_COLUMNS, OPERATORS, DEFAULT_PAGE_SIZE, FILTER_COLUMNS } from './constants';
 import { QueryOptions, QueryFilters, Operator } from './types';
-import { filtersObjectToArray } from './params';
+import { filtersObjectToArray, sanitizeOrderBy } from './params';
 
 const log = debug('umami:prisma');
 
@@ -242,9 +242,11 @@ async function pagedRawQuery(
   const size = +pageSize || DEFAULT_PAGE_SIZE;
   const offset = +size * (+page - 1);
   const direction = sortDescending ? 'desc' : 'asc';
+  // orderBy is a SQL identifier interpolated into the raw query — allowlist it.
+  const safeOrderBy = sanitizeOrderBy(orderBy);
 
   const statements = [
-    orderBy && `order by ${orderBy} ${direction}`,
+    safeOrderBy && `order by ${safeOrderBy} ${direction}`,
     +size > 0 && `limit ${+size} offset ${offset}`,
   ]
     .filter(n => n)

@@ -3,7 +3,7 @@ import client from '@/lib/prisma';
 import { getStripeClient } from '@/lib/stripe';
 import { parseRequest } from '@/lib/request';
 import { canViewWebsite } from '@/permissions';
-import { unauthorized, serverError, badRequest } from '@/lib/response';
+import { unauthorized, serverError } from '@/lib/response';
 
 export async function GET(
     request: NextRequest,
@@ -22,22 +22,14 @@ export async function GET(
     }
 
     try {
-        console.log('[Revenue API] Fetching website:', websiteId);
+        // Use a narrow select to avoid loading the user's password hash into memory.
         const website = await client.client.website.findUnique({
             where: { id: websiteId },
-            include: { user: true },
+            select: { id: true },
         });
 
-        console.log('[Revenue API] Found website:', website?.id, 'User:', website?.user?.username);
-
-        if (website && website?.user?.username === 'conclick') {
-            console.log('[Revenue API] Generating mock data for conclick');
-            const mockData = generateMockRevenue();
-            console.log('[Revenue API] Mock data total:', mockData.total);
-            return NextResponse.json({
-                chart: mockData.chart,
-                total: mockData.total
-            });
+        if (!website) {
+            return NextResponse.json({ chart: [], total: 0 });
         }
 
         const stripe = await getStripeClient(websiteId);
@@ -88,28 +80,9 @@ export async function GET(
         });
 
     } catch (e: any) {
-        console.error('Stripe API Error:', e);
-        return serverError(e);
+        // Don't forward the raw Stripe error to the client — it would spread
+        // headers/raw response body/requestId into the JSON response via serverError.
+        console.error('Stripe API Error:', e?.message ?? e);
+        return serverError({ message: 'Failed to fetch revenue.' });
     }
-}
-
-function generateMockRevenue() {
-    const data = [];
-    let total = 0;
-    const days = 90;
-    const end = new Date();
-
-    for (let i = days; i >= 0; i--) {
-        const d = new Date(end);
-        d.setDate(d.getDate() - i);
-        const dateStr = d.toISOString().split('T')[0];
-
-        // Random amount between 100 and 1000
-        const amount = Math.floor(Math.random() * 900) + 100;
-        total += amount;
-
-        data.push({ x: dateStr, y: amount });
-    }
-
-    return { chart: data, total };
 }

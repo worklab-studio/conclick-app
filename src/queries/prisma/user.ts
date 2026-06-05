@@ -17,7 +17,11 @@ async function findUser(criteria: Prisma.UserFindUniqueArgs, options: GetUserOpt
     ...criteria,
     where: {
       ...criteria.where,
-      ...(showDeleted && { deletedAt: null }),
+      // Exclude soft-deleted users UNLESS the caller explicitly asks to see
+      // them. Previously this was `showDeleted && ...`, which inverted the
+      // meaning — passing showDeleted:true (e.g. the registration collision
+      // check) silently filtered deleted users OUT, defeating the check.
+      ...(!showDeleted && { deletedAt: null }),
     },
     select: {
       id: true,
