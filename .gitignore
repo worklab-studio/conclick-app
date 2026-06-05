@@ -41,5 +41,8 @@ yarn-error.log*
 .env.*
 *.env.*
 
+# Claude Code local dev config (preview launch settings)
+.claude/
+
 *.dev.yml
 

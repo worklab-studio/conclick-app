@@ -1,32 +1,35 @@
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
+import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 
-export function middleware(request: NextRequest) {
-    const { pathname } = request.nextUrl;
+// Page routes that require a signed-in user. API routes are intentionally NOT
+// listed here — they self-authorize via parseRequest()/checkAuth(), and several
+// are public (tracker collect, config, heartbeat, share-token dashboards,
+// webhooks). clerkMiddleware still RUNS on /api (see matcher) so that `auth()`
+// resolves inside those handlers; it just doesn't force a redirect there.
+const isProtectedPage = createRouteMatcher([
+  '/dashboard(.*)',
+  '/websites(.*)',
+  '/account(.*)',
+  '/teams(.*)',
+  '/boards(.*)',
+  '/links(.*)',
+  '/pixels(.*)',
+  '/inbox(.*)',
+  '/console(.*)',
+  '/settings(.*)',
+  '/admin(.*)',
+]);
 
-    // Protect Admin Routes
-    if (pathname.startsWith('/admin') && pathname !== '/admin/login') {
-        const adminSession = request.cookies.get('conclick_admin_session');
-
-        if (!adminSession) {
-            const url = request.nextUrl.clone();
-            url.pathname = '/admin/login';
-            return NextResponse.redirect(url);
-        }
-    }
-
-    return NextResponse.next();
-}
+export default clerkMiddleware(async (auth, req) => {
+  if (isProtectedPage(req)) {
+    await auth.protect();
+  }
+});
 
 export const config = {
-    matcher: [
-        /*
-         * Match all request paths except for the ones starting with:
-         * - api (API routes)
-         * - _next/static (static files)
-         * - _next/image (image optimization files)
-         * - favicon.ico (favicon file)
-         */
-        '/((?!api|_next/static|_next/image|favicon.ico).*)',
-    ],
+  matcher: [
+    // Skip Next.js internals and static asset files; run on everything else.
+    '/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
+    // Always run on API routes so auth() is available inside route handlers.
+    '/(api|trpc)(.*)',
+  ],
 };

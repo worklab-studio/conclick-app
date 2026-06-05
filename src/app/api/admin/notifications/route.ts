@@ -1,45 +1,55 @@
 import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
+import { z } from 'zod';
+import { checkAdmin } from '@/lib/auth';
 import prisma from '@/lib/prisma';
 
-// POST /api/admin/notifications
+const schema = z.object({
+  title: z.string().min(1).max(200),
+  message: z.string().min(1).max(500),
+  type: z.enum(['alert', 'info', 'success', 'warning']).optional(),
+});
+
+// POST /api/admin/notifications — broadcast a notification to all active users.
 export async function POST(req: Request) {
-    // Check for hardcoded admin session
-    const adminSession = (await cookies()).get('conclick_admin_session');
+  if (!(await checkAdmin(req))) {
+    return new NextResponse('Unauthorized', { status: 401 });
+  }
 
-    if (!adminSession || adminSession.value !== 'authenticated') {
-        return new NextResponse('Unauthorized', { status: 401 });
+  let body: unknown;
+  try {
+    body = await req.json();
+  } catch {
+    return new NextResponse('Invalid JSON', { status: 400 });
+  }
+
+  const parsed = schema.safeParse(body);
+  if (!parsed.success) {
+    return NextResponse.json({ error: z.treeifyError(parsed.error) }, { status: 400 });
+  }
+
+  const { title, message, type } = parsed.data;
+
+  try {
+    const users = await prisma.client.user.findMany({
+      where: { deletedAt: null },
+      select: { id: true },
+    });
+
+    if (users.length > 0) {
+      await prisma.client.notification.createMany({
+        data: users.map(user => ({
+          userId: user.id,
+          title,
+          message,
+          type: type || 'info',
+          read: false,
+        })),
+      });
     }
 
-    const { title, message, type } = await req.json();
-
-    if (!title || !message) {
-        return new NextResponse('Missing title or message', { status: 400 });
-    }
-
-    try {
-        // Fetch all users (Optimization: In a real app, use a queue or background job)
-        const users = await prisma.client.user.findMany({
-            where: { deletedAt: null },
-            select: { id: true }
-        });
-
-        // Bulk Create Notifications
-        if (users.length > 0) {
-            await prisma.client.notification.createMany({
-                data: users.map(user => ({
-                    userId: user.id,
-                    title,
-                    message,
-                    type: type || 'info',
-                    read: false,
-                }))
-            });
-        }
-
-        return NextResponse.json({ success: true, count: users.length });
-    } catch (error) {
-        console.error('Error broadcasting notifications:', error);
-        return new NextResponse('Internal Server Error', { status: 500 });
-    }
+    return NextResponse.json({ success: true, count: users.length });
+  } catch (error: any) {
+    console.error('Error broadcasting notifications:', error?.message ?? error);
+    return new NextResponse('Internal Server Error', { status: 500 });
+  }
 }

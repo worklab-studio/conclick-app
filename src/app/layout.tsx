@@ -1,5 +1,7 @@
 import { Suspense } from 'react';
 import { Metadata } from 'next';
+import { ClerkProvider } from '@clerk/nextjs';
+import { dark } from '@clerk/themes';
 import { Providers } from './Providers';
 import '@fontsource/inter/300.css';
 import '@fontsource/inter/400.css';
@@ -34,6 +36,11 @@ export default function ({ children }) {
   }
 
   return (
+    <ClerkProvider
+      appearance={{ baseTheme: dark }}
+      signInUrl="/login"
+      signUpUrl="/register"
+    >
     <html lang="en" className="dark" style={{ colorScheme: 'dark' }} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
@@ -61,6 +68,7 @@ export default function ({ children }) {
         </Suspense>
       </body>
     </html>
+    </ClerkProvider>
   );
 }
 

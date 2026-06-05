@@ -1,11 +1,10 @@
 import debug from 'debug';
-import { ROLE_PERMISSIONS, ROLES, SHARE_TOKEN_HEADER } from '@/lib/constants';
+import { auth as clerkAuth } from '@clerk/nextjs/server';
+import { ROLE_PERMISSIONS, SHARE_TOKEN_HEADER } from '@/lib/constants';
 import { secret } from '@/lib/crypto';
-import { getRandomChars } from '@/lib/generate';
-import { createSecureToken, parseSecureToken, parseToken } from '@/lib/jwt';
+import { parseToken } from '@/lib/jwt';
 import { ensureArray } from '@/lib/utils';
-import redis from '@/lib/redis';
-import { getUser } from '@/queries/prisma/user';
+import { getOrCreateLocalUser } from '@/lib/clerk';
 
 const log = debug('umami:auth');
 
@@ -15,76 +14,55 @@ export function getBearerToken(request: Request) {
   return auth?.split(' ')[1];
 }
 
-import { createClient } from '@/lib/supabase/server';
-
+/**
+ * Resolve the caller's identity for an API request.
+ *
+ * Authentication is handled by Clerk (cookie/session, read via `auth()` which
+ * relies on clerkMiddleware having run). Share tokens remain a separate,
+ * header-based mechanism for public/embedded dashboards.
+ *
+ * Returns the same shape the rest of the app expects: `{ user, shareToken }`.
+ * Never logs credentials.
+ */
 export async function checkAuth(request: Request) {
-  const token = getBearerToken(request);
-  const payload = parseSecureToken(token, secret());
   const shareToken = await parseShareToken(request);
 
   let user = null;
-  const { userId, authKey } = payload || {};
 
-  if (userId) {
-    user = await getUser(userId);
-  } else if (redis.enabled && authKey) {
-    const key = await redis.client.get(authKey);
+  try {
+    const { userId: clerkUserId } = await clerkAuth();
 
-    if (key?.userId) {
-      user = await getUser(key.userId);
+    if (clerkUserId) {
+      user = await getOrCreateLocalUser(clerkUserId);
     }
+  } catch (e) {
+    // auth() throws if clerkMiddleware didn't run for this route (e.g. some
+    // public/collect endpoints). Treat as unauthenticated and fall through.
+    log('clerk auth() unavailable for this route');
   }
-
-  // Fallback: Check Supabase Auth (Cookie-based)
-  if (!user && !shareToken) {
-    try {
-      const supabase = await createClient();
-      const { data: { user: supabaseUser }, error } = await supabase.auth.getUser();
-
-      if (supabaseUser && !error) {
-        user = await getUser(supabaseUser.id);
-        log('User authenticated via Supabase Cookie');
-      }
-    } catch (e) {
-      // Ignore error, just means no supabase session
-    }
-  }
-
-  log({ token, payload, authKey, shareToken, user });
 
   if (!user?.id && !shareToken) {
-    log('User not authorized');
     return null;
   }
 
-  if (user) {
-    user.isAdmin = user.role === ROLES.admin;
-  }
-
   return {
-    token,
-    authKey,
     shareToken,
     user,
   };
 }
 
-export async function saveAuth(data: any, expire = 0) {
-  const authKey = `auth:${getRandomChars(32)}`;
-
-  if (redis.enabled) {
-    await redis.client.set(authKey, data);
-
-    if (expire) {
-      await redis.client.expire(authKey, expire);
-    }
-  }
-
-  return createSecureToken({ authKey }, secret());
-}
-
 export async function hasPermission(role: string, permission: string | string[]) {
   return ensureArray(permission).some(e => ROLE_PERMISSIONS[role]?.includes(e));
+}
+
+/**
+ * Gate for /api/admin/* routes. Replaces the old forgeable
+ * `conclick_admin_session` cookie: now requires a real Clerk-authenticated
+ * user whose local role is admin (granted via ADMIN_EMAILS on first sign-in).
+ */
+export async function checkAdmin(request: Request): Promise<boolean> {
+  const auth = await checkAuth(request);
+  return !!auth?.user?.isAdmin;
 }
 
 export function parseShareToken(request: Request) {

@@ -1,41 +1,40 @@
 import { NextResponse } from 'next/server';
-import { checkAuth } from '@/lib/auth';
+import { z } from 'zod';
+import { checkAdmin } from '@/lib/auth';
 import prisma from '@/lib/prisma';
-import { ROLES } from '@/lib/constants';
-
-// POST /api/admin/users/[userId]/lifetime
-import { cookies } from 'next/headers';
 
 // POST /api/admin/users/[userId]/lifetime
 export async function POST(req: Request, { params }: { params: Promise<{ userId: string }> }) {
-    // Check for hardcoded admin session
-    const adminSession = (await cookies()).get('conclick_admin_session');
+  if (!(await checkAdmin(req))) {
+    return new NextResponse('Unauthorized', { status: 401 });
+  }
 
-    // Also allow standard admin auth
-    const auth = await checkAuth(req);
-    const isStandardAdmin = auth && auth.user.role === ROLES.admin;
-    const isCookieAdmin = adminSession && adminSession.value === 'authenticated';
+  const { userId } = await params;
 
-    if (!isStandardAdmin && !isCookieAdmin) {
-        return new NextResponse('Unauthorized', { status: 401 });
+  if (!z.uuid().safeParse(userId).success) {
+    return new NextResponse('Bad Request', { status: 400 });
+  }
+
+  try {
+    // updateMany + deletedAt guard so a soft-deleted user can't be resurrected
+    // into lifetime status, and a bad id returns 404 instead of throwing.
+    const result = await prisma.client.user.updateMany({
+      where: { id: userId, deletedAt: null },
+      data: {
+        subscriptionStatus: 'active',
+        subscriptionPlan: 'lifetime',
+        trialEndsAt: null,
+        endsAt: null,
+      },
+    });
+
+    if (result.count === 0) {
+      return new NextResponse('Not Found', { status: 404 });
     }
 
-    const { userId } = await params;
-
-    try {
-        const updatedUser = await prisma.client.user.update({
-            where: { id: userId },
-            data: {
-                subscriptionStatus: 'active',
-                subscriptionPlan: 'lifetime',
-                trialEndsAt: null, // Remove trial
-                endsAt: null, // No expiration for lifetime
-            },
-        });
-
-        return NextResponse.json(updatedUser);
-    } catch (error) {
-        console.error('Error granting lifetime access:', error);
-        return new NextResponse('Internal Server Error', { status: 500 });
-    }
+    return NextResponse.json({ success: true });
+  } catch (error: any) {
+    console.error('Error granting lifetime access:', error?.message ?? error);
+    return new NextResponse('Internal Server Error', { status: 500 });
+  }
 }
