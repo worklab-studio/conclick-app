@@ -1,10 +1,73 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
+import { NextRequest, NextResponse } from 'next/server';
 
-// Page routes that require a signed-in user. API routes are intentionally NOT
-// listed here — they self-authorize via parseRequest()/checkAuth(), and several
-// are public (tracker collect, config, heartbeat, share-token dashboards,
-// webhooks). clerkMiddleware still RUNS on /api (see matcher) so that `auth()`
-// resolves inside those handlers; it just doesn't force a redirect there.
+// ---------------------------------------------------------------------------
+// Unified middleware: umami tracker/CORS rewrites + Clerk auth.
+//
+// This file is the single source of truth (the Docker build no longer swaps in
+// docker/middleware.ts). The umami helpers below are all opt-in via env vars
+// (tracker script renaming, custom collect endpoint, disable-login) and run
+// BEFORE Clerk so tracker traffic is never gated by auth. Clerk then protects
+// the app's page routes; API routes self-authorize via parseRequest/checkAuth.
+// ---------------------------------------------------------------------------
+
+const TRACKER_PATH = '/script.js';
+const COLLECT_PATH = '/api/send';
+const LOGIN_PATH = '/login';
+
+const apiHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': '*',
+  'Access-Control-Allow-Methods': 'GET, DELETE, POST, PUT',
+  'Access-Control-Max-Age': process.env.CORS_MAX_AGE || '86400',
+  'Cache-Control': 'no-cache',
+};
+
+const trackerHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Cache-Control': 'public, max-age=86400, must-revalidate',
+};
+
+function customCollectEndpoint(request: NextRequest) {
+  const collectEndpoint = process.env.COLLECT_API_ENDPOINT;
+  if (collectEndpoint) {
+    const url = request.nextUrl.clone();
+    if (url.pathname.endsWith(collectEndpoint)) {
+      url.pathname = COLLECT_PATH;
+      return NextResponse.rewrite(url, { headers: apiHeaders });
+    }
+  }
+}
+
+function customScriptName(request: NextRequest) {
+  const scriptName = process.env.TRACKER_SCRIPT_NAME;
+  if (scriptName) {
+    const url = request.nextUrl.clone();
+    const names = scriptName.split(',').map(name => name.trim().replace(/^\/+/, ''));
+    if (names.find(name => url.pathname.endsWith(name))) {
+      url.pathname = TRACKER_PATH;
+      return NextResponse.rewrite(url, { headers: trackerHeaders });
+    }
+  }
+}
+
+function customScriptUrl(request: NextRequest) {
+  const scriptUrl = process.env.TRACKER_SCRIPT_URL;
+  if (scriptUrl && request.nextUrl.pathname.endsWith(TRACKER_PATH)) {
+    return NextResponse.rewrite(scriptUrl, { headers: trackerHeaders });
+  }
+}
+
+function disableLogin(request: NextRequest) {
+  const loginDisabled = process.env.DISABLE_LOGIN;
+  if (loginDisabled && request.nextUrl.pathname.endsWith(LOGIN_PATH)) {
+    return new NextResponse('Access denied', { status: 403 });
+  }
+}
+
+const umamiRewrites = [customCollectEndpoint, customScriptName, customScriptUrl, disableLogin];
+
+// Page routes that require a signed-in user. API routes self-authorize.
 const isProtectedPage = createRouteMatcher([
   '/dashboard(.*)',
   '/websites(.*)',
@@ -20,6 +83,16 @@ const isProtectedPage = createRouteMatcher([
 ]);
 
 export default clerkMiddleware(async (auth, req) => {
+  // 1. umami tracker/CORS rewrites (opt-in via env). Return early if matched
+  //    so tracker traffic is never subjected to auth.
+  for (const fn of umamiRewrites) {
+    const res = fn(req as NextRequest);
+    if (res) {
+      return res;
+    }
+  }
+
+  // 2. Clerk: protect app page routes.
   if (isProtectedPage(req)) {
     await auth.protect();
   }
