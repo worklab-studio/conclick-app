@@ -14,14 +14,22 @@ const frameAncestors = process.env.ALLOWED_FRAME_URLS || '';
 const trackerScriptName = process.env.TRACKER_SCRIPT_NAME || '';
 const trackerScriptURL = process.env.TRACKER_SCRIPT_URL || '';
 
+// Clerk loads clerk-js + runs auth flows from its Frontend API domain
+// (clerk.fluxdesignlab.io in prod, *.clerk.accounts.dev in dev) and uses
+// Cloudflare Turnstile for bot protection. These must be allowed in the CSP
+// or the browser blocks clerk-js ("failed_to_load_clerk_js").
+const clerkDomains =
+  'https://clerk.fluxdesignlab.io https://*.clerk.accounts.dev https://*.clerk.com https://challenges.cloudflare.com';
+
 const contentSecurityPolicy = `
   default-src 'self';
   img-src 'self' https: data: blob:;
-  script-src 'self' 'unsafe-eval' 'unsafe-inline';
+  script-src 'self' 'unsafe-eval' 'unsafe-inline' ${clerkDomains};
   style-src 'self' 'unsafe-inline';
   connect-src 'self' https:;
   worker-src 'self' blob:;
   child-src 'self' blob:;
+  frame-src 'self' https://challenges.cloudflare.com https://clerk.fluxdesignlab.io https://*.clerk.accounts.dev;
   frame-ancestors 'self' ${frameAncestors};
 `;
 
