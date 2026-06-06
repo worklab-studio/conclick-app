@@ -7,12 +7,12 @@ primary_region = "bom"
   # public key (safe to commit). The secret key is a runtime Fly secret.
   [build.args]
     DATABASE_TYPE = "postgresql"
-    NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY = "pk_test_cHJlc2VudC13b2xmLTkuY2xlcmsuYWNjb3VudHMuZGV2JA"
+    NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY = "pk_live_Y2xlcmsuZmx1eGRlc2lnbmxhYi5pbyQ"
     NEXT_PUBLIC_CLERK_SIGN_IN_URL = "/login"
     NEXT_PUBLIC_CLERK_SIGN_UP_URL = "/register"
     NEXT_PUBLIC_CLERK_SIGN_IN_FALLBACK_REDIRECT_URL = "/dashboard"
     NEXT_PUBLIC_CLERK_SIGN_UP_FALLBACK_REDIRECT_URL = "/dashboard"
-    NEXT_PUBLIC_APP_URL = "https://conclick.fly.dev"
+    NEXT_PUBLIC_APP_URL = "https://app.fluxdesignlab.io"
 
 [env]
   DATABASE_TYPE = "postgresql"
