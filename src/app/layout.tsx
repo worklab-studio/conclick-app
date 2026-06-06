@@ -37,7 +37,37 @@ export default function ({ children }) {
 
   return (
     <ClerkProvider
-      appearance={{ baseTheme: dark }}
+      appearance={{
+        baseTheme: dark,
+        variables: {
+          colorPrimary: '#6366f1',
+          colorText: '#fafafa',
+          colorTextSecondary: '#a1a1aa',
+          colorBackground: '#111114',
+          colorInputBackground: '#1c1c22',
+          colorInputText: '#fafafa',
+          borderRadius: '0.75rem',
+          fontFamily: '"Inter", system-ui, sans-serif',
+        },
+        elements: {
+          card: 'shadow-2xl',
+          headerSubtitle: 'text-zinc-400',
+        },
+      }}
+      localization={{
+        signIn: {
+          start: {
+            title: 'Sign in to Conclick',
+            subtitle: 'Welcome back — sign in to continue',
+          },
+        },
+        signUp: {
+          start: {
+            title: 'Create your Conclick account',
+            subtitle: 'Start tracking your sites in minutes',
+          },
+        },
+      }}
       signInUrl="/login"
       signUpUrl="/register"
     >
