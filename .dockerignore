@@ -7,3 +7,8 @@ node_modules
 .idea
 .env
 .env.*
+.next
+.claude
+cypress
+*.log
+geo

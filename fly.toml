@@ -1,0 +1,39 @@
+app = "conclick"
+primary_region = "bom"
+
+[build]
+  # Public, build-time values. NEXT_PUBLIC_* must be present during `next build`
+  # so they're inlined into the client bundle. The Clerk publishable key is a
+  # public key (safe to commit). The secret key is a runtime Fly secret.
+  [build.args]
+    DATABASE_TYPE = "postgresql"
+    NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY = "pk_test_cHJlc2VudC13b2xmLTkuY2xlcmsuYWNjb3VudHMuZGV2JA"
+    NEXT_PUBLIC_CLERK_SIGN_IN_URL = "/login"
+    NEXT_PUBLIC_CLERK_SIGN_UP_URL = "/register"
+    NEXT_PUBLIC_CLERK_SIGN_IN_FALLBACK_REDIRECT_URL = "/dashboard"
+    NEXT_PUBLIC_CLERK_SIGN_UP_FALLBACK_REDIRECT_URL = "/dashboard"
+    NEXT_PUBLIC_APP_URL = "https://conclick.fly.dev"
+
+[env]
+  DATABASE_TYPE = "postgresql"
+  PORT = "3000"
+  HOSTNAME = "0.0.0.0"
+
+[http_service]
+  internal_port = 3000
+  force_https = true
+  # Scale to zero when idle (beta cost saver); Fly's proxy wakes it on the next
+  # request (~1-2s cold start). Bump min_machines_running to 1 for always-on.
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 0
+  processes = ["app"]
+
+  [http_service.concurrency]
+    type = "requests"
+    soft_limit = 200
+    hard_limit = 250
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "512mb"
