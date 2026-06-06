@@ -19,7 +19,7 @@ const trackerScriptURL = process.env.TRACKER_SCRIPT_URL || '';
 // Cloudflare Turnstile for bot protection. These must be allowed in the CSP
 // or the browser blocks clerk-js ("failed_to_load_clerk_js").
 const clerkDomains =
-  'https://clerk.fluxdesignlab.io https://*.clerk.accounts.dev https://*.clerk.com https://challenges.cloudflare.com';
+  'https://clerk.conclick.io https://clerk.fluxdesignlab.io https://*.clerk.accounts.dev https://*.clerk.com https://challenges.cloudflare.com';
 
 const contentSecurityPolicy = `
   default-src 'self';
