@@ -10,8 +10,8 @@ primary_region = "bom"
     NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY = "pk_live_Y2xlcmsuY29uY2xpY2suaW8k"
     NEXT_PUBLIC_CLERK_SIGN_IN_URL = "/login"
     NEXT_PUBLIC_CLERK_SIGN_UP_URL = "/register"
-    NEXT_PUBLIC_CLERK_SIGN_IN_FALLBACK_REDIRECT_URL = "/dashboard"
-    NEXT_PUBLIC_CLERK_SIGN_UP_FALLBACK_REDIRECT_URL = "/dashboard"
+    NEXT_PUBLIC_CLERK_SIGN_IN_FALLBACK_REDIRECT_URL = "/websites"
+    NEXT_PUBLIC_CLERK_SIGN_UP_FALLBACK_REDIRECT_URL = "/websites"
     NEXT_PUBLIC_APP_URL = "https://app.conclick.io"
 
 [env]
@@ -23,10 +23,11 @@ primary_region = "bom"
   internal_port = 3000
   force_https = true
   # Scale to zero when idle (beta cost saver); Fly's proxy wakes it on the next
-  # request (~1-2s cold start). Bump min_machines_running to 1 for always-on.
-  auto_stop_machines = "stop"
+  # Keep one machine always running — auto-stop was flapping ("machine can't
+  # start") and 503-ing requests, which broke the post-login flow.
+  auto_stop_machines = "off"
   auto_start_machines = true
-  min_machines_running = 0
+  min_machines_running = 1
   processes = ["app"]
 
   [http_service.concurrency]
