@@ -12,6 +12,10 @@ import { addDays } from 'date-fns';
 export function isPaidOrTrialUser(user: User): boolean {
     if (!user) return false;
 
+    // Admins are never subject to the subscription paywall — they always have
+    // full access regardless of plan/trial state.
+    if (user.role === 'admin') return true;
+
     const now = new Date();
 
     // 1. Check Lifetime
