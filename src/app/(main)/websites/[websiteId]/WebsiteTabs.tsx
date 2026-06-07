@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { LayoutDashboard, Users, Route, Filter, Target, DollarSign } from 'lucide-react';
+import { LayoutDashboard, Users, CreditCard, Filter, Target, DollarSign } from 'lucide-react';
 import { useNavigation } from '@/components/hooks';
 import { cn } from '@/lib/utils';
 
@@ -18,7 +18,7 @@ type Tab = {
 const TABS: Tab[] = [
   { label: 'Overview', suffix: '', icon: LayoutDashboard, exact: true },
   { label: 'Users', suffix: '/sessions', icon: Users },
-  { label: 'Journeys', suffix: '/journeys', icon: Route },
+  { label: 'Customers', suffix: '/payment-journey', icon: CreditCard },
   { label: 'Funnels', suffix: '/funnels', icon: Filter },
   { label: 'Goals', suffix: '/goals', icon: Target },
   { label: 'Revenue', suffix: '/revenue', icon: DollarSign },

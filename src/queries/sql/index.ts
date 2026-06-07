@@ -26,6 +26,7 @@ export * from './sessions/getSessionDataValues';
 export * from './sessions/getSessionMetrics';
 export * from './sessions/getSessionExpandedMetrics';
 export * from './sessions/getWebsiteSessions';
+export * from './sessions/getPaymentCustomers';
 export * from './sessions/getWebsiteSessionStats';
 export * from './sessions/getSessionActivity';
 export * from './sessions/getSessionStats';
