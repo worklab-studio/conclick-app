@@ -1,10 +1,10 @@
 {
   "name": "conclick-mcp",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "MCP server for Conclick analytics — let Cursor, Claude Code, Codex and other agents query visitors, inspect revenue, manage websites and connect payment providers from a prompt.",
   "type": "module",
   "bin": {
-    "conclick-mcp": "./index.js"
+    "conclick-mcp": "index.js"
   },
   "main": "./index.js",
   "files": [

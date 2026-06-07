@@ -209,6 +209,41 @@ server.tool(
   },
 );
 
+server.tool(
+  'get_realtime',
+  'Current active visitors on a website right now (the live count, last few minutes).',
+  { websiteId: z.string() },
+  async ({ websiteId }) => {
+    try {
+      return ok(await api(`/websites/${websiteId}/active`));
+    } catch (e) {
+      return fail(e);
+    }
+  },
+);
+
+server.tool(
+  'get_pageviews',
+  'Time-bucketed pageviews + visitors series for a website over the last N days (for trends and charts).',
+  {
+    websiteId: z.string(),
+    days: z
+      .number()
+      .int()
+      .positive()
+      .max(365)
+      .optional()
+      .describe('Lookback window in days (default 7).'),
+  },
+  async ({ websiteId, days }) => {
+    try {
+      return ok(await api(`/websites/${websiteId}/pageviews`, { query: range(days || 7) }));
+    } catch (e) {
+      return fail(e);
+    }
+  },
+);
+
 const transport = new StdioServerTransport();
 await server.connect(transport);
 console.error('Conclick MCP server running (stdio).');

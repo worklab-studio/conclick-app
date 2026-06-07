@@ -24,6 +24,16 @@ const MCP_CONFIG = `{
   }
 }`;
 
+const CLAUDE_CMD =
+  'claude mcp add conclick --env CONCLICK_API_KEY=ck_live_… -- npx -y conclick-mcp';
+
+const EXAMPLE_PROMPTS = [
+  'List my sites and which got the most visitors this week',
+  "Show conclick.io's top pages and referrers (last 30 days)",
+  'How many people are on conclick.io right now?',
+  'Connect my Dodo test key to conclick.io and show revenue',
+];
+
 export function ApiKeysSettings() {
   const { get, post, del, useQuery } = useApi();
   const { toast } = useToast();
@@ -171,13 +181,22 @@ export function ApiKeysSettings() {
         )}
       </div>
 
-      <div className="space-y-2 rounded-lg border border-[hsl(0,0%,12%)] bg-[hsl(0,0%,7%)] p-4">
-        <div className="text-sm font-semibold text-foreground">Connect your AI editor</div>
-        <p className="text-xs text-muted-foreground">
-          Add this to Cursor, Claude Code, or Codex (MCP servers), using a key from above:
-        </p>
+      <div className="space-y-3 rounded-lg border border-[hsl(0,0%,12%)] bg-[hsl(0,0%,7%)] p-4">
+        <div className="flex items-center justify-between gap-2">
+          <div className="text-sm font-semibold text-foreground">Connect your AI editor</div>
+          <a
+            href="https://www.npmjs.com/package/conclick-mcp"
+            target="_blank"
+            rel="noreferrer"
+            className="shrink-0 text-xs font-medium text-indigo-300 hover:text-indigo-200"
+          >
+            Full docs ↗
+          </a>
+        </div>
+
+        <p className="text-xs text-muted-foreground">Cursor / Codex / any MCP client:</p>
         <div className="relative">
-          <pre className="overflow-x-auto rounded-md border border-zinc-800 bg-[#0f0f12] p-3 text-xs leading-relaxed text-zinc-300">
+          <pre className="overflow-x-auto rounded-md border border-zinc-800 bg-[#0f0f12] p-3 pr-10 text-xs leading-relaxed text-zinc-300">
             <code>{MCP_CONFIG}</code>
           </pre>
           <Button
@@ -188,6 +207,33 @@ export function ApiKeysSettings() {
           >
             <Copy className="h-3.5 w-3.5" />
           </Button>
+        </div>
+
+        <p className="text-xs text-muted-foreground">Claude Code — one command:</p>
+        <div className="relative">
+          <pre className="overflow-x-auto rounded-md border border-zinc-800 bg-[#0f0f12] p-3 pr-10 text-xs text-zinc-300">
+            <code>{CLAUDE_CMD}</code>
+          </pre>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => copy(CLAUDE_CMD)}
+            className="absolute right-2 top-2 h-7 w-7 border-zinc-700"
+          >
+            <Copy className="h-3.5 w-3.5" />
+          </Button>
+        </div>
+
+        <div className="pt-1">
+          <div className="text-xs font-medium text-muted-foreground">Then just ask:</div>
+          <ul className="mt-1.5 space-y-1">
+            {EXAMPLE_PROMPTS.map(p => (
+              <li key={p} className="flex items-start gap-2 text-xs text-zinc-300">
+                <span className="mt-px text-indigo-400">›</span>
+                <span>&ldquo;{p}&rdquo;</span>
+              </li>
+            ))}
+          </ul>
         </div>
       </div>
     </div>
