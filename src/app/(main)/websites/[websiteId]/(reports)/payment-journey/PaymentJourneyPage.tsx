@@ -1,14 +1,10 @@
 'use client';
 
-import { useWebsitePaymentCustomersQuery } from '@/components/hooks';
-import { DataGrid } from '@/components/common/DataGrid';
 import { WebsiteControls } from '@/app/(main)/websites/[websiteId]/WebsiteControls';
 import { SessionModal } from '@/app/(main)/websites/[websiteId]/sessions/SessionModal';
-import { PaymentCustomersTable } from './PaymentCustomersTable';
+import { CustomersDataTable } from './CustomersDataTable';
 
 export function PaymentJourneyPage({ websiteId }: { websiteId: string }) {
-  const queryResult = useWebsitePaymentCustomersQuery(websiteId);
-
   return (
     <div className="mx-auto w-full space-y-4 px-3 py-6 md:px-6" style={{ maxWidth: '1320px' }}>
       <WebsiteControls websiteId={websiteId} />
@@ -19,9 +15,7 @@ export function PaymentJourneyPage({ websiteId }: { websiteId: string }) {
           Based on attributed payments (visitors identified at checkout).
         </p>
       </div>
-      <DataGrid query={queryResult} allowPaging allowSearch={false}>
-        {({ data }) => <PaymentCustomersTable data={data} />}
-      </DataGrid>
+      <CustomersDataTable websiteId={websiteId} />
       <SessionModal websiteId={websiteId} />
     </div>
   );

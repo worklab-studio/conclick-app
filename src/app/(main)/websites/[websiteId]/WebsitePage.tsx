@@ -4,6 +4,7 @@ import { WebsiteHeader } from './WebsiteHeader';
 import { WebsiteMetricsBar } from './WebsiteMetricsBar';
 import { WebsiteChart } from './WebsiteChart';
 import { WebsitePanels } from './WebsitePanels';
+import { DashboardSectionsPanel } from './DashboardSectionsPanel';
 import { DashboardSetupBanner } from './DashboardSetupBanner';
 import { useWebsiteQuery, useLoginQuery } from '@/components/hooks';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -151,6 +152,7 @@ export function WebsitePage({ websiteId }: { websiteId: string }) {
           onChartTypeChange={setChartType}
         />
         <WebsitePanels websiteId={websiteId} />
+        <DashboardSectionsPanel websiteId={websiteId} />
       </div>
     </div>
   );
