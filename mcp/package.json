@@ -1,0 +1,31 @@
+{
+  "name": "@conclick/mcp",
+  "version": "0.1.0",
+  "description": "MCP server for Conclick analytics — let Cursor, Claude Code, Codex and other agents query visitors, inspect revenue, manage websites and connect payment providers from a prompt.",
+  "type": "module",
+  "bin": {
+    "conclick-mcp": "./index.js"
+  },
+  "main": "./index.js",
+  "files": [
+    "index.js",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "conclick",
+    "analytics",
+    "cursor",
+    "claude-code",
+    "codex"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "zod": "^3.23.8"
+  }
+}
