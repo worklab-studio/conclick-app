@@ -1,8 +1,8 @@
 import Link from 'next/link';
-import { Globe, ArrowLeft } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { useMessages, useNavigation, useWebsite } from '@/components/hooks';
-import { Card, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { SiteIcon } from '@/app/(main)/websites/SiteIcon';
 
 export function WebsiteSettingsHeader() {
   const website = useWebsite();
@@ -17,8 +17,8 @@ export function WebsiteSettingsHeader() {
           {formatMessage(labels.website)}
         </Button>
       </Link>
-      <div className="flex items-center gap-2 mb-6">
-        <Globe className="h-5 w-5 text-muted-foreground" />
+      <div className="flex items-center gap-3 mb-6">
+        <SiteIcon domain={website?.domain} name={website?.name} size={36} className="rounded-lg" />
         <div>
           <h1 className="text-xl font-semibold">{website?.name}</h1>
           <p className="text-sm text-muted-foreground">{website?.domain}</p>

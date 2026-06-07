@@ -7,7 +7,7 @@ export function WebsiteSettingsPage({ websiteId }: { websiteId: string }) {
   return (
     <WebsiteProvider websiteId={websiteId}>
       <div className="mx-auto w-full px-3 md:px-6" style={{ maxWidth: '1320px' }}>
-        <div className="py-6 space-y-6">
+        <div className="mx-auto max-w-3xl py-6 space-y-6">
           <WebsiteSettingsHeader />
           <WebsiteSettings websiteId={websiteId} />
         </div>

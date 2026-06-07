@@ -124,7 +124,8 @@ export function WebsiteShareForm({ websiteId, shareId, onSave, onClose }: Websit
           <Button
             type="button"
             onClick={copyToClipboard}
-            className="w-full border-0 bg-[#5e5ba4] font-medium text-white hover:opacity-90"
+            style={{ backgroundColor: '#5e5ba4', color: '#fff' }}
+            className="w-full border-0 font-medium hover:opacity-90"
           >
             {copied ? <Check className="mr-2 h-4 w-4" /> : <Copy className="mr-2 h-4 w-4" />}
             {copied ? 'Copied!' : 'Copy link'}
