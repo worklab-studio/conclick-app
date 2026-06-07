@@ -44,6 +44,9 @@ async function relationalQuery(websiteId: string, filters: QueryFilters) {
       session.country,
       session.region,
       session.city,
+      session.distinct_id as "distinctId",
+      coalesce(max(rev.spent_minor), 0)::float8 as "spentMinor",
+      max(rev.spent_currency) as "spentCurrency",
       min(website_event.created_at) as "firstAt",
       max(website_event.created_at) as "lastAt",
       count(distinct website_event.visit_id) as "visits",
@@ -53,6 +56,16 @@ async function relationalQuery(websiteId: string, filters: QueryFilters) {
     ${cohortQuery}
     join session on session.session_id = website_event.session_id
       and session.website_id = website_event.website_id
+    left join (
+      select session_id,
+             sum(amount_minor) as spent_minor,
+             max(currency) as spent_currency
+      from revenue_event
+      where website_id = {{websiteId::uuid}}
+        and type = 'payment'
+        and session_id is not null
+      group by session_id
+    ) rev on rev.session_id = session.session_id
     where website_event.website_id = {{websiteId::uuid}}
     ${dateQuery}
     ${filterQuery}
@@ -67,7 +80,8 @@ async function relationalQuery(websiteId: string, filters: QueryFilters) {
       session.language, 
       session.country, 
       session.region, 
-      session.city
+      session.city,
+      session.distinct_id
     order by max(website_event.created_at) desc
     `,
     queryParams,
