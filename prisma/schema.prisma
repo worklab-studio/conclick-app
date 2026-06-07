@@ -132,6 +132,7 @@ model Website {
   revenue     Revenue[]
   segments    Segment[]
   sessionData SessionData[]
+  paymentIntegrations PaymentIntegration[]
 
   @@index([userId])
   @@index([teamId])
@@ -139,6 +140,22 @@ model Website {
   @@index([shareId])
   @@index([createdBy])
   @@map("website")
+}
+
+model PaymentIntegration {
+  id          String   @id @default(uuid()) @map("integration_id") @db.Uuid
+  websiteId   String   @map("website_id") @db.Uuid
+  provider    String   @db.VarChar(50)
+  credentials String   @db.Text
+  status      String   @default("active") @db.VarChar(20)
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  website Website @relation(fields: [websiteId], references: [id])
+
+  @@unique([websiteId, provider])
+  @@index([websiteId])
+  @@map("payment_integration")
 }
 
 model WebsiteEvent {

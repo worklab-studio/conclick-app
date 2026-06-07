@@ -24,6 +24,30 @@ function decorate(user: any): LocalUser {
   return { ...user, isAdmin: user.role === ROLES.admin };
 }
 
+// Short-lived in-memory cache of the Clerk-id → local-user lookup. A single
+// page load fires many authenticated API calls, each of which resolves the
+// user; without this they'd each hit the DB. A 30s TTL keeps role/subscription
+// changes reasonably fresh while collapsing a per-page burst into one query.
+const USER_CACHE_TTL = 30_000;
+const userCache = new Map<string, { user: LocalUser; expires: number }>();
+
+function getCachedUser(clerkUserId: string): LocalUser | null {
+  const hit = userCache.get(clerkUserId);
+  if (hit && hit.expires > Date.now()) return hit.user;
+  if (hit) userCache.delete(clerkUserId);
+  return null;
+}
+
+function setCachedUser(clerkUserId: string, user: LocalUser): LocalUser {
+  userCache.set(clerkUserId, { user, expires: Date.now() + USER_CACHE_TTL });
+  return user;
+}
+
+/** Invalidate the cached user (call after role/subscription changes). */
+export function clearCachedUser(clerkUserId: string) {
+  userCache.delete(clerkUserId);
+}
+
 async function uniqueUsername(base: string): Promise<string> {
   let candidate = (base || 'user').toLowerCase().replace(/[^a-z0-9._-]/g, '') || 'user';
   const root = candidate;
@@ -47,11 +71,15 @@ async function uniqueUsername(base: string): Promise<string> {
  * Admin role is granted when the verified email is listed in ADMIN_EMAILS.
  */
 export async function getOrCreateLocalUser(clerkUserId: string): Promise<LocalUser | null> {
+  // 0. Per-burst cache — avoids re-querying the user on every API call.
+  const cached = getCachedUser(clerkUserId);
+  if (cached) return cached;
+
   // 1. Fast path — already linked.
   const linked = await prisma.client.user.findUnique({ where: { clerkId: clerkUserId } });
   if (linked) {
     if (linked.deletedAt) return null;
-    return decorate(linked);
+    return setCachedUser(clerkUserId, decorate(linked));
   }
 
   // Need the Clerk profile to link or create.
@@ -80,7 +108,7 @@ export async function getOrCreateLocalUser(clerkUserId: string): Promise<LocalUs
           ...(isAdminEmail ? { role: ROLES.admin } : {}),
         },
       });
-      return decorate(updated);
+      return setCachedUser(clerkUserId, decorate(updated));
     }
   }
 
@@ -100,12 +128,12 @@ export async function getOrCreateLocalUser(clerkUserId: string): Promise<LocalUs
         displayName,
       },
     });
-    return decorate(created);
+    return setCachedUser(clerkUserId, decorate(created));
   } catch (e: any) {
     // Lost a race to create the same clerkId — re-read and return the winner.
     if (e?.code === 'P2002') {
       const raced = await prisma.client.user.findUnique({ where: { clerkId: clerkUserId } });
-      if (raced && !raced.deletedAt) return decorate(raced);
+      if (raced && !raced.deletedAt) return setCachedUser(clerkUserId, decorate(raced));
     }
     throw e;
   }

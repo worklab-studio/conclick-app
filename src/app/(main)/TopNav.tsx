@@ -23,11 +23,13 @@ export function TopNav() {
   return (
     <nav className="sticky top-0 z-50 w-full border-b dark:border-[hsl(0,0%,9%)] bg-background">
       <div className="mx-auto w-full px-3 md:px-6" style={{ maxWidth: '1320px' }}>
-        <div className="flex h-16 items-center justify-between mx-4">
+        <div className="flex h-16 items-center justify-between">
           {/* Logo on the left */}
           <Link href="/websites" className="flex items-center">
             <img
-              src={theme === 'dark' ? '/images/conclick-logo-dark.png' : '/images/conclick-logo.png'}
+              src={
+                theme === 'dark' ? '/images/conclick-logo-dark.png' : '/images/conclick-logo.png'
+              }
               alt="Conclick"
               className="h-8 w-auto"
             />
@@ -41,7 +43,10 @@ export function TopNav() {
             <NotificationDropdown />
 
             {user?.role === 'admin' && (
-              <Link href="/admin" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors mr-2">
+              <Link
+                href="/admin"
+                className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors mr-2"
+              >
                 Admin
               </Link>
             )}
@@ -59,7 +64,11 @@ export function TopNav() {
                   </AvatarFallback>
                 </Avatar>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" sideOffset={4} className="w-[260px] p-2 dark:bg-[hsl(0,0%,8%)] dark:border-[hsl(0,0%,12%)]">
+              <DropdownMenuContent
+                align="end"
+                sideOffset={4}
+                className="w-[260px] p-2 dark:bg-[hsl(0,0%,8%)] dark:border-[hsl(0,0%,12%)]"
+              >
                 {/* User Header */}
                 <div className="flex items-center gap-3 p-2 mb-1">
                   <Avatar className="h-10 w-10 border dark:border-[hsl(0,0%,12%)] bg-gradient-to-br from-orange-500 to-purple-600">
@@ -76,15 +85,24 @@ export function TopNav() {
                 <DropdownMenuSeparator className="bg-[hsl(0,0%,12%)] my-1" />
 
                 {/* Menu Items */}
-                <DropdownMenuItem onClick={() => router.push('/account')} className="cursor-pointer focus:bg-[hsl(0,0%,12%)]">
+                <DropdownMenuItem
+                  onClick={() => router.push('/account')}
+                  className="cursor-pointer focus:bg-[hsl(0,0%,12%)]"
+                >
                   <User className="mr-2 h-4 w-4" />
                   <span>Account</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => router.push('/account/billing')} className="cursor-pointer focus:bg-[hsl(0,0%,12%)]">
+                <DropdownMenuItem
+                  onClick={() => router.push('/account/billing')}
+                  className="cursor-pointer focus:bg-[hsl(0,0%,12%)]"
+                >
                   <CreditCard className="mr-2 h-4 w-4" />
                   <span>Billing</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => router.push('/logout')} className="cursor-pointer focus:bg-[hsl(0,0%,12%)]">
+                <DropdownMenuItem
+                  onClick={() => router.push('/logout')}
+                  className="cursor-pointer focus:bg-[hsl(0,0%,12%)]"
+                >
                   <LogOut className="mr-2 h-4 w-4" />
                   <span>Log out</span>
                 </DropdownMenuItem>

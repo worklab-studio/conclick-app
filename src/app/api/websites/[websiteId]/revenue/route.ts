@@ -1,88 +1,57 @@
-import { NextRequest, NextResponse } from 'next/server';
-import client from '@/lib/prisma';
-import { getStripeClient } from '@/lib/stripe';
 import { parseRequest } from '@/lib/request';
+import { json, unauthorized, serverError } from '@/lib/response';
 import { canViewWebsite } from '@/permissions';
-import { unauthorized, serverError } from '@/lib/response';
+import { getActiveIntegration } from '@/lib/revenue/store';
+import { getRevenueProvider, EMPTY_SUMMARY } from '@/lib/revenue';
+import { stripeProvider } from '@/lib/revenue/stripe';
+import { getWebsite } from '@/queries/prisma';
+import type { RevenueRange, RevenueUnit } from '@/lib/revenue/types';
+
+const DAY = 24 * 60 * 60 * 1000;
 
 export async function GET(
-    request: NextRequest,
-    { params }: { params: Promise<{ websiteId: string }> },
+  request: Request,
+  { params }: { params: Promise<{ websiteId: string }> },
 ) {
-    const { auth, error } = await parseRequest(request);
+  const { auth, query, error } = await parseRequest(request);
+  if (error) return error();
 
-    if (error) {
-        return error();
+  const { websiteId } = await params;
+  if (!(await canViewWebsite(auth, websiteId))) return unauthorized();
+
+  const now = Date.now();
+  const endAt = query.endAt ? Number(query.endAt) : now;
+  const startAt = query.startAt ? Number(query.startAt) : now - 30 * DAY;
+  const unit: RevenueUnit = query.unit === 'hour' || query.unit === 'month' ? query.unit : 'day';
+  const range: RevenueRange = {
+    startDate: new Date(startAt),
+    endDate: new Date(endAt),
+    unit,
+  };
+
+  try {
+    // 1. Active integration (encrypted credentials in payment_integration).
+    const active = await getActiveIntegration(websiteId);
+    if (active) {
+      const provider = getRevenueProvider(active.provider);
+      if (provider) {
+        const summary = await provider.fetchRevenue(active.credentials, range);
+        return json({ ...summary, connected: true, provider: active.provider });
+      }
     }
 
-    const { websiteId } = await params;
-
-    if (!(await canViewWebsite(auth, websiteId))) {
-        return unauthorized();
+    // 2. Legacy fallback: a Stripe secret key stored on the website row.
+    const website = await getWebsite(websiteId);
+    if (website?.stripeSecretKey) {
+      const summary = await stripeProvider.fetchRevenue({ apiKey: website.stripeSecretKey }, range);
+      return json({ ...summary, connected: true, provider: 'stripe' });
     }
 
-    try {
-        // Use a narrow select to avoid loading the user's password hash into memory.
-        const website = await client.client.website.findUnique({
-            where: { id: websiteId },
-            select: { id: true },
-        });
-
-        if (!website) {
-            return NextResponse.json({ chart: [], total: 0 });
-        }
-
-        const stripe = await getStripeClient(websiteId);
-
-        if (!stripe) {
-            // Return empty data instead of error - UI will handle gracefully
-            return NextResponse.json({
-                chart: [],
-                total: 0,
-                stripeNotConfigured: true
-            });
-        }
-
-        // Fetch Balance Transactions (simulating a "Revenue" feed)
-        // In a real app, you might aggregate this or use Stripe Reporting API
-        // For now, we listed the latest charges to calculate a simple total or list
-        const transactions = await stripe.balanceTransactions.list({
-            limit: 100, // Fetch last 100 transactions
-        });
-
-        // Simple aggregation for demonstration
-        // Group by day for the chart
-        const dailyRevenue: Record<string, number> = {};
-
-        transactions.data.forEach((txn) => {
-            // created is in seconds
-            const date = new Date(txn.created * 1000).toISOString().split('T')[0];
-
-            // Amount is in cents, convert to main currency unit (e.g., dollars)
-            // Note: This assumes all transactions are same currency or doesn't handle conversion
-            // For a robust implementation, you'd filter by currency or convert
-            if (txn.type === 'charge' || txn.type === 'payment') {
-                // txn.amount is net effect on balance. For revenue, we might want 'charge' amount.
-                // Let's use net amount for now (profit) or just raw amount.
-                const amount = txn.amount / 100;
-                dailyRevenue[date] = (dailyRevenue[date] || 0) + amount;
-            }
-        });
-
-        const chartData = Object.keys(dailyRevenue).map(date => ({
-            x: date,
-            y: dailyRevenue[date]
-        })).sort((a, b) => a.x.localeCompare(b.x));
-
-        return NextResponse.json({
-            chart: chartData,
-            total: transactions.data.reduce((acc, txn) => acc + (txn.amount / 100), 0)
-        });
-
-    } catch (e: any) {
-        // Don't forward the raw Stripe error to the client — it would spread
-        // headers/raw response body/requestId into the JSON response via serverError.
-        console.error('Stripe API Error:', e?.message ?? e);
-        return serverError({ message: 'Failed to fetch revenue.' });
-    }
+    // 3. Nothing connected.
+    return json({ ...EMPTY_SUMMARY, connected: false, stripeNotConfigured: true });
+  } catch (e: any) {
+    // eslint-disable-next-line no-console
+    console.error('Revenue fetch error:', e?.message ?? e);
+    return serverError({ message: 'Failed to fetch revenue.' });
+  }
 }

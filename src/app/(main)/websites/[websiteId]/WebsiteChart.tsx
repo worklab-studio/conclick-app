@@ -51,8 +51,13 @@ export function WebsiteChart({
     isLoading: isLoadingRevenue,
     error: errorRevenue,
   } = useQuery({
-    queryKey: ['revenue', websiteId],
-    queryFn: () => get(`/websites/${websiteId}/revenue`),
+    queryKey: ['revenue', websiteId, startDate, endDate, unit],
+    queryFn: () =>
+      get(`/websites/${websiteId}/revenue`, {
+        startAt: new Date(startDate).getTime(),
+        endAt: new Date(endDate).getTime(),
+        unit,
+      }),
     enabled: !!websiteId && chartType === 'revenue' && !isDemo,
   });
 
@@ -182,7 +187,8 @@ export function WebsiteChart({
     return <div className="text-red-500">Error loading chart data</div>;
   }
 
-  const showRevenueChart = isDemo || (revenueData && revenueData.total > 0);
+  const showRevenueChart =
+    isDemo || revenueData?.connected || (revenueData && revenueData.total > 0);
 
   return (
     <Card className="dark:bg-[hsl(0,0%,8%)] dark:border-[hsl(0,0%,12%)]">
@@ -224,7 +230,13 @@ export function WebsiteChart({
                   }}
                   style={{ fontSize: '12px', fill: '#71717a' }}
                 />
-                <YAxis yAxisId="left" tick={false} axisLine={false} width={0} />
+                <YAxis
+                  yAxisId="left"
+                  tick={false}
+                  axisLine={false}
+                  width={0}
+                  domain={[0, (dataMax: number) => Math.max(Math.ceil(dataMax * 1.25), 5)]}
+                />
                 <Tooltip
                   cursor={{
                     strokeDasharray: '3 3',
@@ -283,6 +295,7 @@ export function WebsiteChart({
                   name="Visitors"
                   stackId="a"
                   fill="#5e5ba4"
+                  radius={[4, 4, 0, 0]}
                   barSize={20}
                 />
                 <Bar

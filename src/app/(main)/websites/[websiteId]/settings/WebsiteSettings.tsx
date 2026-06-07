@@ -1,14 +1,13 @@
-import { useWebsite, useMessages } from '@/components/hooks';
+import { useWebsite } from '@/components/hooks';
 import { WebsiteShareForm } from './WebsiteShareForm';
 import { WebsiteTrackingCode } from './WebsiteTrackingCode';
 import { WebsiteData } from './WebsiteData';
 import { WebsiteEditForm } from './WebsiteEditForm';
-import { WebsiteStripeConfiguration } from './WebsiteStripeConfiguration';
+import { RevenueIntegrationForm } from './RevenueIntegrationForm';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 export function WebsiteSettings({ websiteId }: { websiteId: string; openExternal?: boolean }) {
   const website = useWebsite();
-  const { formatMessage, labels } = useMessages();
 
   return (
     <div className="space-y-6">
@@ -39,12 +38,15 @@ export function WebsiteSettings({ websiteId }: { websiteId: string; openExternal
         </CardContent>
       </Card>
 
-      <Card className="dark:bg-[hsl(0,0%,8%)] dark:border-[hsl(0,0%,12%)]">
+      <Card
+        id="revenue-integration"
+        className="scroll-mt-20 dark:border-[hsl(0,0%,12%)] dark:bg-[hsl(0,0%,8%)]"
+      >
         <CardHeader>
-          <CardTitle>Stripe Integration</CardTitle>
+          <CardTitle>Revenue Integration</CardTitle>
         </CardHeader>
         <CardContent>
-          <WebsiteStripeConfiguration websiteId={websiteId} />
+          <RevenueIntegrationForm websiteId={websiteId} />
         </CardContent>
       </Card>
 

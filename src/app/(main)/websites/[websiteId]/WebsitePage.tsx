@@ -4,6 +4,7 @@ import { WebsiteHeader } from './WebsiteHeader';
 import { WebsiteMetricsBar } from './WebsiteMetricsBar';
 import { WebsiteChart } from './WebsiteChart';
 import { WebsitePanels } from './WebsitePanels';
+import { DashboardSetupBanner } from './DashboardSetupBanner';
 import { useWebsiteQuery, useLoginQuery } from '@/components/hooks';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
@@ -14,7 +15,7 @@ import { toast } from 'sonner';
 function LoadingSkeleton() {
   return (
     <div className="mx-auto w-full px-3 md:px-6 py-8" style={{ maxWidth: '1320px' }}>
-      <div className="mx-4 space-y-6">
+      <div className="space-y-6">
         {/* Header skeleton */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
@@ -88,7 +89,9 @@ function checkAccess(user: any) {
   const effectiveEndsAt = periodEndsAt && periodEndsAt > now ? periodEndsAt : subEndsAt;
 
   const isLifetime = user.subscriptionPlan === 'lifetime' || user.lemonOrderId;
-  const isPaid = (user.subscriptionStatus === 'active' || (effectiveEndsAt && effectiveEndsAt > now)) && !isLifetime;
+  const isPaid =
+    (user.subscriptionStatus === 'active' || (effectiveEndsAt && effectiveEndsAt > now)) &&
+    !isLifetime;
 
   // Check PAID
   if (isLifetime || isPaid) return true;
@@ -138,10 +141,15 @@ export function WebsitePage({ websiteId }: { websiteId: string }) {
 
   return (
     <div className="mx-auto w-full px-3 md:px-6 py-8" style={{ maxWidth: '1320px' }}>
-      <div className="mx-4 space-y-6">
+      <div className="space-y-6">
         <WebsiteHeader websiteId={websiteId} />
+        <DashboardSetupBanner websiteId={websiteId} domain={website?.domain} />
         <WebsiteMetricsBar websiteId={websiteId} chartType={chartType} />
-        <WebsiteChart websiteId={websiteId} chartType={chartType} onChartTypeChange={setChartType} />
+        <WebsiteChart
+          websiteId={websiteId}
+          chartType={chartType}
+          onChartTypeChange={setChartType}
+        />
         <WebsitePanels websiteId={websiteId} />
       </div>
     </div>
