@@ -5,6 +5,7 @@ import { secret } from '@/lib/crypto';
 import { parseToken } from '@/lib/jwt';
 import { ensureArray } from '@/lib/utils';
 import { getOrCreateLocalUser } from '@/lib/clerk';
+import { isApiKey, getUserByApiKey } from '@/lib/apikey';
 
 const log = debug('umami:auth');
 
@@ -29,16 +30,23 @@ export async function checkAuth(request: Request) {
 
   let user = null;
 
-  try {
-    const { userId: clerkUserId } = await clerkAuth();
+  // 1. API key (Authorization: Bearer ck_…) — programmatic / MCP / agent access.
+  const bearer = getBearerToken(request);
+  if (isApiKey(bearer)) {
+    user = await getUserByApiKey(bearer as string);
+  } else {
+    // 2. Clerk session (cookie), read via auth() which relies on clerkMiddleware.
+    try {
+      const { userId: clerkUserId } = await clerkAuth();
 
-    if (clerkUserId) {
-      user = await getOrCreateLocalUser(clerkUserId);
+      if (clerkUserId) {
+        user = await getOrCreateLocalUser(clerkUserId);
+      }
+    } catch {
+      // auth() throws if clerkMiddleware didn't run for this route (e.g. some
+      // public/collect endpoints). Treat as unauthenticated and fall through.
+      log('clerk auth() unavailable for this route');
     }
-  } catch (e) {
-    // auth() throws if clerkMiddleware didn't run for this route (e.g. some
-    // public/collect endpoints). Treat as unauthenticated and fall through.
-    log('clerk auth() unavailable for this route');
   }
 
   if (!user?.id && !shareToken) {
