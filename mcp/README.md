@@ -1,4 +1,4 @@
-# @conclick/mcp
+# conclick-mcp
 
 Control [Conclick](https://app.conclick.io) from Cursor, Claude Code, Codex, or any
 MCP client. Query visitors, inspect revenue, manage websites, and connect payment
@@ -14,7 +14,7 @@ providers — from a prompt.
   "mcpServers": {
     "conclick": {
       "command": "npx",
-      "args": ["-y", "@conclick/mcp"],
+      "args": ["-y", "conclick-mcp"],
       "env": { "CONCLICK_API_KEY": "ck_live_your_key" }
     }
   }
@@ -22,7 +22,7 @@ providers — from a prompt.
 ```
 
 - **Cursor:** Settings → MCP → add the block above.
-- **Claude Code:** `claude mcp add conclick -e CONCLICK_API_KEY=ck_live_… -- npx -y @conclick/mcp`
+- **Claude Code:** `claude mcp add conclick -e CONCLICK_API_KEY=ck_live_… -- npx -y conclick-mcp`
 - **Codex:** add to its MCP servers config.
 
 Self-hosting Conclick? Set `CONCLICK_API_URL` (defaults to `https://app.conclick.io`).

@@ -18,7 +18,7 @@ const MCP_CONFIG = `{
   "mcpServers": {
     "conclick": {
       "command": "npx",
-      "args": ["-y", "@conclick/mcp"],
+      "args": ["-y", "conclick-mcp"],
       "env": { "CONCLICK_API_KEY": "ck_live_…" }
     }
   }
