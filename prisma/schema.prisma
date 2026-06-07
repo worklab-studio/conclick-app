@@ -111,6 +111,7 @@ model Session {
   websiteEvents WebsiteEvent[]
   sessionData   SessionData[]
   revenue       Revenue[]
+  revenueEvents RevenueEvent[]
 
   @@index([createdAt])
   @@index([websiteId])
@@ -151,6 +152,7 @@ model Website {
   segments    Segment[]
   sessionData SessionData[]
   paymentIntegrations PaymentIntegration[]
+  revenueEvents       RevenueEvent[]
 
   @@index([userId])
   @@index([teamId])
@@ -357,6 +359,39 @@ model Revenue {
   @@index([websiteId, createdAt])
   @@index([websiteId, sessionId, createdAt])
   @@map("revenue")
+}
+
+// Normalized, gateway-agnostic revenue ledger fed by VERIFIED payment webhooks.
+// Distinct from the legacy `revenue` table (which is written client-side from
+// tracked events): this one is authoritative, signed, idempotent, and supports
+// refunds/disputes (negative `amountMinor`). All "Spent"/payment-journey views
+// read ONLY from here. Each gateway adapter normalizes into this single shape.
+model RevenueEvent {
+  id              String   @id @default(uuid()) @map("revenue_event_id") @db.Uuid
+  websiteId       String   @map("website_id") @db.Uuid
+  distinctId      String?  @map("distinct_id") @db.VarChar(50)
+  sessionId       String?  @map("session_id") @db.Uuid
+  gateway         String   @db.VarChar(30) // stripe|polar|dodo|lemonsqueezy|razorpay
+  gatewayEventId  String   @map("gateway_event_id") @db.VarChar(255)
+  type            String   @db.VarChar(20) // payment|refund|dispute
+  amountMinor     BigInt   @map("amount_minor") // original minor units; refund/dispute negative
+  currency        String   @db.VarChar(10)
+  amountBaseMinor BigInt?  @map("amount_base_minor") // normalized base ccy (filled later via FX)
+  baseCurrency    String?  @map("base_currency") @db.VarChar(10)
+  occurredAt      DateTime @map("occurred_at") @db.Timestamptz(6)
+  rawPayload      Json     @map("raw_payload")
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  website Website  @relation(fields: [websiteId], references: [id])
+  session Session? @relation(fields: [sessionId], references: [id])
+
+  @@unique([gateway, gatewayEventId]) // idempotency key — webhook retries are no-ops
+  @@index([websiteId])
+  @@index([websiteId, occurredAt])
+  @@index([sessionId])
+  @@index([distinctId])
+  @@index([websiteId, distinctId])
+  @@map("revenue_event")
 }
 
 model Link {
