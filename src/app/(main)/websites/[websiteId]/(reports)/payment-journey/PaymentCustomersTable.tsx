@@ -44,8 +44,8 @@ function formatCompletedAt(value: any) {
   return format(d, "MMM d 'at' h:mm a");
 }
 
-// Full-width rows, content centered to match the Visitors list.
-const INNER = 'mx-auto flex w-full max-w-[1080px] items-center gap-4 px-7';
+// Full-width rows (aligned with the dashboard), matching the Visitors list.
+const INNER = 'flex items-center gap-4 px-7';
 
 export function PaymentCustomersTable({ data }: { data?: any[]; displayMode?: string }) {
   const { formatValue } = useFormat();

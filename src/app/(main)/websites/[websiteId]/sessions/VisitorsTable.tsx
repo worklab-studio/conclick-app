@@ -29,9 +29,22 @@ function lastSeen(value: any) {
   return formatDistanceToNow(d, { addSuffix: true });
 }
 
-// Rows span the full panel (so dividers reach the edges) but the content is
-// centered in a comfortable column so the metrics rail never strands on the edge.
-const INNER = 'mx-auto flex w-full max-w-[1080px] items-center gap-5 px-7';
+// Per-visitor activity graph: 8 dots, filled = visits.
+function VisitDots({ visits }: { visits: number }) {
+  const on = Math.min(Math.max(visits, 0), 8);
+  return (
+    <div className="flex gap-1">
+      {Array.from({ length: 8 }).map((_, i) => (
+        <span
+          key={i}
+          className={`h-1.5 w-1.5 rounded-full ${i < on ? 'bg-[#5e5ba4]' : 'bg-[hsl(0,0%,20%)]'}`}
+        />
+      ))}
+    </div>
+  );
+}
+
+const ROW = 'flex items-center gap-6 px-7';
 
 export function VisitorsTable({ data }: { data?: any[]; displayMode?: string }) {
   const { formatValue } = useFormat();
@@ -42,11 +55,12 @@ export function VisitorsTable({ data }: { data?: any[]; displayMode?: string }) 
     <div className="divide-y divide-[hsl(0,0%,12%)]">
       {/* Header */}
       <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground/60">
-        <div className={`${INNER} py-2`}>
+        <div className={`${ROW} py-2`}>
           <div className="flex-1">Visitor</div>
           <div className="hidden items-center gap-7 md:flex">
-            <div className="w-[160px]">Source</div>
+            <div className="w-[150px]">Source</div>
             <div className="w-[70px] text-right">Spent</div>
+            <div className="w-[96px]">Activity</div>
             <div className="w-[120px] text-right">Last seen</div>
           </div>
         </div>
@@ -56,6 +70,7 @@ export function VisitorsTable({ data }: { data?: any[]; displayMode?: string }) 
         const seed = row.distinctId || row.id;
         const spent = Number(row.spentMinor) || 0;
         const views = Number(row.views) || 0;
+        const visits = Number(row.visits) || 0;
         const ref = row.referrerDomain as string | undefined;
 
         return (
@@ -64,7 +79,7 @@ export function VisitorsTable({ data }: { data?: any[]; displayMode?: string }) 
             href={updateParams({ session: row.id })}
             className="block transition-colors hover:bg-[hsl(0,0%,11%)]"
           >
-            <div className={`${INNER} py-3`}>
+            <div className={`${ROW} py-3`}>
               {/* Visitor */}
               <div className="flex min-w-0 flex-1 items-center gap-3">
                 <Avatar seed={seed} size={36} />
@@ -97,10 +112,10 @@ export function VisitorsTable({ data }: { data?: any[]; displayMode?: string }) 
                 </div>
               </div>
 
-              {/* Metrics — tight right rail (desktop) */}
+              {/* Metrics (desktop) */}
               <div className="hidden items-center gap-7 md:flex">
                 {/* Source */}
-                <div className="flex w-[160px] min-w-0 items-center gap-2 text-sm text-muted-foreground">
+                <div className="flex w-[150px] min-w-0 items-center gap-2 text-sm text-muted-foreground">
                   {ref ? (
                     <>
                       <SiteIcon domain={ref} name={ref} size={16} />
@@ -122,6 +137,13 @@ export function VisitorsTable({ data }: { data?: any[]; displayMode?: string }) 
                   ) : (
                     <span className="text-sm text-muted-foreground/40">—</span>
                   )}
+                </div>
+                {/* Activity */}
+                <div className="w-[96px]">
+                  <VisitDots visits={visits} />
+                  <div className="mt-1.5 text-[11px] text-muted-foreground/40">
+                    {visits} visit{visits === 1 ? '' : 's'}
+                  </div>
                 </div>
                 {/* Last seen */}
                 <div className="w-[120px] text-right">
