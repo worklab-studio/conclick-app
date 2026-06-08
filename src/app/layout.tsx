@@ -71,33 +71,36 @@ export default function ({ children }) {
       signInUrl="/login"
       signUpUrl="/register"
     >
-    <html lang="en" className="dark" style={{ colorScheme: 'dark' }} suppressHydrationWarning>
-      <head>
-        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
-        <link rel="icon" href="/images/conclick-logo.png" />
-        <link rel="apple-touch-icon" sizes="180x180" href="/images/conclick-logo.png" />
-        <link rel="icon" type="image/png" sizes="32x32" href="/images/conclick-logo.png" />
-        <link rel="icon" type="image/png" sizes="16x16" href="/images/conclick-logo.png" />
-        <link rel="manifest" href="/site.webmanifest" />
-        <link rel="mask-icon" href="/images/conclick-logo.png" color="#5bbad5" />
-        <meta name="msapplication-TileColor" content="#da532c" />
-        <meta name="theme-color" content="#0a0a0a" />
-        <meta name="robots" content="noindex,nofollow" />
-        <style dangerouslySetInnerHTML={{
-          __html: `
+      <html lang="en" className="dark" style={{ colorScheme: 'dark' }} suppressHydrationWarning>
+        <head>
+          <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+          <link rel="icon" type="image/svg+xml" href="/images/conclick-icon.svg" />
+          <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png" />
+          <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png" />
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png" />
+          <link rel="manifest" href="/site.webmanifest" />
+          <link rel="mask-icon" href="/images/conclick-logo.svg" color="#5e5ba4" />
+          <meta name="msapplication-TileColor" content="#5e5ba4" />
+          <meta name="theme-color" content="#0a0a0a" />
+          <meta name="robots" content="noindex,nofollow" />
+          <style
+            dangerouslySetInnerHTML={{
+              __html: `
           html, body { 
             background-color: #09090b !important; 
             color: #fafafa !important;
           }
-        `}} />
-      </head>
-      <body className="bg-[#09090b] text-foreground">
-        <Suspense>
-          <Providers>{children}</Providers>
-          <Toaster richColors position="bottom-left" />
-        </Suspense>
-      </body>
-    </html>
+        `,
+            }}
+          />
+        </head>
+        <body className="bg-[#09090b] text-foreground">
+          <Suspense>
+            <Providers>{children}</Providers>
+            <Toaster richColors position="bottom-left" />
+          </Suspense>
+        </body>
+      </html>
     </ClerkProvider>
   );
 }

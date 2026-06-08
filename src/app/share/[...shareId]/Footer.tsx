@@ -1,3 +1,5 @@
+import { Logo } from '@/components/logo';
+
 // Public share footer — a short sales pitch + sign-up CTA (this page is seen by
 // people who don't yet have Conclick).
 export function Footer() {
@@ -5,7 +7,7 @@ export function Footer() {
     <footer className="mt-6 border-t border-[hsl(0,0%,12%)]">
       <div className="mx-auto w-full max-w-[1320px] px-3 py-14 md:px-6">
         <div className="mx-auto flex max-w-xl flex-col items-center gap-4 text-center">
-          <img src="/images/conclick-logo-dark.png" alt="Conclick" width={44} height={44} />
+          <Logo className="h-10 w-auto" />
           <h2 className="text-2xl font-bold tracking-tight text-foreground">
             Analytics your visitors can trust
           </h2>

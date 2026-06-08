@@ -7,14 +7,14 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
-import { useNavigation, useTheme, useLoginQuery } from '@/components/hooks';
+import { useNavigation, useLoginQuery } from '@/components/hooks';
 import { LogOut, CreditCard, User } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { NotificationDropdown } from '@/components/NotificationDropdown';
+import { Logo } from '@/components/logo';
 
 export function TopNav() {
   const { router } = useNavigation();
-  const { theme } = useTheme();
   const { user } = useLoginQuery();
   const username = user?.username || 'User';
   // Mock email if not available, usually derived from user object or user@example.com
@@ -26,13 +26,7 @@ export function TopNav() {
         <div className="flex h-16 items-center justify-between">
           {/* Logo on the left */}
           <Link href="/websites" className="flex items-center">
-            <img
-              src={
-                theme === 'dark' ? '/images/conclick-logo-dark.png' : '/images/conclick-logo.png'
-              }
-              alt="Conclick"
-              className="h-8 w-auto"
-            />
+            <Logo className="h-7 w-auto" />
           </Link>
 
           {/* Admin dropdown on the right */}

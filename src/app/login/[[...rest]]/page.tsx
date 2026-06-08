@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import { SignIn } from '@clerk/nextjs';
+import { Logo } from '@/components/logo';
 
 export default function Page() {
   return (
@@ -16,14 +17,7 @@ export default function Page() {
           'radial-gradient(1100px 520px at 50% -8%, rgba(99,102,241,0.20), transparent 62%), #09090b',
       }}
     >
-      {/* white logo for dark background */}
-      <img
-        src="/images/conclick-logo-dark.png"
-        alt="Conclick"
-        width={48}
-        height={48}
-        style={{ height: 48, width: 'auto' }}
-      />
+      <Logo className="h-12 w-auto" />
       <SignIn />
     </div>
   );

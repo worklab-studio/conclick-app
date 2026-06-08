@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import MapGL, { Popup, NavigationControl, FullscreenControl } from 'react-map-gl/maplibre';
 import 'maplibre-gl/dist/maplibre-gl.css';
+import { Logo } from '@/components/logo';
 
 export function LiveVisitorsPage({ websiteId }: { websiteId: string }) {
   const [isClient, setIsClient] = useState(false);
@@ -572,7 +573,7 @@ export function LiveVisitorsPage({ websiteId }: { websiteId: string }) {
       <div className="absolute top-6 left-6 z-[1000] space-y-3">
         {/* Branding Header */}
         <div className="flex items-center gap-3 px-2">
-          <img src="/images/conclick-logo-dark.png" alt="Conclick" className="h-6 w-auto" />
+          <Logo className="h-6 w-auto" />
           <div className="h-5 w-px bg-white/20"></div>
           <span className="text-white/80 text-sm font-medium">Real time</span>
         </div>

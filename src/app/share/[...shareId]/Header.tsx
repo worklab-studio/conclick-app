@@ -1,3 +1,5 @@
+import { Logo } from '@/components/logo';
+
 // Public share top nav — Conclick branded, with a sign-up CTA. No theme/language
 // controls (the share is dark, read-only). Inner content is constrained to the
 // same 1320px column as the dashboard so the logo lines up with the content.
@@ -11,7 +13,7 @@ export function Header() {
           rel="noreferrer"
           className="flex items-center gap-2.5"
         >
-          <img src="/images/conclick-logo-dark.png" alt="Conclick" width={26} height={26} />
+          <Logo className="h-6 w-auto" />
           <span className="text-base font-bold text-foreground">Conclick</span>
         </a>
         <a

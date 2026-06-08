@@ -1,12 +1,26 @@
-import { cn } from "@/lib/utils";
+import type { ComponentProps } from 'react';
+import { cn } from '@/lib/utils';
 
-export const Logo = ({ className, ...props }: React.ComponentProps<"img">) => {
+/**
+ * Conclick brand mark (inline SVG). Renders with `currentColor`, so it inherits
+ * the surrounding text color — white on the app's dark surfaces, and it adapts
+ * automatically if the foreground color ever differs. Size it with a className
+ * (e.g. `h-8 w-auto`); the 1189×864 viewBox preserves the aspect ratio.
+ */
+export function Logo({ className, ...props }: ComponentProps<'svg'>) {
   return (
-    <img
-      src="/images/android-chrome-192x192.png"
-      alt="logo"
-      className={cn("size-7", className)}
+    <svg
+      viewBox="0 0 1189 864"
+      fill="currentColor"
+      xmlns="http://www.w3.org/2000/svg"
+      role="img"
+      aria-label="Conclick"
+      className={cn('h-7 w-auto text-foreground', className)}
       {...props}
-    />
+    >
+      <path d="M746.017 0.363425C748.467 0.214425 750.907 0.116419 753.357 0.069419C864.147 -2.04658 977.717 44.3404 1056.58 121.577C1142.23 205.456 1186.41 312.574 1188.4 431.738C1179.34 431.533 1170.09 431.609 1161.01 431.671C1098.16 432.095 1035.2 431.035 972.367 431.788C972.367 382.555 955.627 334.786 924.897 296.321C882.827 244.371 831.747 222.801 767.047 215.866C710.647 213.24 655.437 232.642 613.087 269.974C562.947 314.373 544.037 366.685 540.057 431.69L324.787 431.748C324.787 321.354 367.077 215.154 442.977 134.989C521.957 51.4514 631.077 2.97543 746.017 0.363425Z" />
+      <path d="M647.537 431.766L863.467 431.843C863.377 496.74 849.977 549.67 825.357 608.97C824.597 609.72 803.547 651.05 799.677 657.41C782.817 684.53 763.107 709.77 740.897 732.72C661.657 814.22 553.407 861.09 439.757 863.12C323.847 865.64 211.869 821.1 129.363 739.66C45.148 657.15 1.21002 549.16 0.0200195 431.752L215.894 431.799C214.134 486.34 239.075 543.56 276.758 582.51C317.397 623.84 372.777 647.33 430.737 647.81C487.377 648.03 541.847 626 582.397 586.46C624.117 545.81 647.607 490.01 647.537 431.766Z" />
+      <path d="M101.562 0.297372C160.648 -3.12263 211.438 41.7384 215.343 100.793C219.247 159.848 174.804 211.005 115.783 215.394C56.0729 219.833 4.18894 174.758 0.238936 115.014C-3.71106 55.2704 41.7879 3.75737 101.562 0.297372Z" />
+    </svg>
   );
-};
+}
