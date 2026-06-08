@@ -1,6 +1,16 @@
 import { Resend } from 'resend';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Lazily constructed: the Resend constructor throws on a missing key, and
+// `next build` evaluates this module while collecting API-route page data (where
+// RESEND_API_KEY isn't set). Construct on first use at runtime instead, and skip
+// sending entirely if the key is absent.
+let _resend: Resend | null = null;
+function resendClient(): Resend | null {
+  const key = process.env.RESEND_API_KEY;
+  if (!key) return null;
+  if (!_resend) _resend = new Resend(key);
+  return _resend;
+}
 
 // Sending domain must be verified in Resend. Overridable via EMAIL_FROM.
 const FROM_EMAIL = process.env.EMAIL_FROM || 'Conclick <noreply@xautopilot.app>';
@@ -12,6 +22,8 @@ export async function sendTeamInviteEmail(
   inviterName?: string,
 ) {
   const who = inviterName ? `${inviterName} invited you` : 'You have been invited';
+  const resend = resendClient();
+  if (!resend) return undefined;
   return resend.emails.send({
     from: FROM_EMAIL,
     to: email,
@@ -42,6 +54,8 @@ export async function sendTeamInviteEmail(
 export async function sendPasswordResetEmail(email: string, resetToken: string) {
   const resetUrl = `${process.env.NEXT_PUBLIC_APP_URL}/reset-password?token=${resetToken}`;
 
+  const resend = resendClient();
+  if (!resend) return undefined;
   return resend.emails.send({
     from: FROM_EMAIL,
     to: email,
@@ -68,6 +82,8 @@ export async function sendPasswordResetEmail(email: string, resetToken: string) 
 }
 
 export async function sendWelcomeEmail(email: string, username: string) {
+  const resend = resendClient();
+  if (!resend) return undefined;
   return resend.emails.send({
     from: FROM_EMAIL,
     to: email,
@@ -97,6 +113,8 @@ export async function sendWelcomeEmail(email: string, username: string) {
 }
 
 export async function sendTrialEndingEmail(email: string, daysLeft: number) {
+  const resend = resendClient();
+  if (!resend) return undefined;
   return resend.emails.send({
     from: FROM_EMAIL,
     to: email,
@@ -127,6 +145,8 @@ export async function sendTrialEndingEmail(email: string, daysLeft: number) {
 export async function sendSubscriptionConfirmation(email: string, plan: string) {
   const planDisplay = plan === 'annual' ? '$7/month (billed yearly)' : '$9/month';
 
+  const resend = resendClient();
+  if (!resend) return undefined;
   return resend.emails.send({
     from: FROM_EMAIL,
     to: email,
