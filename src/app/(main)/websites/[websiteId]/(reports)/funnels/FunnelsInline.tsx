@@ -3,7 +3,7 @@ import { Grid, Column } from '@umami/react-zen';
 import { SectionHeader } from '@/components/common/SectionHeader';
 import { Funnel } from './Funnel';
 import { FunnelAddButton } from './FunnelAddButton';
-import { useDateRange, useReportsQuery } from '@/components/hooks';
+import { useDateRange, useReportsQuery, useNavigation } from '@/components/hooks';
 import { LoadingPanel } from '@/components/common/LoadingPanel';
 import { Panel } from '@/components/common/Panel';
 
@@ -14,12 +14,15 @@ export function FunnelsInline({ websiteId }: { websiteId: string }) {
   const {
     dateRange: { startDate, endDate },
   } = useDateRange();
+  const isShare = useNavigation().pathname?.includes('/share/');
 
   return (
     <Column gap>
-      <SectionHeader>
-        <FunnelAddButton websiteId={websiteId} />
-      </SectionHeader>
+      {!isShare && (
+        <SectionHeader>
+          <FunnelAddButton websiteId={websiteId} />
+        </SectionHeader>
+      )}
       <LoadingPanel data={data} isLoading={isLoading} error={error}>
         {data && (
           <Grid gap>

@@ -48,7 +48,8 @@ const ROW = 'flex items-center gap-6 px-7';
 
 export function VisitorsTable({ data }: { data?: any[]; displayMode?: string }) {
   const { formatValue } = useFormat();
-  const { updateParams } = useNavigation();
+  const { updateParams, pathname } = useNavigation();
+  const isShare = pathname?.includes('/share/');
   const rows = Array.isArray(data) ? data : [];
 
   return (
@@ -73,12 +74,17 @@ export function VisitorsTable({ data }: { data?: any[]; displayMode?: string }) 
         const visits = Number(row.visits) || 0;
         const ref = row.referrerDomain as string | undefined;
 
+        // Read-only on the public share: rows aren't clickable (no profile modal).
+        const Wrapper: any = isShare ? 'div' : Link;
+        const wrapperProps: any = isShare
+          ? {}
+          : {
+              href: updateParams({ session: row.id }),
+              className: 'block transition-colors hover:bg-[hsl(0,0%,11%)]',
+            };
+
         return (
-          <Link
-            key={row.id}
-            href={updateParams({ session: row.id })}
-            className="block transition-colors hover:bg-[hsl(0,0%,11%)]"
-          >
+          <Wrapper key={row.id} {...wrapperProps}>
             <div className={`${ROW} py-3`}>
               {/* Visitor */}
               <div className="flex min-w-0 flex-1 items-center gap-3">
@@ -165,7 +171,7 @@ export function VisitorsTable({ data }: { data?: any[]; displayMode?: string }) 
                 </div>
               </div>
             </div>
-          </Link>
+          </Wrapper>
         );
       })}
     </div>

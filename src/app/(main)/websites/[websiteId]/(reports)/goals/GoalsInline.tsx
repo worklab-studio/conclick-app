@@ -3,7 +3,7 @@ import { Grid, Column } from '@umami/react-zen';
 import { SectionHeader } from '@/components/common/SectionHeader';
 import { Goal } from './Goal';
 import { GoalAddButton } from './GoalAddButton';
-import { useDateRange, useReportsQuery } from '@/components/hooks';
+import { useDateRange, useReportsQuery, useNavigation } from '@/components/hooks';
 import { LoadingPanel } from '@/components/common/LoadingPanel';
 import { Panel } from '@/components/common/Panel';
 
@@ -14,12 +14,15 @@ export function GoalsInline({ websiteId }: { websiteId: string }) {
   const {
     dateRange: { startDate, endDate },
   } = useDateRange();
+  const isShare = useNavigation().pathname?.includes('/share/');
 
   return (
     <Column gap>
-      <SectionHeader>
-        <GoalAddButton websiteId={websiteId} />
-      </SectionHeader>
+      {!isShare && (
+        <SectionHeader>
+          <GoalAddButton websiteId={websiteId} />
+        </SectionHeader>
+      )}
       <LoadingPanel data={data} isLoading={isLoading} error={error}>
         {data && (
           <Grid columns={{ xs: '1fr', md: '1fr 1fr' }} gap>

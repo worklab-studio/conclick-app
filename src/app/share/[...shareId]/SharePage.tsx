@@ -1,9 +1,7 @@
 'use client';
-import { Column } from '@umami/react-zen';
 import { WebsiteProvider } from '@/app/(main)/websites/WebsiteProvider';
 import { WebsitePage } from '@/app/(main)/websites/[websiteId]/WebsitePage';
 import { useShareTokenQuery } from '@/components/hooks';
-import { PageBody } from '@/components/common/PageBody';
 import { Header } from './Header';
 import { Footer } from './Footer';
 
@@ -15,14 +13,12 @@ export function SharePage({ shareId }) {
   }
 
   return (
-    <Column backgroundColor="2">
-      <PageBody gap>
-        <Header />
-        <WebsiteProvider websiteId={shareToken.websiteId}>
-          <WebsitePage websiteId={shareToken.websiteId} shareMode />
-        </WebsiteProvider>
-        <Footer />
-      </PageBody>
-    </Column>
+    <div className="min-h-screen">
+      <Header />
+      <WebsiteProvider websiteId={shareToken.websiteId}>
+        <WebsitePage websiteId={shareToken.websiteId} shareMode />
+      </WebsiteProvider>
+      <Footer />
+    </div>
   );
 }

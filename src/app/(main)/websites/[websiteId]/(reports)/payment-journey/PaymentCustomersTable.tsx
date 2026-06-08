@@ -49,7 +49,8 @@ const INNER = 'flex items-center gap-4 px-7';
 
 export function PaymentCustomersTable({ data }: { data?: any[]; displayMode?: string }) {
   const { formatValue } = useFormat();
-  const { updateParams } = useNavigation();
+  const { updateParams, pathname } = useNavigation();
+  const isShare = pathname?.includes('/share/');
   const rows = Array.isArray(data) ? data : [];
 
   return (
@@ -66,12 +67,16 @@ export function PaymentCustomersTable({ data }: { data?: any[]; displayMode?: st
 
       {rows.map((row: any) => {
         const seed = row.distinctId || row.id;
+        const Wrapper: any = isShare ? 'div' : Link;
+        const wrapperProps: any = isShare
+          ? {}
+          : {
+              href: updateParams({ session: row.id }),
+              className: 'block transition-colors hover:bg-[hsl(0,0%,11%)]',
+            };
+
         return (
-          <Link
-            key={row.id}
-            href={updateParams({ session: row.id })}
-            className="block transition-colors hover:bg-[hsl(0,0%,11%)]"
-          >
+          <Wrapper key={row.id} {...wrapperProps}>
             <div className={`${INNER} py-3`}>
               <div className="flex min-w-0 flex-1 items-center gap-3">
                 <Avatar seed={seed} size={36} />
@@ -126,7 +131,7 @@ export function PaymentCustomersTable({ data }: { data?: any[]; displayMode?: st
                 {formatCompletedAt(row.completedAt)}
               </div>
             </div>
-          </Link>
+          </Wrapper>
         );
       })}
     </div>

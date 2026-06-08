@@ -179,7 +179,7 @@ export function WebsitePage({ websiteId, shareMode }: { websiteId: string; share
           onChartTypeChange={setChartType}
         />
         <WebsitePanels websiteId={websiteId} />
-        {!shareMode && <DashboardSectionsPanel websiteId={websiteId} />}
+        <DashboardSectionsPanel websiteId={websiteId} />
       </div>
     </div>
   );

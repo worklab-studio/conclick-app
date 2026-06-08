@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Users, CreditCard, Filter, Target } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useNavigation } from '@/components/hooks';
 import { SessionsDataTable } from '@/app/(main)/websites/[websiteId]/sessions/SessionsDataTable';
 import { SessionModal } from '@/app/(main)/websites/[websiteId]/sessions/SessionModal';
 import { CustomersDataTable } from '@/app/(main)/websites/[websiteId]/(reports)/payment-journey/CustomersDataTable';
@@ -26,6 +27,7 @@ type TabId = (typeof TABS)[number]['id'];
  */
 export function DashboardSectionsPanel({ websiteId }: { websiteId: string }) {
   const [tab, setTab] = useState<TabId>('users');
+  const isShare = useNavigation().pathname?.includes('/share/');
 
   return (
     <div className="overflow-hidden rounded-xl border border-[hsl(0,0%,12%)] bg-[hsl(0,0%,8%)]">
@@ -62,8 +64,9 @@ export function DashboardSectionsPanel({ websiteId }: { websiteId: string }) {
         </div>
       )}
 
-      {/* Lets a visitor/customer row click open the session profile from here. */}
-      <SessionModal websiteId={websiteId} />
+      {/* Lets a visitor/customer row click open the session profile from here —
+          owner view only; the public share is read-only. */}
+      {!isShare && <SessionModal websiteId={websiteId} />}
     </div>
   );
 }
