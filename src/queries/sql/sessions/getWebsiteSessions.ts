@@ -47,6 +47,10 @@ async function relationalQuery(websiteId: string, filters: QueryFilters) {
       session.distinct_id as "distinctId",
       coalesce(max(rev.spent_minor), 0)::float8 as "spentMinor",
       max(rev.spent_currency) as "spentCurrency",
+      (array_agg(website_event.referrer_domain order by website_event.created_at)
+        filter (where website_event.referrer_domain is not null
+                and website_event.referrer_domain <> ''
+                and website_event.referrer_domain <> website_event.hostname))[1] as "referrerDomain",
       min(website_event.created_at) as "firstAt",
       max(website_event.created_at) as "lastAt",
       count(distinct website_event.visit_id) as "visits",
