@@ -1,21 +1,9 @@
+'use client';
+
 import { isSameDay } from 'date-fns';
-import {
-  Icon,
-  StatusLight,
-  Column,
-  Row,
-  Heading,
-  Text,
-  Button,
-  DialogTrigger,
-  Popover,
-  Dialog,
-} from '@umami/react-zen';
+import { Eye, Zap } from 'lucide-react';
 import { LoadingPanel } from '@/components/common/LoadingPanel';
-import { Eye, FileText } from '@/components/icons';
-import { Lightning } from '@/components/svg';
-import { useMessages, useMobile, useSessionActivityQuery, useTimezone } from '@/components/hooks';
-import { EventData } from '@/components/metrics/EventData';
+import { useMessages, useSessionActivityQuery, useTimezone } from '@/components/hooks';
 
 export function SessionActivity({
   websiteId,
@@ -36,59 +24,47 @@ export function SessionActivity({
     startDate,
     endDate,
   );
-  const { isMobile } = useMobile();
-  let lastDay = null;
+  let lastDay: any = null;
 
   return (
     <LoadingPanel data={data} isLoading={isLoading} error={error}>
-      <Column gap>
-        {data?.map(({ eventId, createdAt, urlPath, eventName, visitId, hasData }) => {
+      <div className="space-y-0.5">
+        {data?.map(({ eventId, createdAt, urlPath, eventName }: any) => {
           const showHeader = !lastDay || !isSameDay(new Date(lastDay), new Date(createdAt));
           lastDay = createdAt;
 
           return (
-            <Column key={eventId} gap>
-              {showHeader && <Heading size="1">{formatTimezoneDate(createdAt, 'PPPP')}</Heading>}
-              <Row alignItems="center" gap="6" height="40px">
-                <StatusLight color={`#${visitId?.substring(0, 6)}`}>
-                  <Text wrap="nowrap">{formatTimezoneDate(createdAt, 'pp')}</Text>
-                </StatusLight>
-                <Row alignItems="center" gap="2">
-                  <Icon>{eventName ? <Lightning /> : <Eye />}</Icon>
-                  <Text wrap="nowrap">
+            <div key={eventId}>
+              {showHeader && (
+                <div className="mb-2 mt-4 text-[13px] font-bold text-foreground first:mt-0">
+                  {formatTimezoneDate(createdAt, 'PPPP')}
+                </div>
+              )}
+              <div className="flex items-center gap-3.5 py-1.5 text-sm">
+                <span className="h-2 w-2 shrink-0 rounded-full bg-[#5e5ba4] shadow-[0_0_0_4px_rgba(94,91,164,0.12)]" />
+                <span className="w-24 shrink-0 tabular-nums text-muted-foreground">
+                  {formatTimezoneDate(createdAt, 'pp')}
+                </span>
+                <span className="inline-flex min-w-0 items-center gap-2 text-foreground">
+                  {eventName ? (
+                    <Zap className="h-3.5 w-3.5 shrink-0 text-muted-foreground/70" />
+                  ) : (
+                    <Eye className="h-3.5 w-3.5 shrink-0 text-muted-foreground/70" />
+                  )}
+                  <span className="shrink-0 text-muted-foreground">
                     {eventName
                       ? formatMessage(labels.triggeredEvent)
                       : formatMessage(labels.viewedPage)}
-                  </Text>
-                  <Text weight="bold" style={{ maxWidth: isMobile ? '400px' : null }} truncate>
+                  </span>
+                  <span className="truncate rounded-md bg-[#5e5ba4]/12 px-1.5 py-0.5 font-mono text-xs text-indigo-300">
                     {eventName || urlPath}
-                  </Text>
-                  {hasData > 0 && <PropertiesButton websiteId={websiteId} eventId={eventId} />}
-                </Row>
-              </Row>
-            </Column>
+                  </span>
+                </span>
+              </div>
+            </div>
           );
         })}
-      </Column>
+      </div>
     </LoadingPanel>
   );
 }
-
-const PropertiesButton = props => {
-  return (
-    <DialogTrigger>
-      <Button variant="quiet">
-        <Row alignItems="center" gap>
-          <Icon>
-            <FileText />
-          </Icon>
-        </Row>
-      </Button>
-      <Popover placement="right">
-        <Dialog>
-          <EventData {...props} />
-        </Dialog>
-      </Popover>
-    </DialogTrigger>
-  );
-};
