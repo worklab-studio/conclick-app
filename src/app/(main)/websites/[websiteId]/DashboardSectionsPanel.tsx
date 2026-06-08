@@ -53,12 +53,14 @@ export function DashboardSectionsPanel({ websiteId }: { websiteId: string }) {
         })}
       </div>
 
-      <div className="p-4">
-        {tab === 'users' && <SessionsDataTable websiteId={websiteId} />}
-        {tab === 'customers' && <CustomersDataTable websiteId={websiteId} />}
-        {tab === 'funnels' && <FunnelsInline websiteId={websiteId} />}
-        {tab === 'goals' && <GoalsInline websiteId={websiteId} />}
-      </div>
+      {tab === 'users' && <SessionsDataTable websiteId={websiteId} />}
+      {tab === 'customers' && <CustomersDataTable websiteId={websiteId} />}
+      {(tab === 'funnels' || tab === 'goals') && (
+        <div className="p-4">
+          {tab === 'funnels' && <FunnelsInline websiteId={websiteId} />}
+          {tab === 'goals' && <GoalsInline websiteId={websiteId} />}
+        </div>
+      )}
 
       {/* Lets a visitor/customer row click open the session profile from here. */}
       <SessionModal websiteId={websiteId} />

@@ -50,7 +50,7 @@ export function PaymentCustomersTable({ data }: { data?: any[]; displayMode?: st
   const rows = Array.isArray(data) ? data : [];
 
   return (
-    <div className="divide-y divide-[hsl(0,0%,12%)] overflow-hidden rounded-xl border border-[hsl(0,0%,12%)] bg-[hsl(0,0%,8%)]">
+    <div className="divide-y divide-[hsl(0,0%,12%)]">
       {/* header */}
       <div className="hidden items-center gap-4 px-4 py-2 text-[11px] font-medium uppercase tracking-wide text-muted-foreground/70 md:flex">
         <div className="w-10" />

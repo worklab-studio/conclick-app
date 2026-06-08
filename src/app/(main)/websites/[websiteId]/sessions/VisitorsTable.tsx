@@ -50,7 +50,7 @@ export function VisitorsTable({ data }: { data?: any[]; displayMode?: string }) 
   const rows = Array.isArray(data) ? data : [];
 
   return (
-    <div className="divide-y divide-[hsl(0,0%,12%)] overflow-hidden rounded-xl border border-[hsl(0,0%,12%)] bg-[hsl(0,0%,8%)]">
+    <div className="divide-y divide-[hsl(0,0%,12%)]">
       {rows.map((row: any) => {
         const seed = row.distinctId || row.id;
         const visits = Number(row.visits) || 0;
