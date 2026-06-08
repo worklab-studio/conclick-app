@@ -7,7 +7,7 @@ export default function ({ children }) {
 
 export const metadata: Metadata = {
   title: {
-    template: '%s | Settings | Umami',
-    default: 'Settings | Umami',
+    template: '%s | Settings | Conclick',
+    default: 'Settings | Conclick',
   },
 };

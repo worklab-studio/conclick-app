@@ -1,8 +1,6 @@
 'use client';
 
-import { useMessages, useNavigation } from '@/components/hooks';
-import { EventsChart } from '@/components/metrics/EventsChart';
-import { MetricsTable } from '@/components/metrics/MetricsTable';
+import { useMessages } from '@/components/hooks';
 import { WeeklyTraffic } from '@/components/metrics/WeeklyTraffic';
 import { WorldMap } from '@/components/metrics/WorldMap';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,8 +9,6 @@ import { MetricPanel } from './MetricPanel';
 
 export function WebsitePanels({ websiteId }: { websiteId: string }) {
   const { formatMessage, labels } = useMessages();
-  const { pathname } = useNavigation();
-  const isSharePage = pathname.includes('/share/');
 
   return (
     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -76,30 +72,6 @@ export function WebsitePanels({ websiteId }: { websiteId: string }) {
           </CardContent>
         </Card>
       </LazyMount>
-
-      {isSharePage && (
-        <div className="grid grid-cols-1 gap-4 md:col-span-2 md:grid-cols-3">
-          <Card className="flex h-[400px] flex-col dark:border-[hsl(0,0%,12%)] dark:bg-[hsl(0,0%,8%)]">
-            <CardHeader className="shrink-0">
-              <CardTitle>{formatMessage(labels.events)}</CardTitle>
-            </CardHeader>
-            <CardContent className="min-h-0 flex-1 overflow-y-auto">
-              <MetricsTable
-                websiteId={websiteId}
-                type="event"
-                title={formatMessage(labels.event)}
-                limit={15}
-                filterLink={false}
-              />
-            </CardContent>
-          </Card>
-          <Card className="dark:border-[hsl(0,0%,12%)] dark:bg-[hsl(0,0%,8%)] md:col-span-2">
-            <CardContent>
-              <EventsChart websiteId={websiteId} />
-            </CardContent>
-          </Card>
-        </div>
-      )}
     </div>
   );
 }
