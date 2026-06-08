@@ -1,15 +1,21 @@
-import { useWebsiteSessionsQuery } from '@/components/hooks';
+'use client';
+
+import { useWebsiteSessionsQuery, useNavigation } from '@/components/hooks';
 import { VisitorsTable } from './VisitorsTable';
+import { VisitorsFilter } from './VisitorsFilter';
 import { DataGrid } from '@/components/common/DataGrid';
 
 export function SessionsDataTable({ websiteId }: { websiteId?: string; teamId?: string }) {
-  const queryResult = useWebsiteSessionsQuery(websiteId);
+  const { query } = useNavigation();
+  const userFilter = (query?.userFilter as string) || undefined;
+  const queryResult = useWebsiteSessionsQuery(websiteId, userFilter ? { userFilter } : undefined);
 
   return (
-    <DataGrid query={queryResult} allowPaging>
-      {({ data }) => {
-        return <VisitorsTable data={data} />;
-      }}
-    </DataGrid>
+    <div>
+      <VisitorsFilter />
+      <DataGrid query={queryResult} allowPaging>
+        {({ data }) => <VisitorsTable data={data} />}
+      </DataGrid>
+    </div>
   );
 }

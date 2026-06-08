@@ -18,6 +18,7 @@ export async function GET(
     ...filterParams,
     ...pagingParams,
     ...searchParams,
+    userFilter: z.enum(['new', 'returning', 'paying', 'bounced']).optional(),
   });
 
   const { auth, query, error } = await parseRequest(request, schema);
@@ -33,6 +34,7 @@ export async function GET(
   }
 
   const filters = await getQueryFilters(query, websiteId);
+  (filters as any).userFilter = query.userFilter;
 
   const data = await getWebsiteSessions(websiteId, filters);
 

@@ -101,7 +101,7 @@ export function DataGrid({
                 : child}
             </Column>
             {showPager && (
-              <Row marginTop="6">
+              <Row>
                 <Pager
                   page={data.page}
                   pageSize={data.pageSize}

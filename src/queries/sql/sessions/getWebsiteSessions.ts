@@ -30,6 +30,21 @@ async function relationalQuery(websiteId: string, filters: QueryFilters) {
            or device ilike {{search}})`
     : '';
 
+  // Segment filter (New / Returning / Paying / Bounced) → a HAVING on the
+  // session aggregates. Value is allowlisted in the route schema, so the mapped
+  // SQL is fixed (no interpolation of user input).
+  const userFilter = (filters as any).userFilter as string | undefined;
+  const havingQuery =
+    userFilter === 'new'
+      ? 'having count(distinct website_event.visit_id) = 1'
+      : userFilter === 'returning'
+        ? 'having count(distinct website_event.visit_id) > 1'
+        : userFilter === 'bounced'
+          ? 'having sum(case when website_event.event_type = 1 then 1 else 0 end) = 1'
+          : userFilter === 'paying'
+            ? 'having coalesce(max(rev.spent_minor), 0) > 0'
+            : '';
+
   return pagedRawQuery(
     `
     select
@@ -86,6 +101,7 @@ async function relationalQuery(websiteId: string, filters: QueryFilters) {
       session.region, 
       session.city,
       session.distinct_id
+    ${havingQuery}
     order by max(website_event.created_at) desc
     `,
     queryParams,

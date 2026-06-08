@@ -34,7 +34,7 @@ export function Pager({ page, pageSize, count, onPageChange, className }: PagerP
 
   return (
     <div
-      className={`flex w-full flex-wrap items-center justify-between gap-3 px-7 ${className || ''}`}
+      className={`flex w-full flex-wrap items-center justify-between gap-3 border-t border-[hsl(0,0%,12%)] px-7 py-4 ${className || ''}`}
     >
       <div className="text-sm text-muted-foreground">
         Showing{' '}

@@ -135,7 +135,7 @@ export function VisitorsTable({ data }: { data?: any[]; displayMode?: string }) 
                       {formatMoney(spent, row.spentCurrency)}
                     </span>
                   ) : (
-                    <span className="text-sm text-muted-foreground/40">—</span>
+                    <span className="text-sm text-muted-foreground/50">$0</span>
                   )}
                 </div>
                 {/* Activity */}
