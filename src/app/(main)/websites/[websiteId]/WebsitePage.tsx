@@ -7,6 +7,8 @@ import { WebsitePanels } from './WebsitePanels';
 import { DashboardSectionsPanel } from './DashboardSectionsPanel';
 import { DashboardSetupBanner } from './DashboardSetupBanner';
 import { useWebsiteQuery, useLoginQuery } from '@/components/hooks';
+import { SiteIcon } from '@/app/(main)/websites/SiteIcon';
+import { DateRangePicker } from '@/components/input/DateRangePicker';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { useRouter } from 'next/navigation';
@@ -106,14 +108,32 @@ function checkAccess(user: any) {
   return false;
 }
 
-export function WebsitePage({ websiteId }: { websiteId: string }) {
+// Minimal read-only header for public share links (no website switcher / owner
+// actions): just the site identity + date range.
+function ShareHeader({ website, websiteId }: { website: any; websiteId: string }) {
+  return (
+    <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+      <div className="flex items-center gap-3">
+        <SiteIcon domain={website?.domain} name={website?.name} size={32} className="rounded-lg" />
+        <div>
+          <h1 className="text-lg font-semibold text-foreground">{website?.name}</h1>
+          {website?.domain && <p className="text-sm text-muted-foreground">{website.domain}</p>}
+        </div>
+      </div>
+      <DateRangePicker websiteId={websiteId} />
+    </div>
+  );
+}
+
+export function WebsitePage({ websiteId, shareMode }: { websiteId: string; shareMode?: boolean }) {
   const { user, isLoading: isUserLoading } = useLoginQuery();
   const { data: website, isLoading: isWebsiteLoading, error } = useWebsiteQuery(websiteId);
   const [chartType, setChartType] = useState('overview');
   const router = useRouter();
 
-  // Access Control Redirect
+  // Access-control redirect — owner view only; never for public share links.
   useEffect(() => {
+    if (shareMode) return;
     if (!isUserLoading && user) {
       const hasAccess = checkAccess(user);
       if (!hasAccess) {
@@ -121,14 +141,15 @@ export function WebsitePage({ websiteId }: { websiteId: string }) {
         toast.error('Your trial has expired. Please upgrade to continue viewing analytics.');
       }
     }
-  }, [user, isUserLoading, router]);
+  }, [user, isUserLoading, router, shareMode]);
 
-  if (isWebsiteLoading || isUserLoading) {
+  // In share mode the viewer is anonymous — never block the render on (or gate
+  // access by) the login query, which 401s for them.
+  if (isWebsiteLoading || (!shareMode && isUserLoading)) {
     return <LoadingSkeleton />;
   }
 
-  // Double check access to prevent flash of content before redirect
-  if (user && !checkAccess(user)) {
+  if (!shareMode && user && !checkAccess(user)) {
     return null;
   }
 
@@ -143,8 +164,14 @@ export function WebsitePage({ websiteId }: { websiteId: string }) {
   return (
     <div className="mx-auto w-full px-3 md:px-6 py-8" style={{ maxWidth: '1320px' }}>
       <div className="space-y-6">
-        <WebsiteHeader websiteId={websiteId} />
-        <DashboardSetupBanner websiteId={websiteId} domain={website?.domain} />
+        {shareMode ? (
+          <ShareHeader website={website} websiteId={websiteId} />
+        ) : (
+          <>
+            <WebsiteHeader websiteId={websiteId} />
+            <DashboardSetupBanner websiteId={websiteId} domain={website?.domain} />
+          </>
+        )}
         <WebsiteMetricsBar websiteId={websiteId} chartType={chartType} />
         <WebsiteChart
           websiteId={websiteId}
@@ -152,7 +179,7 @@ export function WebsitePage({ websiteId }: { websiteId: string }) {
           onChartTypeChange={setChartType}
         />
         <WebsitePanels websiteId={websiteId} />
-        <DashboardSectionsPanel websiteId={websiteId} />
+        {!shareMode && <DashboardSectionsPanel websiteId={websiteId} />}
       </div>
     </div>
   );

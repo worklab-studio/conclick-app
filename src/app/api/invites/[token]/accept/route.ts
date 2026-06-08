@@ -25,6 +25,15 @@ export async function POST(request: Request, { params }: { params: Promise<{ tok
     return badRequest({ message: 'This invitation has expired.' });
   }
 
+  // The invite is addressed to a specific email — the signed-in user must match,
+  // so a leaked link can't be redeemed by someone else.
+  const userEmail = (auth.user as any).email?.toLowerCase();
+  if (userEmail && invite.email && userEmail !== invite.email.toLowerCase()) {
+    return unauthorized({
+      message: `This invitation was sent to ${invite.email}. Please sign in with that email to accept it.`,
+    });
+  }
+
   // Create the membership (idempotent — ignore if already a member / unique race).
   const existing = await getTeamUser(invite.teamId, auth.user.id);
   if (!existing) {
