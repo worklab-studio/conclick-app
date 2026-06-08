@@ -284,9 +284,34 @@ model Team {
   members  TeamUser[]
   links    Link[]
   pixels   Pixel[]
+  invites  TeamInvite[]
 
   @@index([accessCode])
   @@map("team")
+}
+
+// Email-based team invitations. A pending invite is created + emailed; the
+// recipient accepts via /invite/[token] (signing up through Clerk first if new),
+// which creates the TeamUser and marks the invite accepted.
+model TeamInvite {
+  id             String    @id @default(uuid()) @map("team_invite_id") @db.Uuid
+  teamId         String    @map("team_id") @db.Uuid
+  email          String    @db.VarChar(255)
+  token          String    @unique @db.VarChar(255)
+  role           String    @db.VarChar(50)
+  status         String    @default("pending") @db.VarChar(20) // pending|accepted|revoked
+  invitedById    String?   @map("invited_by_id") @db.Uuid
+  acceptedUserId String?   @map("accepted_user_id") @db.Uuid
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  expiresAt      DateTime  @map("expires_at") @db.Timestamptz(6)
+  acceptedAt     DateTime? @map("accepted_at") @db.Timestamptz(6)
+
+  team Team @relation(fields: [teamId], references: [id])
+
+  @@index([teamId])
+  @@index([token])
+  @@index([email])
+  @@map("team_invite")
 }
 
 model TeamUser {

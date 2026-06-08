@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { NextResponse } from 'next/server';
 import { headers } from 'next/headers';
 import { Webhook } from 'svix';
@@ -5,6 +6,7 @@ import prisma from '@/lib/prisma';
 import { ROLES } from '@/lib/constants';
 import { uuid } from '@/lib/crypto';
 import { getRandomChars } from '@/lib/generate';
+import { sendWelcomeEmail } from '@/lib/email';
 
 function adminEmails(): string[] {
   return (process.env.ADMIN_EMAILS || '')
@@ -68,8 +70,7 @@ export async function POST(req: Request) {
     if (type === 'user.created' || type === 'user.updated') {
       const clerkId = data.id as string;
       const email = primaryEmail(data);
-      const displayName =
-        [data.first_name, data.last_name].filter(Boolean).join(' ') || undefined;
+      const displayName = [data.first_name, data.last_name].filter(Boolean).join(' ') || undefined;
       const isAdminEmail = email ? adminEmails().includes(email) : false;
 
       const existing = await prisma.client.user.findUnique({ where: { clerkId } });
@@ -84,7 +85,8 @@ export async function POST(req: Request) {
           },
         });
       } else {
-        const base = data.username || (email ? email.split('@')[0] : '') || `user-${getRandomChars(6)}`;
+        const base =
+          data.username || (email ? email.split('@')[0] : '') || `user-${getRandomChars(6)}`;
         const username = await uniqueUsername(base);
         await prisma.client.user.create({
           data: {
@@ -96,6 +98,14 @@ export async function POST(req: Request) {
             role: isAdminEmail ? ROLES.admin : ROLES.user,
           },
         });
+
+        if (email) {
+          try {
+            await sendWelcomeEmail(email, displayName ?? username);
+          } catch (e: any) {
+            console.error('Welcome email failed:', e?.message ?? e);
+          }
+        }
       }
     } else if (type === 'user.deleted') {
       const clerkId = data.id as string;

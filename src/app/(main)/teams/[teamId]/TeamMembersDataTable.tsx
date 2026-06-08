@@ -2,7 +2,8 @@
 
 import { TeamMembersTable } from './TeamMembersTable';
 import { useTeamMembersQuery } from '@/components/hooks';
-import { TeamMemberAddButton } from './TeamMemberAddButton';
+import { TeamMemberInviteButton } from './TeamMemberInviteButton';
+import { TeamPendingInvites } from './TeamPendingInvites';
 import { Input } from '@/components/ui/input';
 import { Search } from 'lucide-react';
 import { useState, useEffect } from 'react';
@@ -39,17 +40,17 @@ export function TeamMembersDataTable({
           <Input
             placeholder="Search members..."
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={e => setSearch(e.target.value)}
             className="pl-9 dark:bg-[#18181b] dark:border-zinc-800"
           />
         </div>
-        {allowEdit && <TeamMemberAddButton teamId={teamId} />}
+        {allowEdit && <TeamMemberInviteButton teamId={teamId} />}
       </div>
 
+      {allowEdit && <TeamPendingInvites teamId={teamId} />}
+
       {isLoading ? (
-        <div className="flex items-center justify-center p-8 text-zinc-500">
-          Loading...
-        </div>
+        <div className="flex items-center justify-center p-8 text-zinc-500">Loading...</div>
       ) : (
         <TeamMembersTable data={data?.data || []} teamId={teamId} allowEdit={allowEdit} />
       )}

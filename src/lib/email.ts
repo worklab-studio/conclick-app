@@ -2,16 +2,51 @@ import { Resend } from 'resend';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-const FROM_EMAIL = 'Conclick <noreply@conclick.com>';
+// Sending domain must be verified in Resend. Overridable via EMAIL_FROM.
+const FROM_EMAIL = process.env.EMAIL_FROM || 'Conclick <noreply@xautopilot.app>';
+
+export async function sendTeamInviteEmail(
+  email: string,
+  teamName: string,
+  inviteUrl: string,
+  inviterName?: string,
+) {
+  const who = inviterName ? `${inviterName} invited you` : 'You have been invited';
+  return resend.emails.send({
+    from: FROM_EMAIL,
+    to: email,
+    subject: `You're invited to join ${teamName} on Conclick`,
+    html: `
+      <div style="font-family: system-ui, -apple-system, sans-serif; max-width: 480px; margin: 0 auto; padding: 40px 20px;">
+        <h1 style="color: #18181b; font-size: 24px; font-weight: 600; margin-bottom: 16px;">${who} to join ${teamName}</h1>
+        <p style="color: #52525b; font-size: 16px; line-height: 1.6; margin-bottom: 24px;">
+          ${teamName} uses Conclick for privacy-friendly analytics. Accept the invitation to view the team's dashboards.
+        </p>
+        <a href="${inviteUrl}" style="display: inline-block; background: #5e5ba4; color: white; font-weight: 600; text-decoration: none; padding: 12px 24px; border-radius: 8px; margin-bottom: 24px;">
+          Accept invitation
+        </a>
+        <p style="color: #71717a; font-size: 14px; margin-top: 24px;">
+          Or paste this link into your browser:<br />
+          <a href="${inviteUrl}" style="color: #5e5ba4; word-break: break-all;">${inviteUrl}</a>
+        </p>
+        <p style="color: #a1a1aa; font-size: 13px; margin-top: 16px;">
+          This invitation expires in 7 days. If you weren't expecting it, you can ignore this email.
+        </p>
+        <hr style="border: none; border-top: 1px solid #e4e4e7; margin: 32px 0;" />
+        <p style="color: #a1a1aa; font-size: 12px;">Conclick — Analytics that respect privacy</p>
+      </div>
+    `,
+  });
+}
 
 export async function sendPasswordResetEmail(email: string, resetToken: string) {
-    const resetUrl = `${process.env.NEXT_PUBLIC_APP_URL}/reset-password?token=${resetToken}`;
+  const resetUrl = `${process.env.NEXT_PUBLIC_APP_URL}/reset-password?token=${resetToken}`;
 
-    return resend.emails.send({
-        from: FROM_EMAIL,
-        to: email,
-        subject: 'Reset your password - Conclick',
-        html: `
+  return resend.emails.send({
+    from: FROM_EMAIL,
+    to: email,
+    subject: 'Reset your password - Conclick',
+    html: `
       <div style="font-family: system-ui, -apple-system, sans-serif; max-width: 480px; margin: 0 auto; padding: 40px 20px;">
         <h1 style="color: #18181b; font-size: 24px; font-weight: 600; margin-bottom: 24px;">Reset your password</h1>
         <p style="color: #52525b; font-size: 16px; line-height: 1.6; margin-bottom: 24px;">
@@ -29,15 +64,15 @@ export async function sendPasswordResetEmail(email: string, resetToken: string) 
         </p>
       </div>
     `,
-    });
+  });
 }
 
 export async function sendWelcomeEmail(email: string, username: string) {
-    return resend.emails.send({
-        from: FROM_EMAIL,
-        to: email,
-        subject: 'Welcome to Conclick! 🎉',
-        html: `
+  return resend.emails.send({
+    from: FROM_EMAIL,
+    to: email,
+    subject: 'Welcome to Conclick! 🎉',
+    html: `
       <div style="font-family: system-ui, -apple-system, sans-serif; max-width: 480px; margin: 0 auto; padding: 40px 20px;">
         <h1 style="color: #18181b; font-size: 24px; font-weight: 600; margin-bottom: 24px;">Welcome to Conclick, ${username}! 🎉</h1>
         <p style="color: #52525b; font-size: 16px; line-height: 1.6; margin-bottom: 16px;">
@@ -58,15 +93,15 @@ export async function sendWelcomeEmail(email: string, username: string) {
         </p>
       </div>
     `,
-    });
+  });
 }
 
 export async function sendTrialEndingEmail(email: string, daysLeft: number) {
-    return resend.emails.send({
-        from: FROM_EMAIL,
-        to: email,
-        subject: `Your Conclick trial ends in ${daysLeft} day${daysLeft === 1 ? '' : 's'}`,
-        html: `
+  return resend.emails.send({
+    from: FROM_EMAIL,
+    to: email,
+    subject: `Your Conclick trial ends in ${daysLeft} day${daysLeft === 1 ? '' : 's'}`,
+    html: `
       <div style="font-family: system-ui, -apple-system, sans-serif; max-width: 480px; margin: 0 auto; padding: 40px 20px;">
         <h1 style="color: #18181b; font-size: 24px; font-weight: 600; margin-bottom: 24px;">Your trial ends in ${daysLeft} day${daysLeft === 1 ? '' : 's'}</h1>
         <p style="color: #52525b; font-size: 16px; line-height: 1.6; margin-bottom: 24px;">
@@ -86,17 +121,17 @@ export async function sendTrialEndingEmail(email: string, daysLeft: number) {
         </p>
       </div>
     `,
-    });
+  });
 }
 
 export async function sendSubscriptionConfirmation(email: string, plan: string) {
-    const planDisplay = plan === 'annual' ? '$7/month (billed yearly)' : '$9/month';
+  const planDisplay = plan === 'annual' ? '$7/month (billed yearly)' : '$9/month';
 
-    return resend.emails.send({
-        from: FROM_EMAIL,
-        to: email,
-        subject: 'Your Conclick subscription is active! 🚀',
-        html: `
+  return resend.emails.send({
+    from: FROM_EMAIL,
+    to: email,
+    subject: 'Your Conclick subscription is active! 🚀',
+    html: `
       <div style="font-family: system-ui, -apple-system, sans-serif; max-width: 480px; margin: 0 auto; padding: 40px 20px;">
         <h1 style="color: #18181b; font-size: 24px; font-weight: 600; margin-bottom: 24px;">You're all set! 🚀</h1>
         <p style="color: #52525b; font-size: 16px; line-height: 1.6; margin-bottom: 24px;">
@@ -123,5 +158,5 @@ export async function sendSubscriptionConfirmation(email: string, plan: string) 
         </p>
       </div>
     `,
-    });
+  });
 }
