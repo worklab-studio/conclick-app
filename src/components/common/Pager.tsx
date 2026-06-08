@@ -1,6 +1,6 @@
-import { Button, Icon, Row, Text } from '@umami/react-zen';
-import { useMessages } from '@/components/hooks';
-import { ChevronRight } from '@/components/icons';
+'use client';
+
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 export interface PagerProps {
   page: string | number;
@@ -10,51 +10,51 @@ export interface PagerProps {
   className?: string;
 }
 
-export function Pager({ page, pageSize, count, onPageChange }: PagerProps) {
-  const { formatMessage, labels } = useMessages();
-  const maxPage = pageSize && count ? Math.ceil(+count / +pageSize) : 0;
-  const lastPage = page === maxPage;
-  const firstPage = page === 1;
+const BTN =
+  'inline-flex h-8 items-center gap-1.5 rounded-lg border border-[hsl(0,0%,15%)] bg-[hsl(0,0%,9%)] px-3 text-sm font-medium text-foreground transition-colors hover:bg-[hsl(0,0%,13%)] disabled:cursor-default disabled:border-transparent disabled:bg-transparent disabled:text-muted-foreground/40 disabled:hover:bg-transparent';
 
-  if (count === 0 || !maxPage) {
+export function Pager({ page, pageSize, count, onPageChange, className }: PagerProps) {
+  const p = +page;
+  const ps = +pageSize;
+  const c = +count;
+  const maxPage = ps && c ? Math.ceil(c / ps) : 0;
+
+  if (!c || !maxPage || maxPage === 1) {
     return null;
   }
 
-  const handlePageChange = (value: number) => {
-    const nextPage = +page + +value;
+  const firstPage = p <= 1;
+  const lastPage = p >= maxPage;
+  const start = (p - 1) * ps + 1;
+  const end = Math.min(p * ps, c);
 
-    if (nextPage > 0 && nextPage <= maxPage) {
-      onPageChange(nextPage);
-    }
+  const go = (next: number) => {
+    if (next > 0 && next <= maxPage) onPageChange(next);
   };
 
-  if (maxPage === 1) {
-    return null;
-  }
-
   return (
-    <Row alignItems="center" justifyContent="space-between" gap="3" flexGrow={1}>
-      <Text>{formatMessage(labels.numberOfRecords, { x: count.toLocaleString() })}</Text>
-      <Row alignItems="center" justifyContent="flex-end" gap="3">
-        <Text>
-          {formatMessage(labels.pageOf, {
-            current: page.toLocaleString(),
-            total: maxPage.toLocaleString(),
-          })}
-        </Text>
-        <Row gap="1">
-          <Button variant="outline" onPress={() => handlePageChange(-1)} isDisabled={firstPage}>
-            <Icon size="sm" rotate={180}>
-              <ChevronRight />
-            </Icon>
-          </Button>
-          <Button variant="outline" onPress={() => handlePageChange(1)} isDisabled={lastPage}>
-            <Icon size="sm">
-              <ChevronRight />
-            </Icon>
-          </Button>
-        </Row>
-      </Row>
-    </Row>
+    <div className={`flex w-full flex-wrap items-center justify-between gap-3 ${className || ''}`}>
+      <div className="text-sm text-muted-foreground">
+        Showing{' '}
+        <span className="font-semibold text-foreground">
+          {start.toLocaleString()}–{end.toLocaleString()}
+        </span>{' '}
+        of <span className="font-semibold text-foreground">{c.toLocaleString()}</span>
+      </div>
+      <div className="flex items-center gap-2.5">
+        <button type="button" onClick={() => go(p - 1)} disabled={firstPage} className={BTN}>
+          <ChevronLeft className="h-4 w-4" />
+          Prev
+        </button>
+        <span className="text-sm tabular-nums text-muted-foreground">
+          Page <span className="font-semibold text-foreground">{p.toLocaleString()}</span> of{' '}
+          <span className="font-semibold text-foreground">{maxPage.toLocaleString()}</span>
+        </span>
+        <button type="button" onClick={() => go(p + 1)} disabled={lastPage} className={BTN}>
+          Next
+          <ChevronRight className="h-4 w-4" />
+        </button>
+      </div>
+    </div>
   );
 }
