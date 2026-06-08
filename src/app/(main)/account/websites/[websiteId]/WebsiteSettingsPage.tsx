@@ -6,8 +6,8 @@ import { WebsiteSettingsHeader } from '@/app/(main)/websites/[websiteId]/setting
 export function WebsiteSettingsPage({ websiteId }: { websiteId: string }) {
   return (
     <WebsiteProvider websiteId={websiteId}>
-      <div className="mx-auto w-full px-3 md:px-6" style={{ maxWidth: '1320px' }}>
-        <div className="mx-auto max-w-3xl py-6 space-y-6">
+      <div className="mx-auto w-full px-3 md:px-6 py-8" style={{ maxWidth: '1320px' }}>
+        <div className="space-y-6">
           <WebsiteSettingsHeader />
           <WebsiteSettings websiteId={websiteId} />
         </div>
