@@ -334,22 +334,21 @@ function WebhookAttribution({
   const origin = typeof window !== 'undefined' ? window.location.origin : 'https://app.conclick.io';
   const webhookUrl = `${origin}/api/integrations/webhooks/${provider}?websiteId=${websiteId}`;
 
-  // Auto-provisioned: the webhook + secret are already set; only the checkout tag remains.
+  // Auto-provisioned webhook + the script auto-tags Dodo links → nothing to do.
   if (hasSecret) {
     return (
-      <div className="space-y-3 rounded-lg border border-emerald-500/20 bg-emerald-500/[0.06] p-4">
+      <div className="space-y-2 rounded-lg border border-emerald-500/20 bg-emerald-500/[0.06] p-4">
         <div className="flex items-center gap-2">
           <Check className="h-4 w-4 text-emerald-400" />
           <div className="text-sm font-semibold text-foreground">
-            Webhook connected automatically
+            Attribution is on — nothing else to do
           </div>
         </div>
         <p className="text-xs text-muted-foreground">
-          Payments now attribute to visitors you identify. The only step on your side: tag the
-          checkout with the visitor&apos;s id.
+          The webhook is connected, and your Conclick script automatically tags Dodo checkout links
+          with the visitor — so payments attach to the right person in Users → Spent. No code
+          needed.
         </p>
-        <pre className="overflow-x-auto rounded bg-[hsl(0,0%,6%)] px-2 py-1.5 text-[11px] leading-relaxed text-foreground/80">{`conclick.identify(userId)           // on your site
-metadata: { distinct_id: userId }   // on the Dodo checkout`}</pre>
       </div>
     );
   }

@@ -53,6 +53,25 @@
     }
   };
 
+  // Persistent visitor id (localStorage). Survives the redirect to a hosted
+  // checkout, so a payment webhook can attribute the sale back to this exact
+  // visitor. Used as the distinct id unless the site explicitly identifies one.
+  const getVisitorId = () => {
+    if (!localStorage) return undefined;
+    try {
+      let id = localStorage.getItem('conclick.vid');
+      if (!id) {
+        id =
+          (window.crypto && window.crypto.randomUUID && window.crypto.randomUUID()) ||
+          'v-' + Math.random().toString(36).slice(2) + Date.now().toString(36);
+        localStorage.setItem('conclick.vid', id);
+      }
+      return id;
+    } catch {
+      return undefined;
+    }
+  };
+
   const getPayload = () => ({
     website,
     screen,
@@ -62,7 +81,7 @@
     url: currentUrl,
     referrer: currentRef,
     tag,
-    id: identity ? identity : undefined,
+    id: identity || getVisitorId(),
   });
 
   const hasDoNotTrack = () => {
@@ -317,6 +336,28 @@
   let maxScroll = 0;
   let clickCount = 0;
   let engagementSent;
+
+  // Auto-tag clicks on Dodo Payments checkout links with this visitor's id, so
+  // the payment webhook can attribute the sale back to them — no checkout code.
+  const tagCheckoutLinks = e => {
+    const t = e.target;
+    const a = t && t.closest ? t.closest('a[href]') : null;
+    if (!a) return;
+    const href = a.getAttribute('href') || '';
+    if (!/dodopayments\.com/i.test(href)) return;
+    if (/[?&]metadata_distinct_id=/.test(href)) return;
+    const vid = getVisitorId();
+    if (!vid) return;
+    a.href =
+      href +
+      (href.indexOf('?') > -1 ? '&' : '?') +
+      'metadata_distinct_id=' +
+      encodeURIComponent(vid);
+  };
+
+  if (!trackingDisabled()) {
+    document.addEventListener('click', tagCheckoutLinks, true);
+  }
 
   if (autoTrack && !trackingDisabled()) {
     if (document.readyState === 'complete') {
