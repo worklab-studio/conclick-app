@@ -12,7 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Loader2, CheckCircle2, Plug, X, ArrowLeft, ArrowRight } from 'lucide-react';
+import { Loader2, CheckCircle2, Plug, X, ArrowLeft, ArrowRight, Copy, Check } from 'lucide-react';
 
 // Only providers with a working backend are connectable here. `hasProducts`
 // providers (e.g. Dodo, whose one account can hold many products) get a second
@@ -134,32 +134,35 @@ export function RevenueIntegrationForm({ websiteId }: { websiteId: string }) {
   if (status?.connected) {
     const connectedName = PROVIDERS.find(p => p.id === status.provider)?.name || status.provider;
     return (
-      <div className="flex items-center justify-between rounded-lg border border-emerald-500/20 bg-emerald-500/[0.06] p-4">
-        <div className="flex items-center gap-3">
-          <CheckCircle2 className="h-5 w-5 text-emerald-400" />
-          <div>
-            <div className="text-sm font-semibold text-foreground">
-              Connected to {connectedName}
-            </div>
-            <div className="text-xs text-muted-foreground">
-              Revenue is syncing on the Revenue tab.
+      <div className="space-y-4">
+        <div className="flex items-center justify-between rounded-lg border border-emerald-500/20 bg-emerald-500/[0.06] p-4">
+          <div className="flex items-center gap-3">
+            <CheckCircle2 className="h-5 w-5 text-emerald-400" />
+            <div>
+              <div className="text-sm font-semibold text-foreground">
+                Connected to {connectedName}
+              </div>
+              <div className="text-xs text-muted-foreground">
+                Revenue is syncing on the Revenue tab.
+              </div>
             </div>
           </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={disconnect}
+            disabled={busy}
+            className="border-zinc-700 text-zinc-300 hover:bg-zinc-800"
+          >
+            {busy ? (
+              <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <X className="mr-2 h-3.5 w-3.5" />
+            )}
+            Disconnect
+          </Button>
         </div>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={disconnect}
-          disabled={busy}
-          className="border-zinc-700 text-zinc-300 hover:bg-zinc-800"
-        >
-          {busy ? (
-            <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
-          ) : (
-            <X className="mr-2 h-3.5 w-3.5" />
-          )}
-          Disconnect
-        </Button>
+        <WebhookAttribution websiteId={websiteId} provider={status.provider} />
       </div>
     );
   }
@@ -303,6 +306,117 @@ export function RevenueIntegrationForm({ websiteId }: { websiteId: string }) {
         Your key is validated with a live API call, then stored encrypted. We never display it
         again.
       </p>
+    </div>
+  );
+}
+
+// Optional webhook setup for per-visitor attribution: register the webhook URL +
+// signing secret, then identify visitors and tag checkouts with the same id.
+function WebhookAttribution({ websiteId, provider }: { websiteId: string; provider: string }) {
+  const { post } = useApi();
+  const { toast } = useToast();
+  const [secret, setSecret] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+
+  const origin = typeof window !== 'undefined' ? window.location.origin : 'https://app.conclick.io';
+  const webhookUrl = `${origin}/api/integrations/webhooks/${provider}?websiteId=${websiteId}`;
+
+  const saveSecret = async () => {
+    if (!secret.trim()) return;
+    setSaving(true);
+    try {
+      await post(`/websites/${websiteId}/integrations/webhook-secret`, {
+        webhookSecret: secret.trim(),
+      });
+      setSaved(true);
+      setSecret('');
+      toast('Webhook secret saved — payments will now attribute to visitors.');
+    } catch (e: any) {
+      toast(e?.message || 'Could not save the secret.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="space-y-3 rounded-lg border border-[hsl(0,0%,12%)] bg-[hsl(0,0%,9%)] p-4">
+      <div>
+        <div className="text-sm font-semibold text-foreground">
+          Attribute payments to visitors (optional)
+        </div>
+        <p className="mt-0.5 text-xs text-muted-foreground">
+          Tie each payment to the visitor who made it — shows in Users → Spent and the Paying
+          filter.
+        </p>
+      </div>
+
+      <div className="space-y-1.5 text-xs text-muted-foreground">
+        <div>
+          <span className="font-medium text-foreground/80">1.</span> Add this webhook in your{' '}
+          {provider} dashboard for the <code className="text-[#b7b4e4]">payment.succeeded</code>{' '}
+          event:
+        </div>
+        <div className="flex items-center gap-2">
+          <code className="flex-1 truncate rounded bg-[hsl(0,0%,6%)] px-2 py-1.5 text-[11px] text-foreground/90">
+            {webhookUrl}
+          </code>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => {
+              navigator.clipboard?.writeText(webhookUrl);
+              toast('Webhook URL copied.');
+            }}
+            className="shrink-0 border-zinc-700"
+          >
+            <Copy className="h-3.5 w-3.5" />
+          </Button>
+        </div>
+      </div>
+
+      <div className="space-y-1.5 text-xs text-muted-foreground">
+        <div>
+          <span className="font-medium text-foreground/80">2.</span> Paste the signing secret it
+          gives you:
+        </div>
+        <div className="flex items-center gap-2">
+          <Input
+            type="password"
+            value={secret}
+            onChange={e => {
+              setSecret(e.target.value);
+              setSaved(false);
+            }}
+            placeholder="whsec_…"
+            className="font-mono dark:border-zinc-800 dark:bg-[#18181b]"
+          />
+          <Button
+            size="sm"
+            onClick={saveSecret}
+            disabled={saving || !secret.trim()}
+            style={{ backgroundColor: '#5e5ba4', color: 'white' }}
+            className="shrink-0 border-0"
+          >
+            {saving ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            ) : saved ? (
+              <Check className="h-3.5 w-3.5" />
+            ) : (
+              'Save'
+            )}
+          </Button>
+        </div>
+      </div>
+
+      <div className="space-y-1.5 text-xs text-muted-foreground">
+        <div>
+          <span className="font-medium text-foreground/80">3.</span> On your site, identify the
+          visitor and tag the checkout with the same id:
+        </div>
+        <pre className="overflow-x-auto rounded bg-[hsl(0,0%,6%)] px-2 py-1.5 text-[11px] leading-relaxed text-foreground/80">{`umami.identify(userId)              // on your site
+metadata: { distinct_id: userId }   // on the Dodo checkout`}</pre>
+      </div>
     </div>
   );
 }
