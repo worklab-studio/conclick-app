@@ -34,6 +34,7 @@ export * from './sessions/getSessionStats';
 export * from './sessions/saveSessionData';
 export * from './getActiveVisitors';
 export * from './getChannelMetrics';
+export * from './getAiTraffic';
 export * from './getChannelExpandedMetrics';
 export * from './getRealtimeActivity';
 export * from './getRealtimeData';

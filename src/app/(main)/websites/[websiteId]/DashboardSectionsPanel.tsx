@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Users, CreditCard, Filter, Target } from 'lucide-react';
+import { Users, CreditCard, Filter, Target, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useNavigation } from '@/components/hooks';
 import { SessionsDataTable } from '@/app/(main)/websites/[websiteId]/sessions/SessionsDataTable';
@@ -9,12 +9,14 @@ import { SessionModal } from '@/app/(main)/websites/[websiteId]/sessions/Session
 import { CustomersDataTable } from '@/app/(main)/websites/[websiteId]/(reports)/payment-journey/CustomersDataTable';
 import { FunnelsInline } from '@/app/(main)/websites/[websiteId]/(reports)/funnels/FunnelsInline';
 import { GoalsInline } from '@/app/(main)/websites/[websiteId]/(reports)/goals/GoalsInline';
+import { AiTrafficInline } from '@/app/(main)/websites/[websiteId]/AiTrafficInline';
 
 const TABS = [
   { id: 'users', label: 'Users', icon: Users },
   { id: 'customers', label: 'Customers', icon: CreditCard },
   { id: 'funnels', label: 'Funnels', icon: Filter },
   { id: 'goals', label: 'Goals', icon: Target },
+  { id: 'ai', label: 'AI', icon: Sparkles },
 ] as const;
 
 type TabId = (typeof TABS)[number]['id'];
@@ -57,6 +59,7 @@ export function DashboardSectionsPanel({ websiteId }: { websiteId: string }) {
 
       {tab === 'users' && <SessionsDataTable websiteId={websiteId} />}
       {tab === 'customers' && <CustomersDataTable websiteId={websiteId} />}
+      {tab === 'ai' && <AiTrafficInline websiteId={websiteId} />}
       {(tab === 'funnels' || tab === 'goals') && (
         <div className="p-4">
           {tab === 'funnels' && <FunnelsInline websiteId={websiteId} />}

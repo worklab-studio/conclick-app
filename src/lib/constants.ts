@@ -316,6 +316,21 @@ export const EMAIL_DOMAINS = [
 
 export const VIDEO_DOMAINS = ['twitch.', 'youtube.'];
 
+// AI assistants / answer engines — visitors arriving from these are "AI search".
+export const AI_DOMAINS = [
+  'chatgpt.com',
+  'chat.openai.com',
+  'openai.com',
+  'perplexity.ai',
+  'gemini.google.com',
+  'bard.google.com',
+  'copilot.microsoft.com',
+  'claude.ai',
+  'you.com',
+  'poe.com',
+  'phind.com',
+];
+
 export const PAID_AD_PARAMS = [
   'ad_id=',
   'aid=',
