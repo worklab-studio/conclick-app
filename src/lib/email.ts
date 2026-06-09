@@ -180,3 +180,74 @@ export async function sendSubscriptionConfirmation(email: string, plan: string) 
     `,
   });
 }
+
+export interface DigestSite {
+  name: string;
+  visitors: number;
+  pageviews: number;
+  payments: number;
+  revenue: number; // minor units
+  currency: string;
+  topSource: string;
+}
+
+function digestMoney(minor: number, currency: string) {
+  const major = (minor || 0) / 100;
+  try {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: currency || 'USD',
+      maximumFractionDigits: Number.isInteger(major) ? 0 : 2,
+    }).format(major);
+  } catch {
+    return `$${major.toFixed(0)}`;
+  }
+}
+
+// Founder daily digest: yesterday's numbers per website + a top source. Sent by
+// the daily-digest cron to website owners who haven't opted out.
+export async function sendFounderDailyDigest(email: string, sites: DigestSite[]) {
+  const resend = resendClient();
+  if (!resend || !sites.length) return undefined;
+
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://app.conclick.io';
+  const totalVisitors = sites.reduce((a, s) => a + s.visitors, 0);
+  const totalRevenue = sites.reduce((a, s) => a + s.revenue, 0);
+  const currency = sites.find(s => s.revenue > 0)?.currency || 'USD';
+
+  const cards = sites
+    .map(
+      s => `
+      <div style="border:1px solid #e4e4e7;border-radius:12px;padding:16px;margin-bottom:12px;">
+        <div style="font-weight:600;color:#18181b;margin-bottom:10px;">${s.name}</div>
+        <table style="width:100%;font-size:14px;color:#52525b;border-collapse:collapse;">
+          <tr><td style="padding:2px 0;">Visitors</td><td style="text-align:right;font-weight:600;color:#18181b;">${s.visitors}</td></tr>
+          <tr><td style="padding:2px 0;">Pageviews</td><td style="text-align:right;">${s.pageviews}</td></tr>
+          <tr><td style="padding:2px 0;">Payments</td><td style="text-align:right;">${s.payments}</td></tr>
+          <tr><td style="padding:2px 0;">Revenue</td><td style="text-align:right;font-weight:600;color:#15803d;">${digestMoney(s.revenue, s.currency)}</td></tr>
+          <tr><td style="padding:2px 0;">Top source</td><td style="text-align:right;">${s.topSource || '—'}</td></tr>
+        </table>
+      </div>`,
+    )
+    .join('');
+
+  return resend.emails.send({
+    from: FROM_EMAIL,
+    to: email,
+    subject: `Yesterday: ${totalVisitors} visitors${totalRevenue ? `, ${digestMoney(totalRevenue, currency)}` : ''} · Conclick`,
+    html: `
+      <div style="font-family: system-ui, -apple-system, sans-serif; max-width: 480px; margin: 0 auto; padding: 40px 20px;">
+        <h1 style="color: #18181b; font-size: 22px; font-weight: 600; margin-bottom: 20px;">Yesterday's recap</h1>
+        ${cards}
+        <a href="${appUrl}/websites" style="display: inline-block; background: #5e5ba4; color: white; font-weight: 600; text-decoration: none; padding: 12px 24px; border-radius: 8px; margin-top: 8px;">
+          Open dashboard
+        </a>
+        <hr style="border: none; border-top: 1px solid #e4e4e7; margin: 32px 0;" />
+        <p style="color: #a1a1aa; font-size: 12px;">
+          Conclick — Analytics that respect privacy ·
+          <a href="${appUrl}/account/preferences" style="color: #a1a1aa;">manage digest</a>
+        </p>
+      </div>
+    `,
+  });
+}
