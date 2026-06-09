@@ -58,7 +58,11 @@ export function LiveVisitorsPage({ websiteId }: { websiteId: string }) {
   }, [isAutoPanning]);
 
   const handleShare = async () => {
-    const url = `${window.location.origin}/share/${websiteId}/live`;
+    // On the public share this view already lives at /share/<id>/live, so copy
+    // the current URL; for the owner, build it from the website's share id.
+    const url = window.location.pathname.includes('/share/')
+      ? window.location.href
+      : `${window.location.origin}/share/${website?.shareId || websiteId}/live`;
     try {
       await navigator.clipboard.writeText(url);
       setCopied(true);

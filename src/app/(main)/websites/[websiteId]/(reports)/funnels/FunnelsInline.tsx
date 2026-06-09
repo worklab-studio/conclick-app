@@ -6,6 +6,8 @@ import { FunnelAddButton } from './FunnelAddButton';
 import { useDateRange, useReportsQuery, useNavigation } from '@/components/hooks';
 import { LoadingPanel } from '@/components/common/LoadingPanel';
 import { Panel } from '@/components/common/Panel';
+import { TabEmptyState } from '@/components/common/TabEmptyState';
+import { Filter } from 'lucide-react';
 
 // Funnels report body WITHOUT WebsiteControls — the date range comes from the
 // dashboard's shared picker. Used inline in the dashboard "Funnels" panel tab.
@@ -23,7 +25,19 @@ export function FunnelsInline({ websiteId }: { websiteId: string }) {
           <FunnelAddButton websiteId={websiteId} />
         </SectionHeader>
       )}
-      <LoadingPanel data={data} isLoading={isLoading} error={error}>
+      <LoadingPanel
+        data={data}
+        isLoading={isLoading}
+        error={error}
+        isEmpty={data?.['data']?.length === 0}
+        renderEmpty={() => (
+          <TabEmptyState
+            icon={Filter}
+            title="No funnels yet"
+            description="Build a funnel to see where visitors drop off across a sequence of steps. On a single-page site, use tracked events (e.g. view_pricing → click_buy → purchase) as the steps."
+          />
+        )}
+      >
         {data && (
           <Grid gap>
             {data['data']?.map((report: any) => (

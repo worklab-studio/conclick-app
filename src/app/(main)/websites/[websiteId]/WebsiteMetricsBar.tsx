@@ -172,9 +172,16 @@ export function WebsiteMetricsBar({
               'transition-all duration-300 hover:shadow-lg dark:bg-[hsl(0,0%,8%)] dark:border-[hsl(0,0%,12%)] dark:hover:border-[hsl(0,0%,15%)] overflow-hidden relative',
               isLive && 'cursor-pointer hover:bg-accent/50',
             )}
-            onClick={() =>
-              isLive && window.open(renderUrl(`/websites/${websiteId}/live`), '_blank')
-            }
+            onClick={() => {
+              if (!isLive) return;
+              // On the public share, the live globe lives at <sharepath>/live;
+              // for the owner it's the protected /websites/:id/live route.
+              const path = window.location.pathname;
+              const url = path.includes('/share/')
+                ? `${path.replace(/\/+$/, '')}/live`
+                : renderUrl(`/websites/${websiteId}/live`);
+              window.open(url, '_blank');
+            }}
           >
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
               <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
