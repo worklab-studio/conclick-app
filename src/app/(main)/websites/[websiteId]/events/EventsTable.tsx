@@ -53,7 +53,7 @@ export function EventsTable(props: DataTableProps) {
       <DataColumn id="session" label={formatMessage(labels.session)} width="80px">
         {(row: any) => {
           return (
-            <Link href={updateParams({ session: row.sessionId })}>
+            <Link href={updateParams({ session: row.sessionId })} scroll={false}>
               <Avatar seed={row.sessionId} size={32} />
             </Link>
           );

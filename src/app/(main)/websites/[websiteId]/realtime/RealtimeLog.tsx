@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { FixedSizeList } from 'react-window';
-import { SearchField, Text, Column, Row, IconLabel, Heading } from '@umami/react-zen';
+import { SearchField } from '@umami/react-zen';
 import Link from 'next/link';
 import { useFormat } from '@/components//hooks/useFormat';
 import { Empty } from '@/components/common/Empty';
@@ -124,15 +124,16 @@ export function RealtimeLog({ data }: { data: any }) {
   const TableRow = ({ index, style }) => {
     const row = logs[index];
     return (
-      <div className="flex items-center gap-4 px-4 hover:bg-zinc-100 dark:hover:bg-[#18181b] transition-colors" style={style}>
+      <div
+        className="flex items-center gap-4 px-4 hover:bg-zinc-100 dark:hover:bg-[#18181b] transition-colors"
+        style={style}
+      >
         <div className="min-w-[30px]">
-          <Link href={updateParams({ session: row.sessionId })}>
+          <Link href={updateParams({ session: row.sessionId })} scroll={false}>
             <Avatar seed={row.sessionId} size={32} />
           </Link>
         </div>
-        <div className="min-w-[100px] text-sm text-muted-foreground">
-          {getTime(row)}
-        </div>
+        <div className="min-w-[100px] text-sm text-muted-foreground">{getTime(row)}</div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
             <div className="text-muted-foreground">{getIcon(row)}</div>

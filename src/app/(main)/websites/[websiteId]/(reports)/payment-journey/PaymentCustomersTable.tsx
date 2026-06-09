@@ -74,6 +74,7 @@ export function PaymentCustomersTable({ data }: { data?: any[]; displayMode?: st
           ? {}
           : {
               href: updateParams({ session: row.id }),
+              scroll: false,
               className: 'block transition-colors hover:bg-[hsl(0,0%,11%)]',
             };
 

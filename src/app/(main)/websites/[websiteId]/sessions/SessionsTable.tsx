@@ -14,7 +14,7 @@ export function SessionsTable(props: DataTableProps) {
     <DataTable {...props}>
       <DataColumn id="id" label={formatMessage(labels.session)} width="100px">
         {(row: any) => (
-          <Link href={updateParams({ session: row.id })}>
+          <Link href={updateParams({ session: row.id })} scroll={false}>
             <Avatar seed={row.id} size={32} />
           </Link>
         )}

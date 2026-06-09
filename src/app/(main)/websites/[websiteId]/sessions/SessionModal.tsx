@@ -1,41 +1,29 @@
-import { Dialog, Modal, ModalProps, Column } from '@umami/react-zen';
+'use client';
+
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { SessionProfile } from '@/app/(main)/websites/[websiteId]/sessions/SessionProfile';
 import { useNavigation } from '@/components/hooks';
 
-export interface SessionModalProps extends ModalProps {
-  websiteId: string;
-}
-
-export function SessionModal({ websiteId, ...props }: SessionModalProps) {
+// Visitor session detail as a centered modal overlay. Radix locks the page
+// behind it (no background scroll), and the open/close navigation uses
+// scroll:false so the underlying list never jumps to the top.
+export function SessionModal({ websiteId }: { websiteId: string }) {
   const {
     router,
     query: { session },
     updateParams,
   } = useNavigation();
-  const handleOpenChange = (isOpen: boolean) => {
-    if (!isOpen) {
-      router.push(updateParams({ session: undefined }));
-    }
-  };
+
+  const close = () => router.push(updateParams({ session: undefined }), { scroll: false });
 
   return (
-    <Modal
-      placement="bottom"
-      offset="80px"
-      isOpen={!!session}
-      onOpenChange={handleOpenChange}
-      isDismissable
-      {...props}
-    >
-      <Column height="100%" maxWidth="1320px" style={{ margin: '0 auto' }}>
-        <Dialog variant="sheet">
-          {({ close }) => (
-            <Column padding="6">
-              <SessionProfile websiteId={websiteId} sessionId={session} onClose={() => close()} />
-            </Column>
-          )}
-        </Dialog>
-      </Column>
-    </Modal>
+    <Dialog open={!!session} onOpenChange={open => !open && close()}>
+      <DialogContent className="max-h-[88vh] max-w-3xl overflow-y-auto border-[hsl(0,0%,12%)] bg-[hsl(0,0%,8%)] p-6">
+        <DialogTitle className="sr-only">Visitor session</DialogTitle>
+        {session ? (
+          <SessionProfile websiteId={websiteId} sessionId={session} onClose={close} />
+        ) : null}
+      </DialogContent>
+    </Dialog>
   );
 }

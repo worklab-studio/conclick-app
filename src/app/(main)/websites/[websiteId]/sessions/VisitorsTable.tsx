@@ -80,6 +80,7 @@ export function VisitorsTable({ data }: { data?: any[]; displayMode?: string }) 
           ? {}
           : {
               href: updateParams({ session: row.id }),
+              scroll: false,
               className: 'block transition-colors hover:bg-[hsl(0,0%,11%)]',
             };
 
