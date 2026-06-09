@@ -1,5 +1,6 @@
 import type {
   ProviderCredentials,
+  ProviderProduct,
   RevenueProvider,
   RevenueRange,
   RevenueSummary,
@@ -23,9 +24,13 @@ interface DodoPayment {
 
 const MAX_PAGES = 25; // safety cap → up to 2,500 payments per fetch
 
-async function listPayments(
+// All succeeded payments in range, optionally scoped to a single Dodo product
+// via the API's `product_id` filter (payment objects don't expose a product, so
+// scoping must happen in the query, not by filtering the result).
+async function fetchPayments(
   credentials: ProviderCredentials,
   range: RevenueRange,
+  productId?: string,
 ): Promise<DodoPayment[]> {
   const { apiKey, mode } = credentials;
   const out: DodoPayment[] = [];
@@ -38,6 +43,7 @@ async function listPayments(
       created_at_gte: range.startDate.toISOString(),
       created_at_lte: range.endDate.toISOString(),
     });
+    if (productId) params.set('product_id', productId);
 
     const res = await fetch(`${baseUrl(mode)}/payments?${params.toString()}`, {
       headers: { Authorization: `Bearer ${apiKey}` },
@@ -54,6 +60,36 @@ async function listPayments(
     if (items.length < 100) break; // last page
   }
 
+  return out;
+}
+
+// Payments for the integration. Multi-product accounts scope to the selected
+// product ids (credentials.productIds, comma-separated): one query per product,
+// merged + deduped by payment_id — so two websites sharing one Dodo key don't
+// each report the whole account's revenue.
+async function listPayments(
+  credentials: ProviderCredentials,
+  range: RevenueRange,
+): Promise<DodoPayment[]> {
+  const productIds = (credentials.productIds || '')
+    .split(',')
+    .map(s => s.trim())
+    .filter(Boolean);
+
+  if (!productIds.length) {
+    return fetchPayments(credentials, range);
+  }
+
+  const seen = new Set<string>();
+  const out: DodoPayment[] = [];
+  for (const productId of productIds) {
+    for (const p of await fetchPayments(credentials, range, productId)) {
+      if (!seen.has(p.payment_id)) {
+        seen.add(p.payment_id);
+        out.push(p);
+      }
+    }
+  }
   return out;
 }
 
@@ -114,5 +150,39 @@ export const dodoProvider: RevenueProvider = {
       .sort((a, b) => new Date(a.x).getTime() - new Date(b.x).getTime());
 
     return { total: Math.round(total * 100) / 100, currency, chart };
+  },
+
+  // List the account's products so a user can scope a website to specific ones.
+  async listProducts(credentials: ProviderCredentials): Promise<ProviderProduct[]> {
+    const { apiKey, mode } = credentials;
+    const out: ProviderProduct[] = [];
+
+    for (let page = 0; page < 10; page++) {
+      const params = new URLSearchParams({
+        page_size: '100',
+        page_number: String(page),
+        archived: 'false',
+      });
+
+      const res = await fetch(`${baseUrl(mode)}/products?${params.toString()}`, {
+        headers: { Authorization: `Bearer ${apiKey}` },
+      });
+
+      if (!res.ok) {
+        throw new Error(`Dodo API ${res.status}`);
+      }
+
+      const body = await res.json();
+      const items = body?.items ?? body?.data ?? [];
+      for (const p of items) {
+        if (p?.product_id) {
+          out.push({ id: p.product_id, name: p.name || p.product_id });
+        }
+      }
+
+      if (items.length < 100) break;
+    }
+
+    return out;
   },
 };

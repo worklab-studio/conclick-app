@@ -42,7 +42,15 @@ export interface ProviderCredentials {
   mode?: string;
   /** Webhook signing secret, when the provider uses webhooks. */
   webhookSecret?: string;
+  /** Comma-separated gateway product ids to scope revenue to (multi-product accounts). */
+  productIds?: string;
   [key: string]: string | undefined;
+}
+
+/** A product on the gateway — used to scope a website's revenue to specific products. */
+export interface ProviderProduct {
+  id: string;
+  name: string;
 }
 
 export interface RevenueProvider {
@@ -54,6 +62,8 @@ export interface RevenueProvider {
   validate(credentials: ProviderCredentials): Promise<ValidationResult>;
   /** Fetch normalized revenue for a date range. */
   fetchRevenue(credentials: ProviderCredentials, range: RevenueRange): Promise<RevenueSummary>;
+  /** List the gateway's products, so a website can be scoped to specific ones. */
+  listProducts?(credentials: ProviderCredentials): Promise<ProviderProduct[]>;
 }
 
 /** Empty summary — used when a website has no connected provider. */
