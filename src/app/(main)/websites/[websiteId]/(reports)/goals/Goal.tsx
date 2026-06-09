@@ -1,8 +1,7 @@
-import { Grid, Row, Column, Text, Icon, ProgressBar, Dialog } from '@umami/react-zen';
+import { Dialog } from '@umami/react-zen';
+import { Globe, Zap, Users } from 'lucide-react';
 import { ReportEditButton } from '@/components/input/ReportEditButton';
 import { useMessages, useResultQuery } from '@/components/hooks';
-import { File, User } from '@/components/icons';
-import { Lightning } from '@/components/svg';
 import { LoadingPanel } from '@/components/common/LoadingPanel';
 import { formatLongNumber } from '@/lib/format';
 import { GoalEditForm } from './GoalEditForm';
@@ -32,67 +31,61 @@ export function Goal({ id, name, type, parameters, websiteId, startDate, endDate
     ...parameters,
   });
   const isPage = parameters?.type === 'path';
+  const Icon = isPage ? Globe : Zap;
+  const num = data?.num || 0;
+  const total = data?.total || 0;
+  const pct = total ? Math.round((num / total) * 100) : 0;
 
   return (
     <LoadingPanel data={data} isLoading={isLoading} isFetching={isFetching} error={error}>
       {data && (
-        <Grid gap>
-          <Grid columns="1fr auto" gap>
-            <Column gap>
-              <Row>
-                <Text size="4" weight="bold">
-                  {name}
-                </Text>
-              </Row>
-            </Column>
-            <Column>
-              <ReportEditButton id={id} name={name} type={type}>
-                {({ close }) => {
-                  return (
-                    <Dialog
-                      title={formatMessage(labels.goal)}
-                      variant="modal"
-                      style={{ minHeight: 300, minWidth: 400 }}
-                    >
-                      <GoalEditForm id={id} websiteId={websiteId} onClose={close} />
-                    </Dialog>
-                  );
-                }}
-              </ReportEditButton>
-            </Column>
-          </Grid>
-          <Row alignItems="center" justifyContent="space-between" gap>
-            <Text color="muted">
-              {formatMessage(isPage ? labels.viewedPage : labels.triggeredEvent)}
-            </Text>
-            <Text color="muted">{formatMessage(labels.conversionRate)}</Text>
-          </Row>
-          <Row alignItems="center" justifyContent="space-between" gap>
-            <Row alignItems="center" gap>
-              <Icon>{parameters.type === 'path' ? <File /> : <Lightning />}</Icon>
-              <Text>{parameters.value}</Text>
-            </Row>
-            <Row alignItems="center" gap>
-              <Icon>
-                <User />
-              </Icon>
-              <Text title={`${data?.num} / ${data?.total}`}>{`${formatLongNumber(
-                data?.num,
-              )} / ${formatLongNumber(data?.total)}`}</Text>
-            </Row>
-          </Row>
-          <Row alignItems="center" gap="6">
-            <ProgressBar
-              value={data?.num || 0}
-              minValue={0}
-              maxValue={data?.total || 1}
-              style={{ width: '100%' }}
+        <div className="space-y-4">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <div className="truncate text-[15px] font-semibold text-foreground">{name}</div>
+              <div className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
+                <Icon className="h-3.5 w-3.5 shrink-0 text-[#8b88cf]" />
+                <span className="truncate">{parameters.value}</span>
+              </div>
+            </div>
+            <ReportEditButton id={id} name={name} type={type}>
+              {({ close }: { close: () => void }) => (
+                <Dialog
+                  title={formatMessage(labels.goal)}
+                  variant="modal"
+                  style={{ minHeight: 300, minWidth: 400 }}
+                >
+                  <GoalEditForm id={id} websiteId={websiteId} onClose={close} />
+                </Dialog>
+              )}
+            </ReportEditButton>
+          </div>
+
+          <div className="flex items-end justify-between gap-4">
+            <div className="flex items-baseline gap-2">
+              <span className="text-3xl font-bold tabular-nums text-foreground">{pct}%</span>
+              <span className="text-xs text-muted-foreground">
+                {formatMessage(labels.conversionRate).toLowerCase()}
+              </span>
+            </div>
+            <div
+              className="flex items-center gap-1.5 text-sm text-muted-foreground"
+              title={`${num} / ${total}`}
+            >
+              <Users className="h-3.5 w-3.5" />
+              <span className="tabular-nums">
+                {formatLongNumber(num)} / {formatLongNumber(total)}
+              </span>
+            </div>
+          </div>
+
+          <div className="h-2.5 w-full overflow-hidden rounded-full bg-[hsl(0,0%,14%)]">
+            <div
+              className="h-full rounded-full bg-gradient-to-r from-[#5e5ba4] to-[#7c79c4] transition-all"
+              style={{ width: `${Math.min(pct, 100)}%` }}
             />
-            <Text weight="bold" size="7">
-              {data?.total ? Math.round((+data?.num / +data?.total) * 100) : '0'}%
-            </Text>
-          </Row>
-        </Grid>
+          </div>
+        </div>
       )}
     </LoadingPanel>
   );
