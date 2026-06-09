@@ -36,6 +36,7 @@ export * from './getActiveVisitors';
 export * from './getChannelMetrics';
 export * from './getAiTraffic';
 export * from './getCampaigns';
+export * from './getRevenueBySource';
 export * from './getChannelExpandedMetrics';
 export * from './getRealtimeActivity';
 export * from './getRealtimeData';
