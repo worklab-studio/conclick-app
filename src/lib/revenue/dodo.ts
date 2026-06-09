@@ -223,4 +223,47 @@ export const dodoProvider: RevenueProvider = {
 
     return [...map.values()].sort((a, b) => b.totalMinor - a.totalMinor);
   },
+
+  // Auto-create the webhook for this URL (reusing an existing one) + fetch its
+  // signing secret, so connecting needs no manual webhook setup.
+  async provisionWebhook(credentials, webhookUrl) {
+    const { apiKey, mode } = credentials;
+    const base = baseUrl(mode);
+    const authHeader = { Authorization: `Bearer ${apiKey}` };
+
+    // Reuse an existing webhook with the same URL (avoids duplicates on reconnect).
+    let id: string | undefined;
+    try {
+      const listRes = await fetch(`${base}/webhooks?page_size=100`, { headers: authHeader });
+      if (listRes.ok) {
+        const body = await listRes.json();
+        const items = body?.items ?? body?.data ?? [];
+        id = items.find((w: any) => w?.url === webhookUrl)?.id;
+      }
+    } catch {
+      /* ignore — fall through to create */
+    }
+
+    if (!id) {
+      const createRes = await fetch(`${base}/webhooks`, {
+        method: 'POST',
+        headers: { ...authHeader, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          url: webhookUrl,
+          description: 'Conclick — payment attribution',
+          filter_types: ['payment.succeeded', 'refund.succeeded', 'dispute.accepted'],
+        }),
+      });
+      if (!createRes.ok) {
+        throw new Error(`Dodo webhook create ${createRes.status}`);
+      }
+      id = (await createRes.json())?.id;
+    }
+    if (!id) return {};
+
+    const secretRes = await fetch(`${base}/webhooks/${id}/secret`, { headers: authHeader });
+    if (!secretRes.ok) return {};
+    const secretBody = await secretRes.json();
+    return { webhookSecret: secretBody?.secret ? String(secretBody.secret) : undefined };
+  },
 };

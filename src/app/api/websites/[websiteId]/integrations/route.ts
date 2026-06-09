@@ -44,9 +44,28 @@ export async function POST(
     return badRequest({ message: result.error || 'Could not validate those credentials.' });
   }
 
-  await saveIntegration(websiteId, body.provider, body.credentials as ProviderCredentials);
+  const creds = body.credentials as ProviderCredentials;
+  await saveIntegration(websiteId, body.provider, creds);
 
-  return json({ ok: true, provider: body.provider });
+  // Best-effort: auto-create the gateway webhook + store its secret, so the user
+  // never copies a URL or secret. Non-fatal — account-level revenue works without it.
+  let webhookProvisioned = false;
+  if (provider.provisionWebhook && !creds.webhookSecret) {
+    try {
+      const host = request.headers.get('x-forwarded-host') || request.headers.get('host');
+      const proto = request.headers.get('x-forwarded-proto') || 'https';
+      const webhookUrl = `${proto}://${host}/api/integrations/webhooks/${body.provider}?websiteId=${websiteId}`;
+      const { webhookSecret } = await provider.provisionWebhook(creds, webhookUrl);
+      if (webhookSecret) {
+        await saveIntegration(websiteId, body.provider, { ...creds, webhookSecret });
+        webhookProvisioned = true;
+      }
+    } catch {
+      // User can still add the secret manually from the connected panel.
+    }
+  }
+
+  return json({ ok: true, provider: body.provider, webhookProvisioned });
 }
 
 // DELETE — disconnect (wipes the stored secret).

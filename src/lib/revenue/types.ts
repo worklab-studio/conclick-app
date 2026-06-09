@@ -83,6 +83,11 @@ export interface RevenueProvider {
     credentials: ProviderCredentials,
     range: RevenueRange,
   ): Promise<ProviderCustomer[]>;
+  /** Auto-create the gateway's webhook for this URL + return its signing secret. */
+  provisionWebhook?(
+    credentials: ProviderCredentials,
+    webhookUrl: string,
+  ): Promise<{ webhookSecret?: string }>;
 }
 
 /** Empty summary — used when a website has no connected provider. */

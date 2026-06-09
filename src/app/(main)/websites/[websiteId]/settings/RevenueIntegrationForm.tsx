@@ -162,7 +162,11 @@ export function RevenueIntegrationForm({ websiteId }: { websiteId: string }) {
             Disconnect
           </Button>
         </div>
-        <WebhookAttribution websiteId={websiteId} provider={status.provider} />
+        <WebhookAttribution
+          websiteId={websiteId}
+          provider={status.provider}
+          hasSecret={!!status.hasWebhookSecret}
+        />
       </div>
     );
   }
@@ -312,7 +316,15 @@ export function RevenueIntegrationForm({ websiteId }: { websiteId: string }) {
 
 // Optional webhook setup for per-visitor attribution: register the webhook URL +
 // signing secret, then identify visitors and tag checkouts with the same id.
-function WebhookAttribution({ websiteId, provider }: { websiteId: string; provider: string }) {
+function WebhookAttribution({
+  websiteId,
+  provider,
+  hasSecret,
+}: {
+  websiteId: string;
+  provider: string;
+  hasSecret: boolean;
+}) {
   const { post } = useApi();
   const { toast } = useToast();
   const [secret, setSecret] = useState('');
@@ -321,6 +333,26 @@ function WebhookAttribution({ websiteId, provider }: { websiteId: string; provid
 
   const origin = typeof window !== 'undefined' ? window.location.origin : 'https://app.conclick.io';
   const webhookUrl = `${origin}/api/integrations/webhooks/${provider}?websiteId=${websiteId}`;
+
+  // Auto-provisioned: the webhook + secret are already set; only the checkout tag remains.
+  if (hasSecret) {
+    return (
+      <div className="space-y-3 rounded-lg border border-emerald-500/20 bg-emerald-500/[0.06] p-4">
+        <div className="flex items-center gap-2">
+          <Check className="h-4 w-4 text-emerald-400" />
+          <div className="text-sm font-semibold text-foreground">
+            Webhook connected automatically
+          </div>
+        </div>
+        <p className="text-xs text-muted-foreground">
+          Payments now attribute to visitors you identify. The only step on your side: tag the
+          checkout with the visitor&apos;s id.
+        </p>
+        <pre className="overflow-x-auto rounded bg-[hsl(0,0%,6%)] px-2 py-1.5 text-[11px] leading-relaxed text-foreground/80">{`umami.identify(userId)              // on your site
+metadata: { distinct_id: userId }   // on the Dodo checkout`}</pre>
+      </div>
+    );
+  }
 
   const saveSecret = async () => {
     if (!secret.trim()) return;

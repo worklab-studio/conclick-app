@@ -23,16 +23,15 @@ export async function getActiveIntegration(websiteId: string): Promise<ActiveInt
   }
 }
 
-/** Public connection status — never returns credentials. */
+/** Public connection status — never returns credentials, only whether a webhook secret exists. */
 export async function getIntegrationStatus(websiteId: string) {
-  const row = await prisma.client.paymentIntegration.findFirst({
-    where: { websiteId, status: 'active' },
-    select: { provider: true, updatedAt: true },
-  });
-
-  return row
-    ? { connected: true, provider: row.provider, connectedAt: row.updatedAt }
-    : { connected: false, provider: null };
+  const active = await getActiveIntegration(websiteId);
+  if (!active) return { connected: false, provider: null, hasWebhookSecret: false };
+  return {
+    connected: true,
+    provider: active.provider,
+    hasWebhookSecret: !!active.credentials.webhookSecret,
+  };
 }
 
 export async function saveIntegration(
