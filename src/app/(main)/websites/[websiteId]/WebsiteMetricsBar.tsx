@@ -9,7 +9,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { ArrowUp, ArrowDown, Minus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-import { useResultQuery } from '@/components/hooks';
+import { useApi } from '@/components/hooks';
 
 const DEMO_WEBSITE_ID = '1be0acac-4fc3-4dc1-a4d2-02e6a2aae843';
 
@@ -34,19 +34,26 @@ export function WebsiteMetricsBar({
   const { dateRange } = useDateRange({ timezone });
   const { startDate, endDate, unit } = dateRange;
 
-  const { data: revenueStats } = useResultQuery<any>('revenue', {
-    websiteId,
-    startDate,
-    endDate,
-    unit,
-    currency: 'USD',
+  // Total Revenue must match the Revenue chart — both read the connected
+  // provider's pull endpoint (same query key de-dupes the request).
+  const { get, useQuery } = useApi();
+  const { data: revenueStats } = useQuery({
+    queryKey: ['revenue', websiteId, startDate, endDate, unit],
+    queryFn: () =>
+      get(`/websites/${websiteId}/revenue`, {
+        startAt: new Date(startDate).getTime(),
+        endAt: new Date(endDate).getTime(),
+        unit,
+      }),
+    enabled: !isDemo && !!websiteId && chartType === 'revenue',
   });
 
   const finalData = data;
 
   // Calculate Total Revenue - use mock data for demo
   const realTotalRevenue =
-    revenueStats?.chart?.reduce((acc: number, curr: any) => acc + curr.y, 0) || 0;
+    revenueStats?.total ??
+    (revenueStats?.chart?.reduce((acc: number, curr: any) => acc + curr.y, 0) || 0);
   const finalTotalRevenue = isDemo ? 2847 : realTotalRevenue;
   const finalRevenueChange = isDemo ? 342 : 0;
 

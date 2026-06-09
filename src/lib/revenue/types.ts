@@ -53,6 +53,20 @@ export interface ProviderProduct {
   name: string;
 }
 
+/** A paying customer pulled from the gateway (unattributed — not tied to a session). */
+export interface ProviderCustomer {
+  id: string;
+  name?: string;
+  email?: string;
+  /** Total paid in minor units (e.g. cents) over the range. */
+  totalMinor: number;
+  currency: string;
+  /** Number of payments. */
+  count: number;
+  /** ISO timestamp of the most recent payment. */
+  lastAt: string;
+}
+
 export interface RevenueProvider {
   /** Stable id, e.g. 'stripe' | 'dodo' | 'polar'. */
   id: string;
@@ -64,6 +78,11 @@ export interface RevenueProvider {
   fetchRevenue(credentials: ProviderCredentials, range: RevenueRange): Promise<RevenueSummary>;
   /** List the gateway's products, so a website can be scoped to specific ones. */
   listProducts?(credentials: ProviderCredentials): Promise<ProviderProduct[]>;
+  /** List paying customers (unattributed) — populates the Customers tab without webhooks. */
+  listCustomers?(
+    credentials: ProviderCredentials,
+    range: RevenueRange,
+  ): Promise<ProviderCustomer[]>;
 }
 
 /** Empty summary — used when a website has no connected provider. */

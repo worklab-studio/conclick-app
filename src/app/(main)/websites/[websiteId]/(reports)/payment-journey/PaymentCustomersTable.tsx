@@ -67,8 +67,10 @@ export function PaymentCustomersTable({ data }: { data?: any[]; displayMode?: st
 
       {rows.map((row: any) => {
         const seed = row.distinctId || row.id;
-        const Wrapper: any = isShare ? 'div' : Link;
-        const wrapperProps: any = isShare
+        // Unattributed (pull-provider) customers have no real session → not clickable.
+        const unlinked = isShare || row.unlinked;
+        const Wrapper: any = unlinked ? 'div' : Link;
+        const wrapperProps: any = unlinked
           ? {}
           : {
               href: updateParams({ session: row.id }),
@@ -82,8 +84,12 @@ export function PaymentCustomersTable({ data }: { data?: any[]; displayMode?: st
                 <Avatar seed={seed} size={36} />
                 <div className="min-w-0">
                   <div className="flex items-center gap-2">
-                    <span className="truncate text-sm font-semibold capitalize text-foreground">
-                      {friendlyName(seed)}
+                    <span
+                      className={`truncate text-sm font-semibold text-foreground ${
+                        row.displayName ? '' : 'capitalize'
+                      }`}
+                    >
+                      {row.displayName || friendlyName(seed)}
                     </span>
                     <span className="shrink-0 rounded-md bg-amber-500/10 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-400 ring-1 ring-inset ring-amber-500/20">
                       Customer

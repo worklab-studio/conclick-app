@@ -1,5 +1,6 @@
 import type {
   ProviderCredentials,
+  ProviderCustomer,
   ProviderProduct,
   RevenueProvider,
   RevenueRange,
@@ -20,6 +21,7 @@ interface DodoPayment {
   status: string;
   created_at: string;
   metadata?: Record<string, string>;
+  customer?: { customer_id?: string; name?: string; email?: string };
 }
 
 const MAX_PAGES = 25; // safety cap → up to 2,500 payments per fetch
@@ -184,5 +186,41 @@ export const dodoProvider: RevenueProvider = {
     }
 
     return out;
+  },
+
+  // Paying customers grouped from payments (product-scoped) — populates the
+  // Customers tab when there's no webhook-attributed data.
+  async listCustomers(
+    credentials: ProviderCredentials,
+    range: RevenueRange,
+  ): Promise<ProviderCustomer[]> {
+    const payments = await listPayments(credentials, range);
+    const map = new Map<string, ProviderCustomer>();
+
+    for (const p of payments) {
+      const cust = p.customer || {};
+      const id = cust.customer_id || cust.email || p.payment_id;
+      const amount = p.total_amount || 0;
+      const existing = map.get(id);
+      if (existing) {
+        existing.totalMinor += amount;
+        existing.count += 1;
+        if (new Date(p.created_at) > new Date(existing.lastAt)) {
+          existing.lastAt = p.created_at;
+        }
+      } else {
+        map.set(id, {
+          id,
+          name: cust.name || undefined,
+          email: cust.email || undefined,
+          totalMinor: amount,
+          currency: p.currency || 'USD',
+          count: 1,
+          lastAt: p.created_at,
+        });
+      }
+    }
+
+    return [...map.values()].sort((a, b) => b.totalMinor - a.totalMinor);
   },
 };
