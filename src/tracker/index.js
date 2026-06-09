@@ -139,6 +139,59 @@
     document.addEventListener('click', onClick, true);
   };
 
+  /* Autocapture — opt-in per website (toggled via the collect response). Records
+     clicks on interactive elements + form submits as named events so events
+     appear with no code. Skips anything already tagged with data-umami-event,
+     and only reads element labels/selectors — never what a visitor types. */
+
+  const _clean = s => (s || '').replace(/\s+/g, ' ').trim();
+  const _label = el =>
+    _clean(
+      el.getAttribute('aria-label') ||
+        el.innerText ||
+        el.textContent ||
+        el.getAttribute('title') ||
+        el.getAttribute('name') ||
+        el.value ||
+        '',
+    ).slice(0, 40);
+  const _selector = el => {
+    const cls =
+      el.className && typeof el.className === 'string'
+        ? '.' + el.className.trim().split(/\s+/).slice(0, 2).join('.')
+        : '';
+    return (el.tagName.toLowerCase() + (el.id ? '#' + el.id : '') + cls).slice(0, 100);
+  };
+
+  const onAutoClick = e => {
+    const el = e.target.closest(
+      'a,button,[role="button"],input[type="submit"],input[type="button"]',
+    );
+    if (!el || el.closest('[' + eventNameAttribute + ']')) return;
+    const label = _label(el);
+    const data = { tag: el.tagName.toLowerCase(), selector: _selector(el) };
+    if (label) data.text = label;
+    if (el.tagName === 'A' && el.href) data.href = String(el.href).slice(0, 500);
+    track(('Clicked: ' + (label || el.tagName.toLowerCase())).slice(0, 50), data);
+  };
+
+  const onAutoSubmit = e => {
+    const form = e.target;
+    if (!form || form.tagName !== 'FORM') return;
+    const label = _clean(form.getAttribute('name') || form.id || form.getAttribute('aria-label'));
+    track(('Submitted: ' + (label || 'form')).slice(0, 50), {
+      tag: 'form',
+      selector: _selector(form),
+    });
+  };
+
+  const startAutocapture = () => {
+    if (autocaptureStarted) return;
+    autocaptureStarted = true;
+    document.addEventListener('click', onAutoClick, true);
+    document.addEventListener('submit', onAutoSubmit, true);
+  };
+
   /* Tracking functions */
 
   const trackingDisabled = () =>
@@ -175,6 +228,7 @@
       if (data) {
         disabled = !!data.disabled;
         cache = data.cache;
+        if (data.autocapture) startAutocapture();
       }
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (e) {
@@ -229,6 +283,7 @@
   let disabled = false;
   let cache;
   let identity;
+  let autocaptureStarted;
 
   if (autoTrack && !trackingDisabled()) {
     if (document.readyState === 'complete') {

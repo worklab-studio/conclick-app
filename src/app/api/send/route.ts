@@ -86,6 +86,7 @@ export async function POST(request: Request) {
 
     // Cache check
     let cache: Cache | null = null;
+    let website: any = null;
 
     if (websiteId) {
       const cacheHeader = request.headers.get('x-umami-cache');
@@ -98,9 +99,9 @@ export async function POST(request: Request) {
         }
       }
 
-      // Find website
+      // Find website (only on the first, uncached send — no extra hot-path query)
       if (!cache?.websiteId) {
-        const website = await fetchWebsite(websiteId);
+        website = await fetchWebsite(websiteId);
 
         if (!website) {
           return badRequest({ message: 'Website not found.' });
@@ -269,7 +270,14 @@ export async function POST(request: Request) {
 
     const token = createToken({ websiteId, sessionId, visitId, iat }, secret());
 
-    return json({ cache: token, sessionId, visitId });
+    return json({
+      cache: token,
+      sessionId,
+      visitId,
+      // Only present on the first (uncached) send; the tracker reads it once to
+      // decide whether to start autocapture. Opt-in, off by default.
+      ...(website ? { autocapture: !!website.autocaptureEnabled } : {}),
+    });
   } catch (e) {
     const error = serializeError(e);
 

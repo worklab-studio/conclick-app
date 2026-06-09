@@ -146,6 +146,7 @@ model Website {
   stripeId             String?   @map("stripe_id") @db.VarChar(50)
   stripeSecretKey      String?   @map("stripe_secret_key") @db.VarChar(255)
   stripePublishableKey String?   @map("stripe_publishable_key") @db.VarChar(255)
+  autocaptureEnabled   Boolean   @default(false) @map("autocapture_enabled")
   eventData   EventData[]
   reports     Report[]
   revenue     Revenue[]

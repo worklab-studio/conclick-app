@@ -4,6 +4,7 @@ import { WebsiteTrackingCode } from './WebsiteTrackingCode';
 import { WebsiteData } from './WebsiteData';
 import { WebsiteEditForm } from './WebsiteEditForm';
 import { RevenueIntegrationForm } from './RevenueIntegrationForm';
+import { WebsiteAutocaptureForm } from './WebsiteAutocaptureForm';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 export function WebsiteSettings({ websiteId }: { websiteId: string; openExternal?: boolean }) {
@@ -26,6 +27,15 @@ export function WebsiteSettings({ websiteId }: { websiteId: string; openExternal
         </CardHeader>
         <CardContent>
           <WebsiteTrackingCode websiteId={websiteId} />
+        </CardContent>
+      </Card>
+
+      <Card className="dark:bg-[hsl(0,0%,8%)] dark:border-[hsl(0,0%,12%)]">
+        <CardHeader>
+          <CardTitle>Autocapture</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <WebsiteAutocaptureForm websiteId={websiteId} />
         </CardContent>
       </Card>
 
