@@ -348,7 +348,7 @@ function WebhookAttribution({
           Payments now attribute to visitors you identify. The only step on your side: tag the
           checkout with the visitor&apos;s id.
         </p>
-        <pre className="overflow-x-auto rounded bg-[hsl(0,0%,6%)] px-2 py-1.5 text-[11px] leading-relaxed text-foreground/80">{`umami.identify(userId)              // on your site
+        <pre className="overflow-x-auto rounded bg-[hsl(0,0%,6%)] px-2 py-1.5 text-[11px] leading-relaxed text-foreground/80">{`conclick.identify(userId)           // on your site
 metadata: { distinct_id: userId }   // on the Dodo checkout`}</pre>
       </div>
     );
@@ -446,7 +446,7 @@ metadata: { distinct_id: userId }   // on the Dodo checkout`}</pre>
           <span className="font-medium text-foreground/80">3.</span> On your site, identify the
           visitor and tag the checkout with the same id:
         </div>
-        <pre className="overflow-x-auto rounded bg-[hsl(0,0%,6%)] px-2 py-1.5 text-[11px] leading-relaxed text-foreground/80">{`umami.identify(userId)              // on your site
+        <pre className="overflow-x-auto rounded bg-[hsl(0,0%,6%)] px-2 py-1.5 text-[11px] leading-relaxed text-foreground/80">{`conclick.identify(userId)           // on your site
 metadata: { distinct_id: userId }   // on the Dodo checkout`}</pre>
       </div>
     </div>

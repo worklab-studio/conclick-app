@@ -296,11 +296,14 @@
 
   /* Start */
 
+  const api = { track, identify };
+  // `conclick` is the public API name; keep `umami` as a back-compat alias so
+  // anything already wired to it keeps working.
+  if (!window.conclick) {
+    window.conclick = api;
+  }
   if (!window.umami) {
-    window.umami = {
-      track,
-      identify,
-    };
+    window.umami = api;
   }
 
   let currentUrl = normalize(href);
