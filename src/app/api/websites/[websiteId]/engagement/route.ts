@@ -1,0 +1,38 @@
+import { z } from 'zod';
+import { parseRequest, getQueryFilters } from '@/lib/request';
+import { unauthorized, json } from '@/lib/response';
+import { canViewWebsite } from '@/permissions';
+import { dateRangeParams, filterParams } from '@/lib/schema';
+import { getEngagementStats } from '@/queries/sql';
+
+export async function GET(
+  request: Request,
+  { params }: { params: Promise<{ websiteId: string }> },
+) {
+  const schema = z.object({
+    ...dateRangeParams,
+    ...filterParams,
+  });
+
+  const { auth, query, error } = await parseRequest(request, schema);
+
+  if (error) {
+    return error();
+  }
+
+  const { websiteId } = await params;
+
+  if (!(await canViewWebsite(auth, websiteId))) {
+    return unauthorized();
+  }
+
+  const filters = await getQueryFilters(query, websiteId);
+  const row = await getEngagementStats(websiteId, filters);
+
+  const avgScroll = row?.avgScroll != null ? Math.round(Number(row.avgScroll)) : null;
+  const visits = Number(row?.visits) || 0;
+  const totalClicks = Number(row?.totalClicks) || 0;
+  const clicksPerVisit = visits ? Number((totalClicks / visits).toFixed(1)) : null;
+
+  return json({ avgScroll, clicksPerVisit, visits, sessions: Number(row?.sessions) || 0 });
+}

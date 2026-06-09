@@ -3,6 +3,7 @@ export * from './events/getEventDataFields';
 export * from './events/getEventDataProperties';
 export * from './events/getEventDataValues';
 export * from './events/getEventDataStats';
+export * from './events/getEngagementStats';
 export * from './events/getEventDataUsage';
 export * from './events/getEventMetrics';
 export * from './events/getEventExpandedMetrics';

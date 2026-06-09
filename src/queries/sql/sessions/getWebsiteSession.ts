@@ -32,7 +32,13 @@ async function relationalQuery(websiteId: string, sessionId: string) {
       count(distinct visit_id) as visits,
       sum(views) as views,
       sum(events) as events,
-      sum(${getTimestampDiffSQL('min_time', 'max_time')}) as "totaltime" 
+      sum(${getTimestampDiffSQL('min_time', 'max_time')}) as "totaltime",
+      (select max(ed.number_value) from event_data ed
+        join website_event we on we.event_id = ed.website_event_id
+        where we.session_id = {{sessionId::uuid}} and we.event_name = 'engagement' and ed.data_key = 'scroll') as "maxScroll",
+      (select sum(ed.number_value) from event_data ed
+        join website_event we on we.event_id = ed.website_event_id
+        where we.session_id = {{sessionId::uuid}} and we.event_name = 'engagement' and ed.data_key = 'clicks') as "clicks" 
     from (select
           session.session_id as id,
           session.distinct_id,

@@ -129,7 +129,7 @@ export function SessionProfile({
           </div>
 
           {/* Stats strip */}
-          <div className="grid grid-cols-2 divide-[hsl(0,0%,12%)] border-b border-[hsl(0,0%,12%)] md:grid-cols-4 md:divide-x">
+          <div className="grid grid-cols-2 divide-[hsl(0,0%,12%)] border-b border-[hsl(0,0%,12%)] md:grid-cols-6 md:divide-x">
             <Stat label="Visits" value={data.visits} />
             <Stat label="Page views" value={data.views} />
             <Stat label="Events" value={data.events} />
@@ -137,6 +137,11 @@ export function SessionProfile({
               label="Time spent"
               value={`${formatShortTime(Math.abs(~~(data.totaltime / (data.visits || 1))), ['m', 's'], ' ')}`}
             />
+            <Stat
+              label="Max scroll"
+              value={data.maxScroll != null ? `${Math.round(Number(data.maxScroll))}%` : '—'}
+            />
+            <Stat label="Clicks" value={data.clicks != null ? Number(data.clicks) : '—'} />
           </div>
 
           {/* Info grid */}

@@ -3,6 +3,7 @@
 import { useWebsiteSessionsQuery, useNavigation } from '@/components/hooks';
 import { VisitorsTable } from './VisitorsTable';
 import { VisitorsFilter } from './VisitorsFilter';
+import { EngagementStatsStrip } from './EngagementStatsStrip';
 import { DataGrid } from '@/components/common/DataGrid';
 
 export function SessionsDataTable({ websiteId }: { websiteId?: string; teamId?: string }) {
@@ -13,6 +14,7 @@ export function SessionsDataTable({ websiteId }: { websiteId?: string; teamId?: 
   return (
     <div>
       <VisitorsFilter />
+      <EngagementStatsStrip websiteId={websiteId} />
       <DataGrid query={queryResult} allowPaging>
         {({ data }) => <VisitorsTable data={data} />}
       </DataGrid>
