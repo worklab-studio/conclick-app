@@ -12,6 +12,7 @@ import { GoalsInline } from '@/app/(main)/websites/[websiteId]/(reports)/goals/G
 import { AiTrafficInline } from '@/app/(main)/websites/[websiteId]/AiTrafficInline';
 import { CampaignsInline } from '@/app/(main)/websites/[websiteId]/CampaignsInline';
 import { RevenueBySourceInline } from '@/app/(main)/websites/[websiteId]/RevenueBySourceInline';
+import { AutoFunnelInline } from '@/app/(main)/websites/[websiteId]/AutoFunnelInline';
 
 const TABS = [
   { id: 'users', label: 'Users', icon: Users },
@@ -71,7 +72,12 @@ export function DashboardSectionsPanel({ websiteId }: { websiteId: string }) {
       {tab === 'campaigns' && <CampaignsInline websiteId={websiteId} />}
       {(tab === 'funnels' || tab === 'goals') && (
         <div className="p-4">
-          {tab === 'funnels' && <FunnelsInline websiteId={websiteId} />}
+          {tab === 'funnels' && (
+            <>
+              <AutoFunnelInline websiteId={websiteId} />
+              <FunnelsInline websiteId={websiteId} />
+            </>
+          )}
           {tab === 'goals' && <GoalsInline websiteId={websiteId} />}
         </div>
       )}
