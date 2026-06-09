@@ -30,9 +30,9 @@ export function WebsiteAutocaptureForm({ websiteId }: { websiteId: string }) {
         <div>
           <h3 className="text-sm font-semibold text-foreground">Autocapture events</h3>
           <p className="mt-0.5 text-sm text-muted-foreground">
-            Automatically record clicks on buttons &amp; links and form submissions as events — no
-            code needed. They show up in your Goals &amp; Funnels event picker. Only element labels
-            are captured, never what visitors type.
+            Automatically record clicks on buttons &amp; links, form submissions, and each
+            visitor&apos;s scroll depth &amp; click count — no code needed. Events show up in your
+            Goals &amp; Funnels picker. Only element labels are captured, never what visitors type.
           </p>
         </div>
       </div>

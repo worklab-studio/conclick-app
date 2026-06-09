@@ -1,5 +1,7 @@
+'use client';
+
+import { useState } from 'react';
 import { Dialog } from '@umami/react-zen';
-import { Globe, Zap, Users } from 'lucide-react';
 import { useMessages, useResultQuery } from '@/components/hooks';
 import { LoadingPanel } from '@/components/common/LoadingPanel';
 import { formatLongNumber } from '@/lib/format';
@@ -26,7 +28,7 @@ export function Funnel({ id, name, type, parameters, websiteId }: any) {
 
   return (
     <LoadingPanel data={data} isLoading={isLoading} error={error}>
-      <div className="space-y-4">
+      <div className="space-y-3">
         <div className="flex items-start justify-between gap-3">
           <div className="truncate text-[15px] font-semibold text-foreground">{name}</div>
           <ReportEditButton id={id} name={name} type={type}>
@@ -41,63 +43,149 @@ export function Funnel({ id, name, type, parameters, websiteId }: any) {
             )}
           </ReportEditButton>
         </div>
-
-        <div>
-          {rows.map((step, index) => {
-            const isPage = step.type === 'path';
-            const Icon = isPage ? Globe : Zap;
-            const remainingPct = Math.round(step.remaining * 100);
-            const dropPct = Math.round(step.dropoff * 100);
-            const isLast = index === rows.length - 1;
-            return (
-              <div key={index} className="flex gap-3.5">
-                {/* number + connector */}
-                <div className="flex flex-col items-center">
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#5e5ba4] text-xs font-bold text-white">
-                    {index + 1}
-                  </div>
-                  {!isLast && <div className="my-1 w-px flex-1 bg-[hsl(0,0%,16%)]" />}
-                </div>
-
-                {/* body */}
-                <div className={`min-w-0 flex-1 ${isLast ? '' : 'pb-5'}`}>
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="flex min-w-0 items-center gap-1.5">
-                      <Icon className="h-3.5 w-3.5 shrink-0 text-[#8b88cf]" />
-                      <span className="truncate text-sm font-medium text-foreground">
-                        {step.value}
-                      </span>
-                    </div>
-                    <span className="shrink-0 text-lg font-bold tabular-nums text-foreground">
-                      {remainingPct}%
-                    </span>
-                  </div>
-
-                  <div className="mt-2 h-2.5 w-full overflow-hidden rounded-full bg-[hsl(0,0%,14%)]">
-                    <div
-                      className="h-full rounded-full bg-gradient-to-r from-[#5e5ba4] to-[#7c79c4] transition-all"
-                      style={{ width: `${Math.max(0, Math.min(step.remaining * 100, 100))}%` }}
-                    />
-                  </div>
-
-                  <div className="mt-1.5 flex items-center justify-between text-xs text-muted-foreground">
-                    <span className="flex items-center gap-1.5" title={String(step.visitors)}>
-                      <Users className="h-3 w-3" />
-                      {formatLongNumber(step.visitors)}{' '}
-                      {formatMessage(labels.visitors).toLowerCase()}
-                    </span>
-                    {index > 0 && step.dropped > 0 ? (
-                      <span className="text-red-400/80">
-                        −{formatLongNumber(step.dropped)} dropped ({dropPct}%)
-                      </span>
-                    ) : null}
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
+        {rows.length > 0 ? <FunnelRibbon rows={rows} /> : null}
       </div>
     </LoadingPanel>
+  );
+}
+
+// Datafast-style flowing ribbon funnel. Bands taper smoothly step→step; the % of
+// the original remaining is the band thickness. Brighter violet, one subtle echo
+// layer, drop-off shown between steps, visitor counts on hover.
+function FunnelRibbon({ rows }: { rows: FunnelResult[] }) {
+  const [hover, setHover] = useState<number | null>(null);
+
+  const W = 1000;
+  const H = 300;
+  const n = rows.length;
+  const segW = W / n;
+  const k = Math.min(segW * 0.3, 90);
+  const maxT = H * 0.76;
+  const minT = 10;
+  const t = rows.map(r => Math.max(Math.min(r.remaining, 1) * maxT, minT));
+  const cx = rows.map((_, i) => segW * i + segW / 2);
+
+  const ribbon = (mult: number) => {
+    const thick = t.map(v => Math.min(v * mult, H - 6));
+    const yt = thick.map(v => (H - v) / 2);
+    const yb = thick.map(v => (H + v) / 2);
+    let d = `M 0 ${yt[0]}`;
+    for (let i = 0; i < n; i++) {
+      const bx = segW * (i + 1);
+      d += ` L ${i === n - 1 ? W : bx - k} ${yt[i]}`;
+      if (i < n - 1)
+        d += ` C ${bx - k / 2} ${yt[i]} ${bx + k / 2} ${yt[i + 1]} ${bx + k} ${yt[i + 1]}`;
+    }
+    d += ` L ${W} ${yb[n - 1]}`;
+    for (let i = n - 1; i >= 0; i--) {
+      const bx = segW * i;
+      d += ` L ${i === 0 ? 0 : bx + k} ${yb[i]}`;
+      if (i > 0) d += ` C ${bx + k / 2} ${yb[i]} ${bx - k / 2} ${yb[i - 1]} ${bx - k} ${yb[i - 1]}`;
+    }
+    return d + ' Z';
+  };
+
+  return (
+    <div className="relative">
+      <svg
+        viewBox={`0 0 ${W} ${H}`}
+        width="100%"
+        preserveAspectRatio="none"
+        style={{ height: 'auto' }}
+      >
+        <defs>
+          <linearGradient id="funnel-grad" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0" stopColor="#8b5cf6" />
+            <stop offset="1" stopColor="#a78bfa" />
+          </linearGradient>
+        </defs>
+
+        {/* one subtle echo layer */}
+        <path d={ribbon(1.12)} fill="#8b5cf6" opacity={0.1} />
+        <path d={ribbon(1)} fill="url(#funnel-grad)" />
+
+        {/* drop-off between steps */}
+        {rows.map((r, i) =>
+          i === 0 || !(r.dropped > 0) ? null : (
+            <text
+              key={`d${i}`}
+              x={segW * i}
+              y={(H - t[i - 1]) / 2 - 9}
+              textAnchor="middle"
+              fontSize="12.5"
+              fill="#8b8b93"
+            >
+              −{Math.round(r.dropoff * 100)}%
+            </text>
+          ),
+        )}
+
+        {/* % pill per step */}
+        {rows.map((r, i) => {
+          const label = `${Math.round(r.remaining * 100)}%`;
+          const pw = 26 + label.length * 11;
+          return (
+            <g key={`p${i}`} transform={`translate(${cx[i] - pw / 2}, ${H / 2 - 17})`}>
+              <rect width={pw} height="34" rx="17" fill="#101013" stroke="hsl(0 0% 22%)" />
+              <text
+                x={pw / 2}
+                y="22"
+                textAnchor="middle"
+                fontSize="15"
+                fontWeight="700"
+                fill="#fff"
+              >
+                {label}
+              </text>
+            </g>
+          );
+        })}
+
+        {/* hover hit areas */}
+        {rows.map((_, i) => (
+          <rect
+            key={`h${i}`}
+            x={segW * i}
+            y={0}
+            width={segW}
+            height={H}
+            fill="transparent"
+            onMouseEnter={() => setHover(i)}
+            onMouseLeave={() => setHover(null)}
+          />
+        ))}
+      </svg>
+
+      {/* step labels */}
+      <div className="mt-2 flex">
+        {rows.map((r, i) => (
+          <div key={`l${i}`} className="min-w-0 flex-1 px-1 text-center">
+            <div className="truncate text-xs font-medium text-foreground/90" title={r.value}>
+              {r.value}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* hover tooltip — visitor counts live here to keep the chart clean */}
+      {hover !== null ? (
+        <div
+          className="pointer-events-none absolute top-1 z-10 -translate-x-1/2 whitespace-nowrap rounded-lg border border-[hsl(0,0%,16%)] bg-[hsl(0,0%,10%)] px-3 py-2 text-xs shadow-xl"
+          style={{ left: `${(cx[hover] / W) * 100}%` }}
+        >
+          <div className="font-semibold text-foreground">{rows[hover].value}</div>
+          <div className="mt-0.5 text-muted-foreground">
+            {formatLongNumber(rows[hover].visitors)} visitors ·{' '}
+            {Math.round(rows[hover].remaining * 100)}%
+          </div>
+          {hover > 0 && rows[hover].dropped > 0 ? (
+            <div className="text-red-400/80">
+              −{formatLongNumber(rows[hover].dropped)} dropped (
+              {Math.round(rows[hover].dropoff * 100)}%)
+            </div>
+          ) : null}
+        </div>
+      ) : null}
+    </div>
   );
 }

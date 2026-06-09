@@ -1,9 +1,10 @@
 import * as cheerio from 'cheerio';
 
-// Heuristic "read my site → suggest goals & funnels" analyzer (no LLM). Fetches
-// the site's homepage, finds the real interactive elements (CTAs, links, forms),
-// and proposes event-based goals/funnels (named to match autocapture's
-// "Clicked: <label>" / "Submitted: <label>") plus page-based ones from the nav.
+// Heuristic "read my site → suggest goals & funnels" analyzer (no LLM). Reads the
+// homepage AND a few key linked pages (pricing, signup, …), finds the real
+// interactive elements (CTAs, links, forms), and proposes event-based
+// goals/funnels (named to match autocapture's "Clicked: <label>" /
+// "Submitted: <label>") plus page-based ones from the nav.
 
 export interface SuggestedGoal {
   name: string;
@@ -18,7 +19,14 @@ export interface SuggestedFunnel {
 export interface SiteSuggestions {
   goals: SuggestedGoal[];
   funnels: SuggestedFunnel[];
-  meta: { url: string; links: number; buttons: number; forms: number; note?: string };
+  meta: {
+    url: string;
+    links: number;
+    buttons: number;
+    forms: number;
+    pages: number;
+    note?: string;
+  };
 }
 
 const CONVERSION = [
@@ -95,7 +103,55 @@ const cap = (s: string) => s.slice(0, 50);
 const evt = (label: string) => cap(`Clicked: ${label}`);
 
 function empty(url: string, note: string): SiteSuggestions {
-  return { goals: [], funnels: [], meta: { url, links: 0, buttons: 0, forms: 0, note } };
+  return { goals: [], funnels: [], meta: { url, links: 0, buttons: 0, forms: 0, pages: 0, note } };
+}
+
+interface PageData {
+  clickables: { text: string; href?: string }[];
+  forms: number;
+  paths: Set<string>;
+}
+
+async function fetchHtml(url: string): Promise<string | null> {
+  try {
+    const res = await fetch(url, {
+      signal: AbortSignal.timeout(7000),
+      redirect: 'follow',
+      headers: { 'user-agent': 'ConclickBot/1.0 (+https://conclick.io)' },
+    });
+    if (!res.ok) return null;
+    return (await res.text()).slice(0, 1_500_000);
+  } catch {
+    return null;
+  }
+}
+
+function parsePage(html: string, domain: string): PageData {
+  const $ = cheerio.load(html);
+  const clickables: { text: string; href?: string }[] = [];
+  $('a[href], button, [role="button"], input[type="submit"], input[type="button"]').each(
+    (_, el) => {
+      const $el = $(el);
+      const text = clean(
+        $el.attr('aria-label') || $el.text() || $el.attr('value') || $el.attr('title') || '',
+      );
+      if (text) clickables.push({ text, href: $el.attr('href') });
+    },
+  );
+  const paths = new Set<string>();
+  for (const c of clickables) {
+    if (!c.href) continue;
+    let p = '';
+    try {
+      if (c.href.startsWith('/') && !c.href.startsWith('//')) p = c.href;
+      else if (c.href.includes(domain)) p = new URL(c.href).pathname;
+    } catch {
+      /* ignore */
+    }
+    p = p.split('?')[0].split('#')[0];
+    if (p && p !== '/' && p.length < 60) paths.add(p);
+  }
+  return { clickables, forms: $('form').length, paths };
 }
 
 export async function analyzeSite(rawDomain: string): Promise<SiteSuggestions> {
@@ -109,52 +165,33 @@ export async function analyzeSite(rawDomain: string): Promise<SiteSuggestions> {
   }
 
   const url = `https://${domain}/`;
-  let html = '';
-  try {
-    const res = await fetch(url, {
-      signal: AbortSignal.timeout(8000),
-      redirect: 'follow',
-      headers: { 'user-agent': 'ConclickBot/1.0 (+https://conclick.io)' },
-    });
-    html = (await res.text()).slice(0, 2_000_000);
-  } catch {
+  const home = await fetchHtml(url);
+  if (home === null) {
     return empty(url, "Couldn't reach your site to read it — check the domain is public.");
   }
 
-  const $ = cheerio.load(html);
+  const homeData = parsePage(home, domain);
 
-  const clickables: { text: string; href?: string }[] = [];
-  $('a[href], button, [role="button"], input[type="submit"], input[type="button"]').each(
-    (_, el) => {
-      const $el = $(el);
-      const text = clean(
-        $el.attr('aria-label') || $el.text() || $el.attr('value') || $el.attr('title') || '',
-      );
-      if (text) clickables.push({ text, href: $el.attr('href') });
-    },
-  );
-  const formCount = $('form').length;
+  // follow up to 3 high-signal linked pages (pricing, signup, checkout, …)
+  const priority = [...homeData.paths]
+    .filter(p => has(p, [...CONVERSION_PATH, ...CONSIDERATION_PATH]))
+    .slice(0, 3);
+  const subHtml = await Promise.all(priority.map(p => fetchHtml(`https://${domain}${p}`)));
+  const pages = [
+    homeData,
+    ...subHtml.filter((h): h is string => !!h).map(h => parsePage(h, domain)),
+  ];
 
-  // internal paths from same-site links
+  const allClickables = pages.flatMap(p => p.clickables);
+  const formCount = pages.reduce((s, p) => s + p.forms, 0);
   const internalPaths = new Set<string>();
-  for (const c of clickables) {
-    if (!c.href) continue;
-    let p = '';
-    try {
-      if (c.href.startsWith('/') && !c.href.startsWith('//')) p = c.href;
-      else if (c.href.includes(domain)) p = new URL(c.href).pathname;
-    } catch {
-      /* ignore */
-    }
-    p = p.split('?')[0].split('#')[0];
-    if (p && p !== '/' && p.length < 60) internalPaths.add(p);
-  }
+  pages.forEach(p => p.paths.forEach(x => internalPaths.add(x)));
 
   // unique CTAs by label, bucketed by intent
   const seen = new Set<string>();
   const conv: string[] = [];
   const cons: string[] = [];
-  for (const c of clickables) {
+  for (const c of allClickables) {
     const key = c.text.toLowerCase();
     if (seen.has(key)) continue;
     seen.add(key);
@@ -211,9 +248,10 @@ export async function analyzeSite(rawDomain: string): Promise<SiteSuggestions> {
     funnels: funnels.slice(0, 2),
     meta: {
       url,
-      links: $('a[href]').length,
-      buttons: $('button').length,
+      links: allClickables.length,
+      buttons: 0,
       forms: formCount,
+      pages: pages.length,
       note:
         goals.length || funnels.length
           ? undefined

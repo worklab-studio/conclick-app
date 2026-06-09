@@ -190,6 +190,33 @@
     autocaptureStarted = true;
     document.addEventListener('click', onAutoClick, true);
     document.addEventListener('submit', onAutoSubmit, true);
+
+    // Engagement: max scroll depth + total click count, sent once on page exit.
+    const onScroll = () => {
+      const e = document.documentElement;
+      const denom = e.scrollHeight - e.clientHeight || 1;
+      const pct = Math.min(100, Math.round(((window.scrollY || e.scrollTop || 0) / denom) * 100));
+      if (pct > maxScroll) maxScroll = pct;
+    };
+    const sendEngagement = () => {
+      if (engagementSent) return;
+      engagementSent = true;
+      if (maxScroll > 0 || clickCount > 0) {
+        track('engagement', { scroll: maxScroll, clicks: clickCount });
+      }
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    document.addEventListener(
+      'click',
+      () => {
+        clickCount++;
+      },
+      true,
+    );
+    window.addEventListener('pagehide', sendEngagement);
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'hidden') sendEngagement();
+    });
   };
 
   /* Tracking functions */
@@ -284,6 +311,9 @@
   let cache;
   let identity;
   let autocaptureStarted;
+  let maxScroll = 0;
+  let clickCount = 0;
+  let engagementSent;
 
   if (autoTrack && !trackingDisabled()) {
     if (document.readyState === 'complete') {
