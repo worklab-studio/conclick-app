@@ -8,6 +8,7 @@ import { LoadingPanel } from '@/components/common/LoadingPanel';
 import { Panel } from '@/components/common/Panel';
 import { TabEmptyState } from '@/components/common/TabEmptyState';
 import { Target } from 'lucide-react';
+import { SmartSetupButton } from '../SmartSetupButton';
 
 // Goals report body WITHOUT WebsiteControls — date range comes from the
 // dashboard's shared picker. Used inline in the dashboard "Goals" panel tab.
@@ -22,7 +23,10 @@ export function GoalsInline({ websiteId }: { websiteId: string }) {
     <Column gap>
       {!isShare && (
         <SectionHeader>
-          <GoalAddButton websiteId={websiteId} />
+          <div className="flex items-center gap-2">
+            <SmartSetupButton websiteId={websiteId} />
+            <GoalAddButton websiteId={websiteId} />
+          </div>
         </SectionHeader>
       )}
       <LoadingPanel

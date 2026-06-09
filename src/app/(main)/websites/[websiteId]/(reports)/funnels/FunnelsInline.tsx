@@ -8,6 +8,7 @@ import { LoadingPanel } from '@/components/common/LoadingPanel';
 import { Panel } from '@/components/common/Panel';
 import { TabEmptyState } from '@/components/common/TabEmptyState';
 import { Filter } from 'lucide-react';
+import { SmartSetupButton } from '../SmartSetupButton';
 
 // Funnels report body WITHOUT WebsiteControls — the date range comes from the
 // dashboard's shared picker. Used inline in the dashboard "Funnels" panel tab.
@@ -22,7 +23,10 @@ export function FunnelsInline({ websiteId }: { websiteId: string }) {
     <Column gap>
       {!isShare && (
         <SectionHeader>
-          <FunnelAddButton websiteId={websiteId} />
+          <div className="flex items-center gap-2">
+            <SmartSetupButton websiteId={websiteId} />
+            <FunnelAddButton websiteId={websiteId} />
+          </div>
         </SectionHeader>
       )}
       <LoadingPanel
