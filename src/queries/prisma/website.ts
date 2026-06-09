@@ -70,39 +70,13 @@ export async function getAllUserWebsitesIncludingTeamOwner(userId: string, filte
   );
 }
 
-// Teams the user belongs to + the user-ids of those teams' owners — so a team
-// member can see (and open) the websites owned by their team's owner, not only
-// websites explicitly assigned to a team.
-export async function getUserTeamContext(
-  userId: string,
-): Promise<{ teamIds: string[]; ownerIds: string[] }> {
-  const memberships = await prisma.client.teamUser.findMany({
-    where: { userId },
-    select: { teamId: true },
-  });
-  const teamIds = memberships.map(m => m.teamId);
-  if (!teamIds.length) {
-    return { teamIds: [], ownerIds: [] };
-  }
-  const owners = await prisma.client.teamUser.findMany({
-    where: { teamId: { in: teamIds }, role: ROLES.teamOwner },
-    select: { userId: true },
-  });
-  const ownerIds = [...new Set(owners.map(o => o.userId))].filter(id => id !== userId);
-  return { teamIds, ownerIds };
-}
-
+// Personal workspace: only the user's own (non-team) websites. Team websites
+// are listed per-team via getTeamWebsites + the workspace switcher.
 export async function getUserWebsites(userId: string, filters?: QueryFilters) {
-  const { teamIds, ownerIds } = await getUserTeamContext(userId);
-
   return getWebsites(
     {
       where: {
-        OR: [
-          { userId },
-          ...(teamIds.length ? [{ teamId: { in: teamIds } }] : []),
-          ...(ownerIds.length ? [{ userId: { in: ownerIds } }] : []),
-        ],
+        userId,
       },
       include: {
         user: {

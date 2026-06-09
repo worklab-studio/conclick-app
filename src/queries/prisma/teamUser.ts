@@ -2,6 +2,7 @@ import { uuid } from '@/lib/crypto';
 import { Prisma } from '@/generated/prisma/client';
 import prisma from '@/lib/prisma';
 import { QueryFilters } from '@/lib/types';
+import { ROLES } from '@/lib/constants';
 import TeamUserFindManyArgs = Prisma.TeamUserFindManyArgs;
 
 export async function findTeamUser(criteria: Prisma.TeamUserFindUniqueArgs) {
@@ -13,6 +14,18 @@ export async function getTeamUser(teamId: string, userId: string) {
     where: {
       teamId,
       userId,
+    },
+  });
+}
+
+export async function getTeamOwner(teamId: string) {
+  return prisma.client.teamUser.findFirst({
+    where: {
+      teamId,
+      role: ROLES.teamOwner,
+    },
+    include: {
+      user: true,
     },
   });
 }

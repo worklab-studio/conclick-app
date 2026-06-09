@@ -12,6 +12,7 @@ import { LogOut, CreditCard, User } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { NotificationDropdown } from '@/components/NotificationDropdown';
 import { Logo } from '@/components/logo';
+import { WorkspaceSwitcher } from './WorkspaceSwitcher';
 
 export function TopNav() {
   const { router } = useNavigation();
@@ -25,9 +26,12 @@ export function TopNav() {
       <div className="mx-auto w-full px-3 md:px-6" style={{ maxWidth: '1320px' }}>
         <div className="flex h-16 items-center justify-between">
           {/* Logo on the left */}
-          <Link href="/websites" className="flex items-center">
-            <Logo className="h-7 w-auto" />
-          </Link>
+          <div className="flex items-center gap-3">
+            <Link href="/websites" className="flex items-center">
+              <Logo className="h-7 w-auto" />
+            </Link>
+            <WorkspaceSwitcher />
+          </div>
 
           {/* Admin dropdown on the right */}
           {/* Profile Component */}

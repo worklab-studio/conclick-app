@@ -1,7 +1,7 @@
 import { Auth } from '@/lib/types';
 import { PERMISSIONS } from '@/lib/constants';
 import { hasPermission } from '@/lib/auth';
-import { getLink, getPixel, getTeamUser, getUserTeamContext, getWebsite } from '@/queries/prisma';
+import { getLink, getPixel, getTeamUser, getWebsite } from '@/queries/prisma';
 
 export async function canViewWebsite({ user, shareToken }: Auth, websiteId: string) {
   if (user?.isAdmin) {
@@ -29,12 +29,7 @@ export async function canViewWebsite({ user, shareToken }: Auth, websiteId: stri
   }
 
   if (entity.userId) {
-    if (user.id === entity.userId) {
-      return true;
-    }
-    // Team members can view websites owned by a team-owner they share a team with.
-    const { ownerIds } = await getUserTeamContext(user.id);
-    return ownerIds.includes(entity.userId);
+    return user.id === entity.userId;
   }
 
   if (entity.teamId) {

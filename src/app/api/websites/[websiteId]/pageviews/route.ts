@@ -5,7 +5,7 @@ import { dateRangeParams, filterParams } from '@/lib/schema';
 import { getCompareDate } from '@/lib/date';
 import { unauthorized, json } from '@/lib/response';
 import { getPageviewStats, getSessionStats } from '@/queries/sql';
-import { isPaidOrTrialUser } from '@/lib/billing';
+import { websiteHasPaidOwner } from '@/lib/website-access';
 
 export async function GET(
   request: Request,
@@ -29,7 +29,7 @@ export async function GET(
   // session that does NOT have a matching share token for this website.
   const hasMatchingShareToken = auth.shareToken?.websiteId === websiteId;
 
-  if (!hasMatchingShareToken && !isPaidOrTrialUser(auth.user)) {
+  if (!hasMatchingShareToken && !(await websiteHasPaidOwner(websiteId))) {
     return unauthorized({ message: 'Subscription required to view analytics.' });
   }
 

@@ -8,6 +8,7 @@ import { TeamLeaveButton } from '@/app/(main)/teams/TeamLeaveButton';
 import { TeamManage } from './TeamManage';
 import { TeamEditForm } from './TeamEditForm';
 import { TeamMembersDataTable } from './TeamMembersDataTable';
+import { TeamWebsitesForm } from './TeamWebsitesForm';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 export function TeamSettings({ teamId }: { teamId: string }) {
@@ -70,6 +71,17 @@ export function TeamSettings({ teamId }: { teamId: string }) {
             <TeamMembersDataTable teamId={teamId} allowEdit={canEdit} />
           </CardContent>
         </Card>
+
+        {isTeamOwner && (
+          <Card className="dark:bg-[hsl(0,0%,8%)] dark:border-[hsl(0,0%,12%)]">
+            <CardHeader>
+              <CardTitle>Websites</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <TeamWebsitesForm teamId={teamId} />
+            </CardContent>
+          </Card>
+        )}
 
         {isTeamOwner && (
           <Card className="border-red-200 dark:bg-[hsl(0,0%,8%)] dark:border-red-900/30">

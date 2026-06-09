@@ -131,17 +131,17 @@ export function WebsitePage({ websiteId, shareMode }: { websiteId: string; share
   const [chartType, setChartType] = useState('overview');
   const router = useRouter();
 
-  // Access-control redirect — owner view only; never for public share links.
+  // Access-control redirect — never for public share links, and never for
+  // team-owned sites (those inherit the team owner's plan, enforced server-side).
+  // Only the user's own personal sites gate on the user's own plan.
   useEffect(() => {
     if (shareMode) return;
-    if (!isUserLoading && user) {
-      const hasAccess = checkAccess(user);
-      if (!hasAccess) {
-        router.replace('/account/billing');
-        toast.error('Your trial has expired. Please upgrade to continue viewing analytics.');
-      }
+    if (isUserLoading || isWebsiteLoading) return;
+    if (user && website && !website.teamId && !checkAccess(user)) {
+      router.replace('/account/billing');
+      toast.error('Your trial has expired. Please upgrade to continue viewing analytics.');
     }
-  }, [user, isUserLoading, router, shareMode]);
+  }, [user, isUserLoading, website, isWebsiteLoading, router, shareMode]);
 
   // In share mode the viewer is anonymous — never block the render on (or gate
   // access by) the login query, which 401s for them.
@@ -149,7 +149,7 @@ export function WebsitePage({ websiteId, shareMode }: { websiteId: string; share
     return <LoadingSkeleton />;
   }
 
-  if (!shareMode && user && !checkAccess(user)) {
+  if (!shareMode && user && website && !website.teamId && !checkAccess(user)) {
     return null;
   }
 
