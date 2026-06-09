@@ -70,13 +70,24 @@ export async function getAllUserWebsitesIncludingTeamOwner(userId: string, filte
   );
 }
 
-// Personal workspace: only the user's own (non-team) websites. Team websites
-// are listed per-team via getTeamWebsites + the workspace switcher.
+// Everything the user can access: their own sites + the sites of any team they
+// belong to (any role). The Personal workspace shows all of this; team
+// workspaces filter to a single team via getTeamWebsites.
 export async function getUserWebsites(userId: string, filters?: QueryFilters) {
   return getWebsites(
     {
       where: {
-        userId,
+        OR: [
+          { userId },
+          {
+            team: {
+              deletedAt: null,
+              members: {
+                some: { userId },
+              },
+            },
+          },
+        ],
       },
       include: {
         user: {
