@@ -1,4 +1,5 @@
 'use client';
+import { useCallback, useMemo, useState } from 'react';
 import { Grid, Column } from '@umami/react-zen';
 import { SectionHeader } from '@/components/common/SectionHeader';
 import { Goal } from './Goal';
@@ -18,6 +19,17 @@ export function GoalsInline({ websiteId }: { websiteId: string }) {
     dateRange: { startDate, endDate },
   } = useDateRange();
   const isShare = useNavigation().pathname?.includes('/share/');
+
+  // Active goals first (by conversions desc); goals whose counts haven't loaded
+  // keep their insertion order so the grid doesn't jump while loading.
+  const [counts, setCounts] = useState<Record<string, number>>({});
+  const onResult = useCallback((id: string, num: number) => {
+    setCounts(prev => (prev[id] === num ? prev : { ...prev, [id]: num }));
+  }, []);
+  const reports = useMemo(() => {
+    const list = [...((data?.['data'] as any[]) || [])];
+    return list.sort((a, b) => (counts[b.id] ?? -1) - (counts[a.id] ?? -1));
+  }, [data, counts]);
 
   return (
     <Column gap>
@@ -44,9 +56,9 @@ export function GoalsInline({ websiteId }: { websiteId: string }) {
       >
         {data && (
           <Grid columns={{ xs: '1fr', md: '1fr 1fr' }} gap>
-            {data['data']?.map((report: any) => (
+            {reports.map((report: any) => (
               <Panel key={report.id}>
-                <Goal {...report} startDate={startDate} endDate={endDate} />
+                <Goal {...report} startDate={startDate} endDate={endDate} onResult={onResult} />
               </Panel>
             ))}
           </Grid>

@@ -124,11 +124,17 @@ export function detectSiteType(pages: ValueCount[]): {
   return { isSinglePage: uniq.size < 4, meaningful };
 }
 
-function bestConversion(events: ValueCount[], maxCount: number): string | null {
+function bestConversion(
+  events: ValueCount[],
+  maxCount: number,
+  goalSet?: Set<string>,
+): string | null {
   let best: string | null = null;
   let bestScore = 0;
   for (const e of events) {
-    const s = scoreConversionEvent(e.value, e.count, maxCount);
+    let s = scoreConversionEvent(e.value, e.count, maxCount);
+    // User-declared intent beats keyword guessing: saved goals get a strong boost.
+    if (s >= 0 && goalSet?.has(String(e.value || '').toLowerCase())) s += 50;
     if (s > bestScore) {
       bestScore = s;
       best = e.value;
@@ -148,11 +154,15 @@ function bestConversion(events: ValueCount[], maxCount: number): string | null {
 export function buildAutoSteps(
   pages: ValueCount[],
   events: ValueCount[],
+  goalValues?: string[],
 ): { steps: AutoStep[]; isSinglePage: boolean } {
   const { isSinglePage, meaningful } = detectSiteType(pages);
   const maxEv = Math.max(1, ...events.map(e => e.count || 0));
   const entry = pages.some(p => p.value === '/') ? '/' : pages[0]?.value || '';
-  const conv = bestConversion(events, maxEv);
+  const goalSet = goalValues?.length
+    ? new Set(goalValues.filter(Boolean).map(v => String(v).toLowerCase()))
+    : undefined;
+  const conv = bestConversion(events, maxEv, goalSet);
 
   const steps: AutoStep[] = [];
   if (entry) steps.push({ type: 'path', value: entry });

@@ -115,6 +115,8 @@ export const goalReportSchema = z.object({
     .object({
       startDate: z.coerce.date(),
       endDate: z.coerce.date(),
+      // Needed for the daily conversions series (day bucketing in the user's tz).
+      timezone: z.string().optional(),
       type: z.string(),
       value: z.string(),
       operator: z.enum(['count', 'sum', 'average']).optional(),

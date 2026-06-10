@@ -5,6 +5,20 @@ import { parseRequest } from '@/lib/request';
 import { canViewWebsite, canUpdateWebsite } from '@/permissions';
 import { unauthorized, json } from '@/lib/response';
 import { getReports, createReport } from '@/queries/prisma';
+import { reportKey } from '@/lib/report-identity';
+
+// Find an existing goal/funnel with the same canonical parameters, if any.
+async function findDuplicateReport(websiteId: string, type: string, parameters: any) {
+  const key = reportKey(type, parameters);
+  if (!key) return null;
+  const existing = await getReports(
+    { where: { websiteId, type, website: { deletedAt: null } } },
+    { pageSize: 200 },
+  );
+  return (
+    ((existing as any)?.data as any[])?.find(r => reportKey(r.type, r.parameters) === key) || null
+  );
+}
 
 export async function GET(request: Request) {
   const schema = z.object({
@@ -59,15 +73,31 @@ export async function POST(request: Request) {
     return unauthorized();
   }
 
-  const result = await createReport({
-    id: uuid(),
-    userId: auth.user.id,
-    websiteId,
-    type,
-    name,
-    description: description || '',
-    parameters,
-  });
+  // Idempotent for goals/funnels: saving an identical one returns the existing
+  // report instead of creating a duplicate (fixes the builder, "Add all", and
+  // "Save as funnel" all at once).
+  const duplicate = await findDuplicateReport(websiteId, type, parameters);
+  if (duplicate) {
+    return json(duplicate);
+  }
 
-  return json(result);
+  try {
+    const result = await createReport({
+      id: uuid(),
+      userId: auth.user.id,
+      websiteId,
+      type,
+      name,
+      description: description || '',
+      parameters,
+    });
+    return json(result);
+  } catch (e: any) {
+    // Unique-index race (two parallel creates): return the winner.
+    if (e?.code === 'P2002') {
+      const winner = await findDuplicateReport(websiteId, type, parameters);
+      if (winner) return json(winner);
+    }
+    throw e;
+  }
 }

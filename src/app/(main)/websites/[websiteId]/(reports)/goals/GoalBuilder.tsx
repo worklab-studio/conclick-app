@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
-import { Eye, Zap, Loader2, type LucideIcon } from 'lucide-react';
-import { useUpdateQuery } from '@/components/hooks';
+import { useMemo, useState } from 'react';
+import { Eye, Zap, Loader2, Info, type LucideIcon } from 'lucide-react';
+import { useUpdateQuery, useReportsQuery, useResultQuery } from '@/components/hooks';
 import { Button } from '@/components/ui/button';
 import { MetricValuePicker } from '@/components/input/MetricValuePicker';
+import { goalKey } from '@/lib/report-identity';
 
 type GoalType = 'path' | 'event';
 
@@ -34,7 +35,30 @@ export function GoalBuilder({ websiteId, onClose }: { websiteId: string; onClose
   const effectiveName = nameDirty ? name : defaultName(type, value);
   const canSave = !!value && !!effectiveName;
 
+  // Duplicate guard: is this exact goal already tracked? (Server create is
+  // idempotent too — this is just friendlier.)
+  const { data: existing } = useReportsQuery({ websiteId, type: 'goal' });
+  const isDuplicate = useMemo(() => {
+    if (!value) return false;
+    const key = goalKey({ type, value });
+    return ((existing?.data as any[]) || []).some(r => goalKey(r.parameters) === key);
+  }, [existing, type, value]);
+
+  // Live preview: how this goal performs over the current date range, before saving.
+  const { data: preview } = useResultQuery<{ num: number; total: number }>(
+    'goal',
+    { websiteId, type, value },
+    { enabled: !!value },
+  );
+  const pNum = preview?.num || 0;
+  const pTotal = preview?.total || 0;
+  const pPct = pTotal ? Math.round((pNum / pTotal) * 100) : 0;
+
   const handleSave = async () => {
+    if (isDuplicate) {
+      onClose();
+      return;
+    }
     await mutateAsync(
       { type: 'goal', name: effectiveName, websiteId, parameters: { type, value } },
       {
@@ -89,6 +113,29 @@ export function GoalBuilder({ websiteId, onClose }: { websiteId: string; onClose
         <MetricValuePicker websiteId={websiteId} type={type} value={value} onChange={setValue} />
       </div>
 
+      {value ? (
+        isDuplicate ? (
+          <div className="flex items-start gap-2 rounded-lg border border-[#5e5ba4]/30 bg-[#5e5ba4]/10 px-3 py-2 text-xs text-[#c7c4f0]">
+            <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+            You&apos;re already tracking this — saving won&apos;t create a duplicate.
+          </div>
+        ) : preview ? (
+          <div className="rounded-lg border border-[hsl(0,0%,14%)] bg-[hsl(0,0%,9%)] px-3 py-2 text-xs text-muted-foreground">
+            In the selected period:{' '}
+            <span className="font-semibold text-foreground">{pNum.toLocaleString()}</span> of{' '}
+            <span className="font-semibold text-foreground">{pTotal.toLocaleString()}</span>{' '}
+            visitors did this
+            {pTotal > 0 ? (
+              <>
+                {' '}
+                (<span className="font-semibold text-[#b7b4e4]">{pPct}%</span>)
+              </>
+            ) : null}
+            .
+          </div>
+        ) : null
+      ) : null}
+
       <div>
         <div className="mb-2 text-[13px] font-semibold text-foreground/90">Name</div>
         <input
@@ -119,7 +166,7 @@ export function GoalBuilder({ websiteId, onClose }: { websiteId: string; onClose
           className="border-0 hover:opacity-90"
         >
           {isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-          Create goal
+          {isDuplicate ? 'Done' : 'Create goal'}
         </Button>
       </div>
     </div>

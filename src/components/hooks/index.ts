@@ -16,6 +16,7 @@ export * from './queries/useRevenueBySourceQuery';
 export * from './queries/useFrustrationQuery';
 export * from './queries/useClickMapQuery';
 export * from './queries/useFunnelQuery';
+export * from './queries/useGoalQuery';
 export * from './queries/useDateRangeQuery';
 export * from './queries/useDeleteQuery';
 export * from './queries/useEventDataEventsQuery';

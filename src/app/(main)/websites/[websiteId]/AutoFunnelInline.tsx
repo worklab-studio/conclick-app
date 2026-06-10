@@ -16,6 +16,7 @@ import {
   useDateRange,
   useUpdateQuery,
   useFunnelQuery,
+  useReportsQuery,
 } from '@/components/hooks';
 import { FunnelChart } from '@/app/(main)/websites/[websiteId]/(reports)/funnels/FunnelChart';
 import { buildAutoSteps } from '@/lib/auto-funnel';
@@ -102,7 +103,20 @@ export function AutoFunnelInline({ websiteId }: { websiteId: string }) {
     [eventsData],
   );
 
-  const { steps, isSinglePage } = useMemo(() => buildAutoSteps(pages, events), [pages, events]);
+  // Saved goals steer the auto-funnel's conversion step (declared intent > guessing).
+  const { data: goalReports } = useReportsQuery({ websiteId, type: 'goal' });
+  const goalValues = useMemo(
+    () =>
+      (((goalReports?.data as any[]) || [])
+        .map(r => r?.parameters?.value)
+        .filter(Boolean) as string[]) || [],
+    [goalReports],
+  );
+
+  const { steps, isSinglePage } = useMemo(
+    () => buildAutoSteps(pages, events, goalValues),
+    [pages, events, goalValues],
+  );
   const canRun = steps.length >= 2;
   const windowMinutes = isSinglePage ? 30 : 1440;
 

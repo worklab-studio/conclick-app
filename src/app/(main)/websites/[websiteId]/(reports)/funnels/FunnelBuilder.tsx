@@ -72,9 +72,21 @@ const blankSteps = (): FunnelStep[] => [
  * builder, and friendly "complete within" presets. Saves the same
  * parameters:{window,steps} payload as the old form.
  */
-export function FunnelBuilder({ websiteId, onClose }: { websiteId: string; onClose: () => void }) {
-  const [steps, setSteps] = useState<FunnelStep[]>(blankSteps);
-  const [windowMinutes, setWindowMinutes] = useState(60);
+export function FunnelBuilder({
+  websiteId,
+  onClose,
+  initialSteps,
+  initialWindow,
+}: {
+  websiteId: string;
+  onClose: () => void;
+  initialSteps?: FunnelStep[];
+  initialWindow?: number;
+}) {
+  const [steps, setSteps] = useState<FunnelStep[]>(() =>
+    initialSteps?.length ? initialSteps : blankSteps(),
+  );
+  const [windowMinutes, setWindowMinutes] = useState(initialWindow ?? 60);
   const [name, setName] = useState('');
   const [nameDirty, setNameDirty] = useState(false);
   const { mutateAsync, isPending, error, touch } = useUpdateQuery('/reports');

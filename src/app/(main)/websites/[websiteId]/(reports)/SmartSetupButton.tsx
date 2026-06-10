@@ -1,8 +1,9 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Sparkles, Loader2, Plus, Check, Filter, Globe, Zap } from 'lucide-react';
-import { useApi, useUpdateQuery } from '@/components/hooks';
+import { useApi, useUpdateQuery, useReportsQuery } from '@/components/hooks';
+import { goalKey, funnelKey } from '@/lib/report-identity';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -70,6 +71,22 @@ function SmartSetup({ websiteId }: { websiteId: string }) {
   const [busy, setBusy] = useState<string | undefined>();
   const [addingAll, setAddingAll] = useState(false);
 
+  // What's already tracked — so reopening the dialog never re-offers (or re-adds)
+  // goals/funnels that exist. Server-side idempotency is the backstop.
+  const { data: goalReports } = useReportsQuery({ websiteId, type: 'goal' });
+  const { data: funnelReports } = useReportsQuery({ websiteId, type: 'funnel' });
+  const existingKeys = useMemo(() => {
+    const set = new Set<string>();
+    for (const r of (goalReports?.data as any[]) || []) set.add('goal:' + goalKey(r.parameters));
+    for (const r of (funnelReports?.data as any[]) || [])
+      set.add('funnel:' + funnelKey(r.parameters));
+    return set;
+  }, [goalReports, funnelReports]);
+  const goalExists = (g: Goal) =>
+    existingKeys.has('goal:' + goalKey({ type: g.type, value: g.value }));
+  const funnelExists = (f: Funnel) =>
+    existingKeys.has('funnel:' + funnelKey({ window: f.window || 60, steps: f.steps }));
+
   useEffect(() => {
     let alive = true;
     post(`/websites/${websiteId}/suggest`, {})
@@ -115,10 +132,10 @@ function SmartSetup({ websiteId }: { websiteId: string }) {
   const addAll = async () => {
     setAddingAll(true);
     for (let i = 0; i < goals.length; i++) {
-      if (!added['g' + i]) await addGoal(goals[i], 'g' + i);
+      if (!added['g' + i] && !goalExists(goals[i])) await addGoal(goals[i], 'g' + i);
     }
     for (let i = 0; i < funnels.length; i++) {
-      if (!added['f' + i]) await addFunnel(funnels[i], 'f' + i);
+      if (!added['f' + i] && !funnelExists(funnels[i])) await addFunnel(funnels[i], 'f' + i);
     }
     setAddingAll(false);
   };
@@ -179,7 +196,8 @@ function SmartSetup({ websiteId }: { websiteId: string }) {
                   sub={`${g.type === 'path' ? 'Page goal' : 'Event goal'}${
                     g.count ? ` · ${g.count} fired` : ''
                   }`}
-                  done={added[key]}
+                  done={added[key] || goalExists(g)}
+                  doneLabel={added[key] ? 'Added' : 'Already tracking'}
                   busy={busy === key}
                   onAdd={() => addGoal(g, key)}
                 />
@@ -202,7 +220,8 @@ function SmartSetup({ websiteId }: { websiteId: string }) {
                   sub={`${f.steps.map(s => s.value).join('  →  ')}${
                     f.count ? `  ·  ${f.count} visitors` : ''
                   }`}
-                  done={added[key]}
+                  done={added[key] || funnelExists(f)}
+                  doneLabel={added[key] ? 'Added' : 'Already tracking'}
                   busy={busy === key}
                   onAdd={() => addFunnel(f, key)}
                 />
@@ -220,6 +239,7 @@ function SuggestRow({
   title,
   sub,
   done,
+  doneLabel = 'Added',
   busy,
   onAdd,
 }: {
@@ -227,6 +247,7 @@ function SuggestRow({
   title: string;
   sub: string;
   done?: boolean;
+  doneLabel?: string;
   busy?: boolean;
   onAdd: () => void;
 }) {
@@ -241,7 +262,7 @@ function SuggestRow({
       </div>
       {done ? (
         <span className="flex shrink-0 items-center gap-1 text-xs font-medium text-emerald-400">
-          <Check className="h-4 w-4" /> Added
+          <Check className="h-4 w-4" /> {doneLabel}
         </span>
       ) : (
         <Button
