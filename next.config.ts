@@ -6,7 +6,9 @@ const TRACKER_SCRIPT = '/script.js';
 const basePath = process.env.BASE_PATH || '';
 const cloudMode = process.env.CLOUD_MODE || '';
 const cloudUrl = process.env.CLOUD_URL || '';
-const collectApiEndpoint = process.env.COLLECT_API_ENDPOINT || '';
+// De-fingerprint by default: serve the collect endpoint at a neutral path (with a
+// rewrite back to /api/send, which stays for back-compat). Overridable via env.
+const collectApiEndpoint = process.env.COLLECT_API_ENDPOINT || '/e';
 const corsMaxAge = process.env.CORS_MAX_AGE || '';
 const defaultLocale = process.env.DEFAULT_LOCALE || '';
 const forceSSL = process.env.FORCE_SSL || '';
