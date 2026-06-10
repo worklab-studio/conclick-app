@@ -41,5 +41,7 @@ export async function GET(
   const filters = await getQueryFilters(query, websiteId);
   const values = await getValues(websiteId, FILTER_COLUMNS[type], filters);
 
-  return json((values ?? []).filter(n => n).sort());
+  // Drop rows with no value (e.g. null event_name from pageview rows) so consumers
+  // never receive `{ value: null }` (which broke auto-funnel scoring).
+  return json((values ?? []).filter((n: any) => n && n.value));
 }

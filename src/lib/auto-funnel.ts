@@ -83,6 +83,7 @@ const ASSET_RX = /\.(png|jpe?g|gif|svg|webp|css|js|ico|woff2?|map|json|txt|xml|p
 
 // Strip the autocapture prefix ("Clicked: " / "Submitted: " / "Viewed: ").
 function labelOf(name: string): string {
+  if (!name) return '';
   const idx = name.indexOf(': ');
   return (idx >= 0 ? name.slice(idx + 2) : name).toLowerCase().trim();
 }
@@ -97,6 +98,7 @@ function hasWord(label: string, words: string[]): boolean {
 
 /** Score an event's conversion-worthiness. Returns -1 to drop (UI noise). */
 export function scoreConversionEvent(name: string, count: number, maxCount: number): number {
+  if (!name) return -1;
   const label = labelOf(name);
   if (!label) return -1;
   if (hasWord(label, NOISE)) return -1;
@@ -115,8 +117,8 @@ export function detectSiteType(pages: ValueCount[]): {
   isSinglePage: boolean;
   meaningful: ValueCount[];
 } {
-  const meaningful = pages.filter(
-    p => p.value && p.value !== '/' && !ASSET_RX.test(p.value) && (p.count || 0) > 0,
+  const meaningful = (pages || []).filter(
+    p => p && p.value && p.value !== '/' && !ASSET_RX.test(p.value) && (p.count || 0) > 0,
   );
   const uniq = new Set(meaningful.map(p => p.value.split('?')[0].split('#')[0]));
   return { isSinglePage: uniq.size < 4, meaningful };
