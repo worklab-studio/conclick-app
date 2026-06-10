@@ -38,6 +38,7 @@ export * from './getAiTraffic';
 export * from './getCampaigns';
 export * from './getRevenueBySource';
 export * from './events/getFrustration';
+export * from './events/getClickMap';
 export * from './getChannelExpandedMetrics';
 export * from './getRealtimeActivity';
 export * from './getRealtimeData';

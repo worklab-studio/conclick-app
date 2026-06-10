@@ -9,6 +9,7 @@ import {
   Sparkles,
   Megaphone,
   MousePointerClick,
+  Crosshair,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useNavigation } from '@/components/hooks';
@@ -22,6 +23,7 @@ import { CampaignsInline } from '@/app/(main)/websites/[websiteId]/CampaignsInli
 import { RevenueBySourceInline } from '@/app/(main)/websites/[websiteId]/RevenueBySourceInline';
 import { AutoFunnelInline } from '@/app/(main)/websites/[websiteId]/AutoFunnelInline';
 import { FrictionInline } from '@/app/(main)/websites/[websiteId]/FrictionInline';
+import { ClickMapInline } from '@/app/(main)/websites/[websiteId]/ClickMapInline';
 
 const TABS = [
   { id: 'users', label: 'Users', icon: Users },
@@ -31,6 +33,7 @@ const TABS = [
   { id: 'ai', label: 'AI', icon: Sparkles },
   { id: 'campaigns', label: 'Campaigns', icon: Megaphone },
   { id: 'friction', label: 'Friction', icon: MousePointerClick },
+  { id: 'clickmap', label: 'Click map', icon: Crosshair },
 ] as const;
 
 type TabId = (typeof TABS)[number]['id'];
@@ -81,6 +84,7 @@ export function DashboardSectionsPanel({ websiteId }: { websiteId: string }) {
       {tab === 'ai' && <AiTrafficInline websiteId={websiteId} />}
       {tab === 'campaigns' && <CampaignsInline websiteId={websiteId} />}
       {tab === 'friction' && <FrictionInline websiteId={websiteId} />}
+      {tab === 'clickmap' && <ClickMapInline websiteId={websiteId} />}
       {(tab === 'funnels' || tab === 'goals') && (
         <div className="p-4">
           {tab === 'funnels' && (

@@ -191,6 +191,17 @@
     const data = { tag: el.tagName.toLowerCase(), selector: _selector(el) };
     if (label) data.text = label;
     if (el.tagName === 'A' && el.href) data.href = String(el.href).slice(0, 500);
+    // Coarse vertical position of the click as a 0–100% bucket down the full page,
+    // for the privacy-first click map. Never exact pixels — just how far down.
+    data.y = Math.max(
+      0,
+      Math.min(
+        100,
+        Math.round(
+          ((window.scrollY + e.clientY) / (document.documentElement.scrollHeight || 1)) * 100,
+        ),
+      ),
+    );
     track(('Clicked: ' + (label || el.tagName.toLowerCase())).slice(0, 50), data);
   };
 

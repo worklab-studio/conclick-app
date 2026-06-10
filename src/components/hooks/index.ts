@@ -14,6 +14,7 @@ export * from './queries/useAiTrafficQuery';
 export * from './queries/useCampaignsQuery';
 export * from './queries/useRevenueBySourceQuery';
 export * from './queries/useFrustrationQuery';
+export * from './queries/useClickMapQuery';
 export * from './queries/useDateRangeQuery';
 export * from './queries/useDeleteQuery';
 export * from './queries/useEventDataEventsQuery';
