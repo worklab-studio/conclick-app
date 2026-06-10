@@ -1,7 +1,15 @@
 'use client';
 
 import { useState } from 'react';
-import { Users, CreditCard, Filter, Target, Sparkles, Megaphone } from 'lucide-react';
+import {
+  Users,
+  CreditCard,
+  Filter,
+  Target,
+  Sparkles,
+  Megaphone,
+  MousePointerClick,
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useNavigation } from '@/components/hooks';
 import { SessionsDataTable } from '@/app/(main)/websites/[websiteId]/sessions/SessionsDataTable';
@@ -13,6 +21,7 @@ import { AiTrafficInline } from '@/app/(main)/websites/[websiteId]/AiTrafficInli
 import { CampaignsInline } from '@/app/(main)/websites/[websiteId]/CampaignsInline';
 import { RevenueBySourceInline } from '@/app/(main)/websites/[websiteId]/RevenueBySourceInline';
 import { AutoFunnelInline } from '@/app/(main)/websites/[websiteId]/AutoFunnelInline';
+import { FrictionInline } from '@/app/(main)/websites/[websiteId]/FrictionInline';
 
 const TABS = [
   { id: 'users', label: 'Users', icon: Users },
@@ -21,6 +30,7 @@ const TABS = [
   { id: 'goals', label: 'Goals', icon: Target },
   { id: 'ai', label: 'AI', icon: Sparkles },
   { id: 'campaigns', label: 'Campaigns', icon: Megaphone },
+  { id: 'friction', label: 'Friction', icon: MousePointerClick },
 ] as const;
 
 type TabId = (typeof TABS)[number]['id'];
@@ -70,6 +80,7 @@ export function DashboardSectionsPanel({ websiteId }: { websiteId: string }) {
       )}
       {tab === 'ai' && <AiTrafficInline websiteId={websiteId} />}
       {tab === 'campaigns' && <CampaignsInline websiteId={websiteId} />}
+      {tab === 'friction' && <FrictionInline websiteId={websiteId} />}
       {(tab === 'funnels' || tab === 'goals') && (
         <div className="p-4">
           {tab === 'funnels' && (

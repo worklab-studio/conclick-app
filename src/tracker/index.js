@@ -197,6 +197,7 @@
   const onAutoSubmit = e => {
     const form = e.target;
     if (!form || form.tagName !== 'FORM') return;
+    formTouched = undefined; // submitted → not an abandon
     const label = _clean(form.getAttribute('name') || form.id || form.getAttribute('aria-label'));
     track(('Submitted: ' + (label || 'form')).slice(0, 50), {
       tag: 'form',
@@ -204,11 +205,56 @@
     });
   };
 
+  // Privacy-first frustration signals — element-level only, NEVER coordinates or
+  // typed values: rage clicks (rapid repeats on one element), dead clicks (looks
+  // clickable but isn't), and form abandons (started a form, never submitted).
+  const _safeText = el => (/^(input|textarea|select)$/i.test(el.tagName) ? '' : _label(el));
+
+  const onFrustration = e => {
+    const t = e.target;
+    if (!t || t.nodeType !== 1) return;
+    const sel = _selector(t);
+    const now = Date.now();
+
+    if (sel === lastFrustSel && now - lastFrustAt < 700) {
+      rageCount++;
+      if (rageCount === 3) {
+        track('frustration', { type: 'rage', selector: sel, text: _safeText(t) });
+      }
+    } else {
+      rageCount = 1;
+    }
+    lastFrustSel = sel;
+    lastFrustAt = now;
+
+    const interactive = t.closest(
+      'a[href],button,input,select,textarea,[role="button"],[onclick],[tabindex],label,summary',
+    );
+    if (!interactive) {
+      let pointer = false;
+      try {
+        pointer = getComputedStyle(t).cursor === 'pointer';
+      } catch {
+        pointer = false;
+      }
+      if (pointer) {
+        track('frustration', { type: 'dead', selector: sel, text: _safeText(t) });
+      }
+    }
+  };
+
+  const onFormInput = e => {
+    const form = e.target && e.target.closest && e.target.closest('form');
+    if (form && !formTouched) formTouched = _selector(form);
+  };
+
   const startAutocapture = () => {
     if (autocaptureStarted) return;
     autocaptureStarted = true;
     document.addEventListener('click', onAutoClick, true);
     document.addEventListener('submit', onAutoSubmit, true);
+    document.addEventListener('click', onFrustration, true);
+    document.addEventListener('input', onFormInput, true);
 
     // Engagement: max scroll depth + total click count, sent once on page exit.
     const onScroll = () => {
@@ -220,6 +266,9 @@
     const sendEngagement = () => {
       if (engagementSent) return;
       engagementSent = true;
+      if (formTouched) {
+        track('frustration', { type: 'form_abandon', selector: formTouched });
+      }
       if (maxScroll > 0 || clickCount > 0) {
         track('engagement', { scroll: maxScroll, clicks: clickCount });
       }
@@ -336,6 +385,10 @@
   let maxScroll = 0;
   let clickCount = 0;
   let engagementSent;
+  let rageCount = 0;
+  let lastFrustSel;
+  let lastFrustAt = 0;
+  let formTouched;
 
   // Auto-tag clicks on Dodo Payments checkout links with this visitor's id, so
   // the payment webhook can attribute the sale back to them — no checkout code.
