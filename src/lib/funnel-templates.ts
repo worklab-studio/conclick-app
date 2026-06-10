@@ -14,6 +14,7 @@ export interface FunnelTemplate {
   name: string;
   label: string; // short chip label
   icon: TemplateIcon;
+  window: number; // smart "complete within" default, in minutes
   steps: TemplateStep[];
 }
 
@@ -23,6 +24,7 @@ export const FUNNEL_TEMPLATES: FunnelTemplate[] = [
     name: 'Signup funnel',
     label: 'Signup',
     icon: 'signup',
+    window: 10080, // 7 days — signup decisions take time
     steps: [
       { label: 'Landing', patterns: [/^\/$/, /home/, /index/] },
       { label: 'Pricing / features', patterns: [/pricing/, /plans?/, /features?/] },
@@ -37,6 +39,7 @@ export const FUNNEL_TEMPLATES: FunnelTemplate[] = [
     name: 'Checkout funnel',
     label: 'Checkout',
     icon: 'cart',
+    window: 60, // 1 hour — checkout is a single session
     steps: [
       { label: 'Product', patterns: [/product/, /shop/, /store/, /item/] },
       { label: 'Cart', patterns: [/cart/, /basket/, /bag/] },
@@ -52,6 +55,7 @@ export const FUNNEL_TEMPLATES: FunnelTemplate[] = [
     name: 'Newsletter signup',
     label: 'Newsletter',
     icon: 'mail',
+    window: 1440, // 1 day
     steps: [
       { label: 'Any page', patterns: [/^\/$/, /home/, /blog/] },
       { label: 'Subscribe', patterns: [/subscribe/, /newsletter/, /sign[-_]?up/] },
@@ -62,6 +66,7 @@ export const FUNNEL_TEMPLATES: FunnelTemplate[] = [
     name: 'Contact / lead',
     label: 'Contact',
     icon: 'phone',
+    window: 1440, // 1 day
     steps: [
       { label: 'Landing', patterns: [/^\/$/, /home/] },
       { label: 'Contact', patterns: [/contact/, /demo/, /book/, /call/, /lead/] },

@@ -17,11 +17,13 @@ interface Goal {
   name: string;
   type: 'path' | 'event';
   value: string;
+  count?: number;
 }
 interface Funnel {
   name: string;
   window: number;
   steps: { type: 'path' | 'event'; value: string }[];
+  count?: number;
 }
 
 /**
@@ -66,6 +68,7 @@ function SmartSetup({ websiteId }: { websiteId: string }) {
   const [note, setNote] = useState<string | undefined>();
   const [added, setAdded] = useState<Record<string, boolean>>({});
   const [busy, setBusy] = useState<string | undefined>();
+  const [addingAll, setAddingAll] = useState(false);
 
   useEffect(() => {
     let alive = true;
@@ -109,6 +112,16 @@ function SmartSetup({ websiteId }: { websiteId: string }) {
     setAdded(a => ({ ...a, [key]: true }));
     setBusy(undefined);
   };
+  const addAll = async () => {
+    setAddingAll(true);
+    for (let i = 0; i < goals.length; i++) {
+      if (!added['g' + i]) await addGoal(goals[i], 'g' + i);
+    }
+    for (let i = 0; i < funnels.length; i++) {
+      if (!added['f' + i]) await addFunnel(funnels[i], 'f' + i);
+    }
+    setAddingAll(false);
+  };
 
   if (status === 'loading') {
     return (
@@ -135,6 +148,22 @@ function SmartSetup({ websiteId }: { websiteId: string }) {
 
   return (
     <div className="space-y-5">
+      <div className="flex justify-end">
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={addAll}
+          disabled={addingAll}
+          className="border-[#5e5ba4]/40 text-[#c7c4f0] hover:bg-[#5e5ba4]/10"
+        >
+          {addingAll ? (
+            <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" />
+          ) : (
+            <Plus className="mr-1 h-3.5 w-3.5" />
+          )}
+          Add all
+        </Button>
+      </div>
       {goals.length > 0 && (
         <div>
           <div className="mb-2 text-[13px] font-semibold text-foreground/90">Goals</div>
@@ -147,7 +176,9 @@ function SmartSetup({ websiteId }: { websiteId: string }) {
                   key={key}
                   icon={<Icon className="h-4 w-4" />}
                   title={g.name}
-                  sub={g.type === 'path' ? 'Page goal' : 'Event goal'}
+                  sub={`${g.type === 'path' ? 'Page goal' : 'Event goal'}${
+                    g.count ? ` · ${g.count} fired` : ''
+                  }`}
                   done={added[key]}
                   busy={busy === key}
                   onAdd={() => addGoal(g, key)}
@@ -168,7 +199,9 @@ function SmartSetup({ websiteId }: { websiteId: string }) {
                   key={key}
                   icon={<Filter className="h-4 w-4" />}
                   title={f.name}
-                  sub={f.steps.map(s => s.value).join('  →  ')}
+                  sub={`${f.steps.map(s => s.value).join('  →  ')}${
+                    f.count ? `  ·  ${f.count} visitors` : ''
+                  }`}
                   done={added[key]}
                   busy={busy === key}
                   onAdd={() => addFunnel(f, key)}

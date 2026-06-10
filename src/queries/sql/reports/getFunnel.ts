@@ -13,7 +13,13 @@ export interface FunnelParameters {
 export interface FunnelResult {
   value: string;
   visitors: number;
+  previous?: number;
+  dropped?: number;
   dropoff: number;
+  remaining?: number;
+  revenue?: number; // minor units; payments from the distinct sessions reaching this step
+  revenuePerVisitor?: number; // minor units
+  medianMs?: number | null; // median time from step 1 to this step (ms)
 }
 
 export async function getFunnel(
@@ -97,7 +103,21 @@ async function relationalQuery(
           )`;
         }
 
-        pv.sumQuery += `\n${startSum}select ${levelNumber} as level, count(distinct(session_id)) as count from level${levelNumber}`;
+        // Per-level rollup: visitor count, revenue (deduped to distinct sessions so a
+        // buyer's payment isn't multiplied by repeat events), and median time from step 1.
+        const medianExpr =
+          levelNumber === 1
+            ? '0::float8'
+            : `(select percentile_cont(0.5) within group (order by ms)::float8
+                from (select extract(epoch from (min(n.created_at) - t1.t)) * 1000 as ms
+                      from level${levelNumber} n join t1 on t1.session_id = n.session_id
+                      group by n.session_id, t1.t) d)`;
+        pv.sumQuery += `\n${startSum}select ${levelNumber} as level,
+          (select count(distinct session_id) from level${levelNumber}) as count,
+          coalesce((select sum(r.paid_minor)::float8
+                    from (select distinct session_id from level${levelNumber}) z
+                    left join rev r on r.session_id = z.session_id), 0)::float8 as revenue,
+          ${medianExpr} as median_ms`;
         pv.params.push(paramValue);
 
         return pv;
@@ -115,6 +135,16 @@ async function relationalQuery(
     `
     ${levelOneQuery}
     ${levelQuery}
+    , rev as (
+      select session_id,
+             sum(case when type = 'payment' then amount_minor else 0 end)::float8 as paid_minor
+      from revenue_event
+      where website_id = {{websiteId::uuid}}
+        and session_id is not null
+        and occurred_at between {{startDate}} and {{endDate}}
+      group by session_id
+    )
+    , t1 as ( select session_id, min(created_at) as t from level1 group by session_id )
     ${sumQuery}
     ORDER BY level;
     `,
@@ -255,6 +285,11 @@ const formatResults = (steps: { type: string; value: string }[]) => (results: un
     const dropped = previous > 0 ? previous - visitors : 0;
     const dropoff = previous > 0 ? 1 - visitors / previous : 0;
     const remaining = firstCount > 0 ? visitors / firstCount : 0;
+    // Revenue + median time are present on the PG path; the ClickHouse path omits
+    // these columns, so they default to 0 / null (null-guarded).
+    const revenue = Number(results[i]?.revenue) || 0;
+    const revenuePerVisitor = visitors > 0 ? revenue / visitors : 0;
+    const medianMs = results[i]?.median_ms != null ? Number(results[i]?.median_ms) : null;
 
     return {
       ...step,
@@ -263,6 +298,9 @@ const formatResults = (steps: { type: string; value: string }[]) => (results: un
       dropped,
       dropoff,
       remaining,
+      revenue,
+      revenuePerVisitor,
+      medianMs,
     };
   });
 };

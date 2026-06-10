@@ -1,6 +1,8 @@
 import { timingSafeEqual } from 'node:crypto';
 import { json, unauthorized } from '@/lib/response';
 import prisma from '@/lib/prisma';
+import { getFunnel } from '@/queries/sql';
+import { biggestLeak, funnelRevenueLost } from '@/lib/funnel-insights';
 import { sendFounderDailyDigest, type DigestSite } from '@/lib/email';
 
 // CRON_SECRET-gated; trigger daily from an external scheduler:
@@ -74,6 +76,35 @@ export async function GET(request: Request) {
       const visitors = sessionRows.length;
       if (visitors === 0 && pageviews === 0) continue;
 
+      // Biggest funnel leak from the owner's top saved funnel (best-effort; the
+      // same biggestLeak/funnelRevenueLost helpers the UI uses, so numbers agree).
+      let leak: DigestSite['leak'];
+      try {
+        const report = await prisma.client.report.findFirst({
+          where: { websiteId: w.id, type: 'funnel' },
+          orderBy: { updatedAt: 'desc' },
+        });
+        const fp = report?.parameters as any;
+        if (fp?.steps?.length >= 2) {
+          const fr = (await getFunnel(
+            w.id,
+            { startDate: start, endDate: end, window: Number(fp.window) || 1440, steps: fp.steps },
+            {} as any,
+          )) as any[];
+          const { index } = biggestLeak(fr as any);
+          if (index > 0) {
+            leak = {
+              fromStep: fr[index - 1].value,
+              toStep: fr[index].value,
+              dropPct: Math.round((fr[index].dropoff || 0) * 100),
+              lostRevenue: funnelRevenueLost(fr as any, index),
+            };
+          }
+        }
+      } catch {
+        // never block the digest on the funnel
+      }
+
       sites.push({
         name: w.name,
         visitors,
@@ -82,6 +113,7 @@ export async function GET(request: Request) {
         revenue: Number(rev._sum.amountMinor || 0n),
         currency: ccy?.currency || 'USD',
         topSource: (topSrc[0] as any)?.referrerDomain || 'Direct',
+        leak,
       });
     }
 

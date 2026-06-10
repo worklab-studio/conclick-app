@@ -15,7 +15,12 @@ import {
   FilePlus,
   type LucideIcon,
 } from 'lucide-react';
-import { useDateRange, useUpdateQuery, useWebsiteValuesQuery } from '@/components/hooks';
+import {
+  useDateRange,
+  useUpdateQuery,
+  useWebsiteValuesQuery,
+  useFunnelQuery,
+} from '@/components/hooks';
 import { Button } from '@/components/ui/button';
 import {
   Select,
@@ -31,12 +36,15 @@ import {
   type TemplateIcon,
 } from '@/lib/funnel-templates';
 import { FunnelSuggestions, type FunnelSuggestion } from './FunnelSuggestions';
+import { FunnelChart } from './FunnelChart';
 
 const WINDOW_PRESETS = [
   { label: '15 minutes', value: 15 },
   { label: '30 minutes', value: 30 },
   { label: '1 hour', value: 60 },
   { label: '1 day', value: 1440 },
+  { label: '7 days', value: 10080 },
+  { label: '30 days', value: 43200 },
 ];
 
 const TPL_ICON: Record<TemplateIcon, LucideIcon> = {
@@ -87,6 +95,10 @@ export function FunnelBuilder({ websiteId, onClose }: { websiteId: string; onClo
 
   const effectiveName = nameDirty ? name : funnelName(steps);
   const canSave = steps.length >= 2 && steps.every(s => !!s.value) && !!effectiveName;
+
+  // Live preview — runs the real funnel engine on the current valid steps.
+  const { data: previewData } = useFunnelQuery(websiteId, { steps, window: windowMinutes });
+  const previewRows = (previewData as any[]) || [];
 
   const setStep = (i: number, patch: Partial<FunnelStep>) =>
     setSteps(prev => prev.map((s, idx) => (idx === i ? { ...s, ...patch } : s)));
@@ -236,6 +248,22 @@ export function FunnelBuilder({ websiteId, onClose }: { websiteId: string; onClo
           </button>
         ) : null}
       </div>
+
+      {/* live preview */}
+      {canSave && previewRows.length >= 2 ? (
+        <div>
+          <div className="mb-2 text-[13px] font-semibold text-foreground/90">Preview</div>
+          <div className="rounded-xl border border-[hsl(0,0%,14%)] bg-[hsl(0,0%,9%)] p-3">
+            {(previewRows[0]?.visitors || 0) > 0 ? (
+              <FunnelChart rows={previewRows} />
+            ) : (
+              <div className="py-4 text-center text-xs text-muted-foreground">
+                No visitors match these steps in the selected date range yet.
+              </div>
+            )}
+          </div>
+        </div>
+      ) : null}
 
       {/* within + name */}
       <div className="flex gap-3">

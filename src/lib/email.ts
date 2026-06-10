@@ -189,6 +189,7 @@ export interface DigestSite {
   revenue: number; // minor units
   currency: string;
   topSource: string;
+  leak?: { fromStep: string; toStep: string; dropPct: number; lostRevenue: number };
 }
 
 function digestMoney(minor: number, currency: string) {
@@ -227,6 +228,11 @@ export async function sendFounderDailyDigest(email: string, sites: DigestSite[])
           <tr><td style="padding:2px 0;">Revenue</td><td style="text-align:right;font-weight:600;color:#15803d;">${digestMoney(s.revenue, s.currency)}</td></tr>
           <tr><td style="padding:2px 0;">Top source</td><td style="text-align:right;">${s.topSource || '—'}</td></tr>
         </table>
+        ${
+          s.leak
+            ? `<div style="background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:8px 10px;margin-top:10px;color:#92400e;font-size:13px;">⚠ Biggest funnel leak: <b>${s.leak.fromStep}</b> → <b>${s.leak.toStep}</b> (${s.leak.dropPct}% drop${s.leak.lostRevenue > 0 ? `, ≈${digestMoney(s.leak.lostRevenue, s.currency)} left on the table` : ''})</div>`
+            : ''
+        }
       </div>`,
     )
     .join('');

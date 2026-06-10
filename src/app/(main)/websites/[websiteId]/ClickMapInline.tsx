@@ -36,7 +36,13 @@ function money(minor: number, currency: string) {
 // Revenue-weighted, cohort-segmented click map for one page. Privacy-first: clicks
 // bucketed by coarse page-depth (the tracker's 0–100 `y`) and by element — never
 // pixels or screenshots. Read-side over autocapture clicks + revenue_event.
-export function ClickMapInline({ websiteId }: { websiteId: string }) {
+export function ClickMapInline({
+  websiteId,
+  focus,
+}: {
+  websiteId: string;
+  focus?: { urlPath?: string; cohort?: ClickMapCohort } | null;
+}) {
   const {
     dateRange: { startDate, endDate },
   } = useDateRange();
@@ -53,6 +59,12 @@ export function ClickMapInline({ websiteId }: { websiteId: string }) {
   useEffect(() => {
     if (!urlPath && pages.length) setUrlPath(pages[0].value);
   }, [pages, urlPath]);
+
+  // Seed from a deep link (e.g. the funnel leak diagnosis → "abandoners on /page").
+  useEffect(() => {
+    if (focus?.urlPath) setUrlPath(focus.urlPath);
+    if (focus?.cohort) setCohort(focus.cohort);
+  }, [focus?.urlPath, focus?.cohort]);
 
   const comparing = cohort !== 'all';
   const { data, isLoading } = useClickMapQuery(websiteId, urlPath, cohort);
