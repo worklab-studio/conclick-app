@@ -44,11 +44,11 @@ export function FunnelChart({
   const hasRevenue = rows.some(r => (r.revenue || 0) > 0);
 
   const W = 1000;
-  const H = 300;
+  const H = 210;
   const n = rows.length;
   const segW = W / n;
   const k = Math.min(segW * 0.3, 90);
-  const maxT = H * 0.76;
+  const maxT = H * 0.7;
   const minT = 10;
   const t = rows.map(r => Math.max(Math.min(r.remaining ?? 0, 1) * maxT, minT));
   const cx = rows.map((_, i) => segW * i + segW / 2);
@@ -95,13 +95,13 @@ export function FunnelChart({
         {leakIndex > 0 ? (
           <line
             x1={segW * leakIndex}
-            y1={6}
+            y1={(H - t[leakIndex - 1]) / 2}
             x2={segW * leakIndex}
-            y2={H - 6}
+            y2={(H + t[leakIndex - 1]) / 2}
             stroke="#f59e0b"
             strokeWidth={2}
-            strokeDasharray="5 5"
-            opacity={0.7}
+            strokeDasharray="3 3"
+            opacity={0.9}
           />
         ) : null}
 
@@ -125,16 +125,16 @@ export function FunnelChart({
         {/* % pill per step */}
         {rows.map((r, i) => {
           const label = `${Math.round((r.remaining ?? 0) * 100)}%`;
-          const pw = 26 + label.length * 11;
+          const pw = 22 + label.length * 9;
           return (
-            <g key={`p${i}`} transform={`translate(${cx[i] - pw / 2}, ${H / 2 - 17})`}>
-              <rect width={pw} height="34" rx="17" fill="#101013" stroke="hsl(0 0% 22%)" />
+            <g key={`p${i}`} transform={`translate(${cx[i] - pw / 2}, ${H / 2 - 14})`}>
+              <rect width={pw} height="28" rx="14" fill="#101013" stroke="hsl(0 0% 22%)" />
               <text
                 x={pw / 2}
-                y="22"
+                y="19"
                 textAnchor="middle"
-                fontSize="15"
-                fontWeight="700"
+                fontSize="13"
+                fontWeight="600"
                 fill="#fff"
               >
                 {label}
@@ -158,9 +158,9 @@ export function FunnelChart({
       </svg>
 
       {/* step labels + per-step revenue / median annotations */}
-      <div className="mt-2 flex">
+      <div className="mt-1.5 flex">
         {rows.map((r, i) => (
-          <div key={`l${i}`} className="min-w-0 flex-1 space-y-1 px-1 text-center">
+          <div key={`l${i}`} className="min-w-0 flex-1 space-y-0.5 px-1 text-center">
             <div
               className={`truncate text-xs font-medium ${
                 i === leakIndex ? 'text-amber-300' : 'text-foreground/90'
@@ -169,17 +169,17 @@ export function FunnelChart({
             >
               {r.value}
             </div>
-            <div className="text-[11px] text-muted-foreground">
+            <div className="text-[10px] text-muted-foreground">
               {formatLongNumber(r.visitors)} vis
             </div>
-            <div className="flex flex-wrap items-center justify-center gap-1">
+            <div className="flex flex-wrap items-center justify-center gap-0.5">
               {(r.revenue || 0) > 0 ? (
-                <span className="inline-flex items-center rounded bg-emerald-500/10 px-1.5 py-0.5 text-[11px] font-semibold text-emerald-300">
+                <span className="inline-flex items-center rounded bg-emerald-500/10 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-300">
                   {money(r.revenue || 0, currency)}
                 </span>
               ) : null}
               {i > 0 && r.medianMs != null ? (
-                <span className="text-[11px] text-muted-foreground/60">{dur(r.medianMs)}</span>
+                <span className="text-[10px] text-muted-foreground/60">{dur(r.medianMs)}</span>
               ) : null}
             </div>
           </div>
@@ -188,9 +188,9 @@ export function FunnelChart({
 
       {/* biggest-leak callout */}
       {leakIndex > 0 ? (
-        <div className="mt-3 flex items-start gap-2 rounded-lg border border-amber-500/20 bg-amber-500/[0.07] px-3 py-2 text-sm">
+        <div className="mt-3 flex items-start gap-2 rounded-lg border-2 border-amber-500/40 bg-amber-500/[0.12] px-3 py-2 text-sm">
           <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-400" />
-          <div className="text-amber-200/90">
+          <div className="text-amber-100">
             Biggest leak: <span className="font-semibold">{rows[leakIndex - 1].value}</span> →{' '}
             <span className="font-semibold">{rows[leakIndex].value}</span> ·{' '}
             <span className="font-semibold">

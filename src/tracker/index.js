@@ -181,6 +181,17 @@
         : '';
     return (el.tagName.toLowerCase() + (el.id ? '#' + el.id : '') + cls).slice(0, 100);
   };
+  // Human label for a page section: id > aria-label > nearest heading > data-section.
+  const _sectionLabel = el => {
+    const h = el.querySelector('h1,h2,h3');
+    return _clean(
+      (el.getAttribute('id') || '').replace(/[-_]+/g, ' ') ||
+        el.getAttribute('aria-label') ||
+        (h ? _label(h) : '') ||
+        el.getAttribute('data-section') ||
+        '',
+    ).slice(0, 40);
+  };
 
   const onAutoClick = e => {
     const el = e.target.closest(
@@ -296,6 +307,53 @@
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'hidden') sendEngagement();
     });
+
+    // Section views: fire "Viewed: <section>" the FIRST time each section scrolls into
+    // view. Powers single-page scroll-section funnels. Element-level only — never
+    // coordinates or typed text. Deduped, capped at 8, disconnected on exit.
+    try {
+      const targets = new Set();
+      document.querySelectorAll('section[id],article[id],div[id]').forEach(el => targets.add(el));
+      document.querySelectorAll('section h2,section h3').forEach(h => {
+        const s = h.closest('section');
+        if (s) targets.add(s);
+      });
+      sectionObserver = new IntersectionObserver(
+        entries => {
+          for (const en of entries) {
+            if (!en.isIntersecting) continue;
+            const el = en.target;
+            const sel = _selector(el);
+            sectionObserver.unobserve(el);
+            if (seenSections.has(sel)) continue;
+            const label = _sectionLabel(el);
+            if (
+              !label ||
+              /^(root|app|__next|main|container|wrapper|page|body|header|footer|nav|menu|content|skip)$/i.test(
+                label,
+              )
+            )
+              continue;
+            seenSections.add(sel);
+            track(('Viewed: ' + label).slice(0, 50), { tag: 'section', selector: sel });
+            if (seenSections.size >= 8) {
+              sectionObserver.disconnect();
+              break;
+            }
+          }
+        },
+        { threshold: 0.5 },
+      );
+      let observed = 0;
+      targets.forEach(el => {
+        if (observed++ < 40) sectionObserver.observe(el);
+      });
+    } catch {
+      /* IntersectionObserver unavailable — skip section tracking */
+    }
+    window.addEventListener('pagehide', () => {
+      if (sectionObserver) sectionObserver.disconnect();
+    });
   };
 
   /* Tracking functions */
@@ -400,6 +458,8 @@
   let lastFrustSel;
   let lastFrustAt = 0;
   let formTouched;
+  let sectionObserver;
+  const seenSections = new Set();
 
   // Auto-tag clicks on Dodo Payments checkout links with this visitor's id, so
   // the payment webhook can attribute the sale back to them — no checkout code.

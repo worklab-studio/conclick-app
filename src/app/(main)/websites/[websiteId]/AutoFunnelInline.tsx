@@ -18,6 +18,7 @@ import {
   useFunnelQuery,
 } from '@/components/hooks';
 import { FunnelChart } from '@/app/(main)/websites/[websiteId]/(reports)/funnels/FunnelChart';
+import { buildAutoSteps } from '@/lib/auto-funnel';
 
 interface Journey {
   items: string[];
@@ -29,27 +30,12 @@ interface Step {
   drop: number;
 }
 
-type AutoStep = { type: 'path' | 'event'; value: string };
-
 type Segment = { key: string; label: string; filter?: Record<string, string> };
 const SEGMENTS: Segment[] = [
   { key: 'all', label: 'All' },
   { key: 'desktop', label: 'Desktop', filter: { device: 'desktop' } },
   { key: 'mobile', label: 'Mobile', filter: { device: 'mobile' } },
 ];
-
-// Pick a real, conversion-ending funnel from the site's own data: entry page →
-// a real conversion (top autocapture CTA / form submit). Returns [] when there's
-// no usable conversion event (caller falls back to the journey-derived view).
-function buildAutoSteps(pages: string[], events: string[]): AutoStep[] {
-  const entry = pages.includes('/') ? '/' : pages[0];
-  const conv = events.find(e => /^(Clicked:|Submitted:)/.test(e)) || events[0];
-  if (!entry || !conv || conv === entry) return [];
-  return [
-    { type: 'path', value: entry },
-    { type: 'event', value: conv },
-  ];
-}
 
 // Journey-derived fallback (only when no real conversion step exists). Greedily
 // derives the dominant path from journey sequences.
@@ -110,18 +96,15 @@ export function AutoFunnelInline({ websiteId }: { websiteId: string }) {
     startDate,
     endDate,
   });
-  const pages = useMemo(
-    () => ((pagesData || []) as { value: string }[]).map(d => d.value),
-    [pagesData],
-  );
+  const pages = useMemo(() => (pagesData || []) as { value: string; count: number }[], [pagesData]);
   const events = useMemo(
-    () => ((eventsData || []) as { value: string }[]).map(d => d.value),
+    () => (eventsData || []) as { value: string; count: number }[],
     [eventsData],
   );
 
-  const steps = useMemo(() => buildAutoSteps(pages, events), [pages, events]);
+  const { steps, isSinglePage } = useMemo(() => buildAutoSteps(pages, events), [pages, events]);
   const canRun = steps.length >= 2;
-  const windowMinutes = 1440; // 1 day
+  const windowMinutes = isSinglePage ? 30 : 1440;
 
   const [segment, setSegment] = useState<Segment>(SEGMENTS[0]);
   const [compare, setCompare] = useState(false);
