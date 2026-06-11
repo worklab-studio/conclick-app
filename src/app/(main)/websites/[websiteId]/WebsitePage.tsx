@@ -110,7 +110,7 @@ function checkAccess(user: any) {
 
 // Minimal read-only header for public share links (no website switcher / owner
 // actions): just the site identity + date range.
-function ShareHeader({ website, websiteId }: { website: any; websiteId: string }) {
+function ShareHeader({ website }: { website: any }) {
   return (
     <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
       <div className="flex items-center gap-3">
@@ -120,7 +120,7 @@ function ShareHeader({ website, websiteId }: { website: any; websiteId: string }
           {website?.domain && <p className="text-sm text-muted-foreground">{website.domain}</p>}
         </div>
       </div>
-      <DateRangePicker websiteId={websiteId} />
+      <DateRangePicker />
     </div>
   );
 }
@@ -165,7 +165,7 @@ export function WebsitePage({ websiteId, shareMode }: { websiteId: string; share
     <div className="mx-auto w-full px-3 md:px-6 py-8" style={{ maxWidth: '1320px' }}>
       <div className="space-y-6">
         {shareMode ? (
-          <ShareHeader website={website} websiteId={websiteId} />
+          <ShareHeader website={website} />
         ) : (
           <>
             <WebsiteHeader websiteId={websiteId} />

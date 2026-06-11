@@ -39,21 +39,22 @@ export function WebsiteDateFilter({
           date: `${getDateRangeValue(websiteDateRange.startDate, websiteDateRange.endDate)}:all`,
           offset: undefined,
         }),
+        { scroll: false },
       );
     } else {
-      router.push(updateParams({ date, offset: undefined }));
+      router.push(updateParams({ date, offset: undefined }), { scroll: false });
     }
   };
 
   const handleIncrement = useCallback(
     (increment: number) => {
-      router.push(updateParams({ offset: +offset + increment }));
+      router.push(updateParams({ offset: +offset + increment }), { scroll: false });
     },
     [offset],
   );
 
   const handleSelect = (compare: any) => {
-    router.push(updateParams({ compare }));
+    router.push(updateParams({ compare }), { scroll: false });
   };
 
   const dateValue = useMemo(() => {

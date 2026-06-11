@@ -16,8 +16,9 @@ export function VisitorsFilter() {
   const active = (query?.userFilter as string) || '';
 
   const select = (id: string) => {
-    // Reset to page 1 — a filtered set has fewer pages.
-    router.push(updateParams({ userFilter: id || undefined, page: 1 }));
+    // Reset to page 1 — a filtered set has fewer pages. scroll:false keeps the
+    // viewport in place (Next scrolls to top on push by default).
+    router.push(updateParams({ userFilter: id || undefined, page: 1 }), { scroll: false });
   };
 
   return (

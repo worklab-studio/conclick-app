@@ -11,7 +11,7 @@ export function MonthFilter() {
   const handleMonthSelect = (date: Date) => {
     const range = getMonthDateRangeValue(date);
 
-    router.push(updateParams({ date: range, offset: undefined }));
+    router.push(updateParams({ date: range, offset: undefined }), { scroll: false });
   };
 
   return <MonthSelect date={startDate} onChange={handleMonthSelect} />;

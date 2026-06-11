@@ -29,13 +29,17 @@ export function WebsiteHeader({ websiteId }: { websiteId: string }) {
     <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
       <div className="flex items-center gap-4">
         <WebsiteSelect websiteId={websiteId} onChange={handleWebsiteChange} />
-        <DateRangePicker websiteId={websiteId} />
+        <DateRangePicker />
       </div>
 
       <div className="flex items-center gap-2">
         <Dialog>
           <DialogTrigger asChild>
-            <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-muted-foreground hover:text-foreground"
+            >
               <Share className="mr-2 h-4 w-4" />
               Share
             </Button>
@@ -48,7 +52,12 @@ export function WebsiteHeader({ websiteId }: { websiteId: string }) {
           </DialogContent>
         </Dialog>
 
-        <Button variant="ghost" size="sm" asChild className="text-muted-foreground hover:text-foreground">
+        <Button
+          variant="ghost"
+          size="sm"
+          asChild
+          className="text-muted-foreground hover:text-foreground"
+        >
           <Link href={renderUrl(`/websites/${website.id}/settings`)}>
             <Settings className="mr-2 h-4 w-4" />
             Settings

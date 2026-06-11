@@ -35,15 +35,15 @@ export function FilterBar({ websiteId }: { websiteId: string }) {
   const canSaveSegment = filters.length > 0 && !segment && !cohort && !pathname.includes('/share');
 
   const handleCloseFilter = (param: string) => {
-    router.push(updateParams({ [param]: undefined }));
+    router.push(updateParams({ [param]: undefined }), { scroll: false });
   };
 
   const handleResetFilter = () => {
-    router.push(replaceParams());
+    router.push(replaceParams(), { scroll: false });
   };
 
   const handleSegmentRemove = (type: string) => {
-    router.push(updateParams({ [type]: undefined }));
+    router.push(updateParams({ [type]: undefined }), { scroll: false });
   };
 
   if (!filters.length && !segment && !cohort) {

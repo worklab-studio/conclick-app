@@ -50,13 +50,13 @@ export function DataGrid({
   const handleSearch = (value: string) => {
     if (value !== search) {
       setSearch(value);
-      router.push(updateParams({ search: value, page: 1 }));
+      router.push(updateParams({ search: value, page: 1 }), { scroll: false });
     }
   };
 
   const handlePageChange = useCallback(
     (page: number) => {
-      router.push(updateParams({ search, page }));
+      router.push(updateParams({ search, page }), { scroll: false });
     },
     [search],
   );

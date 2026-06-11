@@ -144,8 +144,8 @@ export function SessionProfile({
             <Stat label="Clicks" value={data.clicks != null ? Number(data.clicks) : '—'} />
           </div>
 
-          {/* Info grid */}
-          <div className="grid grid-cols-2 gap-x-7 gap-y-5 p-6 md:grid-cols-4">
+          {/* Info grid — 3 columns so full dates and UUIDs fit without truncating */}
+          <div className="grid grid-cols-2 gap-x-7 gap-y-5 p-6 md:grid-cols-3">
             <Field label="First seen" icon={<Calendar className="h-3.5 w-3.5" />}>
               {fmtDate(data.firstAt)}
             </Field>
@@ -229,7 +229,9 @@ function Field({
         className={`mt-2 flex items-center gap-2 text-sm ${muted ? 'text-muted-foreground/50' : 'text-foreground'}`}
       >
         <span className="shrink-0 text-muted-foreground/60">{icon}</span>
-        <span className="truncate">{children}</span>
+        <span className="truncate" title={typeof children === 'string' ? children : undefined}>
+          {children}
+        </span>
       </div>
     </div>
   );

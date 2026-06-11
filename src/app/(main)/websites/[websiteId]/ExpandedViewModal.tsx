@@ -17,13 +17,13 @@ export function ExpandedViewModal({
   const { isMobile } = useMobile();
 
   const handleClose = (close: () => void) => {
-    router.push(updateParams({ view: undefined }));
+    router.push(updateParams({ view: undefined }), { scroll: false });
     close();
   };
 
   const handleOpenChange = (isOpen: boolean) => {
     if (!isOpen) {
-      router.push(updateParams({ view: undefined }));
+      router.push(updateParams({ view: undefined }), { scroll: false });
     }
   };
 
