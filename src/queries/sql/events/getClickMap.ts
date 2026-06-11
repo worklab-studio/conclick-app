@@ -25,6 +25,7 @@ export interface ClickMapElement {
   clicks: number;
   sessions: number;
   revenue: number; // minor units, distinct-session sum
+  medianY?: number | null; // median page-depth 0..100 of this element's clicks; null when no tracked y
 }
 
 export interface ClickMapResult {
@@ -165,9 +166,15 @@ export async function getClickMap(
       group by d.bucket
     ),
     elem_clicks as (
-      select c.selector, c.label, c.session_id, c.event_id
+      select c.selector, c.label, c.session_id, c.event_id, c.y
       from cohort_clicks c
       where c.selector is not null
+    ),
+    elem_depth as (
+      select selector, percentile_cont(0.5) within group (order by y)::float8 as median_y
+      from elem_clicks
+      where y is not null
+      group by selector
     ),
     elem_agg as (
       select selector, max(label) as label,
@@ -183,12 +190,14 @@ export async function getClickMap(
       group by e.selector
     )
     select 'depth' as kind, da.bucket as bucket, null::text as selector, null::text as label,
-           da.clicks, da.sessions, dr.revenue, dr.currency
+           da.clicks, da.sessions, dr.revenue, dr.currency, null::float8 as pos
     from depth_agg da join depth_rev dr on dr.bucket = da.bucket
     union all
     select 'element' as kind, null::int as bucket, ea.selector, ea.label,
-           ea.clicks, ea.sessions, er.revenue, er.currency
-    from elem_agg ea join elem_rev er on er.selector = ea.selector
+           ea.clicks, ea.sessions, er.revenue, er.currency, ed.median_y as pos
+    from elem_agg ea
+      join elem_rev er on er.selector = ea.selector
+      left join elem_depth ed on ed.selector = ea.selector
     union all
     select 'total' as kind, null::int as bucket, null::text as selector, null::text as label,
            (select count(*)::int from cohort_clicks) as clicks,
@@ -197,7 +206,7 @@ export async function getClickMap(
              select sum(r.revenue) from cohort_sessions cs
              left join rev r on r.session_id = cs.session_id
            ), 0)::float8 as revenue,
-           (select max(currency) from rev) as currency
+           (select max(currency) from rev) as currency, null::float8 as pos
     order by kind, clicks desc
     `,
     queryParams,
@@ -215,6 +224,7 @@ export async function getClickMap(
       clicks: Number(r.clicks) || 0,
       sessions: Number(r.sessions) || 0,
       revenue: Number(r.revenue) || 0,
+      medianY: r.pos == null ? null : Number(r.pos),
     }))
     .slice(0, 30);
 

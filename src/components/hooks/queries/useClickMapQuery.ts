@@ -23,6 +23,7 @@ export interface ClickMapElement {
   clicks: number;
   sessions: number;
   revenue: number;
+  medianY?: number | null;
 }
 
 export interface ClickMapResult {

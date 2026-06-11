@@ -7,6 +7,7 @@ import {
   useWebsiteValuesQuery,
   useDateRange,
   type ClickMapCohort,
+  type ClickMapElement,
 } from '@/components/hooks';
 import { TabEmptyState } from '@/components/common/TabEmptyState';
 import { formatMinorCurrency } from '@/lib/format';
@@ -21,11 +22,41 @@ const COHORTS: { id: ClickMapCohort; label: string }[] = [
   { id: 'abandoner', label: 'Abandoned' },
 ];
 
+// One plain-English line explaining what each cohort's clicks tell you.
+const COHORT_CONTEXT: Record<ClickMapCohort, string> = {
+  all: 'Clicks from everyone who visited this page.',
+  paid: 'Where your paying customers clicked on this page.',
+  trial: 'Where trial users clicked — compare with Paid to see what converts.',
+  non_buyer: 'Where visitors who never paid clicked — look for distractions or dead ends.',
+  refunded: 'Where refunded customers clicked before churning.',
+  high_ltv: 'Where your highest-value customers focused their attention.',
+  abandoner: 'Where checkout abandoners clicked before dropping off.',
+};
+
 const money = (minor: number, currency: string) => formatMinorCurrency(minor, currency);
 
+// Page-silhouette geometry: median page-depth (0=top..100=bottom) → px in a fixed strip.
+const STRIP_H = 256;
+const PAD = 8;
+const USABLE = STRIP_H - PAD * 2;
+const LABEL_H = 24; // min vertical gap between de-collided side labels
+const yToPx = (m: number) => PAD + (Math.min(100, Math.max(0, m)) / 100) * USABLE;
+
+const friendly = (e: ClickMapElement) => (e.label?.trim() ? e.label.trim() : e.selector);
+
+function depthBand(m?: number | null) {
+  if (m == null) return null;
+  if (m < 20) return 'Top';
+  if (m < 40) return 'Upper';
+  if (m < 60) return 'Middle';
+  if (m < 80) return 'Lower';
+  return 'Bottom';
+}
+
 // Revenue-weighted, cohort-segmented click map for one page. Privacy-first: clicks
-// bucketed by coarse page-depth (the tracker's 0–100 `y`) and by element — never
-// pixels or screenshots. Read-side over autocapture clicks + revenue_event.
+// placed by coarse page-depth (the tracker's 0–100 `y`) and by element — never pixels
+// or screenshots. The page silhouette shows WHERE on the page people click; the list
+// shows WHAT they click, label-first.
 export function ClickMapInline({
   websiteId,
   focus,
@@ -56,38 +87,73 @@ export function ClickMapInline({
     if (focus?.cohort) setCohort(focus.cohort);
   }, [focus?.urlPath, focus?.cohort]);
 
-  const comparing = cohort !== 'all';
   const { data, isLoading } = useClickMapQuery(websiteId, urlPath, cohort);
-  // Faint "all visitors" reference overlay — only fetched when a cohort is selected.
-  const { data: allData } = useClickMapQuery(websiteId, comparing ? urlPath : undefined, 'all');
 
   const currency = data?.currency || 'USD';
   const depth = data?.depth || [];
-  const allDepth = allData?.depth || [];
+  const total = data?.total.clicks || 0;
+  const cohortLabel = COHORTS.find(c => c.id === cohort)?.label || 'All visitors';
+  const hasAnything = total > 0;
 
-  const depthMax = useMemo(
-    () => Math.max(1, ...depth.map(d => d.clicks), ...allDepth.map(d => d.clicks)),
-    [depth, allDepth],
-  );
-  const dotPx = (clicks: number) => (clicks > 0 ? 6 + 22 * Math.sqrt(clicks / depthMax) : 4);
-
+  // List order follows the sort toggle.
   const elements = useMemo(() => {
     const list = [...(data?.elements || [])];
     list.sort((a, b) => (sortBy === 'revenue' ? b.revenue - a.revenue : b.clicks - a.clicks));
     return list;
   }, [data, sortBy]);
+  const listMax = Math.max(1, ...elements.map(e => e.clicks));
 
-  const cohortLabel = COHORTS.find(c => c.id === cohort)?.label || 'All visitors';
-  const hasDepth = depth.some(d => d.clicks > 0);
-  const hasAnything = (data?.total.clicks || 0) > 0;
+  // The strip is always clicks-ranked (stable regardless of the list's sort toggle),
+  // and only includes elements with a known page position.
+  const strip = useMemo(
+    () =>
+      [...(data?.elements || [])]
+        .filter(e => e.medianY != null)
+        .sort((a, b) => b.clicks - a.clicks)
+        .slice(0, 8),
+    [data],
+  );
+  const stripMax = Math.max(1, ...strip.map(e => e.clicks));
 
-  // No pages at all → the page hasn't gathered autocapture clicks yet.
+  // Place dots at true depth; nudge the SIDE LABELS downward so they don't overlap.
+  const placed = useMemo(() => {
+    const items = strip.map((e, i) => ({ e, i, dotY: yToPx(e.medianY as number), labelY: 0 }));
+    let last = -Infinity;
+    for (const it of [...items].sort((a, b) => a.dotY - b.dotY)) {
+      let y = it.dotY;
+      if (y < last + LABEL_H) y = last + LABEL_H;
+      y = Math.min(y, STRIP_H - 10);
+      last = y;
+      items[it.i].labelY = y;
+    }
+    return items;
+  }, [strip]);
+
+  const topByClicks = useMemo(
+    () => [...(data?.elements || [])].sort((a, b) => b.clicks - a.clicks)[0],
+    [data],
+  );
+
+  // Headline region from the depth buckets (top third / middle / lower half).
+  const topThird = depth.slice(0, 3).reduce((s, d) => s + d.clicks, 0);
+  const midThird = depth.slice(3, 7).reduce((s, d) => s + d.clicks, 0);
+  const lowPart = total - topThird - midThird;
+  const region =
+    total === 0
+      ? null
+      : topThird >= midThird && topThird >= lowPart
+        ? 'top third of the page'
+        : lowPart >= midThird
+          ? 'lower half of the page'
+          : 'middle of the page';
+
+  // No pages at all → the site hasn't gathered autocapture clicks yet.
   if (!pages.length && !urlPath) {
     return (
       <TabEmptyState
         icon={Crosshair}
         title="No click data yet"
-        description="Turn on Autocapture (on by default) and let visitors click around. The click map shows where each buyer cohort clicks — by page depth and by element — weighted by revenue."
+        description="Turn on Autocapture (on by default) and let visitors click around. The click map shows where each buyer cohort clicks — by page position and by element — weighted by revenue."
       />
     );
   }
@@ -169,13 +235,44 @@ export function ClickMapInline({
         <div className="flex items-center gap-2 p-8 text-sm text-muted-foreground">
           <Loader2 className="h-4 w-4 animate-spin" /> Loading…
         </div>
+      ) : !hasAnything ? (
+        <div className="space-y-4 p-7">
+          <div className="text-xs text-muted-foreground">{COHORT_CONTEXT[cohort]}</div>
+          <div className="rounded-lg border border-dashed border-[hsl(0,0%,14%)] px-4 py-10 text-center text-sm text-muted-foreground">
+            No clicks recorded for{' '}
+            <span className="text-foreground">{cohortLabel.toLowerCase()}</span> on this page in
+            this date range.
+            <div className="mt-1 text-muted-foreground/70">
+              Try “All visitors”, a different page, or a wider date range.
+            </div>
+          </div>
+        </div>
       ) : (
         <div className="space-y-5 p-7">
-          {/* Cohort summary */}
-          <div className="flex flex-wrap items-center gap-x-6 gap-y-1 text-sm">
-            <span className="font-semibold text-foreground">{cohortLabel}</span>
+          {/* Headline + cohort context */}
+          <div>
+            <div className="text-sm leading-relaxed text-foreground">
+              Most clicks land in the <span className="font-semibold text-[#b7b4e4]">{region}</span>
+              {topByClicks ? (
+                <>
+                  {' '}
+                  · Top element: <span className="font-semibold">{friendly(topByClicks)}</span> (
+                  {topByClicks.clicks} click{topByClicks.clicks === 1 ? '' : 's'})
+                </>
+              ) : null}
+            </div>
+            <div className="mt-1 text-xs text-muted-foreground">{COHORT_CONTEXT[cohort]}</div>
+          </div>
+
+          {/* Summary */}
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-1 text-sm">
             <span className="text-muted-foreground">
-              {data?.total.sessions || 0} visitors · {data?.total.clicks || 0} clicks
+              <span className="font-semibold text-foreground">{total.toLocaleString()}</span> clicks
+              ·{' '}
+              <span className="font-semibold text-foreground">
+                {(data?.total.sessions || 0).toLocaleString()}
+              </span>{' '}
+              visitors
             </span>
             {(data?.total.revenue || 0) > 0 && (
               <span className="inline-flex items-center rounded-md bg-emerald-500/10 px-2 py-0.5 text-sm font-semibold text-emerald-300">
@@ -192,158 +289,178 @@ export function ClickMapInline({
             )}
           </div>
 
-          {!hasAnything ? (
-            <div className="rounded-lg border border-dashed border-[hsl(0,0%,14%)] px-4 py-10 text-center text-sm text-muted-foreground">
-              No clicks recorded for{' '}
-              <span className="text-foreground">{cohortLabel.toLowerCase()}</span> on this page in
-              this date range.
-            </div>
-          ) : (
-            <>
-              {/* Dotted page-depth distribution */}
-              <div className="rounded-lg border border-[hsl(0,0%,12%)] bg-[hsl(0,0%,9%)] p-4">
-                <div className="mb-3 flex items-center gap-4 text-[11px] text-muted-foreground">
-                  <span className="flex items-center gap-1.5">
-                    <span className="h-2.5 w-2.5 rounded-full bg-[#7e7bd0]" /> {cohortLabel}
-                  </span>
-                  {comparing && (
-                    <span className="flex items-center gap-1.5">
-                      <span className="h-2.5 w-2.5 rounded-full border border-[#8b88cf]/60" /> All
-                      visitors
-                    </span>
-                  )}
-                  <span className="ml-auto uppercase tracking-wide text-muted-foreground/50">
-                    Page depth · top → bottom
-                  </span>
-                </div>
+          {total < 20 && (
+            <p className="flex items-start gap-1.5 text-[11px] leading-relaxed text-muted-foreground/70">
+              <Info className="mt-0.5 h-3 w-3 shrink-0" />
+              Early data — only {total} click{total === 1 ? '' : 's'} so far. Depths and shares may
+              shift as more come in.
+            </p>
+          )}
 
-                <div className="space-y-0.5">
-                  {depth.map((d, i) => {
-                    const lo = i * 10;
-                    const hi = lo + 10;
-                    const ad = allDepth[i];
-                    const px = dotPx(d.clicks);
+          {/* Where people click — page silhouette */}
+          {strip.length > 0 ? (
+            <div>
+              <div className="mb-1.5 text-[11px] font-medium uppercase tracking-wide text-muted-foreground/60">
+                Where people click
+              </div>
+              <div className="text-[10px] uppercase tracking-wide text-muted-foreground/40">
+                Top of page
+              </div>
+              <div className="flex gap-1">
+                <div
+                  className="relative w-[150px] shrink-0 rounded-2xl border border-[hsl(0,0%,16%)] bg-gradient-to-b from-[hsl(0,0%,10%)] to-[hsl(0,0%,8.5%)]"
+                  style={{ height: STRIP_H }}
+                >
+                  <div className="absolute inset-x-3 top-1/2 h-px bg-white/5" />
+                  {placed.map(({ e, i, dotY }) => {
+                    const size = 8 + 20 * Math.sqrt(e.clicks / stripMax);
+                    const rev = e.revenue > 0;
+                    const off = ((i % 3) - 1) * 16;
                     return (
                       <div
-                        key={i}
-                        className="flex items-center gap-3"
-                        title={`${lo}–${hi}% down · ${d.clicks} clicks · ${d.sessions} visitors${
-                          d.revenue > 0 ? ` · ${money(d.revenue, currency)}` : ''
+                        key={e.selector}
+                        className="absolute rounded-full"
+                        title={`${friendly(e)} · ${e.clicks} clicks${
+                          rev ? ` · ${money(e.revenue, currency)}` : ''
                         }`}
+                        style={{
+                          left: `calc(50% + ${off}px)`,
+                          top: dotY,
+                          width: size,
+                          height: size,
+                          transform: 'translate(-50%, -50%)',
+                          background: rev ? '#34d399' : '#7e7bd0',
+                          opacity: 0.5 + 0.5 * (e.clicks / stripMax),
+                          boxShadow: rev ? '0 0 0 4px rgba(16,185,129,.18)' : undefined,
+                        }}
+                      />
+                    );
+                  })}
+                </div>
+                <div className="relative flex-1" style={{ height: STRIP_H }}>
+                  {placed.map(({ e, labelY }) => {
+                    const rev = e.revenue > 0;
+                    return (
+                      <div
+                        key={e.selector}
+                        className="absolute left-0 right-0 flex items-center gap-2"
+                        style={{ top: labelY, transform: 'translateY(-50%)' }}
                       >
-                        <div className="w-12 shrink-0 text-right text-[10px] tabular-nums text-muted-foreground/50">
-                          {lo}–{hi}%
-                        </div>
-                        <div className="flex h-7 flex-1 items-center gap-5">
-                          <span className="flex w-7 shrink-0 justify-center">
-                            <span
-                              className="rounded-full bg-[#7e7bd0]"
-                              style={{
-                                width: px,
-                                height: px,
-                                opacity: d.clicks > 0 ? 0.5 + 0.5 * (d.clicks / depthMax) : 0.12,
-                              }}
-                            />
+                        <span className="h-px w-3 shrink-0 bg-white/10" />
+                        <span
+                          className="h-2 w-2 shrink-0 rounded-full"
+                          style={{ background: rev ? '#34d399' : '#7e7bd0' }}
+                        />
+                        <span
+                          className="max-w-[200px] truncate text-[13px] text-foreground"
+                          title={friendly(e)}
+                        >
+                          {friendly(e)}
+                        </span>
+                        <span className="text-xs tabular-nums text-muted-foreground">
+                          {e.clicks}×
+                        </span>
+                        {rev && (
+                          <span className="rounded bg-emerald-500/10 px-1.5 py-0.5 text-[11px] font-semibold text-emerald-300">
+                            {money(e.revenue, currency)}
                           </span>
-                          {comparing && (
-                            <span className="flex w-7 shrink-0 justify-center">
-                              <span
-                                className="rounded-full border border-[#8b88cf]/35"
-                                style={{
-                                  width: dotPx(ad?.clicks || 0),
-                                  height: dotPx(ad?.clicks || 0),
-                                }}
-                              />
-                            </span>
-                          )}
-                          {d.revenue > 0 && (
-                            <span className="text-[11px] font-medium text-emerald-300/90">
-                              {money(d.revenue, currency)}
-                            </span>
-                          )}
-                        </div>
-                        <div className="w-12 shrink-0 text-right text-xs tabular-nums text-muted-foreground">
-                          {d.clicks || ''}
-                        </div>
+                        )}
                       </div>
                     );
                   })}
                 </div>
-
-                {!hasDepth && (
-                  <p className="mt-3 flex items-start gap-1.5 text-[11px] leading-relaxed text-muted-foreground/70">
-                    <Info className="mt-0.5 h-3 w-3 shrink-0" />
-                    Page-depth fills in from clicks captured by the latest tracker. Earlier clicks
-                    still appear in the element list below.
-                  </p>
-                )}
               </div>
+              <div className="text-[10px] uppercase tracking-wide text-muted-foreground/40">
+                Bottom
+              </div>
+            </div>
+          ) : (
+            <p className="flex items-start gap-1.5 text-[11px] leading-relaxed text-muted-foreground/55">
+              <Info className="mt-0.5 h-3 w-3 shrink-0" />
+              Page positions appear once the latest tracker captures click depth. Every click still
+              shows in the list below.
+            </p>
+          )}
 
-              {/* Top elements */}
-              <div>
-                <div className="mb-2 flex items-center justify-between">
-                  <div className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground/70">
-                    What {cohortLabel.toLowerCase()} click
-                  </div>
-                  <div className="flex items-center gap-1 text-[11px]">
-                    <span className="text-muted-foreground/50">Sort</span>
-                    {(['clicks', 'revenue'] as const).map(s => (
-                      <button
-                        key={s}
-                        type="button"
-                        onClick={() => setSortBy(s)}
-                        className={`rounded px-1.5 py-0.5 transition-colors ${
-                          sortBy === s
-                            ? 'bg-[#5e5ba4]/15 text-foreground'
-                            : 'text-muted-foreground hover:text-foreground'
-                        }`}
-                      >
-                        {s === 'clicks' ? 'Clicks' : 'Revenue'}
-                      </button>
-                    ))}
-                  </div>
+          {/* What they click — ranked, label-first */}
+          <div>
+            <div className="mb-2 flex items-center justify-between">
+              <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground/60">
+                What {cohortLabel.toLowerCase()} click
+              </div>
+              <div className="flex items-center gap-1 text-[11px]">
+                <span className="text-muted-foreground/50">Sort</span>
+                {(['clicks', 'revenue'] as const).map(s => (
+                  <button
+                    key={s}
+                    type="button"
+                    onClick={() => setSortBy(s)}
+                    className={`rounded px-1.5 py-0.5 transition-colors ${
+                      sortBy === s
+                        ? 'bg-[#5e5ba4]/15 text-foreground'
+                        : 'text-muted-foreground hover:text-foreground'
+                    }`}
+                  >
+                    {s === 'clicks' ? 'Clicks' : 'Revenue'}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="divide-y divide-[hsl(0,0%,12%)] overflow-hidden rounded-lg border border-[hsl(0,0%,12%)]">
+              {elements.length === 0 ? (
+                <div className="px-4 py-6 text-center text-sm text-muted-foreground">
+                  No element clicks yet.
                 </div>
-
-                <div className="overflow-hidden rounded-lg border border-[hsl(0,0%,12%)] divide-y divide-[hsl(0,0%,12%)]">
-                  {elements.length === 0 ? (
-                    <div className="px-4 py-6 text-center text-sm text-muted-foreground">
-                      No element clicks yet.
-                    </div>
-                  ) : (
-                    elements.map(e => (
-                      <div key={e.selector} className="flex items-center gap-4 px-4 py-2.5">
-                        <div className="min-w-0 flex-1">
-                          <div className="truncate font-mono text-xs text-foreground">
-                            {e.selector}
-                          </div>
-                          {e.label ? (
-                            <div className="truncate text-xs text-muted-foreground">
-                              “{e.label}”
-                            </div>
+              ) : (
+                elements.map(e => {
+                  const band = depthBand(e.medianY);
+                  const nm = friendly(e);
+                  const showSel = !!e.label?.trim() && e.label.trim() !== e.selector;
+                  return (
+                    <div key={e.selector} className="flex items-center gap-4 px-4 py-2.5">
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2">
+                          <span className="truncate text-sm font-medium text-foreground">{nm}</span>
+                          {band ? (
+                            <span className="inline-flex shrink-0 items-center rounded px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground/70 ring-1 ring-inset ring-[hsl(0,0%,16%)]">
+                              {band}
+                            </span>
                           ) : null}
                         </div>
-                        <div className="w-16 shrink-0 text-right text-sm font-semibold tabular-nums text-foreground">
-                          {e.clicks}×
-                        </div>
-                        <div className="w-16 shrink-0 text-right text-xs tabular-nums text-muted-foreground">
-                          {e.sessions} vis
-                        </div>
-                        <div className="w-24 shrink-0 text-right">
-                          {e.revenue > 0 ? (
-                            <span className="inline-flex items-center rounded-md bg-emerald-500/10 px-2 py-0.5 text-sm font-semibold text-emerald-300">
-                              {money(e.revenue, currency)}
-                            </span>
-                          ) : (
-                            <span className="text-sm text-muted-foreground/40">—</span>
-                          )}
+                        {showSel ? (
+                          <div className="truncate font-mono text-[11px] text-muted-foreground/50">
+                            {e.selector}
+                          </div>
+                        ) : null}
+                        <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded bg-[hsl(0,0%,11%)]">
+                          <div
+                            className="h-full rounded bg-[#5e5ba4]/40"
+                            style={{ width: `${Math.max(4, (e.clicks / listMax) * 100)}%` }}
+                          />
                         </div>
                       </div>
-                    ))
-                  )}
-                </div>
-              </div>
-            </>
-          )}
+                      <div className="w-14 shrink-0 text-right text-sm font-semibold tabular-nums text-foreground">
+                        {e.clicks}×
+                      </div>
+                      <div className="w-14 shrink-0 text-right text-xs tabular-nums text-muted-foreground">
+                        {e.sessions} vis
+                      </div>
+                      <div className="w-24 shrink-0 text-right">
+                        {e.revenue > 0 ? (
+                          <span className="inline-flex items-center rounded-md bg-emerald-500/10 px-2 py-0.5 text-sm font-semibold text-emerald-300">
+                            {money(e.revenue, currency)}
+                          </span>
+                        ) : (
+                          <span className="text-sm text-muted-foreground/40">—</span>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          </div>
         </div>
       )}
     </div>
