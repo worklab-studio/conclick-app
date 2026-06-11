@@ -13,7 +13,7 @@ async function findDuplicateReport(websiteId: string, type: string, parameters: 
   if (!key) return null;
   const existing = await getReports(
     { where: { websiteId, type, website: { deletedAt: null } } },
-    { pageSize: 200 },
+    { pageSize: -1 }, // scan all goal/funnel reports (a site can have >200)
   );
   return (
     ((existing as any)?.data as any[])?.find(r => reportKey(r.type, r.parameters) === key) || null

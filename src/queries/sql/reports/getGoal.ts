@@ -17,9 +17,13 @@ export interface GoalParameters {
 export interface GoalResult {
   num: number; // converting sessions
   total: number; // all sessions in range
-  revenue?: number; // minor units — payments from the distinct converting sessions
+  // GROSS payments (type='payment'; refunds/disputes not netted) from the distinct
+  // converting sessions, where the payment occurred inside the same date window as the
+  // conversion. Attribution is session-level (no payment-after-goal ordering). Populated
+  // on the Prisma path only — the ClickHouse path returns just num/total.
+  revenue?: number; // minor units
   currency?: string | null;
-  series?: { t: string; y: number }[]; // converting sessions per day
+  series?: { t: string; y: number }[]; // converting sessions per day (PG only)
 }
 
 export async function getGoal(
@@ -47,6 +51,16 @@ async function relationalQuery(
     startDate,
     endDate,
     eventType,
+  });
+  // Denominator = ALL sessions in range (not only sessions that fired a custom
+  // event). Re-run parseFilters WITHOUT eventType so the total subquery doesn't
+  // inherit `event_type = N`, which would inflate event-goal conversion rates.
+  const { filterQuery: totalFilterQuery } = parseFilters({
+    ...filters,
+    websiteId,
+    value,
+    startDate,
+    endDate,
   });
 
   // Conversion rate + revenue from the distinct converting sessions (deduped per
@@ -83,7 +97,7 @@ async function relationalQuery(
         ${joinSessionQuery}
         where website_event.website_id = {{websiteId::uuid}}
         ${dateQuery}
-        ${filterQuery}
+        ${totalFilterQuery}
       )::int as total,
       coalesce((select sum(r.amount) from conv c join rev r on r.session_id = c.session_id), 0)::float8 as revenue,
       (select max(r.currency) from conv c join rev r on r.session_id = c.session_id) as currency
@@ -129,6 +143,14 @@ async function clickhouseQuery(
     endDate,
     eventType,
   });
+  // Denominator = all sessions in range (no eventType filter). See PG branch.
+  const { filterQuery: totalFilterQuery } = parseFilters({
+    ...filters,
+    websiteId,
+    value,
+    startDate,
+    endDate,
+  });
 
   return rawQuery(
     `
@@ -139,7 +161,7 @@ async function clickhouseQuery(
       ${cohortQuery}
       where website_id = {websiteId:UUID}
         ${dateQuery}
-        ${filterQuery}
+        ${totalFilterQuery}
     ) as total
     from website_event
     ${cohortQuery}

@@ -89,9 +89,12 @@ describe('buildAutoSteps', () => {
 });
 
 describe('report-identity', () => {
-  it('goalKey is case/whitespace-insensitive', () => {
+  it('goalKey trims but is case-sensitive (aligns with jsonb index + exact matching)', () => {
     expect(goalKey({ type: 'event', value: ' Clicked: Sign Up ' })).toBe(
-      goalKey({ type: 'event', value: 'clicked: sign up' }),
+      goalKey({ type: 'event', value: 'Clicked: Sign Up' }),
+    );
+    expect(goalKey({ type: 'path', value: '/Pricing' })).not.toBe(
+      goalKey({ type: 'path', value: '/pricing' }),
     );
   });
 
@@ -107,7 +110,7 @@ describe('report-identity', () => {
       window: 60,
       steps: [
         { type: 'path', value: '/' },
-        { type: 'event', value: 'x' },
+        { type: 'event', value: ' X ' },
       ],
     });
     const c = funnelKey({
@@ -117,8 +120,16 @@ describe('report-identity', () => {
         { type: 'event', value: 'X' },
       ],
     });
-    expect(a).toBe(b);
-    expect(a).not.toBe(c);
+    const lower = funnelKey({
+      window: 60,
+      steps: [
+        { type: 'path', value: '/' },
+        { type: 'event', value: 'x' },
+      ],
+    });
+    expect(a).toBe(b); // trim
+    expect(a).not.toBe(c); // window differs
+    expect(a).not.toBe(lower); // case-sensitive
   });
 
   it('reportKey only dedupes goals and funnels', () => {
@@ -128,7 +139,7 @@ describe('report-identity', () => {
   });
 
   it('keys are null-safe', () => {
-    expect(goalKey(null)).toBe('|');
+    expect(goalKey(null)).toBe('|||');
     expect(funnelKey(undefined)).toBe('0|');
   });
 });

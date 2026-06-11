@@ -116,3 +116,27 @@ export function formatLongCurrency(value: number, currency: string, locale = 'en
 
   return formatCurrency(n, currency, locale);
 }
+
+// Format an amount stored in a currency's MINOR units (e.g. cents) using that
+// currency's real exponent — JPY/KRW have 0 decimals, BHD/KWD have 3 — so the
+// divisor matches what was stored, not a hardcoded /100.
+export function formatMinorCurrency(
+  minor: number | bigint,
+  currency?: string | null,
+  locale?: string,
+) {
+  const code = (currency || 'USD').toUpperCase();
+  let fmt: Intl.NumberFormat;
+  try {
+    fmt = new Intl.NumberFormat(locale, { style: 'currency', currency: code });
+  } catch {
+    return `${code} ${(Number(minor) / 100).toFixed(2)}`;
+  }
+  const digits = fmt.resolvedOptions().maximumFractionDigits ?? 2;
+  const major = (Number(minor) || 0) / 10 ** digits;
+  return new Intl.NumberFormat(locale, {
+    style: 'currency',
+    currency: code,
+    maximumFractionDigits: Number.isInteger(major) ? 0 : digits,
+  }).format(major);
+}

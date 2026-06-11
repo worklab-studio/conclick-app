@@ -20,29 +20,40 @@ const CHOICES: { id: GoalType; icon: LucideIcon; title: string; desc: string }[]
 ];
 
 /**
- * Conclick-native goal builder (replaces the react-zen GoalEditForm for the
- * create flow). Plain language + pick-from-your-site. Saves the same
- * parameters:{type,value} payload the old form used, so existing goals still
- * compute correctly.
+ * Conclick-native goal builder. Used for BOTH create and edit (pass `id` + `initial`).
+ * Plain language + pick-from-your-site, a live preview, and a duplicate guard. Saves the
+ * same parameters:{type,value} payload the legacy form used.
  */
-export function GoalBuilder({ websiteId, onClose }: { websiteId: string; onClose: () => void }) {
-  const [type, setType] = useState<GoalType>('path');
-  const [value, setValue] = useState('');
-  const [name, setName] = useState('');
-  const [nameDirty, setNameDirty] = useState(false);
-  const { mutateAsync, isPending, error, touch } = useUpdateQuery('/reports');
+export function GoalBuilder({
+  websiteId,
+  onClose,
+  id,
+  initial,
+}: {
+  websiteId: string;
+  onClose: () => void;
+  id?: string;
+  initial?: { type: GoalType; value: string; name: string };
+}) {
+  const editing = !!id;
+  const [type, setType] = useState<GoalType>(initial?.type ?? 'path');
+  const [value, setValue] = useState(initial?.value ?? '');
+  const [name, setName] = useState(initial?.name ?? '');
+  const [nameDirty, setNameDirty] = useState(!!initial?.name);
+  const { mutateAsync, isPending, error, touch } = useUpdateQuery(
+    editing ? `/reports/${id}` : '/reports',
+  );
 
   const effectiveName = nameDirty ? name : defaultName(type, value);
   const canSave = !!value && !!effectiveName;
 
-  // Duplicate guard: is this exact goal already tracked? (Server create is
-  // idempotent too — this is just friendlier.)
+  // Duplicate guard (create only — editing the same goal must stay editable).
   const { data: existing } = useReportsQuery({ websiteId, type: 'goal' });
   const isDuplicate = useMemo(() => {
-    if (!value) return false;
+    if (editing || !value) return false;
     const key = goalKey({ type, value });
     return ((existing?.data as any[]) || []).some(r => goalKey(r.parameters) === key);
-  }, [existing, type, value]);
+  }, [existing, type, value, editing]);
 
   // Live preview: how this goal performs over the current date range, before saving.
   const { data: preview } = useResultQuery<{ num: number; total: number }>(
@@ -63,6 +74,7 @@ export function GoalBuilder({ websiteId, onClose }: { websiteId: string; onClose
       { type: 'goal', name: effectiveName, websiteId, parameters: { type, value } },
       {
         onSuccess: () => {
+          if (editing) touch(`report:${id}`);
           touch('reports:goal');
           onClose();
         },
@@ -162,11 +174,10 @@ export function GoalBuilder({ websiteId, onClose }: { websiteId: string; onClose
         <Button
           onClick={handleSave}
           disabled={!canSave || isPending}
-          style={{ backgroundColor: '#5e5ba4', color: '#fff' }}
-          className="border-0 hover:opacity-90"
+          className="border-0 bg-[#5e5ba4] text-white hover:bg-[#5e5ba4]/90"
         >
           {isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-          {isDuplicate ? 'Done' : 'Create goal'}
+          {editing ? 'Save changes' : isDuplicate ? 'Done' : 'Create goal'}
         </Button>
       </div>
     </div>

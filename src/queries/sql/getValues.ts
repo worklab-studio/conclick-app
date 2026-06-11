@@ -70,13 +70,14 @@ async function relationalQuery(websiteId: string, column: string, filters: Query
       ${excludeDomain}
     group by 1
     order by 2 desc
-    limit 10
+    limit {{limit}}
     `,
     {
       websiteId,
       startDate,
       endDate,
       search: `%${search}%`,
+      limit: Math.min(Math.max(Number((filters as any).limit) || 10, 1), 1000),
       ...params,
     },
     FUNCTION_NAME,

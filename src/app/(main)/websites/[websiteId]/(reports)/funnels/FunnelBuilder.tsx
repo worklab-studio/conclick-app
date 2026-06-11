@@ -320,8 +320,7 @@ export function FunnelBuilder({
         <Button
           onClick={handleSave}
           disabled={!canSave || isPending}
-          style={{ backgroundColor: '#5e5ba4', color: '#fff' }}
-          className="border-0 hover:opacity-90"
+          className="border-0 bg-[#5e5ba4] text-white hover:bg-[#5e5ba4]/90"
         >
           {isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
           Create funnel

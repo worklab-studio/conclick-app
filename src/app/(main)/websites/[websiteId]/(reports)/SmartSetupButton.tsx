@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
-import { Sparkles, Loader2, Plus, Check, Filter, Globe, Zap } from 'lucide-react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Sparkles, Loader2, Plus, Check, Filter, Globe, Zap, TrendingUp } from 'lucide-react';
 import { useApi, useUpdateQuery, useReportsQuery } from '@/components/hooks';
 import { goalKey, funnelKey } from '@/lib/report-identity';
 import { Button } from '@/components/ui/button';
@@ -19,19 +19,19 @@ interface Goal {
   type: 'path' | 'event';
   value: string;
   count?: number;
+  source?: 'site' | 'data';
 }
 interface Funnel {
   name: string;
   window: number;
   steps: { type: 'path' | 'event'; value: string }[];
   count?: number;
+  source?: 'site' | 'data';
 }
 
 /**
- * "Suggest from my site" — reads the site's real CTAs/links/forms (server-side,
- * heuristic) and proposes goals + funnels the user adds with one click. Works on
- * single-page sites because it proposes event-based items named to match
- * autocapture.
+ * "Suggest from my site" — proposes goals + funnels from the site's real CTAs/links/
+ * forms AND from what visitors actually do (so it's never a dead end). One-click add.
  */
 export function SmartSetupButton({ websiteId }: { websiteId: string }) {
   const [open, setOpen] = useState(false);
@@ -50,8 +50,8 @@ export function SmartSetupButton({ websiteId }: { websiteId: string }) {
         <DialogHeader className="mb-4">
           <DialogTitle>Suggested setup</DialogTitle>
           <DialogDescription>
-            We read your site and proposed goals &amp; funnels from your real buttons, links, and
-            forms. Add the ones you want.
+            Goals &amp; funnels proposed from your site&apos;s real buttons, links, and forms — plus
+            what your visitors actually do.
           </DialogDescription>
         </DialogHeader>
         {open && <SmartSetup websiteId={websiteId} />}
@@ -59,6 +59,31 @@ export function SmartSetupButton({ websiteId }: { websiteId: string }) {
     </Dialog>
   );
 }
+
+function SectionLabel({
+  icon: Ic,
+  children,
+}: {
+  icon: typeof Sparkles;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="mb-2 flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-wide text-muted-foreground/60">
+      <Ic className="h-3 w-3" /> {children}
+    </div>
+  );
+}
+
+const goalSub = (g: Goal) => {
+  if (g.source === 'data') {
+    return g.type === 'event'
+      ? `Event goal${g.count ? ` · fired ${g.count}× in the last 30 days` : ''}`
+      : `Page goal${g.count ? ` · ${g.count} visitors · likely a conversion page` : ''}`;
+  }
+  return g.type === 'path'
+    ? `Page goal${g.count ? ` · ${g.count} visitors` : ''}`
+    : `Event goal${g.count ? ` · ${g.count} fired` : ''}`;
+};
 
 function SmartSetup({ websiteId }: { websiteId: string }) {
   const { post } = useApi();
@@ -71,8 +96,7 @@ function SmartSetup({ websiteId }: { websiteId: string }) {
   const [busy, setBusy] = useState<string | undefined>();
   const [addingAll, setAddingAll] = useState(false);
 
-  // What's already tracked — so reopening the dialog never re-offers (or re-adds)
-  // goals/funnels that exist. Server-side idempotency is the backstop.
+  // What's already tracked — so reopening never re-offers (or re-adds) existing items.
   const { data: goalReports } = useReportsQuery({ websiteId, type: 'goal' });
   const { data: funnelReports } = useReportsQuery({ websiteId, type: 'funnel' });
   const existingKeys = useMemo(() => {
@@ -87,24 +111,22 @@ function SmartSetup({ websiteId }: { websiteId: string }) {
   const funnelExists = (f: Funnel) =>
     existingKeys.has('funnel:' + funnelKey({ window: f.window || 60, steps: f.steps }));
 
-  useEffect(() => {
-    let alive = true;
+  const load = useCallback(() => {
+    setStatus('loading');
     post(`/websites/${websiteId}/suggest`, {})
       .then((res: any) => {
-        if (!alive) return;
         setGoals(res?.goals || []);
         setFunnels(res?.funnels || []);
         setNote(res?.meta?.note);
         setStatus('ready');
       })
-      .catch(() => {
-        if (alive) setStatus('error');
-      });
-    return () => {
-      alive = false;
-    };
+      .catch(() => setStatus('error'));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [websiteId]);
+
+  useEffect(() => {
+    load();
+  }, [load]);
 
   const addGoal = async (g: Goal, key: string) => {
     setBusy(key);
@@ -149,19 +171,54 @@ function SmartSetup({ websiteId }: { websiteId: string }) {
   }
   if (status === 'error') {
     return (
-      <div className="py-12 text-center text-sm text-muted-foreground">
-        Couldn&apos;t analyze your site right now — make sure the domain is public, or build one
-        manually.
+      <div className="flex flex-col items-center gap-3 py-12 text-center">
+        <div className="text-sm leading-relaxed text-muted-foreground">
+          Couldn&apos;t analyze your site right now — make sure the domain is public.
+        </div>
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={load}
+          className="border-[#5e5ba4]/40 text-[#c7c4f0] hover:bg-[#5e5ba4]/10"
+        >
+          Try again
+        </Button>
       </div>
     );
   }
   if (!goals.length && !funnels.length) {
     return (
-      <div className="py-12 text-center text-sm leading-relaxed text-muted-foreground">
-        {note || "We couldn't spot obvious goals on your site. Try the manual builder."}
+      <div className="flex flex-col items-center gap-3 py-10 text-center">
+        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#5e5ba4]/15 text-indigo-300 ring-1 ring-inset ring-[#5e5ba4]/25">
+          <Sparkles className="h-6 w-6" />
+        </div>
+        <div className="max-w-sm text-sm leading-relaxed text-muted-foreground">
+          {note ||
+            "We couldn't spot obvious goals yet. Add one with the builder, or turn on Autocapture and revisit once visitors start clicking."}
+        </div>
       </div>
     );
   }
+
+  const renderGoal = (g: Goal, i: number) => {
+    const key = 'g' + i;
+    const Icon = g.type === 'path' ? Globe : Zap;
+    return (
+      <SuggestRow
+        key={key}
+        icon={<Icon className="h-4 w-4" />}
+        title={g.name}
+        sub={goalSub(g)}
+        done={added[key] || goalExists(g)}
+        doneLabel={added[key] ? 'Added' : 'Already tracking'}
+        busy={busy === key}
+        onAdd={() => addGoal(g, key)}
+      />
+    );
+  };
+
+  const siteGoals = goals.map((g, i) => ({ g, i })).filter(x => x.g.source !== 'data');
+  const dataGoals = goals.map((g, i) => ({ g, i })).filter(x => x.g.source === 'data');
 
   return (
     <div className="space-y-5">
@@ -181,34 +238,22 @@ function SmartSetup({ websiteId }: { websiteId: string }) {
           Add all
         </Button>
       </div>
-      {goals.length > 0 && (
+
+      {siteGoals.length > 0 && (
         <div>
-          <div className="mb-2 text-[13px] font-semibold text-foreground/90">Goals</div>
-          <div className="space-y-2">
-            {goals.map((g, i) => {
-              const key = 'g' + i;
-              const Icon = g.type === 'path' ? Globe : Zap;
-              return (
-                <SuggestRow
-                  key={key}
-                  icon={<Icon className="h-4 w-4" />}
-                  title={g.name}
-                  sub={`${g.type === 'path' ? 'Page goal' : 'Event goal'}${
-                    g.count ? ` · ${g.count} fired` : ''
-                  }`}
-                  done={added[key] || goalExists(g)}
-                  doneLabel={added[key] ? 'Added' : 'Already tracking'}
-                  busy={busy === key}
-                  onAdd={() => addGoal(g, key)}
-                />
-              );
-            })}
-          </div>
+          <SectionLabel icon={Sparkles}>From your site</SectionLabel>
+          <div className="space-y-2">{siteGoals.map(x => renderGoal(x.g, x.i))}</div>
+        </div>
+      )}
+      {dataGoals.length > 0 && (
+        <div>
+          <SectionLabel icon={TrendingUp}>From your traffic</SectionLabel>
+          <div className="space-y-2">{dataGoals.map(x => renderGoal(x.g, x.i))}</div>
         </div>
       )}
       {funnels.length > 0 && (
         <div>
-          <div className="mb-2 text-[13px] font-semibold text-foreground/90">Funnels</div>
+          <SectionLabel icon={Filter}>Funnels</SectionLabel>
           <div className="space-y-2">
             {funnels.map((f, i) => {
               const key = 'f' + i;
@@ -230,6 +275,11 @@ function SmartSetup({ websiteId }: { websiteId: string }) {
           </div>
         </div>
       )}
+
+      <div className="text-[11px] leading-relaxed text-muted-foreground/55">
+        Suggestions only include actions that actually fire on your site, ranked by how often
+        visitors do them.
+      </div>
     </div>
   );
 }

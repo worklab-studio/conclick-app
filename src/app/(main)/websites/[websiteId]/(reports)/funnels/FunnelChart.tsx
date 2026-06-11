@@ -2,22 +2,11 @@
 
 import { useState } from 'react';
 import { AlertTriangle } from 'lucide-react';
-import { formatLongNumber, formatShortTime } from '@/lib/format';
+import { formatLongNumber, formatShortTime, formatMinorCurrency } from '@/lib/format';
 import { biggestLeak, funnelRevenueLost, type FunnelStepRow } from '@/lib/funnel-insights';
 import { FunnelLeakDiagnosis } from './FunnelLeakDiagnosis';
 
-function money(minor: number, currency = 'USD') {
-  const major = (minor || 0) / 100;
-  try {
-    return new Intl.NumberFormat(undefined, {
-      style: 'currency',
-      currency: currency || 'USD',
-      maximumFractionDigits: Number.isInteger(major) ? 0 : 2,
-    }).format(major);
-  } catch {
-    return `$${major.toFixed(0)}`;
-  }
-}
+const money = (minor: number, currency = 'USD') => formatMinorCurrency(minor, currency);
 
 const dur = (ms: number) => formatShortTime(Math.round(ms / 1000), ['d', 'h', 'm', 's']);
 

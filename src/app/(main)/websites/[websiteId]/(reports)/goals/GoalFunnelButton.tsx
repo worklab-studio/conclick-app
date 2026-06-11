@@ -36,6 +36,7 @@ export function GoalFunnelButton({
       <DialogTrigger asChild>
         <button
           type="button"
+          aria-label="Funnel to this goal"
           title="Funnel to this goal"
           className="rounded-md p-1.5 text-muted-foreground/60 transition-colors hover:bg-[hsl(0,0%,12%)] hover:text-[#b7b4e4]"
         >

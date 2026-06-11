@@ -9,6 +9,7 @@ import {
   type ClickMapCohort,
 } from '@/components/hooks';
 import { TabEmptyState } from '@/components/common/TabEmptyState';
+import { formatMinorCurrency } from '@/lib/format';
 
 const COHORTS: { id: ClickMapCohort; label: string }[] = [
   { id: 'all', label: 'All visitors' },
@@ -20,18 +21,7 @@ const COHORTS: { id: ClickMapCohort; label: string }[] = [
   { id: 'abandoner', label: 'Abandoned' },
 ];
 
-function money(minor: number, currency: string) {
-  const major = (minor || 0) / 100;
-  try {
-    return new Intl.NumberFormat(undefined, {
-      style: 'currency',
-      currency: currency || 'USD',
-      maximumFractionDigits: Number.isInteger(major) ? 0 : 2,
-    }).format(major);
-  } catch {
-    return `$${major.toFixed(0)}`;
-  }
-}
+const money = (minor: number, currency: string) => formatMinorCurrency(minor, currency);
 
 // Revenue-weighted, cohort-segmented click map for one page. Privacy-first: clicks
 // bucketed by coarse page-depth (the tracker's 0–100 `y`) and by element — never

@@ -1,4 +1,5 @@
 import { Resend } from 'resend';
+import { formatMinorCurrency } from '@/lib/format';
 
 // Lazily constructed: the Resend constructor throws on a missing key, and
 // `next build` evaluates this module while collecting API-route page data (where
@@ -192,18 +193,8 @@ export interface DigestSite {
   leak?: { fromStep: string; toStep: string; dropPct: number; lostRevenue: number };
 }
 
-function digestMoney(minor: number, currency: string) {
-  const major = (minor || 0) / 100;
-  try {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: currency || 'USD',
-      maximumFractionDigits: Number.isInteger(major) ? 0 : 2,
-    }).format(major);
-  } catch {
-    return `$${major.toFixed(0)}`;
-  }
-}
+const digestMoney = (minor: number, currency: string) =>
+  formatMinorCurrency(minor, currency, 'en-US');
 
 // Founder daily digest: yesterday's numbers per website + a top source. Sent by
 // the daily-digest cron to website owners who haven't opted out.

@@ -19,10 +19,7 @@ export function GoalAddButton({ websiteId }: { websiteId: string }) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button
-          style={{ backgroundColor: '#5e5ba4', color: '#fff' }}
-          className="border-0 hover:opacity-90"
-        >
+        <Button className="border-0 bg-[#5e5ba4] text-white hover:bg-[#5e5ba4]/90">
           <Plus className="mr-1.5 h-4 w-4" /> Goal
         </Button>
       </DialogTrigger>
