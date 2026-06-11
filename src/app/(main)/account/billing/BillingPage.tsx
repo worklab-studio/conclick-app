@@ -76,7 +76,11 @@ export function BillingPage() {
         {/* Header */}
         <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
           <h2 className="text-lg font-semibold text-foreground">Billing</h2>
-          {billing.isLifetime ? (
+          {billing.isAdmin && !billing.isLifetime && !billing.isActivePaid ? (
+            <Pill tone="green">
+              <Crown className="h-3.5 w-3.5" /> Admin — full access
+            </Pill>
+          ) : billing.isLifetime ? (
             <Pill tone="green">
               <Crown className="h-3.5 w-3.5" /> Lifetime — yours forever
             </Pill>
@@ -108,8 +112,17 @@ export function BillingPage() {
           </div>
         ) : null}
 
-        {/* Lifetime: nothing else to do */}
-        {billing.isLifetime ? (
+        {/* Admin without a purchased plan: no trial bar, plans available for testing */}
+        {billing.isAdmin && !billing.isLifetime && !billing.isActivePaid ? (
+          <>
+            <div className="mb-5 text-[12.5px] text-muted-foreground/70">
+              Your founder account always has full access — no plan needed. The cards below are live
+              checkout (useful for end-to-end payment tests).
+            </div>
+            <PlanCards />
+          </>
+        ) : /* Lifetime: nothing else to do */
+        billing.isLifetime ? (
           <div className="rounded-xl border border-[hsl(0,0%,16%)] px-5 py-5">
             <div className="font-semibold text-foreground">Conclick Lifetime — $99, paid once</div>
             <div className="mt-1 text-[12.5px] text-muted-foreground/70">
