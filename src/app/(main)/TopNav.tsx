@@ -8,7 +8,8 @@ import {
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 import { useNavigation, useLoginQuery } from '@/components/hooks';
-import { LogOut, CreditCard, User } from 'lucide-react';
+import { LogOut, CreditCard, User, Clock } from 'lucide-react';
+import { getBillingState } from '@/lib/billing-state';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { NotificationDropdown } from '@/components/NotificationDropdown';
 import { LogoFull } from '@/components/logo';
@@ -17,6 +18,7 @@ import { WorkspaceSwitcher } from './WorkspaceSwitcher';
 export function TopNav() {
   const { router } = useNavigation();
   const { user } = useLoginQuery();
+  const billing = getBillingState(user);
   const username = user?.username || 'User';
   // Mock email if not available, usually derived from user object or user@example.com
   const email = user?.email || `${username.toLowerCase().replace(/\s+/g, '.')}@example.com`;
@@ -34,6 +36,23 @@ export function TopNav() {
           {/* Profile Component */}
           {/* Profile Component Redesign */}
           <div className="flex items-center gap-4">
+            {/* Trial countdown + upgrade (hidden once paid; admins never see it) */}
+            {billing.isTrial && !billing.isAdmin && (
+              <div className="hidden items-center gap-2 sm:flex">
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-[#5e5ba4]/30 bg-[#5e5ba4]/[.13] px-3 py-1 text-xs font-semibold text-[#c7c4f0]">
+                  <Clock className="h-3 w-3" />
+                  Trial · {billing.trialDaysLeft} day{billing.trialDaysLeft === 1 ? '' : 's'} left
+                </span>
+                <button
+                  type="button"
+                  onClick={() => router.push('/account/billing')}
+                  className="rounded-lg bg-[#5e5ba4] px-3.5 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-[#5e5ba4]/90"
+                >
+                  Upgrade
+                </button>
+              </div>
+            )}
+
             {/* Notification Bell */}
             <NotificationDropdown />
 

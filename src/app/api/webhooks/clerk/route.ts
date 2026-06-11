@@ -7,6 +7,7 @@ import { ROLES } from '@/lib/constants';
 import { uuid } from '@/lib/crypto';
 import { getRandomChars } from '@/lib/generate';
 import { sendWelcomeEmail } from '@/lib/email';
+import { newTrialFields } from '@/lib/billing';
 
 function adminEmails(): string[] {
   return (process.env.ADMIN_EMAILS || '')
@@ -96,6 +97,8 @@ export async function POST(req: Request) {
             email,
             displayName: displayName ?? username,
             role: isAdminEmail ? ROLES.admin : ROLES.user,
+            // 14-day trial starts at signup — no card required.
+            ...newTrialFields(),
           },
         });
 

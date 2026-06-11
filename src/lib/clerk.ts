@@ -3,6 +3,7 @@ import prisma from '@/lib/prisma';
 import { ROLES } from '@/lib/constants';
 import { uuid } from '@/lib/crypto';
 import { getRandomChars } from '@/lib/generate';
+import { ensureTrialStarted, newTrialFields } from '@/lib/billing';
 
 export interface LocalUser {
   id: string;
@@ -75,11 +76,13 @@ export async function getOrCreateLocalUser(clerkUserId: string): Promise<LocalUs
   const cached = getCachedUser(clerkUserId);
   if (cached) return cached;
 
-  // 1. Fast path — already linked.
+  // 1. Fast path — already linked. Backfills the 14-day trial for accounts that
+  // predate billing (no-op once trial/subscription fields exist).
   const linked = await prisma.client.user.findUnique({ where: { clerkId: clerkUserId } });
   if (linked) {
     if (linked.deletedAt) return null;
-    return setCachedUser(clerkUserId, decorate(linked));
+    const withTrial = await ensureTrialStarted(linked);
+    return setCachedUser(clerkUserId, decorate(withTrial));
   }
 
   // Need the Clerk profile to link or create.
@@ -106,6 +109,7 @@ export async function getOrCreateLocalUser(clerkUserId: string): Promise<LocalUs
         data: {
           clerkId: clerkUserId,
           ...(isAdminEmail ? { role: ROLES.admin } : {}),
+          ...(!byEmail.trialStartedAt && !byEmail.subscriptionStatus ? newTrialFields() : {}),
         },
       });
       return setCachedUser(clerkUserId, decorate(updated));
@@ -126,6 +130,8 @@ export async function getOrCreateLocalUser(clerkUserId: string): Promise<LocalUs
         email,
         role: isAdminEmail ? ROLES.admin : ROLES.user,
         displayName,
+        // 14-day trial starts at signup — no card required.
+        ...newTrialFields(),
       },
     });
     return setCachedUser(clerkUserId, decorate(created));

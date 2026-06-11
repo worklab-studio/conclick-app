@@ -1,446 +1,196 @@
 'use client';
 
-import { useLoginQuery } from '@/components/hooks';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Check, Crown, ExternalLink, Clock, Zap } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { useState, useEffect } from 'react';
-import { toast } from 'sonner';
+import { useEffect, useRef, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { Check, Clock, Crown, Loader2, AlertTriangle } from 'lucide-react';
+import { useApi, useLoginQuery } from '@/components/hooks';
+import { getBillingState, TRIAL_DAYS } from '@/lib/billing-state';
+import { PlanCards } from '@/components/billing/PlanCards';
 
-const PLANS = {
-  monthly: {
-    name: 'Pro Monthly',
-    price: '$9',
-    priceDetail: '/ month',
-    features: [
-      'Unlimited websites',
-      'Unlimited tracking',
-      'Real-time analytics',
-      'Custom events',
-      'API access',
-    ],
-    trialText: '30-day free trial',
-    subPrice: undefined,
-  },
-  annual: {
-    name: 'Pro Yearly',
-    price: '$7',
-    priceDetail: '/ month - Billed Yearly',
-    subPrice: undefined,
-    features: [
-      'Unlimited websites',
-      'Unlimited tracking',
-      'Real-time analytics',
-      'Custom events',
-      'API access',
-    ],
-    trialText: '30-day free trial',
-  },
-  lifetime: {
-    name: 'Lifetime',
-    price: '$99',
-    priceDetail: 'one-time',
-    features: [
-      'Pay once, use forever',
-      'Unlimited websites',
-      'Unlimited tracking',
-      'Lifetime updates',
-      'VIP Support',
-    ],
-  },
-};
+const fmt = (d?: Date | null) =>
+  d ? d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : '—';
+
+function Pill({ tone, children }: { tone: 'violet' | 'green' | 'red'; children: React.ReactNode }) {
+  const cls =
+    tone === 'green'
+      ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300'
+      : tone === 'red'
+        ? 'bg-red-500/10 border-red-500/30 text-red-300'
+        : 'bg-[#5e5ba4]/[.13] border-[#5e5ba4]/30 text-[#c7c4f0]';
+  return (
+    <span
+      className={`inline-flex items-center gap-2 rounded-full border px-3.5 py-1.5 text-xs font-semibold ${cls}`}
+    >
+      {children}
+    </span>
+  );
+}
 
 export function BillingPage() {
   const { user, refetch } = useLoginQuery();
-  const [isLoading, setIsLoading] = useState<string | null>(null);
-  const [isAnnual, setIsAnnual] = useState(false);
+  const { post } = useApi();
+  const params = useSearchParams();
+  const [portalBusy, setPortalBusy] = useState(false);
+  const [activating, setActivating] = useState(params.get('status') === 'success');
+  const polls = useRef(0);
 
-  // Set default view to match subscription
+  const billing = getBillingState(user);
+  const paid = billing.isLifetime || billing.isActivePaid;
+
+  // Back from Dodo checkout: the webhook lands within seconds — poll the login
+  // query until access flips (max ~40s), then the page re-renders as paid.
   useEffect(() => {
-    const plan = user?.subscriptionPlan?.toLowerCase() || '';
-    if (plan.includes('annual') || plan.includes('year')) {
-      setIsAnnual(true);
+    if (!activating) return;
+    if (paid) {
+      setActivating(false);
+      return;
     }
-  }, [user?.subscriptionPlan]);
+    if (polls.current >= 20) {
+      setActivating(false);
+      return;
+    }
+    const t = setTimeout(() => {
+      polls.current += 1;
+      refetch();
+    }, 2000);
+    return () => clearTimeout(t);
+  }, [activating, paid, user, refetch]);
 
-  // --- State Logic ---
-  const now = new Date();
-  const trialEndsAt = user?.trialEndsAt ? new Date(user.trialEndsAt) : null;
-  const subEndsAt = user?.subscriptionEndsAt ? new Date(user.subscriptionEndsAt) : null;
-  const periodEndsAt = user?.currentPeriodEndsAt ? new Date(user.currentPeriodEndsAt) : null;
-  const effectiveEndsAt = periodEndsAt && periodEndsAt > now ? periodEndsAt : subEndsAt;
-
-  const isLifetime = user?.subscriptionPlan?.toLowerCase().includes('lifetime') || !!user?.lemonOrderId;
-  const isPaid =
-    (user?.subscriptionStatus === 'active' || (effectiveEndsAt && effectiveEndsAt > now)) &&
-    !isLifetime;
-  const hasPaidAccess = isPaid || isLifetime;
-
-  const isTrial =
-    !hasPaidAccess && (user?.subscriptionStatus === 'trial' || (trialEndsAt && trialEndsAt > now));
-  const isTrialExpired = !hasPaidAccess && trialEndsAt && trialEndsAt < now;
-  const isNewUser = !hasPaidAccess && !isTrial && !isTrialExpired && !user?.trialStartedAt;
-
-  // Plan Check Helper
-  const checkPlan = (type: 'monthly' | 'annual') => {
-    const p = user?.subscriptionPlan?.toLowerCase() || '';
-    if (type === 'annual') return p.includes('annual') || p.includes('year');
-    if (type === 'monthly') return p.includes('month');
-    return false;
-  };
-
-
-  // Days remaining
-  const trialDaysRemaining =
-    trialEndsAt && trialEndsAt > now
-      ? Math.ceil((trialEndsAt.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
-      : 0;
-
-  // Percentage for progress bar (assuming 30 days total)
-
-  // --- Handlers ---
-  const handleStartTrial = async () => {
-    setIsLoading('trial');
+  const openPortal = async () => {
+    setPortalBusy(true);
     try {
-      const res = await fetch('/api/billing/start-trial', { method: 'POST' });
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || 'Failed to start trial');
-      }
-      toast.success('Your 14-day free trial has started!');
-      await refetch();
-    } catch (error: any) {
-      toast.error(error.message);
+      const res = await post('/billing/portal', {});
+      if (res?.url) window.open(res.url, '_blank', 'noopener');
     } finally {
-      setIsLoading(null);
+      setPortalBusy(false);
     }
   };
 
-  const handleUpgrade = async (plan: 'monthly' | 'annual' | 'lifetime') => {
-    setIsLoading(plan);
-    try {
-      const response = await fetch('/api/billing/checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ plan }),
-      });
+  if (!user) return null;
 
-      if (!response.ok) throw new Error('Failed to create checkout');
-
-      const { url } = await response.json();
-      window.location.href = url;
-    } catch {
-      toast.error('Failed to start checkout. Please try again.');
-    } finally {
-      setIsLoading(null);
-    }
-  };
-
-  const handleManage = async () => {
-    setIsLoading('manage');
-    try {
-      const response = await fetch('/api/billing/portal', { method: 'POST' });
-      if (!response.ok) throw new Error('Failed to get portal URL');
-      const { url } = await response.json();
-      window.open(url, '_blank');
-    } catch {
-      toast.error('Failed to open billing settings');
-    } finally {
-      setIsLoading(null);
-    }
-  };
-
-  // --- Components ---
-  const PlanStatusBanner = () => {
-    // 1. Paid State
-    if (hasPaidAccess) {
-      const planName = isLifetime
-        ? 'Lifetime Access'
-        : (user?.subscriptionPlan === 'annual' ? 'Pro Yearly' : 'Pro Monthly');
-
-      const renewalDate = effectiveEndsAt ? effectiveEndsAt.toLocaleDateString() : 'N/A';
-
-      return (
-        <div className="relative w-full mb-8 overflow-hidden rounded-xl border border-emerald-500/30 bg-emerald-500/5 p-6 md:p-8">
-          <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/10 via-teal-500/5 to-transparent mix-blend-overlay" />
-          <div className="relative z-10 flex items-center gap-6">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-400 ring-1 ring-emerald-500/40 shadow-[0_0_15px_rgba(16,185,129,0.2)]">
-              <Check className="h-6 w-6" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2 mb-1">
-                <h3 className="text-lg font-bold text-white">Active Plan: {planName}</h3>
-                <span className="inline-flex items-center rounded-full bg-emerald-500/20 px-2 py-0.5 text-xs font-medium text-emerald-300 ring-1 ring-inset ring-emerald-500/30">
-                  Active
-                </span>
-              </div>
-              <p className="text-zinc-400">
-                {isLifetime ? 'You have lifetime access to all features.' : `Your plan renews on ${renewalDate}.`}
-              </p>
-            </div>
-          </div>
-        </div>
-      )
-    }
-
-    // 2. Trial State
-    if (!isTrial && !isTrialExpired) return null;
-
-    return (
-      <div className={cn(
-        "relative w-full mb-8 overflow-hidden rounded-xl border p-6 md:p-8",
-        isTrialExpired ? "border-red-500/30 bg-red-500/5" : "border-indigo-500/30 bg-indigo-500/5"
-      )}>
-        <div className={cn(
-          "absolute inset-0 bg-gradient-to-r to-transparent mix-blend-overlay",
-          isTrialExpired ? "from-red-500/10 via-orange-500/5" : "from-indigo-500/10 via-purple-500/5"
-        )} />
-
-        <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="flex items-center gap-4">
-            <div className={cn(
-              "flex h-12 w-12 items-center justify-center rounded-full ring-1 shadow-[0_0_15px_rgba(0,0,0,0.2)]",
-              isTrialExpired ? "bg-red-500/20 text-red-400 ring-red-500/40 shadow-red-500/20" : "bg-indigo-500/20 text-indigo-400 ring-indigo-500/40 shadow-indigo-500/20"
-            )}>
-              {isTrialExpired ? <Clock className="h-6 w-6 fill-current" /> : <Zap className="h-6 w-6 fill-current" />}
-            </div>
-            <div>
-              <div className="flex items-center gap-2 mb-1">
-                <h3 className="text-lg font-bold text-white">
-                  {isTrialExpired ? 'Trial Expired' : 'Pro Trial Active'}
-                </h3>
-                <span className={cn(
-                  "inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset",
-                  isTrialExpired ? "bg-red-500/20 text-red-300 ring-red-500/30" : "bg-indigo-500/20 text-indigo-300 ring-indigo-500/30"
-                )}>
-                  {isTrialExpired ? 'Upgrade Required' : 'Full Access'}
-                </span>
-              </div>
-              <p className="text-sm text-zinc-400 max-w-[400px]">
-                {isTrialExpired
-                  ? 'Your trial has ended. Please upgrade to continue accessing your analytics.'
-                  : 'You have unlimited access to all Pro features.'}
-              </p>
-            </div>
-          </div>
-
-          <div className="w-full md:w-auto min-w-[280px]">
-            <div className="flex items-end justify-between mb-2">
-              <span className={cn("text-xs font-medium uppercase tracking-wider", isTrialExpired ? "text-red-300" : "text-indigo-300")}>
-                Time Remaining
-              </span>
-              <span className="text-xl font-bold text-white tabular-nums">
-                {trialDaysRemaining}{' '}
-                <span className="text-xs font-normal text-zinc-500 ml-0.5">days</span>
-              </span>
-            </div>
-            <div className="h-3 w-full bg-zinc-900/50 rounded-full overflow-hidden ring-1 ring-white/5 backdrop-blur-sm">
-              <div
-                className={cn(
-                  "h-full rounded-full transition-all duration-1000 ease-out",
-                  isTrialExpired ? "bg-red-600 shadow-[0_0_10px_rgba(239,68,68,0.5)]" : "bg-indigo-600 shadow-[0_0_10px_rgba(99,102,241,0.5)]"
-                )}
-                style={{ width: `${Math.max(0, Math.min(100, (trialDaysRemaining / 30) * 100))}%` }}
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  };
-
-  // Sub Plan to display
-  const currentSub = isAnnual ? PLANS.annual : PLANS.monthly;
-  const subPlanType = isAnnual ? 'annual' : 'monthly';
+  const trialUsedDays = billing.isTrial ? TRIAL_DAYS - billing.trialDaysLeft : TRIAL_DAYS;
 
   return (
-    <div className="w-full px-0 sm:px-0">
-      {' '}
-      {/* Max-width handled by layout usually, but ensuring nice alignment */}
-      {/* Header + Toggle Section */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-6">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight text-white mb-2">Billing</h1>
-          <p className="text-zinc-400">Simple pricing. No limits.</p>
+    <div className="mx-auto w-full max-w-[1000px] px-6 py-8">
+      <div className="rounded-2xl border border-[hsl(0,0%,12%)] bg-[hsl(0,0%,8%)] p-6 sm:p-7">
+        {/* Header */}
+        <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+          <h2 className="text-lg font-semibold text-foreground">Billing</h2>
+          {billing.isLifetime ? (
+            <Pill tone="green">
+              <Crown className="h-3.5 w-3.5" /> Lifetime — yours forever
+            </Pill>
+          ) : billing.isActivePaid ? (
+            <Pill tone="green">
+              <Check className="h-3.5 w-3.5" /> Monthly plan — active
+            </Pill>
+          ) : billing.inGrace ? (
+            <Pill tone="violet">
+              <Clock className="h-3.5 w-3.5" /> Access until {fmt(billing.periodEndsAt)}
+            </Pill>
+          ) : billing.isTrial ? (
+            <Pill tone="violet">
+              <Clock className="h-3.5 w-3.5" /> Free trial — {billing.trialDaysLeft} of {TRIAL_DAYS}{' '}
+              days left
+            </Pill>
+          ) : (
+            <Pill tone="red">
+              <AlertTriangle className="h-3.5 w-3.5" /> Trial ended
+            </Pill>
+          )}
         </div>
 
-        {/* Toggle - Outside Card */}
-        {!hasPaidAccess && (
-          <div className="flex items-center bg-zinc-900 border border-zinc-800 rounded-lg p-1">
-            <button
-              onClick={() => setIsAnnual(false)}
-              className={cn(
-                'px-4 py-2 text-sm font-medium rounded-md transition-all',
-                !isAnnual
-                  ? 'bg-zinc-800 text-white shadow-sm'
-                  : 'text-zinc-500 hover:text-zinc-300',
-              )}
-            >
-              Monthly
-            </button>
-            <button
-              onClick={() => setIsAnnual(true)}
-              className={cn(
-                'px-4 py-2 text-sm font-medium rounded-md transition-all flex items-center gap-2',
-                isAnnual ? 'bg-zinc-800 text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-300',
-              )}
-            >
-              Yearly
-              <span className="bg-green-500/20 text-green-400 text-[10px] px-1.5 py-0.5 rounded-full font-bold">
-                SAVE 20%
-              </span>
-            </button>
+        {/* Activating banner (return from checkout) */}
+        {activating && !paid ? (
+          <div className="mb-5 flex items-center gap-2.5 rounded-xl border border-[#5e5ba4]/30 bg-[#5e5ba4]/10 px-4 py-3 text-sm text-[#c7c4f0]">
+            <Loader2 className="h-4 w-4 animate-spin" />
+            Payment received — activating your plan… this takes a few seconds.
           </div>
-        )}
-      </div>
-      <PlanStatusBanner />
-      {/* Pricing Section */}
-      <div id="pricing-plans" className="space-y-6">
-        {/* 2-Column Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* 1. Subscription Card */}
-          <Card
-            className={cn(
-              'bg-zinc-900/40 border-zinc-800 hover:border-zinc-700 transition-all flex flex-col relative',
-              isPaid && !isLifetime && 'border-indigo-500/50 ring-1 ring-indigo-500/20',
-            )}
-          >
-            {hasPaidAccess && checkPlan(subPlanType) && (
-              <div className="absolute top-6 right-6">
-                <span className="bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1.5">
-                  <Check className="h-3 w-3" />
-                  ACTIVE
-                </span>
-              </div>
-            )}
-            <CardContent className="p-8 flex-1 flex flex-col">
-              <div className="mb-8">
-                <h3 className="text-xl font-bold text-white mb-2">{currentSub.name}</h3>
-                <div className="flex items-baseline gap-1">
-                  <span className="text-5xl font-bold text-white tracking-tight">
-                    {currentSub.price}
-                  </span>
-                  <span className="text-zinc-500">{currentSub.priceDetail}</span>
-                </div>
-                {isAnnual && currentSub.subPrice && (
-                  <p className="text-green-400 text-sm mt-2 font-medium">{currentSub.subPrice}</p>
-                )}
-                {isTrial ? (
-                  <p className="text-indigo-400 text-sm mt-1 font-medium">
-                    {trialDaysRemaining} days remaining in trial
-                  </p>
-                ) : isNewUser ? (
-                  <p className="text-indigo-400 text-sm mt-1 font-medium">30-day free trial</p>
-                ) : null}
-              </div>
+        ) : null}
 
-              <Button
-                className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-medium h-12 mb-8"
-                disabled={isLoading === subPlanType || hasPaidAccess}
-                onClick={() => {
-                  if (isNewUser) handleStartTrial();
-                  else handleUpgrade(subPlanType);
-                }}
-              >
-                {isLoading === subPlanType
-                  ? 'Loading...'
-                  : hasPaidAccess
-                    ? checkPlan(subPlanType)
-                      ? 'Current Plan'
-                      : `Switch to ${isAnnual ? 'Yearly' : 'Monthly'}`
-                    : 'Upgrade'}
-              </Button>
-
-              <div className="space-y-4 mt-auto border-t border-zinc-800 pt-6">
-                <p className="text-sm font-medium text-white mb-2">Everything in Free, plus:</p>
-                {currentSub.features.map(feature => (
-                  <div key={feature} className="flex items-center gap-3 text-sm text-zinc-400">
-                    <Check className="h-4 w-4 text-indigo-500 flex-shrink-0" />
-                    {feature}
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* 2. Lifetime Card */}
-          <Card
-            className={cn(
-              'bg-zinc-950 border-zinc-800 hover:border-yellow-500/30 transition-all flex flex-col relative',
-              isLifetime && 'border-yellow-500/50 ring-1 ring-yellow-500/20',
-            )}
-          >
-            {/* Badge */}
-            {/* Badge */}
-            {isLifetime ? (
-              <div className="absolute top-6 right-6">
-                <span className="bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1.5">
-                  <Check className="h-3 w-3" />
-                  ACTIVE
-                </span>
-              </div>
-            ) : (
-              <div className="absolute top-6 right-6">
-                <span className="bg-yellow-500/10 text-yellow-500 border border-yellow-500/20 px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1.5">
-                  <Crown className="h-3 w-3 fill-current" />
-                  BEST VALUE
-                </span>
-              </div>
-            )}
-
-            <CardContent className="p-8 flex-1 flex flex-col">
-              <div className="mb-8">
-                <div className="flex items-center gap-2 mb-2">
-                  <h3 className="text-xl font-bold text-white">{PLANS.lifetime.name}</h3>
-                </div>
-                <div className="flex items-baseline gap-1">
-                  <span className="text-5xl font-bold text-white tracking-tight">
-                    {PLANS.lifetime.price}
-                  </span>
-                  <span className="text-zinc-500">{PLANS.lifetime.priceDetail}</span>
-                </div>
-                <p className="text-yellow-500 text-sm mt-2 font-medium">Pay once, use forever</p>
-              </div>
-
-              <Button
-                variant="outline"
-                className={cn(
-                  'w-full border-zinc-700 bg-transparent hover:bg-zinc-800 text-white font-medium h-12 mb-8',
-                  isLifetime &&
-                  'bg-yellow-500/10 border-yellow-500 text-yellow-500 hover:bg-yellow-500/20 hover:text-yellow-500',
-                )}
-                disabled={isLoading === 'lifetime' || isLifetime}
-                onClick={() => handleUpgrade('lifetime')}
-              >
-                {isLoading === 'lifetime'
-                  ? 'Loading...'
-                  : isLifetime
-                    ? 'Lifetime Active'
-                    : 'Upgrade'}
-              </Button>
-
-              <div className="space-y-4 mt-auto border-t border-zinc-800 pt-6">
-                <p className="text-sm font-medium text-white mb-2">Everything in Pro, plus:</p>
-                {PLANS.lifetime.features.map(feature => (
-                  <div key={feature} className="flex items-center gap-3 text-sm text-zinc-400">
-                    <Check className="h-4 w-4 text-yellow-500 flex-shrink-0" />
-                    {feature}
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {hasPaidAccess && (
-          <div className="flex justify-center mt-8">
-            <Button variant="outline" onClick={handleManage}>
-              All Billing Settings <ExternalLink className="ml-2 h-4 w-4" />
-            </Button>
+        {/* Lifetime: nothing else to do */}
+        {billing.isLifetime ? (
+          <div className="rounded-xl border border-[hsl(0,0%,16%)] px-5 py-5">
+            <div className="font-semibold text-foreground">Conclick Lifetime — $99, paid once</div>
+            <div className="mt-1 text-[12.5px] text-muted-foreground/70">
+              Every current and future feature, forever. No renewals, no invoices, no surprises.
+              Thank you for backing Conclick. 💜
+            </div>
           </div>
+        ) : billing.isActivePaid ? (
+          /* Monthly active: manage + upgrade */
+          <div className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-[hsl(0,0%,16%)] px-5 py-4.5">
+            <div>
+              <div className="font-semibold text-foreground">Conclick Monthly — $9/mo</div>
+              <div className="mt-1 text-[12.5px] text-muted-foreground/70">
+                Renews {fmt(billing.periodEndsAt)} · card on file with Dodo Payments
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-2.5">
+              <button
+                type="button"
+                onClick={openPortal}
+                disabled={portalBusy}
+                className="flex items-center gap-2 rounded-lg border border-[hsl(0,0%,20%)] px-4 py-2.5 text-[13px] font-semibold text-foreground transition-colors hover:border-[hsl(0,0%,30%)] disabled:opacity-60"
+              >
+                {portalBusy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : null}
+                Manage subscription
+              </button>
+              <UpgradeToLifetime />
+            </div>
+          </div>
+        ) : (
+          /* Trial (running or ended) and grace: show the plans */
+          <>
+            {billing.isTrial ? (
+              <div className="mb-6">
+                <div className="h-1.5 overflow-hidden rounded bg-[hsl(0,0%,13%)]">
+                  <div
+                    className="h-full rounded bg-gradient-to-r from-[#5e5ba4] to-[#7c79c4]"
+                    style={{ width: `${Math.min(100, (trialUsedDays / TRIAL_DAYS) * 100)}%` }}
+                  />
+                </div>
+                <div className="mt-1.5 flex justify-between text-[11.5px] text-muted-foreground/60">
+                  <span>No credit card needed during the trial</span>
+                  <span>Ends {fmt(billing.trialEndsAt)}</span>
+                </div>
+              </div>
+            ) : null}
+            <PlanCards />
+          </>
         )}
       </div>
     </div>
+  );
+}
+
+function UpgradeToLifetime() {
+  const { post } = useApi();
+  const [busy, setBusy] = useState(false);
+
+  const go = async () => {
+    setBusy(true);
+    try {
+      const res = await post('/billing/checkout', { plan: 'lifetime' });
+      if (res?.url) {
+        window.location.href = res.url;
+        return;
+      }
+    } catch {
+      /* surfaced by staying on page */
+    }
+    setBusy(false);
+  };
+
+  return (
+    <button
+      type="button"
+      onClick={go}
+      disabled={busy}
+      className="flex items-center gap-2 rounded-lg bg-[#5e5ba4] px-4 py-2.5 text-[13px] font-semibold text-white transition-colors hover:bg-[#5e5ba4]/90 disabled:opacity-60"
+    >
+      {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Crown className="h-3.5 w-3.5" />}
+      Upgrade to lifetime — $99
+    </button>
   );
 }
