@@ -160,7 +160,9 @@ export function parseDateRange(value: string, locale = 'en-US', timezone?: strin
   const date = new Date();
   const now = timezone ? utcToZonedTime(date, timezone) : date;
   const dateLocale = getDateLocale(locale);
-  const { num = 1, unit } = parseDateValue(value);
+  // parseDateValue returns null for non-N-unit values ('all') — fall through to the
+  // default switch case instead of crashing on the destructure.
+  const { num = 1, unit } = parseDateValue(value) || {};
 
   switch (unit) {
     case 'hour':

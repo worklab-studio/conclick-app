@@ -29,7 +29,7 @@ export function WebsiteHeader({ websiteId }: { websiteId: string }) {
     <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
       <div className="flex items-center gap-4">
         <WebsiteSelect websiteId={websiteId} onChange={handleWebsiteChange} />
-        <DateRangePicker />
+        <DateRangePicker websiteId={websiteId} />
       </div>
 
       <div className="flex items-center gap-2">

@@ -120,7 +120,7 @@ function ShareHeader({ website }: { website: any }) {
           {website?.domain && <p className="text-sm text-muted-foreground">{website.domain}</p>}
         </div>
       </div>
-      <DateRangePicker />
+      <DateRangePicker websiteId={website?.id} />
     </div>
   );
 }
