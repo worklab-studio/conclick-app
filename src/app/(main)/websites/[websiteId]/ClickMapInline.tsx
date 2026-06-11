@@ -447,127 +447,131 @@ export function ClickMapInline({
                 </span>
               </div>
             ) : (
-              <div className="relative" onClick={() => setSelected(null)}>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={snap.image} alt={`Snapshot of ${urlPath}`} className="block w-full" />
-                <div className="absolute inset-0 bg-[rgba(5,5,8,.30)]" />
+              // The full page scrolls INSIDE the frame (like a real browser window) so
+              // a 10k-px landing page doesn't dwarf the dashboard.
+              <div className="max-h-[75vh] overflow-y-auto">
+                <div className="relative" onClick={() => setSelected(null)}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={snap.image} alt={`Snapshot of ${urlPath}`} className="block w-full" />
+                  <div className="absolute inset-0 bg-[rgba(5,5,8,.30)]" />
 
-                {/* heat blobs */}
-                {heat.map(h => (
-                  <div
-                    key={`blob-${h.e.selector}`}
-                    className="pointer-events-none absolute aspect-square -translate-x-1/2 -translate-y-1/2 rounded-full"
-                    style={{
-                      left: `${h.cx}%`,
-                      top: `${h.cy}%`,
-                      width: `${h.d}%`,
-                      background: heatGradient(h.t, h.e.revenue > 0),
-                    }}
-                  />
-                ))}
+                  {/* heat blobs */}
+                  {heat.map(h => (
+                    <div
+                      key={`blob-${h.e.selector}`}
+                      className="pointer-events-none absolute aspect-square -translate-x-1/2 -translate-y-1/2 rounded-full"
+                      style={{
+                        left: `${h.cx}%`,
+                        top: `${h.cy}%`,
+                        width: `${h.d}%`,
+                        background: heatGradient(h.t, h.e.revenue > 0),
+                      }}
+                    />
+                  ))}
 
-                {/* count badges (click → popup) */}
-                {heat.map(h => (
-                  <button
-                    key={`badge-${h.e.selector}`}
-                    type="button"
-                    onClick={ev => {
-                      ev.stopPropagation();
-                      setSelected(s => (s === h.e.selector ? null : h.e.selector));
-                    }}
-                    className={`absolute -translate-x-1/2 rounded-full border px-2 py-0.5 text-[11px] font-bold tabular-nums text-white shadow-lg transition-transform hover:scale-110 ${
-                      h.e.revenue > 0 ? 'border-emerald-500/50' : 'border-[hsl(0,0%,26%)]'
-                    } bg-[hsl(0,0%,7%)]/95`}
-                    style={{ left: `${h.cx}%`, top: `${h.bottom}%`, marginTop: 6 }}
-                  >
-                    {h.e.clicks}×
-                    {h.e.revenue > 0 ? (
-                      <span className="ml-1.5 font-semibold text-emerald-300">
-                        {money(h.e.revenue, currency)}
-                      </span>
-                    ) : null}
-                  </button>
-                ))}
-
-                {/* popup */}
-                {selectedHeat ? (
-                  <div
-                    className="absolute z-10 w-[260px] rounded-xl border border-[hsl(0,0%,22%)] bg-[hsl(0,0%,9%)]/[.98] p-3.5 shadow-2xl"
-                    style={{
-                      left: `${Math.min(Math.max(selectedHeat.cx, 14), 86)}%`,
-                      top:
-                        selectedHeat.bottom < 72
-                          ? `${selectedHeat.bottom}%`
-                          : `${selectedHeat.top}%`,
-                      transform:
-                        selectedHeat.bottom < 72
-                          ? 'translate(-50%, 34px)'
-                          : 'translate(-50%, calc(-100% - 14px))',
-                    }}
-                    onClick={ev => ev.stopPropagation()}
-                  >
-                    <div className="text-[13px] font-semibold text-foreground">
-                      {friendly(selectedHeat.e)}
-                    </div>
-                    <div className="mt-0.5 truncate font-mono text-[10px] text-muted-foreground/50">
-                      {selectedHeat.e.selector}
-                    </div>
-                    <div className="mt-3 grid grid-cols-2 gap-x-3 gap-y-2.5">
-                      <div>
-                        <div className="text-[10px] uppercase tracking-wide text-muted-foreground/50">
-                          Clicks
-                        </div>
-                        <div className="text-[15px] font-bold tabular-nums">
-                          {selectedHeat.e.clicks}
-                        </div>
-                      </div>
-                      <div>
-                        <div className="text-[10px] uppercase tracking-wide text-muted-foreground/50">
-                          Visitors
-                        </div>
-                        <div className="text-[15px] font-bold tabular-nums">
-                          {selectedHeat.e.sessions}
-                        </div>
-                      </div>
-                      <div>
-                        <div className="text-[10px] uppercase tracking-wide text-muted-foreground/50">
-                          Revenue
-                        </div>
-                        <div
-                          className={`text-[15px] font-bold tabular-nums ${
-                            selectedHeat.e.revenue > 0
-                              ? 'text-emerald-300'
-                              : 'text-muted-foreground/40'
-                          }`}
-                        >
-                          {selectedHeat.e.revenue > 0
-                            ? money(selectedHeat.e.revenue, currency)
-                            : '—'}
-                        </div>
-                      </div>
-                      <div>
-                        <div className="text-[10px] uppercase tracking-wide text-muted-foreground/50">
-                          Share of clicks
-                        </div>
-                        <div className="text-[15px] font-bold tabular-nums">
-                          {total ? Math.round((selectedHeat.e.clicks / total) * 100) : 0}%
-                        </div>
-                      </div>
-                    </div>
-                    <div className="mt-3 flex items-center justify-between border-t border-[hsl(0,0%,13%)] pt-2.5 text-[11px] text-muted-foreground/60">
-                      <span>{depthBand(selectedHeat.e.medianY) || '—'} of page</span>
-                      {selectedHeat.e.label?.trim() ? (
-                        <button
-                          type="button"
-                          onClick={() => setFunnelFor(selectedHeat.e)}
-                          className="inline-flex items-center gap-1 text-[#b7b4e4] transition-colors hover:text-foreground"
-                        >
-                          <Filter className="h-3 w-3" /> Funnel to this →
-                        </button>
+                  {/* count badges (click → popup) */}
+                  {heat.map(h => (
+                    <button
+                      key={`badge-${h.e.selector}`}
+                      type="button"
+                      onClick={ev => {
+                        ev.stopPropagation();
+                        setSelected(s => (s === h.e.selector ? null : h.e.selector));
+                      }}
+                      className={`absolute -translate-x-1/2 rounded-full border px-2 py-0.5 text-[11px] font-bold tabular-nums text-white shadow-lg transition-transform hover:scale-110 ${
+                        h.e.revenue > 0 ? 'border-emerald-500/50' : 'border-[hsl(0,0%,26%)]'
+                      } bg-[hsl(0,0%,7%)]/95`}
+                      style={{ left: `${h.cx}%`, top: `${h.bottom}%`, marginTop: 6 }}
+                    >
+                      {h.e.clicks}×
+                      {h.e.revenue > 0 ? (
+                        <span className="ml-1.5 font-semibold text-emerald-300">
+                          {money(h.e.revenue, currency)}
+                        </span>
                       ) : null}
+                    </button>
+                  ))}
+
+                  {/* popup */}
+                  {selectedHeat ? (
+                    <div
+                      className="absolute z-10 w-[260px] rounded-xl border border-[hsl(0,0%,22%)] bg-[hsl(0,0%,9%)]/[.98] p-3.5 shadow-2xl"
+                      style={{
+                        left: `${Math.min(Math.max(selectedHeat.cx, 14), 86)}%`,
+                        top:
+                          selectedHeat.bottom < 72
+                            ? `${selectedHeat.bottom}%`
+                            : `${selectedHeat.top}%`,
+                        transform:
+                          selectedHeat.bottom < 72
+                            ? 'translate(-50%, 34px)'
+                            : 'translate(-50%, calc(-100% - 14px))',
+                      }}
+                      onClick={ev => ev.stopPropagation()}
+                    >
+                      <div className="text-[13px] font-semibold text-foreground">
+                        {friendly(selectedHeat.e)}
+                      </div>
+                      <div className="mt-0.5 truncate font-mono text-[10px] text-muted-foreground/50">
+                        {selectedHeat.e.selector}
+                      </div>
+                      <div className="mt-3 grid grid-cols-2 gap-x-3 gap-y-2.5">
+                        <div>
+                          <div className="text-[10px] uppercase tracking-wide text-muted-foreground/50">
+                            Clicks
+                          </div>
+                          <div className="text-[15px] font-bold tabular-nums">
+                            {selectedHeat.e.clicks}
+                          </div>
+                        </div>
+                        <div>
+                          <div className="text-[10px] uppercase tracking-wide text-muted-foreground/50">
+                            Visitors
+                          </div>
+                          <div className="text-[15px] font-bold tabular-nums">
+                            {selectedHeat.e.sessions}
+                          </div>
+                        </div>
+                        <div>
+                          <div className="text-[10px] uppercase tracking-wide text-muted-foreground/50">
+                            Revenue
+                          </div>
+                          <div
+                            className={`text-[15px] font-bold tabular-nums ${
+                              selectedHeat.e.revenue > 0
+                                ? 'text-emerald-300'
+                                : 'text-muted-foreground/40'
+                            }`}
+                          >
+                            {selectedHeat.e.revenue > 0
+                              ? money(selectedHeat.e.revenue, currency)
+                              : '—'}
+                          </div>
+                        </div>
+                        <div>
+                          <div className="text-[10px] uppercase tracking-wide text-muted-foreground/50">
+                            Share of clicks
+                          </div>
+                          <div className="text-[15px] font-bold tabular-nums">
+                            {total ? Math.round((selectedHeat.e.clicks / total) * 100) : 0}%
+                          </div>
+                        </div>
+                      </div>
+                      <div className="mt-3 flex items-center justify-between border-t border-[hsl(0,0%,13%)] pt-2.5 text-[11px] text-muted-foreground/60">
+                        <span>{depthBand(selectedHeat.e.medianY) || '—'} of page</span>
+                        {selectedHeat.e.label?.trim() ? (
+                          <button
+                            type="button"
+                            onClick={() => setFunnelFor(selectedHeat.e)}
+                            className="inline-flex items-center gap-1 text-[#b7b4e4] transition-colors hover:text-foreground"
+                          >
+                            <Filter className="h-3 w-3" /> Funnel to this →
+                          </button>
+                        ) : null}
+                      </div>
                     </div>
-                  </div>
-                ) : null}
+                  ) : null}
+                </div>
               </div>
             )}
           </div>

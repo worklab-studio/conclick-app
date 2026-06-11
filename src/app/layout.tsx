@@ -71,7 +71,14 @@ export default function ({ children }) {
       signInUrl="/login"
       signUpUrl="/register"
     >
-      <html lang="en" className="dark" style={{ colorScheme: 'dark' }} suppressHydrationWarning>
+      {/* scrollbar-gutter keeps content from shifting horizontally when a tab/filter
+          switch briefly makes the page shorter than the viewport */}
+      <html
+        lang="en"
+        className="dark [scrollbar-gutter:stable]"
+        style={{ colorScheme: 'dark' }}
+        suppressHydrationWarning
+      >
         <head>
           <script dangerouslySetInnerHTML={{ __html: themeScript }} />
           <link rel="icon" type="image/svg+xml" href="/images/conclick-icon.svg" />

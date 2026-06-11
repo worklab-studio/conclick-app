@@ -9,7 +9,8 @@ import puppeteer, { type Browser, type Page } from 'puppeteer-core';
 const VIEWPORT_W = 1280;
 const VIEWPORT_H = 900;
 const SCALE = 1.5; // crisp on retina without huge rasters on a 1GB machine
-const MAX_HEIGHT = 4500; // CSS px cap for very long pages
+const MAX_HEIGHT = 12000; // CSS px cap — long landing pages run 8-11k incl. footer
+const SCALE_DROP_HEIGHT = 5500; // beyond this, raster at 1x to keep memory bounded
 const NAV_TIMEOUT = 20_000;
 const CACHE_TTL = 24 * 60 * 60 * 1000;
 const CACHE_MAX = 24;
@@ -141,17 +142,28 @@ async function measureBoxes(
   targets: SnapshotTarget[],
 ): Promise<Record<string, SnapshotBox>> {
   // The tracker's selector can match several nodes — disambiguate by the element
-  // text we stored with the click. Targets are embedded as JSON (safe in a JS
-  // expression context for modern Chrome).
+  // text we stored with the click. When the selector matches NOTHING (the site was
+  // redesigned since the clicks happened), fall back to finding a clickable element
+  // by its normalized text ("GET STARTED ▶" still finds today's "Get started").
+  // Targets are embedded as JSON (safe in a JS expression context for modern Chrome).
   const src = `(() => {
     const items = ${JSON.stringify(targets)};
     const out = {};
     const norm = (s) => s.replace(/\\s+/g, ' ').trim().slice(0, 80);
+    const loose = (s) => norm(s).toLowerCase().normalize('NFKC').replace(/[^\\p{L}\\p{N}]+/gu, '');
+    const clickables = Array.from(
+      document.querySelectorAll('a, button, [role="button"], input[type="submit"], input[type="button"]'),
+    );
+    const box = (el) => {
+      const r = el.getBoundingClientRect();
+      if (r.width < 2 || r.height < 2) return null;
+      return { x: r.x + window.scrollX, y: r.y + window.scrollY, w: r.width, h: r.height };
+    };
     for (const it of items) {
+      let el = null;
       try {
         const els = Array.from(document.querySelectorAll(it.selector));
-        if (!els.length) continue;
-        let el = els[0];
+        el = els[0] || null;
         if (els.length > 1 && it.text) {
           const want = norm(it.text);
           const hit = els.find((c) => {
@@ -160,15 +172,13 @@ async function measureBoxes(
           });
           if (hit) el = hit;
         }
-        const r = el.getBoundingClientRect();
-        if (r.width < 2 || r.height < 2) continue;
-        out[it.selector] = {
-          x: r.x + window.scrollX,
-          y: r.y + window.scrollY,
-          w: r.width,
-          h: r.height,
-        };
-      } catch (e) { /* invalid selector — skip */ }
+      } catch (e) { /* invalid selector */ }
+      if ((!el || !box(el)) && it.text) {
+        const want = loose(it.text);
+        if (want) el = clickables.find((c) => loose(c.innerText || c.textContent || '') === want) || el;
+      }
+      const b = el && box(el);
+      if (b) out[it.selector] = b;
     }
     return out;
   })()`;
@@ -201,10 +211,15 @@ async function captureOnce(url: string, targets: SnapshotTarget[]): Promise<Page
         '*,*::before,*::after{animation:none!important;transition:none!important} html{scroll-behavior:auto!important}',
     });
 
+    // Some sites size <html> to the viewport and scroll <body> — take the taller.
     const height = (await page.evaluate(
-      `Math.min(Math.max(document.documentElement.scrollHeight, 600), ${MAX_HEIGHT})`,
+      `Math.min(Math.max(document.documentElement.scrollHeight, document.body ? document.body.scrollHeight : 0, 600), ${MAX_HEIGHT})`,
     )) as number;
     const boxes = await measureBoxes(page, targets);
+    // Very tall pages re-raster at 1x — same CSS layout (boxes stay valid), bounded memory.
+    if (height > SCALE_DROP_HEIGHT) {
+      await page.setViewport({ width: VIEWPORT_W, height: VIEWPORT_H, deviceScaleFactor: 1 });
+    }
     const buf = await page.screenshot({
       type: 'jpeg',
       quality: 80,

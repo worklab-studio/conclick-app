@@ -84,28 +84,32 @@ export function DashboardSectionsPanel({ websiteId }: { websiteId: string }) {
           })}
         </div>
 
-        {tab === 'users' && <SessionsDataTable websiteId={websiteId} />}
-        {tab === 'customers' && (
-          <>
-            <RevenueBySourceInline websiteId={websiteId} />
-            <CustomersDataTable websiteId={websiteId} />
-          </>
-        )}
-        {tab === 'ai' && <AiTrafficInline websiteId={websiteId} />}
-        {tab === 'campaigns' && <CampaignsInline websiteId={websiteId} />}
-        {tab === 'friction' && <FrictionInline websiteId={websiteId} />}
-        {tab === 'clickmap' && <ClickMapInline websiteId={websiteId} focus={clickMapFocus} />}
-        {(tab === 'funnels' || tab === 'goals') && (
-          <div className="p-4">
-            {tab === 'funnels' && (
-              <>
-                <AutoFunnelInline websiteId={websiteId} />
-                <FunnelsInline websiteId={websiteId} />
-              </>
-            )}
-            {tab === 'goals' && <GoalsInline websiteId={websiteId} />}
-          </div>
-        )}
+        {/* min-height keeps the panel from collapsing while the next tab/filter
+            loads — otherwise the document shortens and the scroll position jumps. */}
+        <div className="min-h-[65vh]">
+          {tab === 'users' && <SessionsDataTable websiteId={websiteId} />}
+          {tab === 'customers' && (
+            <>
+              <RevenueBySourceInline websiteId={websiteId} />
+              <CustomersDataTable websiteId={websiteId} />
+            </>
+          )}
+          {tab === 'ai' && <AiTrafficInline websiteId={websiteId} />}
+          {tab === 'campaigns' && <CampaignsInline websiteId={websiteId} />}
+          {tab === 'friction' && <FrictionInline websiteId={websiteId} />}
+          {tab === 'clickmap' && <ClickMapInline websiteId={websiteId} focus={clickMapFocus} />}
+          {(tab === 'funnels' || tab === 'goals') && (
+            <div className="p-4">
+              {tab === 'funnels' && (
+                <>
+                  <AutoFunnelInline websiteId={websiteId} />
+                  <FunnelsInline websiteId={websiteId} />
+                </>
+              )}
+              {tab === 'goals' && <GoalsInline websiteId={websiteId} />}
+            </div>
+          )}
+        </div>
 
         {/* Lets a visitor/customer row click open the session profile from here —
           owner view only; the public share is read-only. */}
