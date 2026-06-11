@@ -463,3 +463,46 @@ model Pixel {
   @@index([createdAt])
   @@map("pixel")
 }
+
+model NotificationChannel {
+  id            String   @id @default(uuid()) @map("channel_id") @db.Uuid
+  userId        String   @map("user_id") @db.Uuid
+  type          String   @db.VarChar(20) // slack | discord | telegram
+  label         String?  @db.VarChar(100)
+  config        String   @db.Text // encrypted JSON: { url } or { botToken, chatId }
+  digest        Boolean  @default(true)
+  paymentAlerts Boolean  @default(true) @map("payment_alerts")
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@index([userId])
+  @@map("notification_channel")
+}
+
+model GoogleConnection {
+  id            String    @id @default(uuid()) @map("connection_id") @db.Uuid
+  websiteId     String    @unique @map("website_id") @db.Uuid
+  email         String?   @db.VarChar(255)
+  refreshToken  String    @map("refresh_token") @db.Text // encrypted
+  accessToken   String?   @map("access_token") @db.Text // encrypted, short-lived
+  tokenExpires  DateTime? @map("token_expires") @db.Timestamptz(6)
+  gscSiteUrl    String?   @map("gsc_site_url") @db.VarChar(255)
+  ga4PropertyId String?   @map("ga4_property_id") @db.VarChar(50)
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime? @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@map("google_connection")
+}
+
+model ImportedStat {
+  websiteId String   @map("website_id") @db.Uuid
+  date      DateTime @db.Date
+  source    String   @db.VarChar(20) // ga4 | plausible | fathom | umami
+  visitors  Int      @default(0)
+  pageviews Int      @default(0)
+  sessions  Int      @default(0)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@id([websiteId, date, source])
+  @@index([websiteId, date])
+  @@map("imported_stat")
+}

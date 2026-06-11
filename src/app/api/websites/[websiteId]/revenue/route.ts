@@ -5,9 +5,51 @@ import { getActiveIntegration } from '@/lib/revenue/store';
 import { getRevenueProvider, EMPTY_SUMMARY } from '@/lib/revenue';
 import { stripeProvider } from '@/lib/revenue/stripe';
 import { getWebsite } from '@/queries/prisma';
-import type { RevenueRange, RevenueUnit } from '@/lib/revenue/types';
+import prisma from '@/lib/prisma';
+import type { RevenueRange, RevenueSummary, RevenueUnit } from '@/lib/revenue/types';
 
 const DAY = 24 * 60 * 60 * 1000;
+
+// Summary straight from the revenue_event rows the webhooks ingested — used for
+// webhook-only gateways (Lemon Squeezy / Paddle / Polar) that have no pull-side
+// API. Net of refunds/disputes (negative rows); minor units → major.
+async function summarizeRevenueEvents(
+  websiteId: string,
+  range: RevenueRange,
+): Promise<RevenueSummary> {
+  const rows = await prisma.client.revenueEvent.findMany({
+    where: { websiteId, occurredAt: { gte: range.startDate, lte: range.endDate } },
+    select: { amountMinor: true, currency: true, occurredAt: true },
+    orderBy: { occurredAt: 'asc' },
+  });
+
+  if (!rows.length) return { ...EMPTY_SUMMARY };
+
+  const bucketKey = (d: Date) => {
+    const iso = d.toISOString();
+    if (range.unit === 'hour') return `${iso.slice(0, 13)}:00:00Z`;
+    if (range.unit === 'month') return `${iso.slice(0, 7)}-01T00:00:00Z`;
+    return `${iso.slice(0, 10)}T00:00:00Z`;
+  };
+
+  const buckets = new Map<string, number>();
+  let totalMinor = 0;
+  const currencyCount = new Map<string, number>();
+  for (const r of rows) {
+    const minor = Number(r.amountMinor);
+    totalMinor += minor;
+    const k = bucketKey(r.occurredAt);
+    buckets.set(k, (buckets.get(k) || 0) + minor / 100);
+    currencyCount.set(r.currency, (currencyCount.get(r.currency) || 0) + 1);
+  }
+  const currency = [...currencyCount.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] || 'USD';
+
+  return {
+    total: totalMinor / 100,
+    currency,
+    chart: [...buckets.entries()].map(([x, y]) => ({ x, y: Math.round(y * 100) / 100 })),
+  };
+}
 
 export async function GET(
   request: Request,
@@ -38,6 +80,10 @@ export async function GET(
         const summary = await provider.fetchRevenue(active.credentials, range);
         return json({ ...summary, connected: true, provider: active.provider });
       }
+
+      // Webhook-only gateway — its truth lives in our own revenue_event rows.
+      const summary = await summarizeRevenueEvents(websiteId, range);
+      return json({ ...summary, connected: true, provider: active.provider });
     }
 
     // 2. Legacy fallback: a Stripe secret key stored on the website row.

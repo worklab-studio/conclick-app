@@ -10,6 +10,7 @@ import {
   Megaphone,
   MousePointerClick,
   Crosshair,
+  Search,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useNavigation } from '@/components/hooks';
@@ -24,6 +25,7 @@ import { RevenueBySourceInline } from '@/app/(main)/websites/[websiteId]/Revenue
 import { AutoFunnelInline } from '@/app/(main)/websites/[websiteId]/AutoFunnelInline';
 import { FrictionInline } from '@/app/(main)/websites/[websiteId]/FrictionInline';
 import { ClickMapInline } from '@/app/(main)/websites/[websiteId]/ClickMapInline';
+import { SeoInline } from '@/app/(main)/websites/[websiteId]/SeoInline';
 import { DashboardTabContext } from '@/app/(main)/websites/[websiteId]/dashboard-tab-context';
 
 const TABS = [
@@ -35,6 +37,7 @@ const TABS = [
   { id: 'campaigns', label: 'Campaigns', icon: Megaphone },
   { id: 'friction', label: 'Friction', icon: MousePointerClick },
   { id: 'clickmap', label: 'Click map', icon: Crosshair },
+  { id: 'seo', label: 'SEO', icon: Search },
 ] as const;
 
 type TabId = (typeof TABS)[number]['id'];
@@ -61,7 +64,8 @@ export function DashboardSectionsPanel({ websiteId }: { websiteId: string }) {
     <DashboardTabContext.Provider value={{ openClickMap }}>
       <div className="overflow-hidden rounded-xl border border-[hsl(0,0%,12%)] bg-[hsl(0,0%,8%)]">
         <div className="flex items-center gap-1 overflow-x-auto border-b border-[hsl(0,0%,12%)] p-2">
-          {TABS.map(t => {
+          {/* SEO is owner-only (live Search Console data) — hidden on public shares. */}
+          {TABS.filter(t => !(isShare && t.id === 'seo')).map(t => {
             const Icon = t.icon;
             const active = t.id === tab;
             return (
@@ -98,6 +102,7 @@ export function DashboardSectionsPanel({ websiteId }: { websiteId: string }) {
           {tab === 'campaigns' && <CampaignsInline websiteId={websiteId} />}
           {tab === 'friction' && <FrictionInline websiteId={websiteId} />}
           {tab === 'clickmap' && <ClickMapInline websiteId={websiteId} focus={clickMapFocus} />}
+          {tab === 'seo' && <SeoInline websiteId={websiteId} />}
           {(tab === 'funnels' || tab === 'goals') && (
             <div className="p-4">
               {tab === 'funnels' && (

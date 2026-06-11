@@ -212,6 +212,17 @@ export async function deleteUser(userId: string) {
         ],
       },
     }),
+    // relationMode=prisma → no cascades: notification channels (webhook URLs/bot
+    // tokens) and per-website Google tokens must be wiped explicitly.
+    client.notificationChannel.deleteMany({
+      where: { userId },
+    }),
+    client.googleConnection.deleteMany({
+      where: { websiteId: { in: websiteIds } },
+    }),
+    client.importedStat.deleteMany({
+      where: { websiteId: { in: websiteIds } },
+    }),
     client.website.deleteMany({
       where: { id: { in: websiteIds } },
     }),

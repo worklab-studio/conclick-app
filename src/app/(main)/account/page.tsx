@@ -1,18 +1,19 @@
 'use client';
 
 import { useState } from 'react';
-import { User, Settings, Users, KeyRound } from 'lucide-react';
+import { User, Settings, Users, KeyRound, Bell } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { PreferenceSettings } from './preferences/PreferenceSettings';
 import { ProfileSettings } from './profile/ProfileSettings';
 import { TeamsSettings } from './teams/TeamsSettings';
 import { ApiKeysSettings } from './ApiKeysSettings';
+import { NotificationSettings } from './notifications/NotificationSettings';
 
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 
-type Tab = 'profile' | 'preferences' | 'teams' | 'api-keys';
-const TABS: Tab[] = ['profile', 'preferences', 'teams', 'api-keys'];
+type Tab = 'profile' | 'preferences' | 'notifications' | 'teams' | 'api-keys';
+const TABS: Tab[] = ['profile', 'preferences', 'notifications', 'teams', 'api-keys'];
 
 export default function SettingsPage() {
   const searchParams = useSearchParams();
@@ -66,6 +67,17 @@ export default function SettingsPage() {
             Preferences
           </Button>
           <Button
+            variant={activeTab === 'notifications' ? 'secondary' : 'ghost'}
+            className={cn(
+              'justify-start gap-3',
+              activeTab === 'notifications' && 'bg-zinc-800 text-white',
+            )}
+            onClick={() => setActiveTab('notifications')}
+          >
+            <Bell className="h-4 w-4" />
+            Notifications
+          </Button>
+          <Button
             variant={activeTab === 'teams' ? 'secondary' : 'ghost'}
             className={cn('justify-start gap-3', activeTab === 'teams' && 'bg-zinc-800 text-white')}
             onClick={() => setActiveTab('teams')}
@@ -107,6 +119,17 @@ export default function SettingsPage() {
               <p className="text-sm text-muted-foreground">Customize your viewing experience.</p>
             </div>
             <PreferenceSettings />
+          </div>
+        )}
+        {activeTab === 'notifications' && (
+          <div className="animate-in fade-in duration-500">
+            <div className="mb-6">
+              <h2 className="text-xl font-bold tracking-tight">Notifications</h2>
+              <p className="text-sm text-muted-foreground">
+                Get your numbers where you already live — Slack, Discord, Telegram.
+              </p>
+            </div>
+            <NotificationSettings />
           </div>
         )}
         {activeTab === 'teams' && (

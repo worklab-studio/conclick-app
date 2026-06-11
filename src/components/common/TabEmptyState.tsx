@@ -1,18 +1,22 @@
 import type { LucideIcon } from 'lucide-react';
+import type { ReactNode } from 'react';
 
 /**
  * Intentional empty state for a dashboard tab — a centered violet icon badge,
  * title, and muted description (matches the StripeConnectPlaceholder look).
- * Read-only (no actions), so it's safe to render on the public share too.
+ * `action` is an optional CTA (e.g. a settings link); omit it on surfaces that
+ * render on the public share.
  */
 export function TabEmptyState({
   icon: Icon,
   title,
   description,
+  action,
 }: {
   icon: LucideIcon;
   title: string;
   description: string;
+  action?: ReactNode;
 }) {
   return (
     <div className="flex w-full items-center justify-center px-6 py-16">
@@ -22,6 +26,7 @@ export function TabEmptyState({
         </div>
         <h3 className="text-base font-semibold text-foreground">{title}</h3>
         <p className="text-sm leading-relaxed text-muted-foreground">{description}</p>
+        {action ? <div className="pt-1">{action}</div> : null}
       </div>
     </div>
   );

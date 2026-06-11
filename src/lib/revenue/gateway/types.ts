@@ -30,6 +30,13 @@ export interface NormalizedRevenueEvent {
   occurredAt: Date;
   /** The raw native event, stored verbatim for audit/debugging. */
   rawPayload: unknown;
+  /**
+   * 'insert' (default): duplicate keys are no-ops. 'replace': the row's amount is
+   * a CUMULATIVE state and later deliveries update it in place — used by gateways
+   * that only report running totals (e.g. Lemon Squeezy's refunded_amount), so a
+   * partial-then-full refund converges to the correct figure.
+   */
+  mode?: 'insert' | 'replace';
 }
 
 /** The money/type/time fields an adapter produces (identity is merged in separately). */

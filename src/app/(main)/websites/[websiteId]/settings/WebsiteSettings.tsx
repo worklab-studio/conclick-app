@@ -4,6 +4,7 @@ import { WebsiteTrackingCode } from './WebsiteTrackingCode';
 import { WebsiteData } from './WebsiteData';
 import { WebsiteEditForm } from './WebsiteEditForm';
 import { RevenueIntegrationForm } from './RevenueIntegrationForm';
+import { GoogleIntegrationForm } from './GoogleIntegrationForm';
 import { WebsiteAutocaptureForm } from './WebsiteAutocaptureForm';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
@@ -57,6 +58,15 @@ export function WebsiteSettings({ websiteId }: { websiteId: string; openExternal
         </CardHeader>
         <CardContent>
           <RevenueIntegrationForm websiteId={websiteId} />
+        </CardContent>
+      </Card>
+
+      <Card id="google" className="scroll-mt-20 dark:border-[hsl(0,0%,12%)] dark:bg-[hsl(0,0%,8%)]">
+        <CardHeader>
+          <CardTitle>Google — Search Console &amp; Analytics import</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <GoogleIntegrationForm websiteId={websiteId} />
         </CardContent>
       </Card>
 

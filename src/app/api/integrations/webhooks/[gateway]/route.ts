@@ -2,6 +2,7 @@ import { json, badRequest, unauthorized, serverError } from '@/lib/response';
 import { getGatewayAdapter } from '@/lib/revenue/gateway';
 import { getActiveIntegration } from '@/lib/revenue/store';
 import { ingestRevenueEvent } from '@/lib/revenue/ingest';
+import { notifyPayment } from '@/lib/notify';
 
 // Node runtime: the Stripe SDK + node:crypto are used for signature verification.
 export const runtime = 'nodejs';
@@ -58,7 +59,23 @@ export async function POST(request: Request, { params }: { params: Promise<{ gat
   const identity = adapter.extractIdentity(parsed.native);
 
   try {
-    const { attributed } = await ingestRevenueEvent(websiteId, { ...core, ...identity });
+    const { attributed, inserted, sessionId } = await ingestRevenueEvent(websiteId, {
+      ...core,
+      ...identity,
+    });
+
+    // Founder alert — only on genuinely new payments (never on retries), and
+    // fire-and-forget so notification latency never delays the gateway ack.
+    if (inserted && core.type === 'payment') {
+      void notifyPayment(websiteId, {
+        amountMinor: core.amountMinor,
+        currency: core.currency,
+        gateway: core.gateway,
+        sessionId,
+        attributed,
+      });
+    }
+
     return json({ received: true, type: core.type, attributed });
   } catch (e: any) {
     // Let the gateway retry — ingest is idempotent, so retries are safe.

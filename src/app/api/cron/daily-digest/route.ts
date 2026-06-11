@@ -4,6 +4,7 @@ import prisma from '@/lib/prisma';
 import { getFunnel } from '@/queries/sql';
 import { biggestLeak, funnelRevenueLost } from '@/lib/funnel-insights';
 import { sendFounderDailyDigest, type DigestSite } from '@/lib/email';
+import { sendDigestToChannels } from '@/lib/notify';
 
 // CRON_SECRET-gated; trigger daily from an external scheduler:
 //   GET /api/cron/daily-digest?key=$CRON_SECRET
@@ -124,6 +125,14 @@ export async function GET(request: Request) {
       sent++;
     } catch {
       // Skip a failed send; the next run will try again.
+    }
+
+    // Slack/Discord/Telegram fan-out — independent of the email, and channels
+    // never block each other (allSettled inside).
+    try {
+      await sendDigestToChannels(user.id, sites);
+    } catch {
+      // best-effort
     }
   }
 

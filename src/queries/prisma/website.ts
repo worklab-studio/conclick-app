@@ -206,6 +206,14 @@ export async function deleteWebsite(websiteId: string) {
         websiteId,
       },
     }),
+    // relationMode=prisma → no DB cascades; clean integration rows explicitly so
+    // Google refresh tokens and imported history never outlive the website.
+    client.googleConnection.deleteMany({
+      where: { websiteId },
+    }),
+    client.importedStat.deleteMany({
+      where: { websiteId },
+    }),
     cloudMode
       ? client.website.update({
           data: {

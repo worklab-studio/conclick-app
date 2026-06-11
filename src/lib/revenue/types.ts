@@ -37,7 +37,8 @@ export interface ValidationResult {
 
 /** Credentials a user supplies when connecting a gateway (always stored encrypted). */
 export interface ProviderCredentials {
-  apiKey: string;
+  /** Pull-side API key. Webhook-only gateways (Lemon Squeezy/Paddle/Polar) have none. */
+  apiKey?: string;
   /** 'test' | 'live' — providers with separate environments (Dodo, Stripe test keys, …). */
   mode?: string;
   /** Webhook signing secret, when the provider uses webhooks. */

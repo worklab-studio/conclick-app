@@ -61,6 +61,19 @@ export function WebsiteChart({
     enabled: !!websiteId && chartType === 'revenue' && !isDemo,
   });
 
+  // Imported GA4 history (one-time backfill) — overlaid only on buckets where
+  // Conclick has no native data, so the chart starts where the data starts.
+  const { data: importedData } = useQuery({
+    queryKey: ['imported-stats', websiteId, startDate, endDate, unit],
+    queryFn: () =>
+      get(`/websites/${websiteId}/ga4-import`, {
+        startAt: new Date(startDate).getTime(),
+        endAt: new Date(endDate).getTime(),
+        unit,
+      }),
+    enabled: !!websiteId && !isDemo && chartType !== 'revenue' && unit !== 'hour',
+  });
+
   const chartData = useMemo(() => {
     // Generate date range based on selected period with proper granularity
     const generateDateRange = () => {
@@ -104,6 +117,7 @@ export function WebsiteChart({
         pageviews_stacked: 0,
         visitors: 0,
         revenue: 0,
+        imported: 0,
       });
     });
 
@@ -148,6 +162,22 @@ export function WebsiteChart({
       });
     }
 
+    // Imported GA4 visitors — backfill effect: only fill buckets that have no
+    // native Conclick data, so the two sources never double-count. The API emits
+    // PLAIN calendar keys ('2026-06-15' / '2026-06') matching generateDateRange's
+    // local-day buckets directly — no Date parsing, no timezone drift.
+    if (importedData?.visitors) {
+      importedData.visitors.forEach((item: any) => {
+        const key = String(item.x);
+        if (dataMap.has(key)) {
+          const existing = dataMap.get(key);
+          if (existing.visitors === 0 && existing.pageviews === 0) {
+            existing.imported = item.y;
+          }
+        }
+      });
+    }
+
     // For demo: generate mock revenue matching existing data points
     if (isDemo && chartType === 'revenue') {
       dataMap.forEach(value => {
@@ -165,7 +195,9 @@ export function WebsiteChart({
     return Array.from(dataMap.values()).sort(
       (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
     );
-  }, [pageviewsData, revenueData, isDemo, chartType, startDate, endDate, unit]);
+  }, [pageviewsData, revenueData, importedData, isDemo, chartType, startDate, endDate, unit]);
+
+  const hasImported = useMemo(() => chartData.some((d: any) => d.imported > 0), [chartData]);
 
   const isLoading = isLoadingPageviews || (isLoadingRevenue && !isDemo && chartType === 'revenue');
   const error = errorPageviews || (errorRevenue && !isDemo);
@@ -307,6 +339,18 @@ export function WebsiteChart({
                   radius={[4, 4, 0, 0]}
                   barSize={20}
                 />
+                {hasImported && (
+                  <Bar
+                    yAxisId="left"
+                    dataKey="imported"
+                    name="Imported (GA)"
+                    stackId="a"
+                    fill="#5e5ba4"
+                    fillOpacity={0.35}
+                    radius={[4, 4, 0, 0]}
+                    barSize={20}
+                  />
+                )}
               </ComposedChart>
             </ResponsiveContainer>
           ) : showRevenueChart ? (

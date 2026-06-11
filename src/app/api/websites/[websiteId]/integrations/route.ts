@@ -3,6 +3,7 @@ import { parseRequest } from '@/lib/request';
 import { json, badRequest, unauthorized } from '@/lib/response';
 import { canViewWebsite, canUpdateWebsite } from '@/permissions';
 import { getRevenueProvider } from '@/lib/revenue';
+import { getGatewayAdapter } from '@/lib/revenue/gateway';
 import { getIntegrationStatus, saveIntegration, disconnectIntegration } from '@/lib/revenue/store';
 import type { ProviderCredentials } from '@/lib/revenue/types';
 
@@ -37,14 +38,26 @@ export async function POST(
   if (!(await canUpdateWebsite(auth, websiteId))) return unauthorized();
 
   const provider = getRevenueProvider(body.provider);
-  if (!provider) return badRequest({ message: 'Unknown payment provider.' });
+  const creds = body.credentials as ProviderCredentials;
 
-  const result = await provider.validate(body.credentials as ProviderCredentials);
+  // Webhook-only gateways (Lemon Squeezy, Paddle, Polar): no API key, no pull-side
+  // provider — the signed webhook IS the integration. All we store is the secret.
+  if (!provider) {
+    if (!getGatewayAdapter(body.provider)) {
+      return badRequest({ message: 'Unknown payment provider.' });
+    }
+    if (!creds.webhookSecret?.trim()) {
+      return badRequest({ message: 'Paste the webhook signing secret to connect.' });
+    }
+    await saveIntegration(websiteId, body.provider, { webhookSecret: creds.webhookSecret.trim() });
+    return json({ ok: true, provider: body.provider, webhookProvisioned: false });
+  }
+
+  const result = await provider.validate(creds);
   if (!result.ok) {
     return badRequest({ message: result.error || 'Could not validate those credentials.' });
   }
 
-  const creds = body.credentials as ProviderCredentials;
   await saveIntegration(websiteId, body.provider, creds);
 
   // Best-effort: auto-create the gateway webhook + store its secret, so the user
