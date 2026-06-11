@@ -30,6 +30,7 @@ export interface ClickMapResult {
   cohort: ClickMapCohort;
   estimated: boolean;
   currency: string;
+  hasRevenueData: boolean;
   total: { clicks: number; sessions: number; revenue: number };
   depth: ClickMapDepthBucket[];
   elements: ClickMapElement[];

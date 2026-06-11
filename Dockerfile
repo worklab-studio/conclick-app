@@ -64,8 +64,12 @@ ENV NODE_OPTIONS=$NODE_OPTIONS
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
+# chromium powers the Click map page snapshots (server-side screenshot + element
+# boxes). Runs headless as the non-root nextjs user with --no-sandbox.
 RUN set -x \
-    && apk add --no-cache curl
+    && apk add --no-cache curl chromium nss freetype harfbuzz ca-certificates ttf-freefont
+
+ENV CHROME_PATH=/usr/bin/chromium-browser
 
 COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 COPY --from=builder /app/prisma ./prisma

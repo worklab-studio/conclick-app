@@ -1,14 +1,32 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { Crosshair, Loader2, Globe, ChevronDown, Info } from 'lucide-react';
+import {
+  Crosshair,
+  Loader2,
+  Globe,
+  ChevronDown,
+  Info,
+  Lock,
+  RefreshCw,
+  Filter,
+} from 'lucide-react';
 import {
   useClickMapQuery,
   useWebsiteValuesQuery,
   useDateRange,
+  useApi,
   type ClickMapCohort,
   type ClickMapElement,
 } from '@/components/hooks';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from '@/components/ui/dialog';
+import { FunnelBuilder } from './(reports)/funnels/FunnelBuilder';
 import { TabEmptyState } from '@/components/common/TabEmptyState';
 import { formatMinorCurrency } from '@/lib/format';
 
@@ -35,13 +53,6 @@ const COHORT_CONTEXT: Record<ClickMapCohort, string> = {
 
 const money = (minor: number, currency: string) => formatMinorCurrency(minor, currency);
 
-// Page-silhouette geometry: median page-depth (0=top..100=bottom) → px in a fixed strip.
-const STRIP_H = 256;
-const PAD = 8;
-const USABLE = STRIP_H - PAD * 2;
-const LABEL_H = 24; // min vertical gap between de-collided side labels
-const yToPx = (m: number) => PAD + (Math.min(100, Math.max(0, m)) / 100) * USABLE;
-
 const friendly = (e: ClickMapElement) => (e.label?.trim() ? e.label.trim() : e.selector);
 
 function depthBand(m?: number | null) {
@@ -53,10 +64,47 @@ function depthBand(m?: number | null) {
   return 'Bottom';
 }
 
-// Revenue-weighted, cohort-segmented click map for one page. Privacy-first: clicks
-// placed by coarse page-depth (the tracker's 0–100 `y`) and by element — never pixels
-// or screenshots. The page silhouette shows WHERE on the page people click; the list
-// shows WHAT they click, label-first.
+// Heat gradient by intensity tier (t = clicks / max).
+function heatGradient(t: number, hasRevenue: boolean) {
+  if (hasRevenue && t >= 0.5)
+    return 'radial-gradient(circle, rgba(255,60,30,.78) 0%, rgba(255,140,40,.5) 38%, rgba(255,170,40,.22) 62%, transparent 78%)';
+  if (t >= 0.66)
+    return 'radial-gradient(circle, rgba(255,60,30,.72) 0%, rgba(255,140,40,.46) 40%, transparent 76%)';
+  if (t >= 0.33)
+    return 'radial-gradient(circle, rgba(255,150,45,.6) 0%, rgba(255,185,60,.3) 48%, transparent 76%)';
+  return 'radial-gradient(circle, rgba(180,150,210,.5) 0%, rgba(150,130,210,.24) 50%, transparent 78%)';
+}
+
+function relativeTime(iso?: string) {
+  if (!iso) return '';
+  const mins = Math.max(0, Math.round((Date.now() - +new Date(iso)) / 60000));
+  if (mins < 1) return 'just now';
+  if (mins < 60) return `${mins}m ago`;
+  if (mins < 60 * 24) return `${Math.round(mins / 60)}h ago`;
+  return new Date(iso).toLocaleDateString();
+}
+
+interface SnapshotBox {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+}
+interface Snapshot {
+  ok: boolean;
+  reason?: string;
+  width: number;
+  height: number;
+  image: string;
+  boxes: Record<string, SnapshotBox>;
+  capturedAt: string;
+}
+
+// Revenue-weighted, cohort-segmented click map for one page — your real page as the
+// canvas. The server snapshots the page (day-cached) and measures each clicked
+// element's exact box from the tracker's stored selector, so heat sits on the real
+// buttons. Click a hotspot for the numbers. Privacy-first: only the OWNER's public
+// page is rendered — never visitor screens.
 export function ClickMapInline({
   websiteId,
   focus,
@@ -67,6 +115,7 @@ export function ClickMapInline({
   const {
     dateRange: { startDate, endDate },
   } = useDateRange();
+  const { post, useQuery } = useApi();
 
   // Top pages for the picker (real url_paths, highest traffic first).
   const { data: pageData } = useWebsiteValuesQuery({ websiteId, type: 'path', startDate, endDate });
@@ -76,6 +125,9 @@ export function ClickMapInline({
   const [cohort, setCohort] = useState<ClickMapCohort>('all');
   const [pickerOpen, setPickerOpen] = useState(false);
   const [sortBy, setSortBy] = useState<'clicks' | 'revenue'>('clicks');
+  const [selected, setSelected] = useState<string | null>(null);
+  const [funnelFor, setFunnelFor] = useState<ClickMapElement | null>(null);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
     if (!urlPath && pages.length) setUrlPath(pages[0].value);
@@ -87,15 +139,20 @@ export function ClickMapInline({
     if (focus?.cohort) setCohort(focus.cohort);
   }, [focus?.urlPath, focus?.cohort]);
 
-  const { data, isLoading } = useClickMapQuery(websiteId, urlPath, cohort);
+  useEffect(() => {
+    setSelected(null);
+  }, [urlPath, cohort]);
+
+  const { data, isLoading, error } = useClickMapQuery(websiteId, urlPath, cohort);
 
   const currency = data?.currency || 'USD';
   const depth = data?.depth || [];
   const total = data?.total.clicks || 0;
   const cohortLabel = COHORTS.find(c => c.id === cohort)?.label || 'All visitors';
   const hasAnything = total > 0;
+  const revLocked = !!data && !data.hasRevenueData;
 
-  // List order follows the sort toggle.
+  // List order follows the sort toggle; the heatmap is always clicks-ranked.
   const elements = useMemo(() => {
     const list = [...(data?.elements || [])];
     list.sort((a, b) => (sortBy === 'revenue' ? b.revenue - a.revenue : b.clicks - a.clicks));
@@ -103,49 +160,85 @@ export function ClickMapInline({
   }, [data, sortBy]);
   const listMax = Math.max(1, ...elements.map(e => e.clicks));
 
-  // The strip is always clicks-ranked (stable regardless of the list's sort toggle),
-  // and only includes elements with a known page position.
-  const strip = useMemo(
+  const byClicks = useMemo(
+    () => [...(data?.elements || [])].sort((a, b) => b.clicks - a.clicks),
+    [data],
+  );
+  const topByClicks = byClicks[0];
+
+  // Page snapshot: captured server-side with measured element boxes.
+  const targets = useMemo(
+    () => byClicks.slice(0, 40).map(e => ({ selector: e.selector, text: e.label })),
+    [byClicks],
+  );
+  const selKey = useMemo(
     () =>
-      [...(data?.elements || [])]
-        .filter(e => e.medianY != null)
-        .sort((a, b) => b.clicks - a.clicks)
-        .slice(0, 8),
-    [data],
+      targets
+        .map(t => t.selector)
+        .sort()
+        .join('|'),
+    [targets],
   );
-  const stripMax = Math.max(1, ...strip.map(e => e.clicks));
+  const snapQuery = useQuery<Snapshot>({
+    queryKey: ['click-map-snapshot', { websiteId, urlPath, selKey, refreshKey }],
+    queryFn: () =>
+      post(`/websites/${websiteId}/page-snapshot`, {
+        path: urlPath,
+        targets,
+        refresh: refreshKey > 0,
+      }),
+    enabled: !!websiteId && !!urlPath && targets.length > 0,
+    staleTime: Infinity,
+    retry: false,
+  });
+  const snap = snapQuery.data?.ok ? snapQuery.data : null;
+  const snapLoading = snapQuery.isLoading || snapQuery.isFetching;
+  const snapFailed = !snapLoading && (snapQuery.isError || snapQuery.data?.ok === false);
 
-  // Place dots at true depth; nudge the SIDE LABELS downward so they don't overlap.
-  const placed = useMemo(() => {
-    const items = strip.map((e, i) => ({ e, i, dotY: yToPx(e.medianY as number), labelY: 0 }));
-    let last = -Infinity;
-    for (const it of [...items].sort((a, b) => a.dotY - b.dotY)) {
-      let y = it.dotY;
-      if (y < last + LABEL_H) y = last + LABEL_H;
-      y = Math.min(y, STRIP_H - 10);
-      last = y;
-      items[it.i].labelY = y;
+  // Heat markers: only elements the snapshot actually located (measured, not guessed).
+  const heat = useMemo(() => {
+    if (!snap) return [];
+    const max = Math.max(1, ...byClicks.map(e => e.clicks));
+    return byClicks
+      .map(e => ({ e, box: snap.boxes[e.selector] }))
+      .filter(({ box }) => box && box.y < snap.height)
+      .map(({ e, box }) => {
+        const t = e.clicks / max;
+        return {
+          e,
+          t,
+          cx: ((box.x + box.w / 2) / snap.width) * 100,
+          cy: ((box.y + box.h / 2) / snap.height) * 100,
+          bottom: (Math.min(box.y + box.h, snap.height) / snap.height) * 100,
+          top: (box.y / snap.height) * 100,
+          d: ((56 + 70 * Math.sqrt(t)) / snap.width) * 100, // blob diameter, % of width
+        };
+      });
+  }, [snap, byClicks]);
+  const unplaced = snap ? byClicks.filter(e => !snap.boxes[e.selector]).length : 0;
+  const selectedHeat = heat.find(h => h.e.selector === selected) || null;
+
+  // Headline: median click depth from the depth buckets (only clicks with a tracked
+  // position) — so the words always agree with where the heat actually sits.
+  const depthTotal = depth.reduce((s, d) => s + d.clicks, 0);
+  let region: string | null = null;
+  if (depthTotal > 0) {
+    let acc = 0;
+    let medianDepth = 95;
+    for (const d of depth) {
+      acc += d.clicks;
+      if (acc >= depthTotal / 2) {
+        medianDepth = d.bucket * 10 + 5;
+        break;
+      }
     }
-    return items;
-  }, [strip]);
-
-  const topByClicks = useMemo(
-    () => [...(data?.elements || [])].sort((a, b) => b.clicks - a.clicks)[0],
-    [data],
-  );
-
-  // Headline region from the depth buckets (top third / middle / lower half).
-  const topThird = depth.slice(0, 3).reduce((s, d) => s + d.clicks, 0);
-  const midThird = depth.slice(3, 7).reduce((s, d) => s + d.clicks, 0);
-  const lowPart = total - topThird - midThird;
-  const region =
-    total === 0
-      ? null
-      : topThird >= midThird && topThird >= lowPart
-        ? 'top third of the page'
-        : lowPart >= midThird
-          ? 'lower half of the page'
-          : 'middle of the page';
+    region =
+      medianDepth <= 30
+        ? 'top of the page'
+        : medianDepth <= 65
+          ? 'middle of the page'
+          : 'bottom of the page';
+  }
 
   // No pages at all → the site hasn't gathered autocapture clicks yet.
   if (!pages.length && !urlPath) {
@@ -153,7 +246,7 @@ export function ClickMapInline({
       <TabEmptyState
         icon={Crosshair}
         title="No click data yet"
-        description="Turn on Autocapture (on by default) and let visitors click around. The click map shows where each buyer cohort clicks — by page position and by element — weighted by revenue."
+        description="Turn on Autocapture (on by default) and let visitors click around. The click map paints real click data onto a snapshot of your page — by element and buyer cohort, weighted by revenue."
       />
     );
   }
@@ -205,28 +298,39 @@ export function ClickMapInline({
           )}
         </div>
 
-        {/* Cohort switcher */}
+        {/* Cohort switcher — buyer cohorts lock until payment data exists */}
         <div className="flex flex-wrap items-center gap-1">
           {COHORTS.map(c => {
             const active = c.id === cohort;
+            const locked = revLocked && c.id !== 'all';
             return (
               <button
                 key={c.id}
                 type="button"
+                disabled={locked && !active}
                 onClick={() => setCohort(c.id)}
-                className={`rounded-lg px-2.5 py-1 text-xs font-medium transition-colors ${
+                title={locked ? 'Unlocks when payments are connected' : undefined}
+                className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-medium transition-colors ${
                   active
                     ? 'bg-[#5e5ba4]/15 text-foreground ring-1 ring-inset ring-[#5e5ba4]/25'
-                    : 'text-muted-foreground hover:bg-[hsl(0,0%,11%)] hover:text-foreground'
+                    : locked
+                      ? 'cursor-not-allowed text-muted-foreground/40'
+                      : 'text-muted-foreground hover:bg-[hsl(0,0%,11%)] hover:text-foreground'
                 }`}
               >
+                {locked ? <Lock className="h-2.5 w-2.5" /> : null}
                 {c.label}
                 {c.id === 'trial' && active && data?.estimated ? (
-                  <span className="ml-1 text-[10px] text-muted-foreground/70">est.</span>
+                  <span className="text-[10px] text-muted-foreground/70">est.</span>
                 ) : null}
               </button>
             );
           })}
+          {revLocked ? (
+            <span className="ml-1 text-[11px] text-muted-foreground/50">
+              Buyer cohorts unlock when payments are connected
+            </span>
+          ) : null}
         </div>
       </div>
 
@@ -234,6 +338,10 @@ export function ClickMapInline({
       {isLoading ? (
         <div className="flex items-center gap-2 p-8 text-sm text-muted-foreground">
           <Loader2 className="h-4 w-4 animate-spin" /> Loading…
+        </div>
+      ) : error ? (
+        <div className="p-7 text-sm text-muted-foreground">
+          Couldn&apos;t load click data — try refreshing the page.
         </div>
       ) : !hasAnything ? (
         <div className="space-y-4 p-7">
@@ -249,140 +357,230 @@ export function ClickMapInline({
         </div>
       ) : (
         <div className="space-y-5 p-7">
-          {/* Headline + cohort context */}
+          {/* Headline + cohort context + summary */}
           <div>
             <div className="text-sm leading-relaxed text-foreground">
-              Most clicks land in the <span className="font-semibold text-[#b7b4e4]">{region}</span>
+              {region ? (
+                <>
+                  Most clicks land near the{' '}
+                  <span className="font-semibold text-[#b7b4e4]">{region}</span>
+                </>
+              ) : (
+                'Click activity on this page'
+              )}
               {topByClicks ? (
                 <>
                   {' '}
-                  · Top element: <span className="font-semibold">{friendly(topByClicks)}</span> (
-                  {topByClicks.clicks} click{topByClicks.clicks === 1 ? '' : 's'})
+                  · Hottest element: <span className="font-semibold">
+                    {friendly(topByClicks)}
+                  </span>{' '}
+                  ({topByClicks.clicks} click{topByClicks.clicks === 1 ? '' : 's'})
                 </>
               ) : null}
             </div>
             <div className="mt-1 text-xs text-muted-foreground">{COHORT_CONTEXT[cohort]}</div>
-          </div>
-
-          {/* Summary */}
-          <div className="flex flex-wrap items-center gap-x-5 gap-y-1 text-sm">
-            <span className="text-muted-foreground">
-              <span className="font-semibold text-foreground">{total.toLocaleString()}</span> clicks
-              ·{' '}
-              <span className="font-semibold text-foreground">
-                {(data?.total.sessions || 0).toLocaleString()}
-              </span>{' '}
-              visitors
-            </span>
-            {(data?.total.revenue || 0) > 0 && (
-              <span className="inline-flex items-center rounded-md bg-emerald-500/10 px-2 py-0.5 text-sm font-semibold text-emerald-300">
-                {money(data!.total.revenue, currency)}
+            <div className="mt-2.5 flex flex-wrap items-center gap-x-5 gap-y-1 text-sm">
+              <span className="text-muted-foreground">
+                <span className="font-semibold text-foreground">{total.toLocaleString()}</span>{' '}
+                clicks ·{' '}
+                <span className="font-semibold text-foreground">
+                  {(data?.total.sessions || 0).toLocaleString()}
+                </span>{' '}
+                visitors
               </span>
-            )}
-            {cohort === 'trial' && data?.estimated && (
-              <span
-                className="inline-flex items-center gap-1 text-xs text-muted-foreground/70"
-                title="Trial blends visitors you tag via conclick.identify(id, { plan: 'trial' }) with an inferred fallback: identified visitors who haven't paid. Tag plan explicitly for exact numbers."
-              >
-                <Info className="h-3 w-3" /> estimated
-              </span>
-            )}
-          </div>
-
-          {total < 20 && (
-            <p className="flex items-start gap-1.5 text-[11px] leading-relaxed text-muted-foreground/70">
-              <Info className="mt-0.5 h-3 w-3 shrink-0" />
-              Early data — only {total} click{total === 1 ? '' : 's'} so far. Depths and shares may
-              shift as more come in.
-            </p>
-          )}
-
-          {/* Where people click — page silhouette */}
-          {strip.length > 0 ? (
-            <div>
-              <div className="mb-1.5 text-[11px] font-medium uppercase tracking-wide text-muted-foreground/60">
-                Where people click
-              </div>
-              <div className="text-[10px] uppercase tracking-wide text-muted-foreground/40">
-                Top of page
-              </div>
-              <div className="flex gap-1">
-                <div
-                  className="relative w-[150px] shrink-0 rounded-2xl border border-[hsl(0,0%,16%)] bg-gradient-to-b from-[hsl(0,0%,10%)] to-[hsl(0,0%,8.5%)]"
-                  style={{ height: STRIP_H }}
-                >
-                  <div className="absolute inset-x-3 top-1/2 h-px bg-white/5" />
-                  {placed.map(({ e, i, dotY }) => {
-                    const size = 8 + 20 * Math.sqrt(e.clicks / stripMax);
-                    const rev = e.revenue > 0;
-                    const off = ((i % 3) - 1) * 16;
-                    return (
-                      <div
-                        key={e.selector}
-                        className="absolute rounded-full"
-                        title={`${friendly(e)} · ${e.clicks} clicks${
-                          rev ? ` · ${money(e.revenue, currency)}` : ''
-                        }`}
-                        style={{
-                          left: `calc(50% + ${off}px)`,
-                          top: dotY,
-                          width: size,
-                          height: size,
-                          transform: 'translate(-50%, -50%)',
-                          background: rev ? '#34d399' : '#7e7bd0',
-                          opacity: 0.5 + 0.5 * (e.clicks / stripMax),
-                          boxShadow: rev ? '0 0 0 4px rgba(16,185,129,.18)' : undefined,
-                        }}
-                      />
-                    );
-                  })}
-                </div>
-                <div className="relative flex-1" style={{ height: STRIP_H }}>
-                  {placed.map(({ e, labelY }) => {
-                    const rev = e.revenue > 0;
-                    return (
-                      <div
-                        key={e.selector}
-                        className="absolute left-0 right-0 flex items-center gap-2"
-                        style={{ top: labelY, transform: 'translateY(-50%)' }}
-                      >
-                        <span className="h-px w-3 shrink-0 bg-white/10" />
-                        <span
-                          className="h-2 w-2 shrink-0 rounded-full"
-                          style={{ background: rev ? '#34d399' : '#7e7bd0' }}
-                        />
-                        <span
-                          className="max-w-[200px] truncate text-[13px] text-foreground"
-                          title={friendly(e)}
-                        >
-                          {friendly(e)}
-                        </span>
-                        <span className="text-xs tabular-nums text-muted-foreground">
-                          {e.clicks}×
-                        </span>
-                        {rev && (
-                          <span className="rounded bg-emerald-500/10 px-1.5 py-0.5 text-[11px] font-semibold text-emerald-300">
-                            {money(e.revenue, currency)}
-                          </span>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-              <div className="text-[10px] uppercase tracking-wide text-muted-foreground/40">
-                Bottom
-              </div>
+              {(data?.total.revenue || 0) > 0 && (
+                <span className="inline-flex items-center rounded-md bg-emerald-500/10 px-2 py-0.5 text-sm font-semibold text-emerald-300">
+                  {money(data!.total.revenue, currency)}
+                </span>
+              )}
+              {total < 20 && (
+                <span className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground/60">
+                  <Info className="h-3 w-3" /> Early data — only {total} click
+                  {total === 1 ? '' : 's'} so far
+                </span>
+              )}
             </div>
-          ) : (
+          </div>
+
+          {/* Heatmap on the real page */}
+          <div className="overflow-hidden rounded-xl border border-[hsl(0,0%,16%)] bg-[#0a0a0c]">
+            {/* frame bar */}
+            <div className="flex flex-wrap items-center gap-3 border-b border-[hsl(0,0%,12%)] bg-[hsl(0,0%,10%)] px-3.5 py-2">
+              <span className="flex gap-1.5">
+                <i className="h-2.5 w-2.5 rounded-full bg-[hsl(0,0%,20%)]" />
+                <i className="h-2.5 w-2.5 rounded-full bg-[hsl(0,0%,20%)]" />
+                <i className="h-2.5 w-2.5 rounded-full bg-[hsl(0,0%,20%)]" />
+              </span>
+              <span className="flex max-w-[340px] items-center gap-2 truncate rounded-md border border-[hsl(0,0%,12%)] bg-[hsl(0,0%,7%)] px-3 py-1 text-xs text-muted-foreground">
+                <Globe className="h-3 w-3 shrink-0 text-[#8b88cf]" />
+                <span className="truncate">{urlPath}</span>
+              </span>
+              <span className="ml-auto flex items-center gap-3 text-[11px] text-muted-foreground/60">
+                <span className="hidden items-center gap-1.5 sm:flex">
+                  fewer
+                  <span className="h-1.5 w-16 rounded bg-gradient-to-r from-[#7c79c4]/40 via-[rgba(255,170,40,.7)] to-[rgba(255,70,40,.95)]" />
+                  more clicks
+                </span>
+                {snap ? <span>Snapshot · {relativeTime(snap.capturedAt)}</span> : null}
+                <button
+                  type="button"
+                  onClick={() => setRefreshKey(k => k + 1)}
+                  disabled={snapLoading}
+                  className="inline-flex items-center gap-1.5 rounded-md border border-[hsl(0,0%,16%)] px-2 py-1 text-[11px] text-muted-foreground transition-colors hover:text-foreground disabled:opacity-50"
+                >
+                  <RefreshCw className={`h-3 w-3 ${snapLoading ? 'animate-spin' : ''}`} />
+                  Refresh
+                </button>
+              </span>
+            </div>
+
+            {snapLoading ? (
+              <div className="flex h-[360px] flex-col items-center justify-center gap-3 text-sm text-muted-foreground">
+                <Loader2 className="h-5 w-5 animate-spin text-[#8b88cf]" />
+                Capturing your page… the first snapshot takes a few seconds.
+              </div>
+            ) : snapFailed || !snap ? (
+              <div className="flex h-[200px] flex-col items-center justify-center gap-2 px-6 text-center text-sm text-muted-foreground">
+                Couldn&apos;t capture your page — it may block bots or be unreachable right now.
+                <span className="text-xs text-muted-foreground/60">
+                  Every click is still in the list below.
+                </span>
+              </div>
+            ) : (
+              <div className="relative" onClick={() => setSelected(null)}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={snap.image} alt={`Snapshot of ${urlPath}`} className="block w-full" />
+                <div className="absolute inset-0 bg-[rgba(5,5,8,.30)]" />
+
+                {/* heat blobs */}
+                {heat.map(h => (
+                  <div
+                    key={`blob-${h.e.selector}`}
+                    className="pointer-events-none absolute aspect-square -translate-x-1/2 -translate-y-1/2 rounded-full"
+                    style={{
+                      left: `${h.cx}%`,
+                      top: `${h.cy}%`,
+                      width: `${h.d}%`,
+                      background: heatGradient(h.t, h.e.revenue > 0),
+                    }}
+                  />
+                ))}
+
+                {/* count badges (click → popup) */}
+                {heat.map(h => (
+                  <button
+                    key={`badge-${h.e.selector}`}
+                    type="button"
+                    onClick={ev => {
+                      ev.stopPropagation();
+                      setSelected(s => (s === h.e.selector ? null : h.e.selector));
+                    }}
+                    className={`absolute -translate-x-1/2 rounded-full border px-2 py-0.5 text-[11px] font-bold tabular-nums text-white shadow-lg transition-transform hover:scale-110 ${
+                      h.e.revenue > 0 ? 'border-emerald-500/50' : 'border-[hsl(0,0%,26%)]'
+                    } bg-[hsl(0,0%,7%)]/95`}
+                    style={{ left: `${h.cx}%`, top: `${h.bottom}%`, marginTop: 6 }}
+                  >
+                    {h.e.clicks}×
+                    {h.e.revenue > 0 ? (
+                      <span className="ml-1.5 font-semibold text-emerald-300">
+                        {money(h.e.revenue, currency)}
+                      </span>
+                    ) : null}
+                  </button>
+                ))}
+
+                {/* popup */}
+                {selectedHeat ? (
+                  <div
+                    className="absolute z-10 w-[260px] rounded-xl border border-[hsl(0,0%,22%)] bg-[hsl(0,0%,9%)]/[.98] p-3.5 shadow-2xl"
+                    style={{
+                      left: `${Math.min(Math.max(selectedHeat.cx, 14), 86)}%`,
+                      top:
+                        selectedHeat.bottom < 72
+                          ? `${selectedHeat.bottom}%`
+                          : `${selectedHeat.top}%`,
+                      transform:
+                        selectedHeat.bottom < 72
+                          ? 'translate(-50%, 34px)'
+                          : 'translate(-50%, calc(-100% - 14px))',
+                    }}
+                    onClick={ev => ev.stopPropagation()}
+                  >
+                    <div className="text-[13px] font-semibold text-foreground">
+                      {friendly(selectedHeat.e)}
+                    </div>
+                    <div className="mt-0.5 truncate font-mono text-[10px] text-muted-foreground/50">
+                      {selectedHeat.e.selector}
+                    </div>
+                    <div className="mt-3 grid grid-cols-2 gap-x-3 gap-y-2.5">
+                      <div>
+                        <div className="text-[10px] uppercase tracking-wide text-muted-foreground/50">
+                          Clicks
+                        </div>
+                        <div className="text-[15px] font-bold tabular-nums">
+                          {selectedHeat.e.clicks}
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-[10px] uppercase tracking-wide text-muted-foreground/50">
+                          Visitors
+                        </div>
+                        <div className="text-[15px] font-bold tabular-nums">
+                          {selectedHeat.e.sessions}
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-[10px] uppercase tracking-wide text-muted-foreground/50">
+                          Revenue
+                        </div>
+                        <div
+                          className={`text-[15px] font-bold tabular-nums ${
+                            selectedHeat.e.revenue > 0
+                              ? 'text-emerald-300'
+                              : 'text-muted-foreground/40'
+                          }`}
+                        >
+                          {selectedHeat.e.revenue > 0
+                            ? money(selectedHeat.e.revenue, currency)
+                            : '—'}
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-[10px] uppercase tracking-wide text-muted-foreground/50">
+                          Share of clicks
+                        </div>
+                        <div className="text-[15px] font-bold tabular-nums">
+                          {total ? Math.round((selectedHeat.e.clicks / total) * 100) : 0}%
+                        </div>
+                      </div>
+                    </div>
+                    <div className="mt-3 flex items-center justify-between border-t border-[hsl(0,0%,13%)] pt-2.5 text-[11px] text-muted-foreground/60">
+                      <span>{depthBand(selectedHeat.e.medianY) || '—'} of page</span>
+                      {selectedHeat.e.label?.trim() ? (
+                        <button
+                          type="button"
+                          onClick={() => setFunnelFor(selectedHeat.e)}
+                          className="inline-flex items-center gap-1 text-[#b7b4e4] transition-colors hover:text-foreground"
+                        >
+                          <Filter className="h-3 w-3" /> Funnel to this →
+                        </button>
+                      ) : null}
+                    </div>
+                  </div>
+                ) : null}
+              </div>
+            )}
+          </div>
+
+          {snap && unplaced > 0 ? (
             <p className="flex items-start gap-1.5 text-[11px] leading-relaxed text-muted-foreground/55">
               <Info className="mt-0.5 h-3 w-3 shrink-0" />
-              Page positions appear once the latest tracker captures click depth. Every click still
-              shows in the list below.
+              {unplaced} element{unplaced === 1 ? ' isn’t' : 's aren’t'} on the current snapshot
+              (changed or removed since the clicks happened) — still counted in the list below.
             </p>
-          )}
+          ) : null}
 
-          {/* What they click — ranked, label-first */}
+          {/* All elements — ranked, label-first */}
           <div>
             <div className="mb-2 flex items-center justify-between">
               <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground/60">
@@ -463,6 +661,29 @@ export function ClickMapInline({
           </div>
         </div>
       )}
+
+      {/* Funnel-to-this-element dialog */}
+      <Dialog open={!!funnelFor} onOpenChange={o => !o && setFunnelFor(null)}>
+        <DialogContent className="max-h-[88vh] max-w-2xl gap-0 overflow-y-auto border-[hsl(0,0%,13%)] bg-[hsl(0,0%,8%)]">
+          <DialogHeader className="mb-4">
+            <DialogTitle>Funnel to this element</DialogTitle>
+            <DialogDescription>
+              See where visitors drop off on the way to clicking “{funnelFor?.label?.trim()}”.
+            </DialogDescription>
+          </DialogHeader>
+          {funnelFor ? (
+            <FunnelBuilder
+              websiteId={websiteId}
+              onClose={() => setFunnelFor(null)}
+              initialSteps={[
+                { type: 'path', value: urlPath },
+                { type: 'event', value: `Clicked: ${funnelFor.label?.trim()}` },
+              ]}
+              initialWindow={60}
+            />
+          ) : null}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

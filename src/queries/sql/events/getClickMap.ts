@@ -32,6 +32,7 @@ export interface ClickMapResult {
   cohort: ClickMapCohort;
   estimated: boolean; // trial blends explicit identify({plan}) + a heuristic fallback
   currency: string;
+  hasRevenueData: boolean; // any payment events in range — buyer cohorts are locked without it
   total: { clicks: number; sessions: number; revenue: number };
   depth: ClickMapDepthBucket[]; // always length 10
   elements: ClickMapElement[];
@@ -206,7 +207,12 @@ export async function getClickMap(
              select sum(r.revenue) from cohort_sessions cs
              left join rev r on r.session_id = cs.session_id
            ), 0)::float8 as revenue,
-           (select max(currency) from rev) as currency, null::float8 as pos
+           (select max(currency) from rev) as currency,
+           -- pos on the total row carries "any payment data in range?" (site-wide,
+           -- regardless of session linkage) — the UI locks buyer cohorts without it.
+           (select count(*)::float8 from revenue_event re2
+             where re2.website_id = {{websiteId::uuid}}
+               and re2.occurred_at between {{startDate}} and {{endDate}}) as pos
     order by kind, clicks desc
     `,
     queryParams,
@@ -247,6 +253,7 @@ export async function getClickMap(
     cohort,
     estimated: cohort === 'trial',
     currency,
+    hasRevenueData: Number(totalRow?.pos) > 0,
     total: {
       clicks: Number(totalRow?.clicks) || 0,
       sessions: Number(totalRow?.sessions) || 0,
