@@ -70,8 +70,10 @@ export function BillingPage() {
 
   const trialUsedDays = billing.isTrial ? TRIAL_DAYS - billing.trialDaysLeft : TRIAL_DAYS;
 
+  // SettingsLayout already provides the page container (1320px, same as TopNav) —
+  // span it fully like every other settings page, no extra centering.
   return (
-    <div className="mx-auto w-full max-w-[1000px] px-6 py-8">
+    <div className="w-full py-2">
       <div className="rounded-2xl border border-[hsl(0,0%,12%)] bg-[hsl(0,0%,8%)] p-6 sm:p-7">
         {/* Header */}
         <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
