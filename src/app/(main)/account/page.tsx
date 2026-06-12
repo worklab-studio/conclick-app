@@ -1,19 +1,19 @@
 'use client';
 
 import { useState } from 'react';
-import { User, Settings, Users, KeyRound, Bell } from 'lucide-react';
+import { User, Settings, Users, KeyRound, Blocks } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { PreferenceSettings } from './preferences/PreferenceSettings';
 import { ProfileSettings } from './profile/ProfileSettings';
 import { TeamsSettings } from './teams/TeamsSettings';
 import { ApiKeysSettings } from './ApiKeysSettings';
-import { NotificationSettings } from './notifications/NotificationSettings';
+import { IntegrationsSettings } from './integrations/IntegrationsSettings';
 
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 
-type Tab = 'profile' | 'preferences' | 'notifications' | 'teams' | 'api-keys';
-const TABS: Tab[] = ['profile', 'preferences', 'notifications', 'teams', 'api-keys'];
+type Tab = 'profile' | 'preferences' | 'teams' | 'integrations' | 'api-keys';
+const TABS: Tab[] = ['profile', 'preferences', 'teams', 'integrations', 'api-keys'];
 
 export default function SettingsPage() {
   const searchParams = useSearchParams();
@@ -23,7 +23,10 @@ export default function SettingsPage() {
   // any invalid value (e.g. ?tab=foo) was preserved as activeTab, and since
   // none of the render branches use strict equality with an invalid value,
   // the content area rendered blank.
-  const rawTab = searchParams.get('tab');
+  // Legacy: channels used to live under ?tab=notifications — send those links
+  // (old Slack OAuth round-trips, bookmarks) to the Integrations directory.
+  const raw = searchParams.get('tab');
+  const rawTab = raw === 'notifications' ? 'integrations' : raw;
   const defaultTab: Tab = TABS.includes(rawTab as Tab) ? (rawTab as Tab) : 'profile';
   const [activeTab, setActiveTabState] = useState<Tab>(defaultTab);
 
@@ -67,23 +70,23 @@ export default function SettingsPage() {
             Preferences
           </Button>
           <Button
-            variant={activeTab === 'notifications' ? 'secondary' : 'ghost'}
-            className={cn(
-              'justify-start gap-3',
-              activeTab === 'notifications' && 'bg-zinc-800 text-white',
-            )}
-            onClick={() => setActiveTab('notifications')}
-          >
-            <Bell className="h-4 w-4" />
-            Notifications
-          </Button>
-          <Button
             variant={activeTab === 'teams' ? 'secondary' : 'ghost'}
             className={cn('justify-start gap-3', activeTab === 'teams' && 'bg-zinc-800 text-white')}
             onClick={() => setActiveTab('teams')}
           >
             <Users className="h-4 w-4" />
             Teams
+          </Button>
+          <Button
+            variant={activeTab === 'integrations' ? 'secondary' : 'ghost'}
+            className={cn(
+              'justify-start gap-3',
+              activeTab === 'integrations' && 'bg-zinc-800 text-white',
+            )}
+            onClick={() => setActiveTab('integrations')}
+          >
+            <Blocks className="h-4 w-4" />
+            Integrations
           </Button>
           <Button
             variant={activeTab === 'api-keys' ? 'secondary' : 'ghost'}
@@ -121,15 +124,16 @@ export default function SettingsPage() {
             <PreferenceSettings />
           </div>
         )}
-        {activeTab === 'notifications' && (
+        {activeTab === 'integrations' && (
           <div className="animate-in fade-in duration-500">
             <div className="mb-6">
-              <h2 className="text-xl font-bold tracking-tight">Notifications</h2>
+              <h2 className="text-xl font-bold tracking-tight">Integrations</h2>
               <p className="text-sm text-muted-foreground">
-                Get your numbers where you already live — Slack, Discord, Telegram.
+                Connect Conclick to your stack — messaging is workspace-wide, payments and Google
+                connect per product.
               </p>
             </div>
-            <NotificationSettings />
+            <IntegrationsSettings />
           </div>
         )}
         {activeTab === 'teams' && (

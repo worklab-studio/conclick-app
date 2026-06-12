@@ -4,7 +4,12 @@ import { json, badRequest, unauthorized } from '@/lib/response';
 import { canViewWebsite, canUpdateWebsite } from '@/permissions';
 import { getRevenueProvider } from '@/lib/revenue';
 import { getGatewayAdapter } from '@/lib/revenue/gateway';
-import { getIntegrationStatus, saveIntegration, disconnectIntegration } from '@/lib/revenue/store';
+import {
+  getIntegrationStatus,
+  saveIntegration,
+  disconnectIntegration,
+  setIntegrationStatus,
+} from '@/lib/revenue/store';
 import type { ProviderCredentials } from '@/lib/revenue/types';
 
 // GET — current connection status (never returns credentials).
@@ -79,6 +84,29 @@ export async function POST(
   }
 
   return json({ ok: true, provider: body.provider, webhookProvisioned });
+}
+
+// PUT — pause/resume the connected gateway. Paused keeps credentials but the
+// webhook acks-and-drops events until resumed. Never resurrects a disconnect.
+export async function PUT(
+  request: Request,
+  { params }: { params: Promise<{ websiteId: string }> },
+) {
+  const schema = z.object({
+    provider: z.string().max(50),
+    status: z.enum(['active', 'paused']),
+  });
+
+  const { auth, body, error } = await parseRequest(request, schema);
+  if (error) return error();
+
+  const { websiteId } = await params;
+  if (!(await canUpdateWebsite(auth, websiteId))) return unauthorized();
+
+  const count = await setIntegrationStatus(websiteId, body.provider, body.status);
+  if (!count) return badRequest({ message: 'No connected integration to update.' });
+
+  return json({ ok: true, status: body.status });
 }
 
 // DELETE — disconnect (wipes the stored secret).

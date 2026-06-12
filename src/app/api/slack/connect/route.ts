@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
   if (!auth?.user) return NextResponse.redirect(`${appUrl}/login`);
 
   if (!slackConfigured()) {
-    return NextResponse.redirect(`${appUrl}/account?tab=notifications&slack=not-configured`);
+    return NextResponse.redirect(`${appUrl}/account?tab=integrations&slack=not-configured`);
   }
 
   return NextResponse.redirect(buildSlackAuthUrl(signState(auth.user.id)));

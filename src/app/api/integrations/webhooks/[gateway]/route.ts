@@ -1,6 +1,6 @@
 import { json, badRequest, unauthorized, serverError } from '@/lib/response';
 import { getGatewayAdapter } from '@/lib/revenue/gateway';
-import { getActiveIntegration } from '@/lib/revenue/store';
+import { getActiveIntegration, isIntegrationPaused } from '@/lib/revenue/store';
 import { ingestRevenueEvent } from '@/lib/revenue/ingest';
 import { notifyPayment } from '@/lib/notify';
 
@@ -36,6 +36,12 @@ export async function POST(request: Request, { params }: { params: Promise<{ gat
   const active = await getActiveIntegration(websiteId);
   const secret = active?.provider === gateway ? active.credentials.webhookSecret : undefined;
   if (!secret) {
+    // Paused (not disconnected) → ack with 200 and drop the event. A non-2xx
+    // here would make gateways retry and eventually auto-disable the webhook,
+    // which would silently break the integration when the user resumes it.
+    if (await isIntegrationPaused(websiteId, gateway)) {
+      return json({ received: true, paused: true });
+    }
     // No verifiable secret configured for this gateway → cannot trust the call.
     return unauthorized({ message: 'No webhook secret configured for this gateway.' });
   }

@@ -58,3 +58,29 @@ export async function disconnectIntegration(websiteId: string, provider?: string
     data: { status: 'disconnected', credentials: '' },
   });
 }
+
+/**
+ * Pause/resume an integration without touching its credentials. Only flips
+ * live rows — a disconnected row (credentials wiped) can never be "resumed"
+ * back into service. Returns the number of rows updated.
+ */
+export async function setIntegrationStatus(
+  websiteId: string,
+  provider: string,
+  status: 'active' | 'paused',
+) {
+  const { count } = await prisma.client.paymentIntegration.updateMany({
+    where: { websiteId, provider, status: { in: ['active', 'paused'] } },
+    data: { status },
+  });
+  return count;
+}
+
+/** Whether this gateway is connected but paused (used to ack webhooks with 200). */
+export async function isIntegrationPaused(websiteId: string, provider: string) {
+  const row = await prisma.client.paymentIntegration.findFirst({
+    where: { websiteId, provider, status: 'paused' },
+    select: { id: true },
+  });
+  return !!row;
+}

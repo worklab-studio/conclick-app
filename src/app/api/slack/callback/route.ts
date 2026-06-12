@@ -11,7 +11,7 @@ import { exchangeSlackCode, getSlackConfig, verifyState } from '@/lib/slack';
 // incoming-webhook URL Slack returns and store it as a notification channel.
 export async function GET(request: NextRequest) {
   const { appUrl } = getSlackConfig();
-  const dest = `${appUrl}/account?tab=notifications`;
+  const dest = `${appUrl}/account?tab=integrations`;
   const url = new URL(request.url);
   const code = url.searchParams.get('code');
   const state = url.searchParams.get('state') || '';
