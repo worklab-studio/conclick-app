@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { Loader2, Plus, Send, Slack, Trash2, MessageCircle, Info } from 'lucide-react';
 import { useApi } from '@/components/hooks/useApi';
 import { useToast } from '@umami/react-zen';
@@ -52,6 +53,23 @@ export function NotificationSettings() {
   const [botToken, setBotToken] = useState('');
   const [chatId, setChatId] = useState('');
   const [busy, setBusy] = useState<string | null>(null);
+
+  // Feedback after returning from the Slack "Add to Slack" round-trip.
+  const params = useSearchParams();
+  useEffect(() => {
+    const s = params.get('slack');
+    if (!s) return;
+    if (s === 'connected') {
+      toast('Slack connected — sent a welcome message to your channel.');
+      refetch();
+    } else if (s === 'not-configured') {
+      toast('Slack isn’t set up on the server yet.');
+    } else if (s === 'error') {
+      toast('Slack connection failed — please try again.');
+    }
+    window.history.replaceState(null, '', '/account?tab=notifications');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [params]);
 
   const add = async () => {
     setBusy('add');
@@ -185,8 +203,25 @@ export function NotificationSettings() {
         </div>
       )}
 
-      {/* Add row */}
-      <div className="flex flex-wrap gap-2 border-t border-[hsl(0,0%,12%)] pt-4">
+      {/* One-click connect (Slack OAuth — picks a channel, no URL to copy) */}
+      <div className="border-t border-[hsl(0,0%,12%)] pt-4">
+        <div className="mb-2 text-[11px] font-medium uppercase tracking-wide text-muted-foreground/60">
+          Connect in one click
+        </div>
+        <a
+          href="/api/slack/connect"
+          className="inline-flex items-center gap-2 rounded-lg border border-[#2c2f33] bg-[#1a1d21] px-4 py-2.5 text-[13px] font-semibold text-white transition-colors hover:bg-[#24272c]"
+        >
+          <Slack className="h-4 w-4" /> Add to Slack
+        </a>
+        <span className="ml-3 text-[11px] text-muted-foreground/50">
+          authorize &amp; pick a channel — done · Discord &amp; Telegram one-click coming next
+        </span>
+      </div>
+
+      {/* Or add any channel manually by webhook URL / bot token */}
+      <div className="flex flex-wrap items-center gap-2 pt-1">
+        <span className="mr-1 text-[11px] text-muted-foreground/50">Or add manually:</span>
         <Select value={type} onValueChange={(v: any) => setType(v)}>
           <SelectTrigger className="w-[150px] dark:border-zinc-800 dark:bg-[#18181b]">
             <SelectValue />
