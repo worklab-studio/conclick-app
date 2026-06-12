@@ -95,10 +95,11 @@ export function GoalsInline({ websiteId }: { websiteId: string }) {
         >
           {data && (
             <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-              {reports.map((report: any) => (
+              {reports.map((report: any, i: number) => (
                 <div
                   key={report.id}
-                  className="rounded-lg border border-[hsl(0,0%,12%)] bg-[hsl(0,0%,9%)] p-4"
+                  className="animate-in fade-in slide-in-from-bottom-2 fill-mode-backwards rounded-lg border border-[hsl(0,0%,12%)] bg-[hsl(0,0%,9%)] p-4 duration-500"
+                  style={{ animationDelay: `${Math.min(i, 8) * 60}ms` }}
                 >
                   <Goal {...report} startDate={startDate} endDate={endDate} onResult={onResult} />
                 </div>

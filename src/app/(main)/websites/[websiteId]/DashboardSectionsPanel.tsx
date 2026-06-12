@@ -90,8 +90,11 @@ export function DashboardSectionsPanel({ websiteId }: { websiteId: string }) {
 
         {/* min-height keeps the panel from collapsing while the next tab/filter
             loads — otherwise the document shortens and the scroll position jumps.
-            Keyed on the tab so each switch replays the mount fade. */}
-        <div key={tab} className="min-h-[65vh] animate-in fade-in duration-300">
+            Keyed on the tab so each switch replays the entrance animation. */}
+        <div
+          key={tab}
+          className="min-h-[65vh] animate-in fade-in slide-in-from-bottom-2 duration-500"
+        >
           {tab === 'users' && <SessionsDataTable websiteId={websiteId} />}
           {tab === 'customers' && (
             <>

@@ -1,7 +1,7 @@
 'use client';
 
 import { useLayoutEffect, useRef, useState } from 'react';
-import { useSpring, animated } from '@react-spring/web';
+import { useSpring, animated, easings } from '@react-spring/web';
 import { formatLongNumber, formatShortTime, formatMinorCurrency } from '@/lib/format';
 import { biggestLeak, funnelRevenueLost, type FunnelStepRow } from '@/lib/funnel-insights';
 import { FunnelLeakDiagnosis } from './FunnelLeakDiagnosis';
@@ -57,6 +57,14 @@ export function FunnelChart({
     config: { tension: 170, friction: 26 },
   });
 
+  // Entrance: the ribbon draws itself left → right on mount (each tab visit
+  // remounts the chart, so the reveal plays every time the funnel is opened).
+  const reveal = useSpring({
+    from: { p: 0 },
+    to: { p: 1 },
+    config: { duration: 900, easing: easings.easeOutCubic },
+  });
+
   // Spring frames can briefly carry the previous array length around a step-
   // count change — every interpolator must fall back to the target values.
   const safeVals = (vals: number[]) => (vals.length === n ? vals : t);
@@ -90,11 +98,14 @@ export function FunnelChart({
 
   return (
     <div className="relative animate-in fade-in duration-500">
-      <svg
+      <animated.svg
         viewBox={`0 0 ${W} ${H}`}
         width="100%"
         preserveAspectRatio="none"
-        style={{ height: 'auto' }}
+        style={{
+          height: 'auto',
+          clipPath: reveal.p.to(v => `inset(0 ${(1 - v) * 100}% 0 0)`),
+        }}
       >
         <defs>
           <linearGradient id="funnel-grad" x1="0" y1="0" x2="1" y2="0">
@@ -177,10 +188,11 @@ export function FunnelChart({
             onMouseLeave={() => setHover(null)}
           />
         ))}
-      </svg>
+      </animated.svg>
 
-      {/* step labels + per-step revenue / median annotations */}
-      <div className="mt-1.5 flex">
+      {/* step labels + per-step revenue / median annotations — fade in just
+          behind the ribbon reveal */}
+      <div className="mt-1.5 flex animate-in fade-in fill-mode-backwards delay-300 duration-700">
         {rows.map((r, i) => (
           <div key={`l${i}`} className="min-w-0 flex-1 space-y-0.5 px-1 text-center">
             <div

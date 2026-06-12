@@ -218,7 +218,7 @@ export function AutoFunnelInline({ websiteId }: { websiteId: string }) {
       <div className="mb-4 rounded-lg border border-[hsl(0,0%,12%)] bg-[hsl(0,0%,9%)] p-4">
         <div className="mb-3 flex items-center justify-between gap-2">
           <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
-            <Filter className="h-4 w-4 text-[#8b88cf]" /> Your real funnel · auto-detected
+            <Filter className="h-4 w-4 text-[#8b88cf]" /> Auto-detected funnel
           </div>
           <button
             type="button"

@@ -6,18 +6,19 @@ import { FunnelAddButton } from './FunnelAddButton';
 import { useDateRange, useReportsQuery, useNavigation } from '@/components/hooks';
 import { LoadingPanel } from '@/components/common/LoadingPanel';
 import { Panel } from '@/components/common/Panel';
-import { TabEmptyState } from '@/components/common/TabEmptyState';
-import { Filter } from 'lucide-react';
 import { SmartSetupButton } from '../SmartSetupButton';
 
-// Funnels report body WITHOUT WebsiteControls — the date range comes from the
-// dashboard's shared picker. Used inline in the dashboard "Funnels" panel tab.
+// Saved funnels under the auto-detected one. The dashboard tab always shows the
+// auto funnel above this list, so the empty state is a slim hint pointing at
+// "Save as funnel" — not a tall "No funnels yet" block that reads as if the
+// funnel above doesn't exist.
 export function FunnelsInline({ websiteId }: { websiteId: string }) {
   const { data, isLoading, isFetching, error } = useReportsQuery({ websiteId, type: 'funnel' });
   const {
     dateRange: { startDate, endDate },
   } = useDateRange();
   const isShare = useNavigation().pathname?.includes('/share/');
+  const reports = (data?.['data'] as any[]) || [];
 
   return (
     <Column gap>
@@ -34,23 +35,29 @@ export function FunnelsInline({ websiteId }: { websiteId: string }) {
         isLoading={isLoading}
         isFetching={isFetching}
         error={error}
-        isEmpty={data?.['data']?.length === 0}
+        isEmpty={reports.length === 0}
         renderEmpty={() => (
-          <TabEmptyState
-            icon={Filter}
-            title="No funnels yet"
-            description="Build a funnel to see where visitors drop off across a sequence of steps. On a single-page site, use tracked events (e.g. view_pricing → click_buy → purchase) as the steps."
-          />
+          <div className="rounded-lg border border-dashed border-[hsl(0,0%,14%)] px-4 py-3 text-[12.5px] text-muted-foreground">
+            No saved funnels yet —{' '}
+            <span className="font-medium text-foreground/80">Save as funnel</span> keeps the
+            auto-detected one above, or build your own with{' '}
+            <span className="font-medium text-foreground/80">+ Funnel</span>.
+          </div>
         )}
       >
         {data && (
-          <Grid gap>
-            {data['data']?.map((report: any) => (
-              <Panel key={report.id}>
-                <Funnel {...report} startDate={startDate} endDate={endDate} />
-              </Panel>
-            ))}
-          </Grid>
+          <>
+            <div className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground/60">
+              Saved funnels
+            </div>
+            <Grid gap>
+              {reports.map((report: any) => (
+                <Panel key={report.id}>
+                  <Funnel {...report} startDate={startDate} endDate={endDate} />
+                </Panel>
+              ))}
+            </Grid>
+          </>
         )}
       </LoadingPanel>
     </Column>
