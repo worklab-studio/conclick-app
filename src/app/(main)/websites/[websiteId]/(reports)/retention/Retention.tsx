@@ -19,7 +19,7 @@ export interface RetentionProps {
 export function Retention({ websiteId, days = DAYS, startDate, endDate }: RetentionProps) {
   const { formatMessage, labels } = useMessages();
   const { locale } = useLocale();
-  const { data, error, isLoading } = useResultQuery('retention', {
+  const { data, error, isLoading, isFetching } = useResultQuery('retention', {
     websiteId,
     startDate,
     endDate,
@@ -48,7 +48,7 @@ export function Retention({ websiteId, days = DAYS, startDate, endDate }: Retent
   const totalDays = rows.length;
 
   return (
-    <LoadingPanel data={data} isLoading={isLoading} error={error}>
+    <LoadingPanel data={data} isLoading={isLoading} isFetching={isFetching} error={error}>
       {data && (
         <Panel allowFullscreen height="900px">
           <Column

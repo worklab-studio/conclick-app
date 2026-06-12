@@ -28,7 +28,7 @@ export function Revenue({ websiteId, startDate, endDate, unit }: RevenueProps) {
   const { formatMessage, labels } = useMessages();
   const { locale, dateLocale } = useLocale();
   const { countryNames } = useCountryNames(locale);
-  const { data, error, isLoading } = useResultQuery<any>('revenue', {
+  const { data, error, isLoading, isFetching } = useResultQuery<any>('revenue', {
     websiteId,
     startDate,
     endDate,
@@ -109,7 +109,7 @@ export function Revenue({ websiteId, startDate, endDate, unit }: RevenueProps) {
       <Grid columns="280px" gap>
         <CurrencySelect value={currency} onChange={setCurrency} />
       </Grid>
-      <LoadingPanel data={data} isLoading={isLoading} error={error}>
+      <LoadingPanel data={data} isLoading={isLoading} isFetching={isFetching} error={error}>
         {data && (
           <Column gap>
             <MetricsBar>

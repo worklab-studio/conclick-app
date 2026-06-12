@@ -28,7 +28,7 @@ export function Attribution({
   step,
   currency,
 }: AttributionProps) {
-  const { data, error, isLoading } = useResultQuery<any>('attribution', {
+  const { data, error, isLoading, isFetching } = useResultQuery<any>('attribution', {
     websiteId,
     startDate,
     endDate,
@@ -84,7 +84,7 @@ export function Attribution({
   }
 
   return (
-    <LoadingPanel data={data} isLoading={isLoading} error={error}>
+    <LoadingPanel data={data} isLoading={isLoading} isFetching={isFetching} error={error}>
       {data && (
         <Column gap>
           <MetricsBar>

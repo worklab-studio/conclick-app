@@ -13,7 +13,7 @@ import { SmartSetupButton } from '../SmartSetupButton';
 // Funnels report body WITHOUT WebsiteControls — the date range comes from the
 // dashboard's shared picker. Used inline in the dashboard "Funnels" panel tab.
 export function FunnelsInline({ websiteId }: { websiteId: string }) {
-  const { data, isLoading, error } = useReportsQuery({ websiteId, type: 'funnel' });
+  const { data, isLoading, isFetching, error } = useReportsQuery({ websiteId, type: 'funnel' });
   const {
     dateRange: { startDate, endDate },
   } = useDateRange();
@@ -32,6 +32,7 @@ export function FunnelsInline({ websiteId }: { websiteId: string }) {
       <LoadingPanel
         data={data}
         isLoading={isLoading}
+        isFetching={isFetching}
         error={error}
         isEmpty={data?.['data']?.length === 0}
         renderEmpty={() => (

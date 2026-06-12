@@ -29,8 +29,11 @@ export function LoadingPanel({
 }: LoadingPanelProps): ReactNode {
   const empty = isEmpty ?? checkEmpty(data);
 
-  // Show loading spinner only if no data exists
-  if (isLoading || isFetching) {
+  // Spinner only while there is nothing meaningful to show: a true first load,
+  // or a refetch bridging an empty placeholder (e.g. the list right after
+  // creating the first item). A background refetch over real data must NOT
+  // collapse the panel — the content stays up, dimmed below.
+  if (isLoading || (isFetching && (data === undefined || empty))) {
     return (
       <Column position="relative" height="100%" width="100%" {...props}>
         <Loading icon={loadingIcon} placement={loadingPlacement} />
@@ -44,16 +47,17 @@ export function LoadingPanel({
   }
 
   // Show empty state (once loaded)
-  if (!error && !isLoading && !isFetching && empty) {
+  if (empty) {
     return renderEmpty();
   }
 
-  // Show main content when data exists
-  if (!isLoading && !isFetching && !error && !empty) {
-    return children;
-  }
-
-  return null;
+  // Content — dimmed while a background refetch is replacing it, so stale
+  // numbers are visibly "refreshing" instead of silently posing as current.
+  return (
+    <div className={`transition-opacity duration-300 ${isFetching ? 'opacity-70' : 'opacity-100'}`}>
+      {children}
+    </div>
+  );
 }
 
 function checkEmpty(data: any) {

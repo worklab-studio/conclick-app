@@ -1,3 +1,4 @@
+import { keepPreviousSameWebsite } from './sameWebsitePlaceholder';
 import { useApi } from '../useApi';
 import { useDateParameters } from '@/components/hooks/useDateParameters';
 import { useFilterParameters } from '../useFilterParameters';
@@ -41,6 +42,10 @@ export function useFunnelQuery(
         parameters: { startDate, endDate, timezone, window: win, steps },
       }),
     enabled: valid,
+    // Bridge key changes (segment pills, date range) with the previous result so
+    // the funnel card never unmounts to a spinner — it morphs to the new shape.
+    // Scoped to this website: never bridges across a website switch.
+    placeholderData: keepPreviousSameWebsite(websiteId),
   });
 
   const prev = compare ? getCompareDate('prev', new Date(startDate), new Date(endDate)) : null;
@@ -63,7 +68,15 @@ export function useFunnelQuery(
         },
       }),
     enabled: valid && !!prev?.startDate,
+    placeholderData: keepPreviousSameWebsite(websiteId),
   });
 
-  return { data: current.data, isLoading: current.isLoading, compareData: previous.data };
+  return {
+    data: current.data,
+    isLoading: current.isLoading,
+    isFetching: current.isFetching,
+    // A disabled query still serves placeholder data — never leak a stale
+    // comparison after the toggle is switched off.
+    compareData: compare ? previous.data : undefined,
+  };
 }

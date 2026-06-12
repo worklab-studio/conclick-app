@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { AlertTriangle } from 'lucide-react';
+import { useLayoutEffect, useRef, useState } from 'react';
+import { useSpring, animated } from '@react-spring/web';
 import { formatLongNumber, formatShortTime, formatMinorCurrency } from '@/lib/format';
 import { biggestLeak, funnelRevenueLost, type FunnelStepRow } from '@/lib/funnel-insights';
 import { FunnelLeakDiagnosis } from './FunnelLeakDiagnosis';
@@ -12,38 +12,58 @@ const dur = (ms: number) => formatShortTime(Math.round(ms / 1000), ['d', 'h', 'm
 
 // Shared funnel visualization: a flowing violet ribbon (thickness = % remaining),
 // per-step conversion / revenue / median-time annotations, and the biggest leak
-// highlighted in amber with an estimated "$ left on the table" callout. Used by both
-// saved funnels (Funnel.tsx) and the auto-detected funnel (AutoFunnelInline) so they
-// always look identical.
+// rendered as the rose FunnelLeakDiagnosis card below. The ribbon's step
+// thicknesses are spring-animated, so segment/date switches morph the shape
+// instead of swapping it. Used by both saved funnels (Funnel.tsx) and the
+// auto-detected funnel (AutoFunnelInline) so they always look identical.
 export function FunnelChart({
   rows,
   currency = 'USD',
   websiteId,
+  diagnosisOpen = false,
 }: {
   rows: FunnelStepRow[];
   currency?: string;
   websiteId?: string;
+  diagnosisOpen?: boolean;
 }) {
-  const [hover, setHover] = useState<number | null>(null);
-
-  if (!rows.length) return null;
-
-  const { index: leakIndex } = biggestLeak(rows);
-  const lost = leakIndex > 0 ? funnelRevenueLost(rows, leakIndex) : 0;
-  const hasRevenue = rows.some(r => (r.revenue || 0) > 0);
+  const [hoverIndex, setHover] = useState<number | null>(null);
+  // With keepPreviousData the chart stays mounted while rows are swapped — a
+  // hovered segment can disappear without ever firing mouseleave, so clamp.
+  const hover = hoverIndex !== null && hoverIndex < rows.length ? hoverIndex : null;
 
   const W = 1000;
   const H = 210;
   const n = rows.length;
-  const segW = W / n;
+  const segW = n ? W / n : W;
   const k = Math.min(segW * 0.3, 90);
   const maxT = H * 0.7;
   const minT = 10;
   const t = rows.map(r => Math.max(Math.min(r.remaining ?? 0, 1) * maxT, minT));
   const cx = rows.map((_, i) => segW * i + segW / 2);
 
-  const ribbon = (mult: number) => {
-    const thick = t.map(v => Math.min(v * mult, H - 6));
+  // Springs can only morph between same-length arrays — when the step count
+  // changes (different funnel entirely) snap instead of interpolating. The ref
+  // is written in an effect, not during render, so a discarded/double render
+  // can never swallow the snap.
+  const prevN = useRef(n);
+  const lengthChanged = prevN.current !== n;
+  useLayoutEffect(() => {
+    prevN.current = n;
+  });
+  const spring = useSpring({
+    ts: t,
+    immediate: lengthChanged,
+    config: { tension: 170, friction: 26 },
+  });
+
+  // Spring frames can briefly carry the previous array length around a step-
+  // count change — every interpolator must fall back to the target values.
+  const safeVals = (vals: number[]) => (vals.length === n ? vals : t);
+
+  // Builds the closed ribbon path for a given set of step thicknesses.
+  const ribbon = (thicknesses: number[], mult: number) => {
+    const thick = safeVals(thicknesses).map(v => Math.min(v * mult, H - 6));
     const yt = thick.map(v => (H - v) / 2);
     const yb = thick.map(v => (H + v) / 2);
     let d = `M 0 ${yt[0]}`;
@@ -62,8 +82,14 @@ export function FunnelChart({
     return d + ' Z';
   };
 
+  if (!rows.length) return null;
+
+  const { index: leakIndex } = biggestLeak(rows);
+  const lost = leakIndex > 0 ? funnelRevenueLost(rows, leakIndex) : 0;
+  const hasRevenue = rows.some(r => (r.revenue || 0) > 0);
+
   return (
-    <div className="relative">
+    <div className="relative animate-in fade-in duration-500">
       <svg
         viewBox={`0 0 ${W} ${H}`}
         width="100%"
@@ -77,37 +103,44 @@ export function FunnelChart({
           </linearGradient>
         </defs>
 
-        <path d={ribbon(1.12)} fill="#8b5cf6" opacity={0.1} />
-        <path d={ribbon(1)} fill="url(#funnel-grad)" />
+        <animated.path
+          d={spring.ts.to((...vals: number[]) => ribbon(vals, 1.12))}
+          fill="#8b5cf6"
+          opacity={0.1}
+        />
+        <animated.path
+          d={spring.ts.to((...vals: number[]) => ribbon(vals, 1))}
+          fill="url(#funnel-grad)"
+        />
 
-        {/* amber marker at the biggest-leak boundary */}
+        {/* rose marker at the biggest-leak boundary, tracking the morph */}
         {leakIndex > 0 ? (
-          <line
+          <animated.line
             x1={segW * leakIndex}
-            y1={(H - t[leakIndex - 1]) / 2}
+            y1={spring.ts.to((...vals: number[]) => (H - safeVals(vals)[leakIndex - 1]) / 2)}
             x2={segW * leakIndex}
-            y2={(H + t[leakIndex - 1]) / 2}
-            stroke="#f59e0b"
+            y2={spring.ts.to((...vals: number[]) => (H + safeVals(vals)[leakIndex - 1]) / 2)}
+            stroke="#fb7185"
             strokeWidth={2}
             strokeDasharray="3 3"
-            opacity={0.9}
+            opacity={0.85}
           />
         ) : null}
 
-        {/* drop-off between steps (the leak one is amber) */}
+        {/* drop-off between steps (the leak one is rose) */}
         {rows.map((r, i) =>
           i === 0 || !((r.dropped ?? 0) > 0) ? null : (
-            <text
+            <animated.text
               key={`d${i}`}
               x={segW * i}
-              y={(H - t[i - 1]) / 2 - 9}
+              y={spring.ts.to((...vals: number[]) => (H - safeVals(vals)[i - 1]) / 2 - 9)}
               textAnchor="middle"
               fontSize="12.5"
               fontWeight={i === leakIndex ? 700 : 400}
-              fill={i === leakIndex ? '#f59e0b' : '#8b8b93'}
+              fill={i === leakIndex ? '#fb7185' : '#8b8b93'}
             >
               −{Math.round(r.dropoff * 100)}%
-            </text>
+            </animated.text>
           ),
         )}
 
@@ -152,7 +185,7 @@ export function FunnelChart({
           <div key={`l${i}`} className="min-w-0 flex-1 space-y-0.5 px-1 text-center">
             <div
               className={`truncate text-xs font-medium ${
-                i === leakIndex ? 'text-amber-300' : 'text-foreground/90'
+                i === leakIndex ? 'text-rose-300' : 'text-foreground/90'
               }`}
               title={r.value}
             >
@@ -175,31 +208,15 @@ export function FunnelChart({
         ))}
       </div>
 
-      {/* biggest-leak callout */}
+      {/* biggest-leak card (summary header + diagnosis) */}
       {leakIndex > 0 ? (
-        <div className="mt-3 flex items-start gap-2 rounded-lg border-2 border-amber-500/40 bg-amber-500/[0.12] px-3 py-2 text-sm">
-          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-400" />
-          <div className="text-amber-100">
-            Biggest leak: <span className="font-semibold">{rows[leakIndex - 1].value}</span> →{' '}
-            <span className="font-semibold">{rows[leakIndex].value}</span> ·{' '}
-            <span className="font-semibold">
-              {Math.round((rows[leakIndex].dropoff || 0) * 100)}% drop
-            </span>
-            {hasRevenue && lost > 0 ? (
-              <>
-                {' '}
-                · ≈<span className="font-semibold">{money(lost, currency)}</span> left on the table
-              </>
-            ) : null}
-          </div>
-        </div>
-      ) : null}
-
-      {websiteId && leakIndex > 0 ? (
         <FunnelLeakDiagnosis
           websiteId={websiteId}
           prevStep={rows[leakIndex - 1]}
           leakStep={rows[leakIndex]}
+          lost={hasRevenue ? lost : 0}
+          currency={currency}
+          defaultOpen={diagnosisOpen}
         />
       ) : null}
 

@@ -9,14 +9,14 @@ import { FunnelChart } from './FunnelChart';
 
 export function Funnel({ id, name, type, parameters, websiteId }: any) {
   const { formatMessage, labels } = useMessages();
-  const { data, error, isLoading } = useResultQuery(type, {
+  const { data, error, isLoading, isFetching } = useResultQuery(type, {
     websiteId,
     ...parameters,
   });
   const rows = (data as any[]) || [];
 
   return (
-    <LoadingPanel data={data} isLoading={isLoading} error={error}>
+    <LoadingPanel data={data} isLoading={isLoading} isFetching={isFetching} error={error}>
       <div className="space-y-3">
         <div className="flex items-start justify-between gap-3">
           <div className="truncate text-[15px] font-semibold text-foreground">{name}</div>

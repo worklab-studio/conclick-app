@@ -1,3 +1,4 @@
+import { keepPreviousSameWebsite } from './sameWebsitePlaceholder';
 import { useApi } from '../useApi';
 import { useDateParameters } from '@/components/hooks/useDateParameters';
 import { useFilterParameters } from '../useFilterParameters';
@@ -35,6 +36,9 @@ export function useGoalQuery(
         parameters: { startDate, endDate, timezone, type, value },
       }),
     enabled: valid,
+    // Keep the card rendered across key changes — no flash back to skeletons.
+    // Scoped to this website: never bridges across a website switch.
+    placeholderData: keepPreviousSameWebsite(websiteId),
   });
 
   const prev = getCompareDate('prev', new Date(startDate), new Date(endDate));
@@ -57,11 +61,14 @@ export function useGoalQuery(
         },
       }),
     enabled: valid && compare && !!prev?.startDate,
+    placeholderData: keepPreviousSameWebsite(websiteId),
   });
 
   return {
     data: current.data,
-    compareData: previous.data,
+    // A disabled query still serves placeholder data — never leak a stale
+    // comparison after compare is switched off.
+    compareData: compare ? previous.data : undefined,
     isLoading: current.isLoading,
     isFetching: current.isFetching,
     error: current.error,

@@ -1,3 +1,4 @@
+import { keepPreviousSameWebsite } from './sameWebsitePlaceholder';
 import { useApi } from '../useApi';
 import { useFilterParameters } from '../useFilterParameters';
 import { ReactQueryOptions } from '@/lib/types';
@@ -39,6 +40,10 @@ export function useResultQuery<T = any>(
         },
       }),
     enabled: !!type,
+    // Date/filter key changes render the previous result while the new one
+    // loads (LoadingPanel dims it via isFetching). Website-scoped — never
+    // bridges across a website switch.
+    placeholderData: keepPreviousSameWebsite<T>(websiteId) as any,
     ...options,
   });
 }

@@ -3,7 +3,6 @@
 import { ReactNode, useState } from 'react';
 import { format } from 'date-fns';
 import {
-  X,
   Copy,
   Check,
   Calendar,
@@ -31,15 +30,7 @@ function fmtDate(value: any) {
 // OS icon filenames are slug-cased (e.g. "Windows 10" -> "windows-10").
 const osIcon = (os?: string) => os?.toLowerCase()?.replaceAll(/\W/g, '-');
 
-export function SessionProfile({
-  websiteId,
-  sessionId,
-  onClose,
-}: {
-  websiteId: string;
-  sessionId: string;
-  onClose?: () => void;
-}) {
+export function SessionProfile({ websiteId, sessionId }: { websiteId: string; sessionId: string }) {
   const { data, isLoading, error } = useWebsiteSessionQuery(websiteId, sessionId);
   const { formatValue } = useFormat();
   const { locale } = useLocale();
@@ -117,15 +108,6 @@ export function SessionProfile({
                 )}
               </button>
             </div>
-            {onClose && (
-              <button
-                type="button"
-                onClick={onClose}
-                className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-lg border border-[hsl(0,0%,15%)] text-muted-foreground transition-colors hover:text-foreground"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            )}
           </div>
 
           {/* Stats strip */}

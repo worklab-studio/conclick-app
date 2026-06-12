@@ -6,12 +6,37 @@ import { GoalAddButton } from './GoalAddButton';
 import { useDateRange, useReportsQuery, useNavigation } from '@/components/hooks';
 import { LoadingPanel } from '@/components/common/LoadingPanel';
 import { TabEmptyState } from '@/components/common/TabEmptyState';
+import { Skeleton } from '@/components/ui/skeleton';
 import { SmartSetupButton } from '../SmartSetupButton';
+
+// Ghost goal cards while the list loads — mirrors the Goal card layout (title,
+// subtitle, big conversion %, progress bar, footer) so nothing reflows.
+function GoalsSkeleton() {
+  return (
+    <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+      {[0, 1, 2, 3].map(i => (
+        <div key={i} className="rounded-lg border border-[hsl(0,0%,12%)] bg-[hsl(0,0%,9%)] p-4">
+          <Skeleton className="h-4 w-44 rounded" />
+          <Skeleton className="mt-2.5 h-3 w-32 rounded" />
+          <div className="mt-5 flex items-baseline gap-3">
+            <Skeleton className="h-8 w-16 rounded" />
+            <Skeleton className="h-3 w-28 rounded" />
+          </div>
+          <Skeleton className="mt-4 h-1.5 w-full rounded-full" />
+          <div className="mt-3.5 flex items-center justify-between">
+            <Skeleton className="h-3 w-24 rounded" />
+            <Skeleton className="h-3 w-40 rounded" />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
 
 // Goals report body WITHOUT WebsiteControls — date range comes from the dashboard's
 // shared picker. House chrome (matches the rest of the dashboard tabs).
 export function GoalsInline({ websiteId }: { websiteId: string }) {
-  const { data, isLoading, error } = useReportsQuery({ websiteId, type: 'goal' });
+  const { data, isLoading, isFetching, error } = useReportsQuery({ websiteId, type: 'goal' });
   const {
     dateRange: { startDate, endDate },
   } = useDateRange();
@@ -50,32 +75,38 @@ export function GoalsInline({ websiteId }: { websiteId: string }) {
           <GoalAddButton websiteId={websiteId} />
         </div>
       )}
-      <LoadingPanel
-        data={data}
-        isLoading={isLoading}
-        error={error}
-        isEmpty={(data?.['data'] as any[])?.length === 0}
-        renderEmpty={() => (
-          <TabEmptyState
-            icon={Target}
-            title="No goals yet"
-            description="Track a conversion target — a page view or a custom event. On a single-page site, use event goals (track an action like 'signup' or 'purchase')."
-          />
-        )}
-      >
-        {data && (
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-            {reports.map((report: any) => (
-              <div
-                key={report.id}
-                className="rounded-lg border border-[hsl(0,0%,12%)] bg-[hsl(0,0%,9%)] p-4"
-              >
-                <Goal {...report} startDate={startDate} endDate={endDate} onResult={onResult} />
-              </div>
-            ))}
-          </div>
-        )}
-      </LoadingPanel>
+      {isLoading && !data ? (
+        // First load only — once cached, returning to this tab renders instantly.
+        <GoalsSkeleton />
+      ) : (
+        <LoadingPanel
+          data={data}
+          isLoading={isLoading}
+          isFetching={isFetching}
+          error={error}
+          isEmpty={(data?.['data'] as any[])?.length === 0}
+          renderEmpty={() => (
+            <TabEmptyState
+              icon={Target}
+              title="No goals yet"
+              description="Track a conversion target — a page view or a custom event. On a single-page site, use event goals (track an action like 'signup' or 'purchase')."
+            />
+          )}
+        >
+          {data && (
+            <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+              {reports.map((report: any) => (
+                <div
+                  key={report.id}
+                  className="rounded-lg border border-[hsl(0,0%,12%)] bg-[hsl(0,0%,9%)] p-4"
+                >
+                  <Goal {...report} startDate={startDate} endDate={endDate} onResult={onResult} />
+                </div>
+              ))}
+            </div>
+          )}
+        </LoadingPanel>
+      )}
     </div>
   );
 }

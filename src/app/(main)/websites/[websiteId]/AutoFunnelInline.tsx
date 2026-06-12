@@ -1,15 +1,8 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import {
-  Loader2,
-  Filter,
-  AlertTriangle,
-  Check,
-  Plus,
-  TrendingUp,
-  TrendingDown,
-} from 'lucide-react';
+import { Filter, Check, Plus, TrendingUp, TrendingDown } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   useResultQuery,
   useWebsiteValuesQuery,
@@ -76,6 +69,41 @@ function deriveFunnel(journeys: Journey[]): { steps: Step[]; biggestLeak: number
   return { steps, biggestLeak };
 }
 
+// Ghost of the auto-funnel card while the first funnel run is in flight —
+// mirrors the real layout (header, pills, stepped ribbon, step labels) so the
+// page doesn't reflow when data lands.
+function FunnelSkeleton() {
+  return (
+    <div className="mb-4 rounded-lg border border-[hsl(0,0%,12%)] bg-[hsl(0,0%,9%)] p-4">
+      <div className="mb-4 flex items-center justify-between">
+        <div className="flex items-center gap-2.5">
+          <Skeleton className="h-4 w-4 rounded" />
+          <Skeleton className="h-4 w-52 rounded" />
+        </div>
+        <Skeleton className="h-7 w-28 rounded-md" />
+      </div>
+      <div className="mb-4 flex gap-2">
+        <Skeleton className="h-6 w-10 rounded-md" />
+        <Skeleton className="h-6 w-16 rounded-md" />
+        <Skeleton className="h-6 w-14 rounded-md" />
+      </div>
+      <div className="flex h-40 items-center">
+        {[100, 68, 36, 16].map((h, i) => (
+          <div key={i} className="flex h-full flex-1 items-center px-0.5">
+            <Skeleton className="w-full rounded" style={{ height: `${h}%` }} />
+          </div>
+        ))}
+      </div>
+      <div className="mt-4 flex justify-around">
+        <Skeleton className="h-3 w-16 rounded" />
+        <Skeleton className="h-3 w-16 rounded" />
+        <Skeleton className="h-3 w-16 rounded" />
+        <Skeleton className="h-3 w-16 rounded" />
+      </div>
+    </div>
+  );
+}
+
 // "Your real funnel" — auto-detected from the site's own pages + conversion events,
 // then run through the SAME accurate funnel engine as saved funnels (window-bound,
 // session-level) so the numbers are trustworthy. Shows revenue, the biggest leak,
@@ -126,6 +154,7 @@ export function AutoFunnelInline({ websiteId }: { websiteId: string }) {
   const {
     data: funnelData,
     isLoading: funnelLoading,
+    isFetching: funnelFetching,
     compareData,
   } = useFunnelQuery(websiteId, {
     steps,
@@ -171,12 +200,10 @@ export function AutoFunnelInline({ websiteId }: { websiteId: string }) {
     );
   };
 
-  if ((canRun && funnelLoading) || (!canRun && journeyLoading)) {
-    return (
-      <div className="mb-4 flex items-center gap-2 text-sm text-muted-foreground">
-        <Loader2 className="h-4 w-4 animate-spin" /> Detecting your funnel…
-      </div>
-    );
+  // First load only — keepPreviousData keeps the card mounted on every later
+  // segment/date switch, so this ghost never reappears once data exists.
+  if ((canRun && funnelLoading && !funnelData) || (!canRun && journeyLoading)) {
+    return <FunnelSkeleton />;
   }
 
   // Accurate path — real funnel engine + shared chart + leak diagnosis.
@@ -249,7 +276,11 @@ export function AutoFunnelInline({ websiteId }: { websiteId: string }) {
             No funnel data{segment.filter ? ` for ${segment.label}` : ''} in this range yet.
           </div>
         ) : (
-          <FunnelChart rows={rows} websiteId={websiteId} />
+          <div
+            className={`transition-opacity duration-300 ${funnelFetching ? 'opacity-70' : 'opacity-100'}`}
+          >
+            <FunnelChart rows={rows} websiteId={websiteId} diagnosisOpen />
+          </div>
         )}
       </div>
     );
@@ -275,7 +306,7 @@ export function AutoFunnelInline({ websiteId }: { websiteId: string }) {
                 <div className="w-6 shrink-0 text-xs text-muted-foreground">{i + 1}</div>
                 <div className="relative h-7 flex-1 overflow-hidden rounded bg-[hsl(0,0%,11%)]">
                   <div
-                    className="absolute inset-y-0 left-0 rounded bg-[#5e5ba4]/40"
+                    className="absolute inset-y-0 left-0 rounded bg-[#5e5ba4]/40 transition-[width] duration-500"
                     style={{ width: `${Math.max(6, pct)}%` }}
                   />
                   <div className="absolute inset-0 flex items-center px-2">
@@ -287,10 +318,10 @@ export function AutoFunnelInline({ websiteId }: { websiteId: string }) {
               {i > 0 && s.drop > 0 ? (
                 <div
                   className={`ml-9 mt-0.5 text-[11px] ${
-                    isLeak ? 'font-semibold text-amber-400' : 'text-muted-foreground/60'
+                    isLeak ? 'font-semibold text-rose-400' : 'text-muted-foreground/60'
                   }`}
                 >
-                  {isLeak ? <AlertTriangle className="mr-1 inline h-3 w-3" /> : null}−{s.drop}% drop
+                  {isLeak ? <TrendingDown className="mr-1 inline h-3 w-3" /> : null}−{s.drop}% drop
                   {isLeak ? ' · biggest leak' : ''}
                 </div>
               ) : null}
@@ -299,7 +330,7 @@ export function AutoFunnelInline({ websiteId }: { websiteId: string }) {
         })}
       </div>
       {funnel.biggestLeak > 0 ? (
-        <div className="mt-3 rounded-md bg-amber-500/10 px-3 py-2 text-xs text-amber-300/90">
+        <div className="mt-3 rounded-md border border-rose-500/15 bg-rose-500/[0.07] px-3 py-2 text-xs text-rose-200/90">
           Biggest leak:{' '}
           <span className="font-semibold">{funnel.steps[funnel.biggestLeak - 1].label}</span> →{' '}
           <span className="font-semibold">{funnel.steps[funnel.biggestLeak].label}</span> (

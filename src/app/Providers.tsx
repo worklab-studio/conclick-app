@@ -14,6 +14,11 @@ const client = new QueryClient({
       retry: false,
       refetchOnWindowFocus: false,
       staleTime: 1000 * 60,
+      // Tab panels unmount on switch; keep their data cached long enough that
+      // returning to a tab renders instantly (stale data refreshes in the
+      // background via refetchOnMount). Default 5min gc made every detour
+      // longer than that flash a cold skeleton.
+      gcTime: 1000 * 60 * 30,
     },
   },
 });

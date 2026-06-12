@@ -1,3 +1,4 @@
+import { keepPreviousSameWebsite } from './sameWebsitePlaceholder';
 import { useApi } from '../useApi';
 import { useCountryNames } from '@/components/hooks/useCountryNames';
 import { useRegionNames } from '@/components/hooks/useRegionNames';
@@ -58,5 +59,8 @@ export function useWebsiteValuesQuery({
         search: getSearch(type, search),
       }),
     enabled: !!(websiteId && type && startDate && endDate),
+    // Date changes keep the previous values while refetching, so consumers
+    // deriving steps from these lists (auto-funnel) never collapse mid-switch.
+    placeholderData: keepPreviousSameWebsite(websiteId),
   });
 }

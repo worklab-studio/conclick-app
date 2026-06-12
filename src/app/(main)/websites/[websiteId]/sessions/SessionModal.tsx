@@ -20,9 +20,7 @@ export function SessionModal({ websiteId }: { websiteId: string }) {
     <Dialog open={!!session} onOpenChange={open => !open && close()}>
       <DialogContent className="max-h-[88vh] w-[min(96vw,56rem)] max-w-4xl overflow-y-auto border-[hsl(0,0%,12%)] bg-[hsl(0,0%,8%)] p-6">
         <DialogTitle className="sr-only">Visitor session</DialogTitle>
-        {session ? (
-          <SessionProfile websiteId={websiteId} sessionId={session} onClose={close} />
-        ) : null}
+        {session ? <SessionProfile websiteId={websiteId} sessionId={session} /> : null}
       </DialogContent>
     </Dialog>
   );

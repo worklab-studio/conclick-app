@@ -27,7 +27,7 @@ export function Journey({ websiteId, steps, startStep, endStep }: JourneyProps) 
   const [selectedNode, setSelectedNode] = useState(null);
   const [activeNode, setActiveNode] = useState(null);
   const { formatMessage, labels } = useMessages();
-  const { data, error, isLoading } = useResultQuery<any>('journey', {
+  const { data, error, isLoading, isFetching } = useResultQuery<any>('journey', {
     websiteId,
     steps,
     startStep,
@@ -154,7 +154,13 @@ export function Journey({ websiteId, steps, startStep, endStep }: JourneyProps) 
   };
 
   return (
-    <LoadingPanel data={data} isLoading={isLoading} error={error} height="100%">
+    <LoadingPanel
+      data={data}
+      isLoading={isLoading}
+      isFetching={isFetching}
+      error={error}
+      height="100%"
+    >
       <div className={styles.container}>
         <div className={styles.view}>
           {columns.map(({ visitorCount, nodes }, columnIndex) => {
