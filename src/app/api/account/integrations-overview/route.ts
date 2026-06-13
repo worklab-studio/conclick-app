@@ -13,8 +13,17 @@ export async function GET(request: NextRequest) {
   const auth = await checkAuth(request);
   if (!auth?.user) return unauthorized();
 
+  // Every website the user can reach — their own AND any team they belong to —
+  // mirroring getUserWebsites / the Websites list. The old query only matched
+  // userId, so team-owned products silently went missing from this page.
   const websites = await prisma.client.website.findMany({
-    where: { userId: auth.user.id, deletedAt: null },
+    where: {
+      deletedAt: null,
+      OR: [
+        { userId: auth.user.id },
+        { team: { deletedAt: null, members: { some: { userId: auth.user.id } } } },
+      ],
+    },
     select: { id: true, name: true, domain: true },
     orderBy: { name: 'asc' },
   });
