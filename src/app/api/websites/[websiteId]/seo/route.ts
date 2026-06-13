@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { parseRequest } from '@/lib/request';
 import { json, badRequest, unauthorized } from '@/lib/response';
 import { canViewWebsite } from '@/permissions';
-import { getAccessToken, getConnection, gscQuery } from '@/lib/google';
+import { getConnection, getServiceAccountToken, gscQuery } from '@/lib/google';
 
 // SEO tab data — live from Google Search Console for the dashboard date range.
 // Three parallel queries: totals (current + previous period for deltas), top
@@ -33,8 +33,10 @@ export async function GET(
     return json({ connected: false });
   }
 
-  const token = await getAccessToken(websiteId);
-  if (!token) return badRequest({ message: 'Google token expired — reconnect in settings.' });
+  const token = await getServiceAccountToken();
+  if (!token) {
+    return badRequest({ message: 'Google reader isn’t configured on the server yet.' });
+  }
 
   const startDate = toDay(query.startAt);
   const endDate = toDay(query.endAt);

@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
   ArrowRight,
+  Copy,
   LayoutGrid,
   List,
   Loader2,
@@ -55,12 +56,13 @@ interface OverviewWebsite {
   name: string;
   domain: string | null;
   payment: { provider: string; status: string } | null;
-  google: { email: string | null; gscSiteUrl: string | null; ga4PropertyId: string | null } | null;
+  google: { gscSiteUrl: string | null; ga4PropertyId: string | null } | null;
 }
 
 interface Overview {
   websites: OverviewWebsite[];
   googleConfigured: boolean;
+  googleReaderEmail: string;
   slackConfigured: boolean;
 }
 
@@ -428,6 +430,41 @@ export function IntegrationsSettings() {
       setBusy(null);
       refetchOverview();
     }
+  };
+
+  // Service-account connect: list the properties shared with our reader and
+  // auto-connect the domain match. No OAuth round-trip.
+  const findAndConnect = async (w: OverviewWebsite) => {
+    setBusy(`find:${w.id}`);
+    try {
+      const res = await get(`/websites/${w.id}/google`, { lists: '1' });
+      const hasLists = !!(res.gscSites?.length || res.ga4Properties?.length);
+      if (!hasLists) {
+        toast(`No shared properties for ${w.name} yet — add the reader email above, then retry.`);
+      } else if (res.suggested?.gscSiteUrl || res.suggested?.ga4PropertyId) {
+        await post(`/websites/${w.id}/google`, {
+          gscSiteUrl: res.suggested.gscSiteUrl,
+          ga4PropertyId: res.suggested.ga4PropertyId,
+        });
+        toast(`Connected ${w.name} — using the property you shared.`);
+      } else {
+        // Shared, but no domain match — finish the pick in the product's settings.
+        toast('Properties found — choose which in the website’s Settings → Google.');
+        router.push(`/websites/${w.id}/settings`);
+      }
+    } catch (e: any) {
+      toast(e?.message || 'Could not reach Google — try again.');
+    } finally {
+      setBusy(null);
+      refetchOverview();
+    }
+  };
+
+  const copyReader = () => {
+    const email = overview?.googleReaderEmail;
+    if (!email) return;
+    navigator.clipboard?.writeText(email);
+    toast('Reader email copied.');
   };
 
   // ---- small render helpers ------------------------------------------------
@@ -939,7 +976,7 @@ export function IntegrationsSettings() {
                       <div className="min-w-0 flex-1">
                         <div className="truncate text-[13px] font-semibold">{w.name}</div>
                         <div className="truncate font-mono text-[11px] text-muted-foreground">
-                          {w.google?.email}
+                          {w.google?.gscSiteUrl || w.google?.ga4PropertyId || w.domain}
                         </div>
                       </div>
                       <span className="flex shrink-0 gap-1.5">
@@ -969,64 +1006,90 @@ export function IntegrationsSettings() {
                     </div>
                   ))}
 
-                  {websites.filter(w => !w.google).length > 0 && (
-                    <div className="space-y-1.5">
+                  {overview?.googleConfigured === false ? (
+                    <p className="text-[11.5px] text-amber-400/90">
+                      Google reader isn&apos;t set up on the server yet (GOOGLE_SERVICE_ACCOUNT_KEY)
+                      — connecting will be enabled once it is.
+                    </p>
+                  ) : websites.filter(w => !w.google).length > 0 ? (
+                    <div className="space-y-2.5">
                       <div className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground/60">
                         Connect a product
                       </div>
-                      {overview?.googleConfigured === false && (
-                        <p className="text-[11.5px] text-amber-400/90">
-                          Google OAuth isn&apos;t configured on the server yet
-                          (GOOGLE_CLIENT_ID/SECRET) — connecting will be enabled once it is.
-                        </p>
-                      )}
+
+                      {/* The reader to add — shown once; same email for every product. */}
+                      <div className="rounded-lg border border-[hsl(0,0%,13%)] bg-[hsl(0,0%,9%)] p-3">
+                        <div className="mb-2 text-[11px] text-muted-foreground">
+                          Add this read-only reader in your{' '}
+                          <a
+                            href="https://search.google.com/search-console/users"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="font-medium text-[#b7b4e4] hover:underline"
+                          >
+                            Search Console
+                          </a>{' '}
+                          (Restricted) and{' '}
+                          <a
+                            href="https://analytics.google.com/analytics/web/#/admin"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="font-medium text-[#b7b4e4] hover:underline"
+                          >
+                            Analytics
+                          </a>{' '}
+                          (Viewer), then connect each product below.
+                        </div>
+                        <div className="flex items-center justify-between gap-2 rounded-md border border-[hsl(0,0%,16%)] bg-[#0f0f11] px-2.5 py-2">
+                          <code className="truncate font-mono text-[11px] text-[#b7b4e4]">
+                            {overview?.googleReaderEmail}
+                          </code>
+                          <button
+                            type="button"
+                            onClick={copyReader}
+                            className="flex shrink-0 items-center gap-1.5 rounded border border-[hsl(0,0%,18%)] bg-[hsl(0,0%,12%)] px-2 py-1 text-[10.5px] font-semibold text-foreground/90 transition-colors hover:bg-[hsl(0,0%,15%)]"
+                          >
+                            <Copy className="h-3 w-3" /> Copy
+                          </button>
+                        </div>
+                      </div>
+
                       {websites
                         .filter(w => !w.google)
-                        .map(w =>
-                          overview?.googleConfigured ? (
-                            <a
-                              key={w.id}
-                              href={`/api/google/connect?websiteId=${w.id}`}
-                              className="flex w-full items-center gap-3 rounded-lg border border-dashed border-[hsl(0,0%,16%)] px-3.5 py-2.5 transition-colors hover:border-[#5e5ba4]/50 hover:bg-[hsl(0,0%,9%)]"
-                            >
-                              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[hsl(0,0%,13%)] text-[12px] font-bold text-foreground/80">
-                                {(w.name || '?').charAt(0).toUpperCase()}
+                        .map(w => (
+                          <button
+                            key={w.id}
+                            type="button"
+                            onClick={() => findAndConnect(w)}
+                            disabled={busy === `find:${w.id}`}
+                            className="flex w-full items-center gap-3 rounded-lg border border-dashed border-[hsl(0,0%,16%)] px-3.5 py-2.5 text-left transition-colors hover:border-[#5e5ba4]/50 hover:bg-[hsl(0,0%,9%)] disabled:opacity-60"
+                          >
+                            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[hsl(0,0%,13%)] text-[12px] font-bold text-foreground/80">
+                              {(w.name || '?').charAt(0).toUpperCase()}
+                            </span>
+                            <span className="min-w-0 flex-1">
+                              <span className="block truncate text-[13px] font-medium">
+                                {w.name}
                               </span>
-                              <span className="min-w-0 flex-1">
-                                <span className="block truncate text-[13px] font-medium">
-                                  {w.name}
-                                </span>
-                                <span className="block truncate font-mono text-[11px] text-muted-foreground">
-                                  {w.domain}
-                                </span>
+                              <span className="block truncate font-mono text-[11px] text-muted-foreground">
+                                {w.domain}
                               </span>
-                              <ArrowRight className="h-3.5 w-3.5 shrink-0 text-[#b7b4e4]" />
-                            </a>
-                          ) : (
-                            <div
-                              key={w.id}
-                              className="flex w-full items-center gap-3 rounded-lg border border-dashed border-[hsl(0,0%,13%)] px-3.5 py-2.5 opacity-50"
-                            >
-                              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[hsl(0,0%,13%)] text-[12px] font-bold text-foreground/80">
-                                {(w.name || '?').charAt(0).toUpperCase()}
+                            </span>
+                            {busy === `find:${w.id}` ? (
+                              <Loader2 className="h-3.5 w-3.5 shrink-0 animate-spin text-[#b7b4e4]" />
+                            ) : (
+                              <span className="flex shrink-0 items-center gap-1 text-[11.5px] font-semibold text-[#b7b4e4]">
+                                Find &amp; connect <ArrowRight className="h-3.5 w-3.5" />
                               </span>
-                              <span className="min-w-0 flex-1">
-                                <span className="block truncate text-[13px] font-medium">
-                                  {w.name}
-                                </span>
-                                <span className="block truncate font-mono text-[11px] text-muted-foreground">
-                                  {w.domain}
-                                </span>
-                              </span>
-                            </div>
-                          ),
-                        )}
+                            )}
+                          </button>
+                        ))}
                       <p className="text-[11px] text-muted-foreground">
-                        Read-only Search Console + Analytics scopes. You pick the property after
-                        authorizing; tokens are stored encrypted.
+                        Read-only — we only read the property you share, and you revoke by removing
+                        the reader in Google. No sign-in, no token.
                       </p>
                     </div>
-                  )}
+                  ) : null}
                 </div>
               )}
             </>

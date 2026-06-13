@@ -1,182 +1,197 @@
 import crypto from 'node:crypto';
 import prisma from '@/lib/prisma';
-import { decrypt, encrypt, secret, uuid } from '@/lib/crypto';
+import { uuid } from '@/lib/crypto';
 
 /**
- * Google integration (one consent, two products): Search Console (SEO tab) and
- * GA4 (one-time history import). Web-server OAuth with offline access; the
- * refresh token is stored encrypted per website. Tokens auto-refresh on read.
+ * Google integration — service-account model ("invite our reader").
  *
- * Env: GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET (OAuth client of type "Web
- * application" with redirect URI `${APP_URL}/api/google/callback`).
+ * There is NO per-user OAuth and NO app verification. ONE service account reads
+ * the customer's data: they add its email as a read-only user in their own
+ * Search Console (Restricted) and GA4 (Viewer), and we query with a JWT-bearer
+ * token minted from the service-account key. The customer revokes by removing
+ * the viewer — we never hold a token of theirs.
+ *
+ * Env: GOOGLE_SERVICE_ACCOUNT_KEY — the service-account JSON key, base64-encoded
+ * (or raw JSON). Needs the Search Console API, Analytics Admin API and Analytics
+ * Data API enabled on its project. Powers: the SEO tab (Search Console) and the
+ * one-time GA4 history import.
  */
 
-export const GOOGLE_SCOPES = [
-  'openid',
-  'email',
+const SA_SCOPES = [
   'https://www.googleapis.com/auth/webmasters.readonly',
   'https://www.googleapis.com/auth/analytics.readonly',
 ].join(' ');
 
-export function getGoogleConfig() {
-  return {
-    clientId: process.env.GOOGLE_CLIENT_ID || '',
-    clientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
-    appUrl: process.env.NEXT_PUBLIC_APP_URL || 'https://app.conclick.io',
-  };
+interface ServiceAccountKey {
+  client_email: string;
+  private_key: string;
+}
+
+let cachedKey: ServiceAccountKey | null | undefined;
+
+/** Parse GOOGLE_SERVICE_ACCOUNT_KEY (base64 JSON or raw JSON). Parsed once. */
+function getKey(): ServiceAccountKey | null {
+  if (cachedKey !== undefined) return cachedKey;
+  const raw = process.env.GOOGLE_SERVICE_ACCOUNT_KEY;
+  if (!raw) {
+    cachedKey = null;
+    return null;
+  }
+  try {
+    const json = raw.trim().startsWith('{') ? raw : Buffer.from(raw, 'base64').toString('utf8');
+    const parsed = JSON.parse(json);
+    if (!parsed.client_email || !parsed.private_key) throw new Error('missing fields');
+    cachedKey = { client_email: parsed.client_email, private_key: parsed.private_key };
+  } catch {
+    cachedKey = null;
+  }
+  return cachedKey;
 }
 
 export function googleConfigured(): boolean {
-  const { clientId, clientSecret } = getGoogleConfig();
-  return !!clientId && !!clientSecret;
+  return !!getKey();
 }
 
-export const redirectUri = () => `${getGoogleConfig().appUrl}/api/google/callback`;
-
-// ---------- CSRF state (HMAC-signed, user-bound, time-boxed) ----------
-
-export function signState(websiteId: string, userId: string): string {
-  const ts = Date.now().toString(36);
-  const sig = crypto
-    .createHmac('sha256', secret())
-    .update(`google:${websiteId}:${userId}:${ts}`)
-    .digest('base64url');
-  return `${websiteId}.${userId}.${ts}.${sig}`;
+/** The reader address customers add as a viewer in GSC + GA4. '' if unconfigured. */
+export function serviceAccountEmail(): string {
+  return getKey()?.client_email || '';
 }
+
+// ---------- service-account access token (JWT-bearer, cached) ----------
+
+let tokenCache: { token: string; expiresAt: number } | null = null;
+
+const b64url = (input: Buffer | string) => Buffer.from(input).toString('base64url');
 
 /**
- * Returns the websiteId only when the signature checks out, the window hasn't
- * lapsed, AND the state was minted for `expectedUserId` — so a state token from
- * one session can't bind a Google account on another user's behalf.
+ * A valid access token for the service account. Self-signs an RS256 JWT and
+ * exchanges it for a 1-hour token, cached in-memory across requests. Returns
+ * null when the key is missing or Google rejects the assertion.
  */
-export function verifyState(state: string, expectedUserId: string): string | null {
-  const [websiteId, userId, ts, sig] = (state || '').split('.');
-  if (!websiteId || !userId || !ts || !sig) return null;
-  if (userId !== expectedUserId) return null;
-  const expected = crypto
-    .createHmac('sha256', secret())
-    .update(`google:${websiteId}:${userId}:${ts}`)
-    .digest('base64url');
-  const a = Buffer.from(sig);
-  const b = Buffer.from(expected);
-  if (a.length !== b.length || !crypto.timingSafeEqual(a, b)) return null;
-  // 15-minute window — long enough for the consent dance.
-  if (Date.now() - parseInt(ts, 36) > 15 * 60_000) return null;
-  return websiteId;
-}
+export async function getServiceAccountToken(): Promise<string | null> {
+  const key = getKey();
+  if (!key) return null;
 
-// ---------- OAuth ----------
-
-export function buildAuthUrl(state: string): string {
-  const { clientId } = getGoogleConfig();
-  const params = new URLSearchParams({
-    client_id: clientId,
-    redirect_uri: redirectUri(),
-    response_type: 'code',
-    scope: GOOGLE_SCOPES,
-    access_type: 'offline',
-    prompt: 'consent', // always re-issue a refresh token on reconnect
-    state,
-  });
-  return `https://accounts.google.com/o/oauth2/v2/auth?${params}`;
-}
-
-async function tokenRequest(body: Record<string, string>) {
-  const res = await fetch('https://oauth2.googleapis.com/token', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: new URLSearchParams(body),
-    signal: AbortSignal.timeout(10_000),
-  });
-  if (!res.ok) {
-    throw new Error(`google token ${res.status}: ${(await res.text()).slice(0, 200)}`);
-  }
-  return res.json() as Promise<{
-    access_token: string;
-    expires_in: number;
-    refresh_token?: string;
-    scope?: string;
-  }>;
-}
-
-export async function exchangeCode(code: string) {
-  const { clientId, clientSecret } = getGoogleConfig();
-  return tokenRequest({
-    code,
-    client_id: clientId,
-    client_secret: clientSecret,
-    redirect_uri: redirectUri(),
-    grant_type: 'authorization_code',
-  });
-}
-
-async function refreshAccessToken(refreshToken: string) {
-  const { clientId, clientSecret } = getGoogleConfig();
-  return tokenRequest({
-    refresh_token: refreshToken,
-    client_id: clientId,
-    client_secret: clientSecret,
-    grant_type: 'refresh_token',
-  });
-}
-
-// ---------- connection storage ----------
-
-export async function saveConnection(
-  websiteId: string,
-  tokens: { access_token: string; expires_in: number; refresh_token?: string },
-  email?: string | null,
-) {
-  const existing = await prisma.client.googleConnection.findUnique({ where: { websiteId } });
-  const refreshToken = tokens.refresh_token
-    ? encrypt(tokens.refresh_token, secret())
-    : existing?.refreshToken;
-
-  if (!refreshToken) throw new Error('Google did not return a refresh token');
-
-  const data = {
-    refreshToken,
-    accessToken: encrypt(tokens.access_token, secret()),
-    tokenExpires: new Date(Date.now() + (tokens.expires_in - 60) * 1000),
-    ...(email ? { email } : {}),
-  };
-
-  if (existing) {
-    return prisma.client.googleConnection.update({ where: { websiteId }, data });
-  }
-  return prisma.client.googleConnection.create({
-    data: { id: uuid(), websiteId, ...data },
-  });
-}
-
-export async function getConnection(websiteId: string) {
-  return prisma.client.googleConnection.findUnique({ where: { websiteId } });
-}
-
-/** Valid access token for a connection — refreshes + persists when expired. */
-export async function getAccessToken(websiteId: string): Promise<string | null> {
-  const conn = await getConnection(websiteId);
-  if (!conn) return null;
+  if (tokenCache && tokenCache.expiresAt > Date.now()) return tokenCache.token;
 
   try {
-    if (conn.accessToken && conn.tokenExpires && conn.tokenExpires > new Date()) {
-      return decrypt(conn.accessToken, secret());
-    }
-    const refreshed = await refreshAccessToken(decrypt(conn.refreshToken, secret()));
-    await prisma.client.googleConnection.update({
-      where: { websiteId },
-      data: {
-        accessToken: encrypt(refreshed.access_token, secret()),
-        tokenExpires: new Date(Date.now() + (refreshed.expires_in - 60) * 1000),
-      },
+    const now = Math.floor(Date.now() / 1000);
+    const header = b64url(JSON.stringify({ alg: 'RS256', typ: 'JWT' }));
+    const claims = b64url(
+      JSON.stringify({
+        iss: key.client_email,
+        scope: SA_SCOPES,
+        aud: 'https://oauth2.googleapis.com/token',
+        iat: now,
+        exp: now + 3600,
+      }),
+    );
+    const signingInput = `${header}.${claims}`;
+    const signature = crypto
+      .createSign('RSA-SHA256')
+      .update(signingInput)
+      .sign(key.private_key.replace(/\\n/g, '\n'));
+    const assertion = `${signingInput}.${b64url(signature)}`;
+
+    const res = await fetch('https://oauth2.googleapis.com/token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+        assertion,
+      }),
+      signal: AbortSignal.timeout(10_000),
     });
-    return refreshed.access_token;
+    if (!res.ok) return null;
+    const data = (await res.json()) as { access_token: string; expires_in: number };
+    if (!data.access_token) return null;
+    tokenCache = {
+      token: data.access_token,
+      expiresAt: Date.now() + (data.expires_in - 60) * 1000,
+    };
+    return data.access_token;
   } catch {
     return null;
   }
 }
 
-// ---------- API wrappers ----------
+// ---------- connection storage (a per-website property selection) ----------
+
+export async function getConnection(websiteId: string) {
+  return prisma.client.googleConnection.findUnique({ where: { websiteId } });
+}
+
+/** Whether a website has picked at least one Google property to read. */
+export function isConnected(
+  conn: { gscSiteUrl?: string | null; ga4PropertyId?: string | null } | null,
+) {
+  return !!(conn && (conn.gscSiteUrl || conn.ga4PropertyId));
+}
+
+/** Upsert the website's property selection. No tokens — auth is the SA viewer grant. */
+export async function saveSelection(
+  websiteId: string,
+  sel: { gscSiteUrl?: string | null; ga4PropertyId?: string | null },
+) {
+  const data = {
+    ...(sel.gscSiteUrl !== undefined ? { gscSiteUrl: sel.gscSiteUrl } : {}),
+    ...(sel.ga4PropertyId !== undefined ? { ga4PropertyId: sel.ga4PropertyId } : {}),
+  };
+  const existing = await prisma.client.googleConnection.findUnique({ where: { websiteId } });
+  if (existing) {
+    return prisma.client.googleConnection.update({ where: { websiteId }, data });
+  }
+  return prisma.client.googleConnection.create({ data: { id: uuid(), websiteId, ...data } });
+}
+
+// ---------- domain binding (multi-tenant isolation) ----------
+//
+// ONE service account is shared across all customers, so its accessible-property
+// list is the UNION of every customer's shared properties. To stop customer A
+// from reading customer B's data, a website may only ever bind a property whose
+// host matches the website's OWN domain — enforced on both listing and save.
+
+/** Bare host: strips scheme, sc-domain:, www., path. '' for empty input. */
+export function bareHost(value: string | null | undefined): string {
+  return (value || '')
+    .replace(/^sc-domain:/, '')
+    .replace(/^https?:\/\//, '')
+    .replace(/^www\./, '')
+    .replace(/\/.*$/, '')
+    .toLowerCase()
+    .trim();
+}
+
+/** True when two hosts are the same site or one is a subdomain of the other. */
+export function domainCovers(propertyHost: string, siteHost: string): boolean {
+  if (!propertyHost || !siteHost) return false;
+  return (
+    propertyHost === siteHost ||
+    siteHost.endsWith(`.${propertyHost}`) ||
+    propertyHost.endsWith(`.${siteHost}`)
+  );
+}
+
+/**
+ * Web-stream hosts declared on a GA4 property (its defaultUri). GA4 property
+ * summaries carry no domain, so this is the only way to bind a GA4 property to a
+ * site. Viewer access is enough to read data streams. [] on any failure.
+ */
+export async function ga4WebStreamHosts(token: string, propertyId: string): Promise<string[]> {
+  try {
+    const data = await googleGet(
+      token,
+      `https://analyticsadmin.googleapis.com/v1beta/${propertyId}/dataStreams?pageSize=50`,
+    );
+    return (data.dataStreams || [])
+      .map((s: any) => bareHost(s.webStreamData?.defaultUri))
+      .filter(Boolean);
+  } catch {
+    return [];
+  }
+}
+
+// ---------- API wrappers (identical regardless of token source) ----------
 
 async function googleGet(token: string, url: string) {
   const res = await fetch(url, {

@@ -4,17 +4,35 @@ import { json, badRequest, unauthorized } from '@/lib/response';
 import { canUpdateWebsite } from '@/permissions';
 import prisma from '@/lib/prisma';
 import {
-  getAccessToken,
+  bareHost,
+  domainCovers,
+  ga4WebStreamHosts,
   getConnection,
+  getServiceAccountToken,
   googleConfigured,
   gscListSites,
   ga4ListProperties,
+  isConnected,
+  saveSelection,
+  serviceAccountEmail,
 } from '@/lib/google';
 
-// Per-website Google connection: status (+ optional property lists for the
-// pickers), select the GSC site / GA4 property, disconnect. This is a SETTINGS
-// surface — every method requires the website OWNER (share-token holders must
-// never see the owner's Google email or enumerate their GSC/GA4 properties).
+// Per-website Google connection (service-account model). ONE reader is shared
+// across all customers, so its accessible-property list is the union of every
+// tenant's grants. To prevent customer A from reading customer B's data, a
+// website may only ever see/bind a property whose host matches its OWN domain —
+// enforced here on both listing and save. Settings surface: every method needs
+// website-update permission (never reachable via a public share token).
+
+const GA4_LIST_CAP = 40; // stream lookups per list call — bounds Google calls
+
+async function websiteHost(websiteId: string): Promise<string> {
+  const website = await prisma.client.website.findUnique({
+    where: { id: websiteId },
+    select: { domain: true },
+  });
+  return bareHost(website?.domain);
+}
 
 export async function GET(
   request: Request,
@@ -30,27 +48,42 @@ export async function GET(
   if (!auth?.user || !(await canUpdateWebsite(auth, websiteId))) return unauthorized();
 
   const conn = await getConnection(websiteId);
-  if (!conn) {
-    return json({ connected: false, configured: googleConfigured() });
-  }
-
   const base = {
-    connected: true,
-    configured: true,
-    email: conn.email,
-    gscSiteUrl: conn.gscSiteUrl,
-    ga4PropertyId: conn.ga4PropertyId,
+    connected: isConnected(conn),
+    configured: googleConfigured(),
+    serviceEmail: serviceAccountEmail(),
+    gscSiteUrl: conn?.gscSiteUrl ?? null,
+    ga4PropertyId: conn?.ga4PropertyId ?? null,
   };
 
   if (query.lists) {
-    const token = await getAccessToken(websiteId);
-    if (!token) return json({ ...base, tokenError: true });
+    const token = await getServiceAccountToken();
+    const host = await websiteHost(websiteId);
+    if (!token || !host) {
+      return json({ ...base, gscSites: [], ga4Properties: [], suggested: null });
+    }
 
-    const [sites, properties] = await Promise.all([
+    const [allSites, allProps] = await Promise.all([
       gscListSites(token).catch(() => []),
       ga4ListProperties(token).catch(() => []),
     ]);
-    return json({ ...base, gscSites: sites, ga4Properties: properties });
+
+    // Only this site's own domain — never another tenant's shared property.
+    const gscSites = allSites.filter(s => domainCovers(bareHost(s.siteUrl), host));
+    const matchedProps = await Promise.all(
+      allProps.slice(0, GA4_LIST_CAP).map(async p => {
+        const hosts = await ga4WebStreamHosts(token, p.property);
+        return hosts.some(h => domainCovers(h, host)) ? p : null;
+      }),
+    );
+    const ga4Properties = matchedProps.filter(Boolean);
+
+    const suggested = {
+      gscSiteUrl: gscSites[0]?.siteUrl ?? null,
+      ga4PropertyId: (ga4Properties[0] as any)?.property ?? null,
+    };
+
+    return json({ ...base, gscSites, ga4Properties, suggested });
   }
 
   return json(base);
@@ -76,15 +109,47 @@ export async function POST(
   const { websiteId } = await params;
   if (!auth?.user || !(await canUpdateWebsite(auth, websiteId))) return unauthorized();
 
-  const conn = await getConnection(websiteId);
-  if (!conn) return badRequest({ message: 'Google is not connected for this website.' });
+  // Re-validate every non-null selection server-side: it must be a property the
+  // reader can actually see AND it must belong to this website's own domain.
+  // This is the wall that stops a tenant binding another tenant's property.
+  const wantsGsc = !!body.gscSiteUrl;
+  const wantsGa4 = !!body.ga4PropertyId;
+  if (wantsGsc || wantsGa4) {
+    const token = await getServiceAccountToken();
+    if (!token) return badRequest({ message: 'Google reader isn’t configured on the server yet.' });
+    const host = await websiteHost(websiteId);
+    if (!host) {
+      return badRequest({ message: 'Set this website’s domain before connecting Google.' });
+    }
 
-  await prisma.client.googleConnection.update({
-    where: { websiteId },
-    data: {
-      ...(body.gscSiteUrl !== undefined ? { gscSiteUrl: body.gscSiteUrl } : {}),
-      ...(body.ga4PropertyId !== undefined ? { ga4PropertyId: body.ga4PropertyId } : {}),
-    },
+    if (wantsGsc) {
+      const sites = await gscListSites(token).catch(() => []);
+      const ok =
+        sites.some(s => s.siteUrl === body.gscSiteUrl) &&
+        domainCovers(bareHost(body.gscSiteUrl), host);
+      if (!ok) {
+        return badRequest({
+          message:
+            'That Search Console property isn’t shared with the reader, or doesn’t match this site’s domain.',
+        });
+      }
+    }
+
+    if (wantsGa4) {
+      const hosts = await ga4WebStreamHosts(token, body.ga4PropertyId as string);
+      if (!hosts.some(h => domainCovers(h, host))) {
+        return badRequest({
+          message:
+            'That GA4 property isn’t shared with the reader, or its website doesn’t match this site’s domain.',
+        });
+      }
+    }
+  }
+
+  // Saving a (validated) selection IS connecting — upsert (the row may not exist).
+  await saveSelection(websiteId, {
+    gscSiteUrl: body.gscSiteUrl,
+    ga4PropertyId: body.ga4PropertyId,
   });
 
   return json({ ok: true });

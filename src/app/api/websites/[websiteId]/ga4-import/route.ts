@@ -3,7 +3,7 @@ import { parseRequest } from '@/lib/request';
 import { json, badRequest, unauthorized } from '@/lib/response';
 import { canUpdateWebsite, canViewWebsite } from '@/permissions';
 import prisma from '@/lib/prisma';
-import { getAccessToken, getConnection, ga4RunReport } from '@/lib/google';
+import { getConnection, getServiceAccountToken, ga4RunReport } from '@/lib/google';
 
 // One-time GA4 history import: daily sessions / activeUsers / screenPageViews
 // land in imported_stat (source 'ga4') and surface as the "Imported" overlay on
@@ -25,8 +25,10 @@ export async function POST(
     return badRequest({ message: 'Pick a GA4 property first.' });
   }
 
-  const token = await getAccessToken(websiteId);
-  if (!token) return badRequest({ message: 'Google token expired — reconnect in settings.' });
+  const token = await getServiceAccountToken();
+  if (!token) {
+    return badRequest({ message: 'Google reader isn’t configured on the server yet.' });
+  }
 
   let report: any;
   try {

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { unauthorized } from '@/lib/response';
 import { checkAuth } from '@/lib/auth';
 import prisma from '@/lib/prisma';
-import { googleConfigured } from '@/lib/google';
+import { googleConfigured, serviceAccountEmail } from '@/lib/google';
 import { slackConfigured } from '@/lib/slack';
 
 // One-call status feed for the Integrations directory: every website the user
@@ -38,7 +38,7 @@ export async function GET(request: NextRequest) {
         }),
         prisma.client.googleConnection.findMany({
           where: { websiteId: { in: ids } },
-          select: { websiteId: true, email: true, gscSiteUrl: true, ga4PropertyId: true },
+          select: { websiteId: true, gscSiteUrl: true, ga4PropertyId: true },
         }),
       ])
     : [[], []];
@@ -55,16 +55,17 @@ export async function GET(request: NextRequest) {
         name: w.name,
         domain: w.domain,
         payment: payment ? { provider: payment.provider, status: payment.status } : null,
-        google: google
-          ? {
-              email: google.email,
-              gscSiteUrl: google.gscSiteUrl,
-              ga4PropertyId: google.ga4PropertyId,
-            }
-          : null,
+        // Connected only when a property is actually picked — a property-less
+        // (legacy OAuth) row reads as not-connected, matching the per-website
+        // page and the connect flow, so the two surfaces never disagree.
+        google:
+          google && (google.gscSiteUrl || google.ga4PropertyId)
+            ? { gscSiteUrl: google.gscSiteUrl, ga4PropertyId: google.ga4PropertyId }
+            : null,
       };
     }),
     googleConfigured: googleConfigured(),
+    googleReaderEmail: serviceAccountEmail(),
     slackConfigured: slackConfigured(),
   });
 }

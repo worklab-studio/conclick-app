@@ -482,8 +482,8 @@ model GoogleConnection {
   id            String    @id @default(uuid()) @map("connection_id") @db.Uuid
   websiteId     String    @unique @map("website_id") @db.Uuid
   email         String?   @db.VarChar(255)
-  refreshToken  String    @map("refresh_token") @db.Text // encrypted
-  accessToken   String?   @map("access_token") @db.Text // encrypted, short-lived
+  refreshToken  String?   @map("refresh_token") @db.Text // legacy OAuth (unused under service-account)
+  accessToken   String?   @map("access_token") @db.Text // legacy OAuth (unused under service-account)
   tokenExpires  DateTime? @map("token_expires") @db.Timestamptz(6)
   gscSiteUrl    String?   @map("gsc_site_url") @db.VarChar(255)
   ga4PropertyId String?   @map("ga4_property_id") @db.VarChar(50)
