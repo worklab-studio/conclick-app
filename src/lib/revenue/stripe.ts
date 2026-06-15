@@ -68,4 +68,36 @@ export const stripeProvider: RevenueProvider = {
 
     return { total: Math.round(total * 100) / 100, currency, chart };
   },
+
+  // Auto-create the webhook so attribution is turnkey (parity with Dodo) — no
+  // manual secret paste. Stripe only reveals an endpoint's signing secret at
+  // creation, so a prior endpoint for this exact URL is unrecoverable: delete
+  // and recreate to guarantee we hold a working secret (and avoid duplicate
+  // deliveries on reconnect).
+  async provisionWebhook(credentials: ProviderCredentials, webhookUrl: string) {
+    const stripe = client(credentials.apiKey);
+    const enabled_events = [
+      'checkout.session.completed',
+      'payment_intent.succeeded',
+      'charge.refunded',
+      'charge.dispute.created',
+    ] as Stripe.WebhookEndpointCreateParams.EnabledEvent[];
+
+    try {
+      for await (const ep of stripe.webhookEndpoints.list({ limit: 100 })) {
+        if (ep.url === webhookUrl) {
+          await stripe.webhookEndpoints.del(ep.id).catch(() => undefined);
+        }
+      }
+    } catch {
+      /* listing failed — fall through and create a fresh endpoint */
+    }
+
+    const endpoint = await stripe.webhookEndpoints.create({
+      url: webhookUrl,
+      enabled_events,
+      description: 'Conclick — revenue tracking + attribution',
+    });
+    return { webhookSecret: endpoint.secret || undefined };
+  },
 };
