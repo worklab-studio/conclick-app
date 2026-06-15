@@ -123,6 +123,31 @@ export function SeoInline({ websiteId }: { websiteId: string }) {
   const pct = (cur: number, prev: number) =>
     prev > 0 ? Math.round(((cur - prev) / prev) * 100) : null;
 
+  // Connected, but Search Console returned nothing for this window — almost
+  // always a too-recent/narrow range (GSC data lags ~2-3 days). Show why,
+  // instead of a wall of zeros that reads as broken.
+  const hasData =
+    (t?.clicks || 0) > 0 || (t?.impressions || 0) > 0 || queries.length > 0 || pages.length > 0;
+
+  if (!hasData) {
+    return (
+      <div className="p-7">
+        <div className="rounded-xl border border-dashed border-[hsl(0,0%,16%)] px-6 py-12 text-center">
+          <Search className="mx-auto h-6 w-6 text-muted-foreground/50" />
+          <div className="mt-3 text-sm font-semibold text-foreground">
+            No Search Console data for this date range
+          </div>
+          <p className="mx-auto mt-1.5 max-w-md text-xs leading-relaxed text-muted-foreground">
+            Connected to <span className="font-medium text-foreground/80">{data.siteUrl}</span>. Try
+            a wider range — <span className="font-medium text-foreground/80">Last 28 days</span> or{' '}
+            <span className="font-medium text-foreground/80">3 months</span>. Google Search Console
+            data also lags about 2–3 days, so today and the last day or two are usually empty.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-5 p-7">
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">

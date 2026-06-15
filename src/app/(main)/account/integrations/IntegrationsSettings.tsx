@@ -710,7 +710,7 @@ export function IntegrationsSettings() {
 
       {/* manage / connect modal */}
       <Dialog open={!!manageDef} onOpenChange={o => !o && setManage(null)}>
-        <DialogContent className="max-w-lg border-[hsl(0,0%,14%)] bg-[hsl(0,0%,7%)] p-6">
+        <DialogContent className="max-h-[85vh] max-w-lg overflow-y-auto border-[hsl(0,0%,14%)] bg-[hsl(0,0%,7%)] p-6">
           {manageDef && manageState && (
             <>
               <DialogHeader>
@@ -976,7 +976,9 @@ export function IntegrationsSettings() {
                       <div className="min-w-0 flex-1">
                         <div className="truncate text-[13px] font-semibold">{w.name}</div>
                         <div className="truncate font-mono text-[11px] text-muted-foreground">
-                          {w.google?.gscSiteUrl || w.google?.ga4PropertyId || w.domain}
+                          {w.domain ||
+                            (w.google?.gscSiteUrl || '').replace('sc-domain:', '') ||
+                            w.google?.ga4PropertyId}
                         </div>
                       </div>
                       <span className="flex shrink-0 gap-1.5">
