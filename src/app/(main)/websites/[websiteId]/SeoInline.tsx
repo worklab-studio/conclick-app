@@ -2,8 +2,18 @@
 
 import { useMemo } from 'react';
 import Link from 'next/link';
-import { Search, TrendingUp, TrendingDown, ArrowUp, Lightbulb, Loader2, Info } from 'lucide-react';
-import { useApi, useDateParameters, useNavigation } from '@/components/hooks';
+import {
+  Search,
+  TrendingUp,
+  TrendingDown,
+  ArrowUp,
+  Lightbulb,
+  Loader2,
+  Info,
+  CalendarDays,
+} from 'lucide-react';
+import { format } from 'date-fns';
+import { useApi, useDateParameters, useDateRange, useNavigation } from '@/components/hooks';
 import { TabEmptyState } from '@/components/common/TabEmptyState';
 
 // SEO tab — live Google Search Console data for the dashboard date range:
@@ -65,6 +75,10 @@ function Chip({
 export function SeoInline({ websiteId }: { websiteId: string }) {
   const { get, useQuery } = useApi();
   const { startAt, endAt } = useDateParameters();
+  const { dateRange } = useDateRange();
+  // The exact window these numbers cover — shown so "0 clicks" never reads as
+  // broken when it's really just a too-recent/narrow range.
+  const periodLabel = `${format(dateRange.startDate, 'MMM d')} – ${format(dateRange.endDate, 'MMM d, yyyy')}`;
   // The tab is hidden on public shares, but never render an owner-settings CTA
   // there even if this component is reached some other way.
   const isShare = useNavigation().pathname?.includes('/share/');
@@ -135,7 +149,7 @@ export function SeoInline({ websiteId }: { websiteId: string }) {
         <div className="rounded-xl border border-dashed border-[hsl(0,0%,16%)] px-6 py-12 text-center">
           <Search className="mx-auto h-6 w-6 text-muted-foreground/50" />
           <div className="mt-3 text-sm font-semibold text-foreground">
-            No Search Console data for this date range
+            No Search Console data for {periodLabel}
           </div>
           <p className="mx-auto mt-1.5 max-w-md text-xs leading-relaxed text-muted-foreground">
             Connected to <span className="font-medium text-foreground/80">{data.siteUrl}</span>. Try
@@ -150,6 +164,16 @@ export function SeoInline({ websiteId }: { websiteId: string }) {
 
   return (
     <div className="space-y-5 p-7">
+      <div className="flex items-center justify-between gap-3">
+        <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground/60">
+          Search performance
+        </div>
+        <span className="inline-flex items-center gap-1.5 rounded-full border border-[hsl(0,0%,15%)] bg-[hsl(0,0%,9%)] px-2.5 py-1 text-[11px] font-medium text-muted-foreground">
+          <CalendarDays className="h-3 w-3" />
+          {periodLabel}
+        </span>
+      </div>
+
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <Chip label="Clicks" value={fmt(t.clicks)} delta={pct(t.clicks, p.clicks)} />
         <Chip
@@ -210,7 +234,7 @@ export function SeoInline({ websiteId }: { websiteId: string }) {
           </div>
           <p className="mt-2 flex items-start gap-1.5 text-[11px] text-muted-foreground/55">
             <Info className="mt-0.5 h-3 w-3 shrink-0" />
-            Live from Google Search Console · {data.siteUrl} · matches the dashboard date range.
+            Live from Google Search Console · {data.siteUrl} · {periodLabel}.
           </p>
         </div>
 
