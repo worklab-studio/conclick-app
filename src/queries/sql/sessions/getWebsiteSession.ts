@@ -38,7 +38,24 @@ async function relationalQuery(websiteId: string, sessionId: string) {
         where we.session_id = {{sessionId::uuid}} and we.event_name = 'engagement' and ed.data_key = 'scroll') as "maxScroll",
       (select sum(ed.number_value) from event_data ed
         join website_event we on we.event_id = ed.website_event_id
-        where we.session_id = {{sessionId::uuid}} and we.event_name = 'engagement' and ed.data_key = 'clicks') as "clicks" 
+        where we.session_id = {{sessionId::uuid}} and we.event_name = 'engagement' and ed.data_key = 'clicks') as "clicks",
+      (select we.referrer_domain from website_event we
+        where we.session_id = {{sessionId::uuid}}
+          and we.referrer_domain is not null and we.referrer_domain <> ''
+          and we.referrer_domain <> coalesce(we.hostname, '')
+        order by we.created_at asc limit 1) as "referrerDomain",
+      (select we.url_path from website_event we
+        where we.session_id = {{sessionId::uuid}} and we.event_type = 1
+        order by we.created_at asc limit 1) as "entryUrl",
+      (select we.utm_source from website_event we
+        where we.session_id = {{sessionId::uuid}} and we.utm_source is not null and we.utm_source <> ''
+        order by we.created_at asc limit 1) as "utmSource",
+      (select we.utm_medium from website_event we
+        where we.session_id = {{sessionId::uuid}} and we.utm_medium is not null and we.utm_medium <> ''
+        order by we.created_at asc limit 1) as "utmMedium",
+      (select we.utm_campaign from website_event we
+        where we.session_id = {{sessionId::uuid}} and we.utm_campaign is not null and we.utm_campaign <> ''
+        order by we.created_at asc limit 1) as "utmCampaign"
     from (select
           session.session_id as id,
           session.distinct_id,

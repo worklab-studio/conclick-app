@@ -11,6 +11,9 @@ import {
   Monitor,
   Languages,
   KeyRound,
+  Globe,
+  LogIn,
+  Megaphone,
 } from 'lucide-react';
 import { Avatar } from '@/components/common/Avatar';
 import { TypeIcon } from '@/components/common/TypeIcon';
@@ -44,6 +47,12 @@ export function SessionProfile({ websiteId, sessionId }: { websiteId: string; se
     setCopied(true);
     setTimeout(() => setCopied(false), 1500);
   };
+
+  // "Where they came from": a UTM source (paid/campaign), else the entry
+  // referrer domain (e.g. t.co / google.com), else Direct.
+  const source = data?.utmSource
+    ? [data.utmSource, data.utmMedium].filter(Boolean).join(' / ')
+    : data?.referrerDomain || 'Direct';
 
   return (
     <LoadingPanel
@@ -153,6 +162,21 @@ export function SessionProfile({ websiteId, sessionId }: { websiteId: string; se
             <Field label="Language" icon={<Languages className="h-3.5 w-3.5" />}>
               {data.language ? formatValue(data.language, 'language') : '—'}
             </Field>
+            <Field
+              label="Source"
+              icon={<Globe className="h-3.5 w-3.5" />}
+              muted={source === 'Direct'}
+            >
+              {source}
+            </Field>
+            <Field label="Landing page" icon={<LogIn className="h-3.5 w-3.5" />}>
+              {data.entryUrl || '—'}
+            </Field>
+            {data.utmCampaign ? (
+              <Field label="Campaign" icon={<Megaphone className="h-3.5 w-3.5" />}>
+                {data.utmCampaign}
+              </Field>
+            ) : null}
           </div>
 
           {/* Tabs */}
