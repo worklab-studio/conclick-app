@@ -31,6 +31,11 @@ export async function POST(request: Request, { params }: { params: Promise<{ gat
 
   const websiteId = new URL(request.url).searchParams.get('websiteId');
   if (!websiteId) return badRequest({ message: 'Missing websiteId.' });
+  // Guard the uuid shape before any DB lookup — a malformed id would otherwise
+  // throw on the Postgres uuid cast and surface as a 500 instead of a clean 400.
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(websiteId)) {
+    return badRequest({ message: 'Invalid websiteId.' });
+  }
 
   // The webhook signing secret lives in the (encrypted) integration credentials.
   const active = await getActiveIntegration(websiteId);
