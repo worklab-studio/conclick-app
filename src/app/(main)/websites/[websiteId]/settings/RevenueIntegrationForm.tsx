@@ -419,8 +419,40 @@ export function RevenueIntegrationForm({ websiteId }: { websiteId: string }) {
   );
 }
 
-// Optional webhook setup for per-visitor attribution: register the webhook URL +
-// signing secret, then identify visitors and tag checkouts with the same id.
+// Per-gateway attribution: how the merchant passes the visitor id at checkout so
+// `extractIdentity` (which reads distinct_id) can tie a payment to a session.
+// `autoTag` = the Conclick script stamps it automatically (Dodo links only).
+const ATTR: Record<string, { name: string; autoTag?: boolean; snippet: string }> = {
+  dodo: {
+    name: 'Dodo Payments',
+    autoTag: true,
+    snippet: `metadata: { distinct_id: userId }   // on the Dodo checkout`,
+  },
+  stripe: {
+    name: 'Stripe',
+    snippet: `metadata: { distinct_id: userId }   // on the Checkout Session / PaymentIntent`,
+  },
+  lemonsqueezy: {
+    name: 'Lemon Squeezy',
+    snippet: `// append to your checkout URL:
+?checkout[custom][distinct_id]=USER_ID
+// …or via the Create Checkout API:
+checkout_data: { custom: { distinct_id: userId } }`,
+  },
+  paddle: {
+    name: 'Paddle',
+    snippet: `Paddle.Checkout.open({ items, customData: { distinct_id: userId } })`,
+  },
+  polar: {
+    name: 'Polar',
+    snippet: `metadata: { distinct_id: userId }   // on the Polar checkout`,
+  },
+};
+
+// Per-visitor attribution guidance, correct for the connected gateway. Webhook-
+// only gateways (LS/Paddle/Polar) arrive here already connected (hasSecret), so
+// they just need the checkout-tagging snippet; API-key gateways without a webhook
+// secret get the register-webhook + paste-secret steps first.
 function WebhookAttribution({
   websiteId,
   provider,
@@ -436,11 +468,20 @@ function WebhookAttribution({
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
+  const cfg = ATTR[provider] ?? { name: provider, snippet: `metadata: { distinct_id: userId }` };
   const origin = typeof window !== 'undefined' ? window.location.origin : 'https://app.conclick.io';
   const webhookUrl = `${origin}/api/integrations/webhooks/${provider}?websiteId=${websiteId}`;
 
-  // Auto-provisioned webhook + the script auto-tags Dodo links → nothing to do.
-  if (hasSecret) {
+  const snippet = (
+    <div className="space-y-1.5 text-xs text-muted-foreground">
+      <div>Identify the visitor on your site, then tag the checkout with the same id:</div>
+      <pre className="overflow-x-auto rounded bg-[hsl(0,0%,6%)] px-2 py-1.5 text-[11px] leading-relaxed text-foreground/80">{`conclick.identify(userId)   // on your site
+${cfg.snippet}`}</pre>
+    </div>
+  );
+
+  // Dodo: the Conclick script auto-tags its checkout links → genuinely nothing to do.
+  if (hasSecret && cfg.autoTag) {
     return (
       <div className="space-y-2 rounded-lg border border-emerald-500/20 bg-emerald-500/[0.06] p-4">
         <div className="flex items-center gap-2">
@@ -450,10 +491,34 @@ function WebhookAttribution({
           </div>
         </div>
         <p className="text-xs text-muted-foreground">
-          The webhook is connected, and your Conclick script automatically tags Dodo checkout links
-          with the visitor — so payments attach to the right person in Users → Spent. No code
-          needed.
+          The webhook is connected, and your Conclick script automatically tags {cfg.name} checkout
+          links with the visitor — so payments attach to the right person in Users → Spent.
         </p>
+      </div>
+    );
+  }
+
+  // Connected (webhook secret set) but not auto-tagged — revenue is already
+  // syncing; attribution is the only optional extra.
+  if (hasSecret) {
+    return (
+      <div className="space-y-3 rounded-lg border border-[hsl(0,0%,12%)] bg-[hsl(0,0%,9%)] p-4">
+        <div className="flex items-center gap-2">
+          <Check className="h-4 w-4 text-emerald-400" />
+          <div className="text-sm font-semibold text-foreground">
+            Connected — {cfg.name} revenue is syncing
+          </div>
+        </div>
+        <div>
+          <div className="text-sm font-semibold text-foreground">
+            Attribute payments to visitors (optional)
+          </div>
+          <p className="mt-0.5 text-xs text-muted-foreground">
+            Tie each payment to the visitor who made it — shows in Users → Spent and the Paying
+            filter. Totals already work without this.
+          </p>
+        </div>
+        {snippet}
       </div>
     );
   }
@@ -490,8 +555,7 @@ function WebhookAttribution({
       <div className="space-y-1.5 text-xs text-muted-foreground">
         <div>
           <span className="font-medium text-foreground/80">1.</span> Add this webhook in your{' '}
-          {provider} dashboard for the <code className="text-[#b7b4e4]">payment.succeeded</code>{' '}
-          event:
+          {cfg.name} dashboard for its payment + refund events:
         </div>
         <div className="flex items-center gap-2">
           <code className="flex-1 truncate rounded bg-[hsl(0,0%,6%)] px-2 py-1.5 text-[11px] text-foreground/90">
@@ -524,7 +588,7 @@ function WebhookAttribution({
               setSecret(e.target.value);
               setSaved(false);
             }}
-            placeholder="whsec_…"
+            placeholder="Signing secret…"
             className="font-mono dark:border-zinc-800 dark:bg-[#18181b]"
           />
           <Button
@@ -546,12 +610,7 @@ function WebhookAttribution({
       </div>
 
       <div className="space-y-1.5 text-xs text-muted-foreground">
-        <div>
-          <span className="font-medium text-foreground/80">3.</span> On your site, identify the
-          visitor and tag the checkout with the same id:
-        </div>
-        <pre className="overflow-x-auto rounded bg-[hsl(0,0%,6%)] px-2 py-1.5 text-[11px] leading-relaxed text-foreground/80">{`conclick.identify(userId)           // on your site
-metadata: { distinct_id: userId }   // on the Dodo checkout`}</pre>
+        <span className="font-medium text-foreground/80">3.</span> {snippet}
       </div>
     </div>
   );
