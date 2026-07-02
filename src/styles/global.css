@@ -127,3 +127,12 @@ a:hover {
     display: none;
     width: 0;
 }
+
+/* Auth: hide the whole "Secured by Clerk" badge box — the "Secured by" text and
+   the clerk.com logo link. We target the element that directly wraps the
+   clerk.com link, so the footer action ("Don't have an account? Sign up") stays
+   (its link points to our own /login or /register, never clerk.com). */
+.cl-rootBox *:has(> a[href*='clerk.com']),
+.cl-rootBox a[href*='clerk.com'] {
+    display: none !important;
+}

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useRef, useMemo } from 'react';
+import { useEffect, useState, useRef, useMemo, useCallback } from 'react';
 import { useWebsiteQuery, useRealtimeQuery } from '@/components/hooks';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
@@ -12,54 +12,478 @@ import {
   ExternalLink,
   X,
   ChevronDown,
+  ChevronUp,
   RotateCw,
+  Share2,
+  Check,
+  Maximize2,
+  Crosshair,
+  Flame,
+  Smartphone,
+  Tablet,
+  Laptop,
+  Monitor,
+  MousePointerClick,
 } from 'lucide-react';
-import MapGL, { Popup, NavigationControl, FullscreenControl } from 'react-map-gl/maplibre';
+import MapGL, { Popup, Marker, NavigationControl } from 'react-map-gl/maplibre';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { Logo } from '@/components/logo';
+import { COUNTRY_CENTROIDS } from '@/lib/country-centroids';
+
+/* ------------------------------- helpers -------------------------------- */
+
+// Sessions seen in the last 5 minutes are "active now"; the rest of the 60-min
+// realtime window renders as dimmed "recent" dots.
+const ACTIVE_MS = 5 * 60_000;
+
+const flagEmoji = (code?: string) =>
+  code && /^[A-Za-z]{2}$/.test(code)
+    ? String.fromCodePoint(...code.toUpperCase().split('').map(c => 127397 + c.charCodeAt(0)))
+    : '🌐';
+
+const countryName = (code?: string) => {
+  if (!code) return 'Unknown';
+  if (!/^[A-Za-z]{2}$/.test(code)) return code; // already a display name
+  try {
+    return new Intl.DisplayNames(['en'], { type: 'region' }).of(code.toUpperCase()) || code;
+  } catch {
+    return code;
+  }
+};
+
+const timeAgo = (ts?: number | null) => {
+  if (!ts) return '—';
+  const s = Math.max(0, Math.floor((Date.now() - ts) / 1000));
+  if (s < 8) return 'just now';
+  if (s < 60) return `${s}s ago`;
+  const m = Math.floor(s / 60);
+  if (m < 60) return `${m}m ago`;
+  const h = Math.floor(m / 60);
+  return `${h}h ago`;
+};
+
+const fmtDuration = (ms: number) => {
+  const s = Math.max(0, Math.floor(ms / 1000));
+  if (s < 60) return `${s}s`;
+  const m = Math.floor(s / 60);
+  if (m < 60) return `${m}m ${s % 60}s`;
+  return `${Math.floor(m / 60)}h ${m % 60}m`;
+};
+
+const DeviceIcon = ({ device, className }: { device?: string; className?: string }) => {
+  const d = (device || '').toLowerCase();
+  if (d === 'mobile') return <Smartphone className={className} />;
+  if (d === 'tablet') return <Tablet className={className} />;
+  if (d === 'desktop') return <Monitor className={className} />;
+  return <Laptop className={className} />;
+};
+
+interface Visitor {
+  id: string;
+  country: string;
+  city: string;
+  lat: number | null;
+  lng: number | null;
+  referrer: string;
+  entryPath: string;
+  currentPath: string;
+  pageCount: number;
+  firstSeen: number;
+  lastSeen: number;
+  browser?: string;
+  os?: string;
+  device?: string;
+}
+
+interface FeedEvent {
+  id: string;
+  sessionId: string;
+  country: string;
+  city: string;
+  urlPath: string;
+  eventName?: string;
+  createdAt: number;
+  isNewSession?: boolean;
+}
+
+interface Ripple {
+  id: string;
+  lng: number;
+  lat: number;
+  big: boolean;
+}
+
+/* ----------------------------- demo simulation --------------------------- */
+
+const DEMO_WEBSITE_ID = '1be0acac-4fc3-4dc1-a4d2-02e6a2aae843';
+
+const DEMO_PATHS = [
+  '/',
+  '/pricing',
+  '/features',
+  '/blog/launch-week',
+  '/docs/getting-started',
+  '/integrations',
+  '/about',
+  '/changelog',
+];
+const DEMO_REFERRERS = ['google.com', 'x.com', 'producthunt.com', 'Direct', 'linkedin.com', 'news.ycombinator.com'];
+const DEMO_BASES: Array<[string, string, number, number, string, string, string]> = [
+  // country, city, lat, lng, browser, os, device
+  ['US', 'New York', 40.7128, -74.006, 'chrome', 'Mac OS', 'laptop'],
+  ['GB', 'London', 51.5074, -0.1278, 'safari', 'Mac OS', 'laptop'],
+  ['DE', 'Berlin', 52.52, 13.405, 'firefox', 'Windows 10', 'desktop'],
+  ['FR', 'Paris', 48.8566, 2.3522, 'chrome', 'Windows 10', 'laptop'],
+  ['IN', 'Mumbai', 19.076, 72.8777, 'chrome', 'Android OS', 'mobile'],
+  ['CA', 'Toronto', 43.6532, -79.3832, 'edge-chromium', 'Windows 10', 'laptop'],
+  ['AU', 'Sydney', -33.8688, 151.2093, 'safari', 'iOS', 'mobile'],
+  ['JP', 'Tokyo', 35.6762, 139.6503, 'chrome', 'Mac OS', 'laptop'],
+  ['BR', 'São Paulo', -23.5505, -46.6333, 'chrome', 'Android OS', 'mobile'],
+  ['NL', 'Amsterdam', 52.3676, 4.9041, 'firefox', 'Linux', 'desktop'],
+  ['US', 'San Francisco', 37.7749, -122.4194, 'chrome', 'Mac OS', 'laptop'],
+  ['ES', 'Madrid', 40.4168, -3.7038, 'chrome', 'Windows 10', 'laptop'],
+  ['SG', 'Singapore', 1.3521, 103.8198, 'safari', 'iOS', 'mobile'],
+  ['KR', 'Seoul', 37.5665, 126.978, 'chrome', 'Windows 10', 'desktop'],
+  ['AE', 'Dubai', 25.2048, 55.2708, 'safari', 'iOS', 'mobile'],
+  ['SE', 'Stockholm', 59.3293, 18.0686, 'chrome', 'Mac OS', 'laptop'],
+  ['MX', 'Mexico City', 19.4326, -99.1332, 'chrome', 'Android OS', 'mobile'],
+  ['ZA', 'Cape Town', -33.9249, 18.4241, 'firefox', 'Windows 10', 'laptop'],
+];
+
+function seedDemo(): { visitors: Visitor[]; feed: FeedEvent[]; counter: number } {
+  const now = Date.now();
+  const visitors: Visitor[] = DEMO_BASES.slice(0, 12).map((b, i) => {
+    const [country, city, lat, lng, browser, os, device] = b;
+    const firstSeen = now - (i + 2) * 3 * 60_000 - i * 7000;
+    const lastSeen = now - i * 40_000;
+    return {
+      id: `demo-${i}`,
+      country,
+      city,
+      lat,
+      lng,
+      referrer: DEMO_REFERRERS[i % DEMO_REFERRERS.length],
+      entryPath: DEMO_PATHS[i % DEMO_PATHS.length],
+      currentPath: DEMO_PATHS[(i + 2) % DEMO_PATHS.length],
+      pageCount: 1 + (i % 4),
+      firstSeen,
+      lastSeen,
+      browser,
+      os,
+      device,
+    };
+  });
+  const feed: FeedEvent[] = visitors.slice(0, 6).map((v, i) => ({
+    id: `demo-feed-${i}`,
+    sessionId: v.id,
+    country: v.country,
+    city: v.city,
+    urlPath: v.currentPath,
+    createdAt: v.lastSeen,
+  }));
+  return { visitors, feed, counter: 0 };
+}
+
+function advanceDemo(s: { visitors: Visitor[]; feed: FeedEvent[]; counter: number }) {
+  const now = Date.now();
+  const counter = s.counter + 1;
+  let visitors = [...s.visitors];
+  let feedEvent: FeedEvent;
+
+  if (counter % 4 === 0) {
+    // A brand-new visitor lands (drives the arrival ripple + feed).
+    const base = DEMO_BASES[(12 + counter / 4) % DEMO_BASES.length];
+    const [country, city, lat, lng, browser, os, device] = base;
+    const path = DEMO_PATHS[counter % DEMO_PATHS.length];
+    const v: Visitor = {
+      id: `demo-live-${counter}`,
+      country,
+      city,
+      lat: lat + ((counter % 5) - 2) * 0.12,
+      lng: lng + ((counter % 7) - 3) * 0.12,
+      referrer: DEMO_REFERRERS[counter % DEMO_REFERRERS.length],
+      entryPath: path,
+      currentPath: path,
+      pageCount: 1,
+      firstSeen: now,
+      lastSeen: now,
+      browser,
+      os,
+      device,
+    };
+    visitors = [v, ...visitors].slice(0, 18);
+    feedEvent = {
+      id: `demo-feed-${now}`,
+      sessionId: v.id,
+      country: v.country,
+      city: v.city,
+      urlPath: v.currentPath,
+      createdAt: now,
+      isNewSession: true,
+    };
+  } else {
+    // An existing visitor navigates to another page.
+    const idx = counter % visitors.length;
+    const v = { ...visitors[idx] };
+    v.currentPath = DEMO_PATHS[(counter + idx) % DEMO_PATHS.length];
+    v.pageCount += 1;
+    v.lastSeen = now;
+    visitors[idx] = v;
+    feedEvent = {
+      id: `demo-feed-${now}`,
+      sessionId: v.id,
+      country: v.country,
+      city: v.city,
+      urlPath: v.currentPath,
+      createdAt: now,
+    };
+  }
+
+  return { visitors, feed: [feedEvent, ...s.feed].slice(0, 18), counter };
+}
+
+/* -------------------------------- component ------------------------------ */
 
 export function LiveVisitorsPage({ websiteId }: { websiteId: string }) {
   const [isClient, setIsClient] = useState(false);
   const { data: website } = useWebsiteQuery(websiteId);
-  const { data: realtimeData } = useRealtimeQuery(websiteId, isClient);
+  const { data: realtimeData, isLoading } = useRealtimeQuery(websiteId, isClient);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [selectedVisitor, setSelectedVisitor] = useState<any | null>(null);
+  const [hoveredVisitor, setHoveredVisitor] = useState<any | null>(null);
   const [isPopupOccluded, setIsPopupOccluded] = useState(false);
   const [isAutoPanning, setIsAutoPanning] = useState(false);
-  const [isMusicPlaying, setIsMusicPlaying] = useState(false);
+  const [isFollowing, setIsFollowing] = useState(false);
   const [copied, setCopied] = useState(false);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const [ripples, setRipples] = useState<Ripple[]>([]);
+  const [lastSync, setLastSync] = useState<number | null>(null);
+  const [, setClockTick] = useState(0);
+
   const mapRef = useRef<any>(null);
   const isInteracting = useRef(false);
+  const followRef = useRef(false);
+  const seenSessions = useRef<Set<string> | null>(null);
+  const seenFeed = useRef<Set<string> | null>(null);
+
+  const isDemo = websiteId === DEMO_WEBSITE_ID;
+  const [demoState, setDemoState] = useState<ReturnType<typeof seedDemo> | null>(null);
 
   useEffect(() => {
     setIsClient(true);
   }, []);
 
-  // Auto-panning effect
+  // Relative-time labels re-render on a slow clock.
+  useEffect(() => {
+    const t = setInterval(() => setClockTick(n => n + 1), 5000);
+    return () => clearInterval(t);
+  }, []);
+
+  // Heartbeat: the API returns a fresh timestamp on every poll.
+  useEffect(() => {
+    if (realtimeData?.timestamp) setLastSync(Date.now());
+  }, [realtimeData?.timestamp]);
+
+  // Demo simulation: seed once, then simulate navigation + arrivals.
+  useEffect(() => {
+    if (!isDemo || !isClient) return;
+    setDemoState(seedDemo());
+    const t = setInterval(() => setDemoState(s => (s ? advanceDemo(s) : s)), 6000);
+    return () => clearInterval(t);
+  }, [isDemo, isClient]);
+
+  useEffect(() => {
+    followRef.current = isFollowing;
+  }, [isFollowing]);
+
+  /* ------------------------- derive visitors + feed ----------------------- */
+
+  const { visitors, feedEvents } = useMemo((): { visitors: Visitor[]; feedEvents: FeedEvent[] } => {
+    if (isDemo) {
+      return { visitors: demoState?.visitors || [], feedEvents: demoState?.feed || [] };
+    }
+
+    const rows = realtimeData?.events || [];
+    const map = new Map<string, Visitor>();
+    const feed: FeedEvent[] = [];
+
+    // rows are newest-first; the `session` row sits at each session's OLDEST
+    // event in the window (that's the entry), the first row we meet is the newest.
+    rows.forEach((e: any) => {
+      const ts = e.createdAt ? new Date(e.createdAt).getTime() : Date.now();
+      let v = map.get(e.sessionId);
+      if (!v) {
+        v = {
+          id: e.sessionId,
+          country: e.country || '',
+          city: e.city || 'Unknown',
+          lat: typeof e.latitude === 'number' ? e.latitude : null,
+          lng: typeof e.longitude === 'number' ? e.longitude : null,
+          referrer: e.referrerDomain || 'Direct',
+          entryPath: e.urlPath || '/',
+          currentPath: e.urlPath || '/',
+          pageCount: 0,
+          firstSeen: ts,
+          lastSeen: ts,
+          browser: e.browser,
+          os: e.os,
+          device: e.device,
+        };
+        map.set(e.sessionId, v);
+      }
+      if (e.__type === 'session') {
+        // oldest row for this session → entry point in the window
+        v.entryPath = e.urlPath || v.entryPath;
+        v.firstSeen = Math.min(v.firstSeen, ts);
+      } else {
+        v.pageCount += 1;
+        if (feed.length < 18) {
+          feed.push({
+            id: `${e.sessionId}-${e.createdAt}-${feed.length}`,
+            sessionId: e.sessionId,
+            country: e.country || '',
+            city: e.city || 'Unknown',
+            urlPath: e.urlPath || '/',
+            eventName: e.eventName || undefined,
+            createdAt: ts,
+          });
+        }
+      }
+      v.firstSeen = Math.min(v.firstSeen, ts);
+      v.lastSeen = Math.max(v.lastSeen, ts);
+    });
+
+    return {
+      visitors: Array.from(map.values()).sort((a, b) => b.lastSeen - a.lastSeen),
+      feedEvents: feed,
+    };
+  }, [isDemo, demoState, realtimeData?.events]);
+
+  const now = Date.now();
+  const activeVisitors = visitors.filter(v => now - v.lastSeen <= ACTIVE_MS);
+  const activeCount = activeVisitors.length;
+  const windowCount = visitors.length;
+
+  /* ------------------------------ coordinates ----------------------------- */
+
+  const jitter = (seed: string): [number, number] => {
+    let h = 0;
+    for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) | 0;
+    const a = (Math.abs(h) % 1000) / 1000 - 0.5;
+    const b = (Math.abs(h >> 7) % 1000) / 1000 - 0.5;
+    return [a * 1.4, b * 1.4];
+  };
+
+  const getCoordinates = useCallback((v: Visitor): [number, number] => {
+    if (typeof v.lat === 'number' && typeof v.lng === 'number') return [v.lng, v.lat];
+    const code = v.country ? String(v.country).toUpperCase() : '';
+    const centroid = COUNTRY_CENTROIDS[code];
+    if (centroid) {
+      const [jLat, jLng] = jitter(v.id || code);
+      return [centroid[1] + jLng, centroid[0] + jLat];
+    }
+    return [0, 0];
+  }, []);
+
+  const visitorData = useMemo(() => {
+    return {
+      type: 'FeatureCollection',
+      features: visitors.map(v => {
+        const coords = getCoordinates(v);
+        return {
+          type: 'Feature',
+          geometry: { type: 'Point', coordinates: coords },
+          properties: {
+            ...v,
+            active: now - v.lastSeen <= ACTIVE_MS,
+          },
+        };
+      }),
+    };
+  }, [visitors, getCoordinates, now]);
+
+  /* --------------------------- ripples + follow --------------------------- */
+
+  useEffect(() => {
+    // Big ripple for brand-new sessions (skip the very first hydration).
+    const ids = new Set(visitors.map(v => v.id));
+    if (!seenSessions.current) {
+      seenSessions.current = ids;
+      return;
+    }
+    const fresh = visitors.filter(v => !seenSessions.current!.has(v.id));
+    seenSessions.current = ids;
+    if (!fresh.length) return;
+
+    const newRipples: Ripple[] = fresh.slice(0, 4).map(v => {
+      const [lng, lat] = getCoordinates(v);
+      return { id: `r-${v.id}-${Date.now()}`, lng, lat, big: true };
+    });
+    setRipples(r => [...r, ...newRipples].slice(-8));
+    newRipples.forEach(r =>
+      setTimeout(() => setRipples(list => list.filter(x => x.id !== r.id)), 4000),
+    );
+
+    if (followRef.current && mapRef.current && newRipples[0]) {
+      const map = mapRef.current.getMap();
+      map.flyTo({
+        center: [newRipples[0].lng, newRipples[0].lat],
+        zoom: Math.max(map.getZoom(), 2.8),
+        duration: 1400,
+      });
+    }
+  }, [visitors, getCoordinates]);
+
+  useEffect(() => {
+    // Small ripple for each new pageview/event in the feed.
+    const ids = new Set(feedEvents.map(f => f.id));
+    if (!seenFeed.current) {
+      seenFeed.current = ids;
+      return;
+    }
+    const fresh = feedEvents.filter(f => !seenFeed.current!.has(f.id) && !f.isNewSession);
+    seenFeed.current = ids;
+    if (!fresh.length) return;
+    const byId = new Map(visitors.map(v => [v.id, v]));
+    const newRipples: Ripple[] = fresh
+      .slice(0, 3)
+      .map(f => byId.get(f.sessionId))
+      .filter(Boolean)
+      .map((v: any) => {
+        const [lng, lat] = getCoordinates(v);
+        return { id: `r-${v.id}-${Date.now()}-s`, lng, lat, big: false };
+      });
+    if (!newRipples.length) return;
+    setRipples(r => [...r, ...newRipples].slice(-8));
+    newRipples.forEach(r =>
+      setTimeout(() => setRipples(list => list.filter(x => x.id !== r.id)), 2600),
+    );
+  }, [feedEvents, visitors, getCoordinates]);
+
+  /* ------------------------------ auto-rotate ----------------------------- */
+
   useEffect(() => {
     if (!isAutoPanning || !mapRef.current) return;
-
     const map = mapRef.current.getMap();
-
-    const rotateFn = () => {
-      if (isInteracting.current) return;
-
-      const center = map.getCenter();
-      // Move longitude slightly to rotate right-to-left (Globe spins, camera stays or moves?)
-      // Decreasing longitude moves the "camera" West (Right relative to space?), making the globe surface move Left -> Right?
-      // Increasing longitude moves "camera" East (Left relative to space?), making globe surface move Right -> Left.
-      center.lng += 0.2;
-      map.easeTo({ center, duration: 0, easing: (t: number) => t });
+    let raf = 0;
+    let last = performance.now();
+    const spin = (t: number) => {
+      const dt = t - last;
+      last = t;
+      if (!isInteracting.current) {
+        const center = map.getCenter();
+        center.lng += (6 * dt) / 1000; // ~6°/s, frame-rate independent
+        map.jumpTo({ center });
+      }
+      raf = requestAnimationFrame(spin);
     };
-
-    const interval = setInterval(rotateFn, 20); // Smooth 60fps-ish
-    return () => clearInterval(interval);
+    raf = requestAnimationFrame(spin);
+    return () => cancelAnimationFrame(raf);
   }, [isAutoPanning]);
 
+  /* -------------------------------- actions ------------------------------- */
+
   const handleShare = async () => {
-    // On the public share this view already lives at /share/<id>/live, so copy
-    // the current URL; for the owner, build it from the website's share id.
     const url = window.location.pathname.includes('/share/')
       ? window.location.href
       : `${window.location.origin}/share/${website?.shareId || websiteId}/live`;
@@ -70,37 +494,6 @@ export function LiveVisitorsPage({ websiteId }: { websiteId: string }) {
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error('Failed to copy:', err);
-    }
-  };
-
-  const toggleAutoPanning = () => {
-    setIsAutoPanning(!isAutoPanning);
-  };
-
-  const toggleMusic = () => {
-    if (!audioRef.current) {
-      audioRef.current = new Audio(
-        'https://assets.mixkit.co/music/preview/mixkit-deep-urban-623.mp3',
-      );
-      audioRef.current.loop = true;
-      audioRef.current.volume = 0.3;
-    }
-
-    if (isMusicPlaying) {
-      audioRef.current.pause();
-      setIsMusicPlaying(false);
-    } else {
-      // play() returns a Promise that rejects under autoplay policy or on
-      // load failure. Catch it so it doesn't surface as an unhandled rejection
-      // and so the UI doesn't show music-playing state when nothing is.
-      audioRef.current
-        .play()
-        .then(() => setIsMusicPlaying(true))
-        .catch(err => {
-          // eslint-disable-next-line no-console
-          console.error('Audio play failed:', err);
-          setIsMusicPlaying(false);
-        });
     }
   };
 
@@ -115,266 +508,57 @@ export function LiveVisitorsPage({ websiteId }: { websiteId: string }) {
   const handleInteractionStart = () => {
     isInteracting.current = true;
   };
-
   const handleInteractionEnd = () => {
     isInteracting.current = false;
   };
 
-  const DEMO_WEBSITE_ID = '1be0acac-4fc3-4dc1-a4d2-02e6a2aae843';
-  const isDemo = websiteId === DEMO_WEBSITE_ID;
+  /* ------------------------------- map wiring ----------------------------- */
 
-  // Mock visitors for demo account with lat/lng coordinates
-  const DEMO_VISITORS = [
-    {
-      id: 'demo-1',
-      country: 'United States',
-      city: 'New York',
-      lat: 40.7128,
-      lng: -74.006,
-      referrer: 'google.com',
-      urlPath: '/pricing',
-    },
-    {
-      id: 'demo-2',
-      country: 'United Kingdom',
-      city: 'London',
-      lat: 51.5074,
-      lng: -0.1278,
-      referrer: 'twitter.com',
-      urlPath: '/',
-    },
-    {
-      id: 'demo-3',
-      country: 'Germany',
-      city: 'Berlin',
-      lat: 52.52,
-      lng: 13.405,
-      referrer: 'Direct',
-      urlPath: '/features',
-    },
-    {
-      id: 'demo-4',
-      country: 'France',
-      city: 'Paris',
-      lat: 48.8566,
-      lng: 2.3522,
-      referrer: 'linkedin.com',
-      urlPath: '/about',
-    },
-    {
-      id: 'demo-5',
-      country: 'India',
-      city: 'Mumbai',
-      lat: 19.076,
-      lng: 72.8777,
-      referrer: 'google.com',
-      urlPath: '/pricing',
-    },
-    {
-      id: 'demo-6',
-      country: 'Canada',
-      city: 'Toronto',
-      lat: 43.6532,
-      lng: -79.3832,
-      referrer: 'Direct',
-      urlPath: '/',
-    },
-    {
-      id: 'demo-7',
-      country: 'Australia',
-      city: 'Sydney',
-      lat: -33.8688,
-      lng: 151.2093,
-      referrer: 'facebook.com',
-      urlPath: '/blog',
-    },
-    {
-      id: 'demo-8',
-      country: 'Japan',
-      city: 'Tokyo',
-      lat: 35.6762,
-      lng: 139.6503,
-      referrer: 'google.com',
-      urlPath: '/features',
-    },
-    {
-      id: 'demo-9',
-      country: 'Brazil',
-      city: 'São Paulo',
-      lat: -23.5505,
-      lng: -46.6333,
-      referrer: 'Direct',
-      urlPath: '/',
-    },
-    {
-      id: 'demo-10',
-      country: 'Netherlands',
-      city: 'Amsterdam',
-      lat: 52.3676,
-      lng: 4.9041,
-      referrer: 'twitter.com',
-      urlPath: '/pricing',
-    },
-    {
-      id: 'demo-11',
-      country: 'United States',
-      city: 'San Francisco',
-      lat: 37.7749,
-      lng: -122.4194,
-      referrer: 'producthunt.com',
-      urlPath: '/',
-    },
-    {
-      id: 'demo-12',
-      country: 'Spain',
-      city: 'Madrid',
-      lat: 40.4168,
-      lng: -3.7038,
-      referrer: 'google.com',
-      urlPath: '/about',
-    },
-    {
-      id: 'demo-13',
-      country: 'Italy',
-      city: 'Rome',
-      lat: 41.9028,
-      lng: 12.4964,
-      referrer: 'Direct',
-      urlPath: '/features',
-    },
-    {
-      id: 'demo-14',
-      country: 'Singapore',
-      city: 'Singapore',
-      lat: 1.3521,
-      lng: 103.8198,
-      referrer: 'linkedin.com',
-      urlPath: '/pricing',
-    },
-    {
-      id: 'demo-15',
-      country: 'South Korea',
-      city: 'Seoul',
-      lat: 37.5665,
-      lng: 126.978,
-      referrer: 'google.com',
-      urlPath: '/',
-    },
-  ];
-
-  // Extract unique visitors from events (API returns 'events', not 'visitors')
-  const visitors = useMemo(() => {
-    if (isDemo) return DEMO_VISITORS;
-
-    const events = realtimeData?.events || [];
-    const sessionMap = new Map();
-
-    // Get unique sessions with their data
-    events.forEach((event: any) => {
-      if (event.__type === 'session' && !sessionMap.has(event.sessionId)) {
-        sessionMap.set(event.sessionId, {
-          id: event.sessionId,
-          country: event.country || 'Unknown',
-          city: event.city || 'Unknown',
-          referrer: event.referrerDomain || 'Direct',
-          urlPath: event.urlPath || '/',
-        });
-      }
-    });
-
-    return Array.from(sessionMap.values());
-  }, [isDemo, realtimeData?.events]);
-
-  // Coordinate mapping for demo/top cities (in real prod, use a geocoding service or DB)
-  const CITY_COORDINATES: Record<string, [number, number]> = {
-    'San Francisco': [37.7749, -122.4194],
-    'New York': [40.7128, -74.006],
-    London: [51.5074, -0.1278],
-    Berlin: [52.52, 13.405],
-    Paris: [48.8566, 2.3522],
-    Mumbai: [19.076, 72.8777],
-    Toronto: [43.6532, -79.3832],
-    Sydney: [-33.8688, 151.2093],
-    Tokyo: [35.6762, 139.6503],
-    'São Paulo': [-23.5505, -46.6333],
-    Amsterdam: [52.3676, 4.9041],
-    Madrid: [40.4168, -3.7038],
-    Rome: [41.9028, 12.4964],
-    Singapore: [1.3521, 103.8198],
-    Seoul: [37.5665, 126.978],
-    Bangalore: [12.9716, 77.5946],
-    Unknown: [0, 0],
-  };
-
-  const getCoordinates = (v: any): [number, number] => {
-    if (v.lng && v.lat) return [v.lng, v.lat];
-    if (v.city && CITY_COORDINATES[v.city])
-      return [CITY_COORDINATES[v.city][1], CITY_COORDINATES[v.city][0]]; // [lng, lat]
-    return [0, 0]; // Null island for unknown
-  };
-
-  const visitorData = useMemo(() => {
-    return {
-      type: 'FeatureCollection',
-      features: visitors.map((v: any) => {
-        const coords = getCoordinates(v);
-        return {
-          type: 'Feature',
-          geometry: {
-            type: 'Point',
-            coordinates: coords,
-          },
-          properties: {
-            ...v,
-            id: v.id || Math.random().toString(),
-            country: v.country || 'Unknown',
-            city: v.city || 'Unknown',
-            referrer: v.referrer || 'Direct',
-            page: v.urlPath || '/',
-            time: 'Just now',
-          },
-        };
-      }),
-    };
-  }, [visitors]);
-
-  // Handle map load and layer creation
   const handleMapLoad = (event: any) => {
     const map = event.target;
-
     if (!map.getSource('visitors')) {
-      // Add Source
-      map.addSource('visitors', {
-        type: 'geojson',
-        data: visitorData as any,
-      });
+      map.addSource('visitors', { type: 'geojson', data: visitorData as any });
 
-      // Add Glow Layer
       map.addLayer({
         id: 'visitor-glow',
         type: 'circle',
         source: 'visitors',
         paint: {
-          'circle-radius': ['interpolate', ['linear'], ['zoom'], 0, 40, 2, 15, 4, 20],
-          'circle-color': '#6366f1',
-          'circle-opacity': 0.3,
-          'circle-blur': 0.4,
+          'circle-radius': [
+            'interpolate',
+            ['linear'],
+            ['zoom'],
+            0,
+            ['case', ['get', 'active'], 34, 14],
+            4,
+            ['case', ['get', 'active'], 22, 10],
+          ],
+          'circle-color': ['case', ['get', 'active'], '#6366f1', '#64748b'],
+          'circle-opacity': ['case', ['get', 'active'], 0.35, 0.12],
+          'circle-blur': 0.5,
           'circle-pitch-alignment': 'map',
           'circle-pitch-scale': 'map',
         },
       });
 
-      // Add Dot Layer
       map.addLayer({
         id: 'visitor-dots',
         type: 'circle',
         source: 'visitors',
         paint: {
-          'circle-radius': ['interpolate', ['linear'], ['zoom'], 0, 8, 2, 6, 4, 8],
-          'circle-color': '#818cf8',
-          'circle-stroke-width': 1.5,
-          'circle-stroke-color': '#ffffff',
-          'circle-opacity': 1,
+          'circle-radius': [
+            'interpolate',
+            ['linear'],
+            ['zoom'],
+            0,
+            ['case', ['get', 'active'], 7, 4],
+            4,
+            ['case', ['get', 'active'], 8, 5],
+          ],
+          'circle-color': ['case', ['get', 'active'], '#818cf8', '#52525b'],
+          'circle-stroke-width': ['case', ['get', 'active'], 1.5, 0.75],
+          'circle-stroke-color': ['case', ['get', 'active'], '#ffffff', '#a1a1aa'],
+          'circle-opacity': ['case', ['get', 'active'], 1, 0.55],
           'circle-pitch-alignment': 'map',
           'circle-pitch-scale': 'map',
         },
@@ -382,61 +566,38 @@ export function LiveVisitorsPage({ websiteId }: { websiteId: string }) {
     }
   };
 
-  // Update visitor data when it changes
   useEffect(() => {
     if (!mapRef.current) return;
     const map = mapRef.current.getMap();
     const source = map.getSource('visitors');
-    if (source) {
-      (source as any).setData(visitorData);
-    }
+    if (source) (source as any).setData(visitorData);
   }, [visitorData]);
 
-  // Occlusion detection: hide popup when marker is behind globe
+  // Occlusion: hide the pinned popup when its dot rotates behind the globe.
   useEffect(() => {
     if (!selectedVisitor || !mapRef.current) {
       setIsPopupOccluded(false);
       return;
     }
-
     const map = mapRef.current.getMap();
-
     const checkOcclusion = () => {
       if (!selectedVisitor) return;
-
-      // Query rendered features at the marker location
       const point = map.project([selectedVisitor.lng, selectedVisitor.lat]);
-
-      // Check if the point is within the canvas bounds
       const canvas = map.getCanvas();
-      const isInBounds =
+      const inBounds =
         point.x >= 0 && point.x <= canvas.width && point.y >= 0 && point.y <= canvas.height;
-
-      if (!isInBounds) {
+      if (!inBounds) {
         setIsPopupOccluded(true);
         return;
       }
-
-      // Query features at this pixel location
-      const features = map.queryRenderedFeatures(point, {
-        layers: ['visitor-dots'],
-      });
-
-      // Check if our specific visitor is in the rendered features
-      const isVisible = features.some((f: any) => f.properties?.id === selectedVisitor.id);
-
-      setIsPopupOccluded(!isVisible);
+      const features = map.queryRenderedFeatures(point, { layers: ['visitor-dots'] });
+      setIsPopupOccluded(!features.some((f: any) => f.properties?.id === selectedVisitor.id));
     };
-
-    // Check immediately
     checkOcclusion();
-
-    // Re-check on map movement/rotation
     map.on('move', checkOcclusion);
     map.on('rotate', checkOcclusion);
     map.on('pitch', checkOcclusion);
     map.on('zoom', checkOcclusion);
-
     return () => {
       map.off('move', checkOcclusion);
       map.off('rotate', checkOcclusion);
@@ -463,13 +624,7 @@ export function LiveVisitorsPage({ websiteId }: { websiteId: string }) {
         },
       },
       layers: [
-        {
-          id: 'background',
-          type: 'background',
-          paint: {
-            'background-color': '#0B1121',
-          },
-        },
+        { id: 'background', type: 'background', paint: { 'background-color': '#0B1121' } },
         {
           id: 'carto-dark-layer',
           type: 'raster',
@@ -493,15 +648,47 @@ export function LiveVisitorsPage({ websiteId }: { websiteId: string }) {
     [],
   );
 
-  const visitorCount = visitors.length;
-  const countryCounts = visitors.reduce(
-    (acc: any, v: any) => {
-      const country = v.country || 'Unknown';
-      acc[country] = (acc[country] || 0) + 1;
-      return acc;
-    },
-    {} as Record<string, number>,
-  );
+  /* ------------------------------ aggregations ---------------------------- */
+
+  const countryCounts = visitors.reduce((acc: Record<string, number>, v) => {
+    const c = v.country || 'Unknown';
+    acc[c] = (acc[c] || 0) + 1;
+    return acc;
+  }, {});
+
+  const referrerCounts = visitors.reduce((acc: Record<string, number>, v) => {
+    const r = v.referrer || 'Direct';
+    acc[r] = (acc[r] || 0) + 1;
+    return acc;
+  }, {});
+
+  // "Viewing now" — pages the currently-active sessions are on.
+  const hotPages = useMemo(() => {
+    const counts: Record<string, number> = {};
+    activeVisitors.forEach(v => {
+      counts[v.currentPath] = (counts[v.currentPath] || 0) + 1;
+    });
+    return Object.entries(counts)
+      .sort(([, a], [, b]) => b - a)
+      .slice(0, 5);
+  }, [activeVisitors]);
+
+  // 30-point sparkline of pageviews. Demo uses a fixed gentle wave.
+  const sparkline = useMemo(() => {
+    if (isDemo) {
+      return Array.from({ length: 30 }, (_, i) => 3 + Math.round(2 * Math.sin(i / 3) + (i % 5 === 0 ? 2 : 0)));
+    }
+    const pts = realtimeData?.series?.views;
+    if (Array.isArray(pts) && pts.length) {
+      return pts.slice(-30).map((p: any) => Number(p.y) || 0);
+    }
+    return [];
+  }, [isDemo, realtimeData?.series?.views]);
+
+  const websiteName = website?.name || (isDemo ? 'Demo · SaaS starter' : '');
+  const websiteDomain = website?.domain || (isDemo ? 'demo.conclick.io' : '');
+
+  /* --------------------------------- render ------------------------------- */
 
   if (!isClient) {
     return (
@@ -511,37 +698,204 @@ export function LiveVisitorsPage({ websiteId }: { websiteId: string }) {
     );
   }
 
+  const panelBody = (
+    <>
+      {/* Controls */}
+      <div className="flex items-center gap-1 pb-3 border-b border-white/5">
+        <Button
+          variant="ghost"
+          size="sm"
+          className={`flex-1 h-8 hover:bg-white/10 transition-colors ${copied ? 'text-green-400' : 'text-zinc-400 hover:text-white'}`}
+          title={copied ? 'Copied!' : 'Copy public share link'}
+          onClick={handleShare}
+        >
+          {copied ? <Check className="h-3.5 w-3.5" /> : <Share2 className="h-3.5 w-3.5" />}
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          className={`flex-1 h-8 hover:bg-white/10 transition-colors ${isAutoPanning ? 'text-indigo-400 bg-white/10' : 'text-zinc-400 hover:text-white'}`}
+          title={isAutoPanning ? 'Stop rotating' : 'Rotate the globe'}
+          onClick={() => setIsAutoPanning(v => !v)}
+        >
+          <RotateCw className={`h-3.5 w-3.5 ${isAutoPanning ? 'animate-spin' : ''}`} />
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          className={`flex-1 h-8 hover:bg-white/10 transition-colors ${isFollowing ? 'text-indigo-400 bg-white/10' : 'text-zinc-400 hover:text-white'}`}
+          title={isFollowing ? 'Stop following new visitors' : 'Fly to new visitors'}
+          onClick={() => setIsFollowing(v => !v)}
+        >
+          <Crosshair className="h-3.5 w-3.5" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="flex-1 h-8 hover:bg-white/10 text-zinc-400 hover:text-white transition-colors"
+          title="Full screen"
+          onClick={toggleFullscreen}
+        >
+          <Maximize2 className="h-3.5 w-3.5" />
+        </Button>
+      </div>
+
+      {/* Website */}
+      <div className="pt-3">
+        <div className="flex items-center gap-2 text-sm text-zinc-400 mb-1">
+          <GlobeIcon className="h-4 w-4" />
+          <span className="text-sm font-medium">Website</span>
+        </div>
+        <p className="font-bold text-white text-lg leading-tight">{websiteName}</p>
+        <p className="text-sm text-zinc-500">{websiteDomain}</p>
+      </div>
+
+      {/* Active now */}
+      <div className="pt-3 border-t border-white/5">
+        <div className="flex items-center justify-between">
+          <div>
+            <span className="text-sm text-zinc-400 font-medium">Active now</span>
+            <p className="text-xs text-zinc-600 mt-0.5">{windowCount} in the last hour</p>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-4xl font-bold text-indigo-400">{activeCount}</span>
+            <div className="relative flex h-3 w-3">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-500 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-3 w-3 bg-indigo-500"></span>
+            </div>
+          </div>
+        </div>
+        {sparkline.length > 1 && (
+          <div className="mt-3">
+            <Sparkline values={sparkline} />
+            <p className="text-[10px] text-zinc-600 mt-1">Pageviews · last hour</p>
+          </div>
+        )}
+      </div>
+
+      {/* Viewing now */}
+      {hotPages.length > 0 && (
+        <div className="pt-3 border-t border-white/5">
+          <div className="flex items-center gap-2 text-sm text-zinc-500 mb-2">
+            <Flame className="h-4 w-4 text-orange-400/80" />
+            <span>Viewing now</span>
+          </div>
+          <div className="space-y-1.5">
+            {hotPages.map(([path, count]) => (
+              <div key={path} className="relative overflow-hidden rounded px-2 py-1">
+                <div
+                  className="absolute inset-y-0 left-0 bg-indigo-500/15 rounded"
+                  style={{ width: `${Math.min(100, (count / (hotPages[0][1] || 1)) * 100)}%` }}
+                />
+                <div className="relative flex items-center justify-between text-sm gap-2">
+                  <span className="truncate text-zinc-300" title={path}>
+                    {path}
+                  </span>
+                  <span className="font-semibold text-white text-xs shrink-0">{count}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Details */}
+      <Collapsible open={isDetailsOpen} onOpenChange={setIsDetailsOpen} className="pt-3 border-t border-white/5">
+        <CollapsibleTrigger className="flex items-center justify-between w-full text-sm text-zinc-400 hover:text-white transition-colors group">
+          <span className="font-medium">Details</span>
+          <ChevronDown
+            className={`h-4 w-4 transition-transform text-zinc-500 group-hover:text-zinc-300 ${isDetailsOpen ? 'rotate-180' : ''}`}
+          />
+        </CollapsibleTrigger>
+        <CollapsibleContent className="space-y-4 pt-3">
+          <div>
+            <div className="flex items-center gap-2 text-sm text-zinc-500 mb-2">
+              <MapPin className="h-4 w-4" />
+              <span>Locations</span>
+            </div>
+            <div className="space-y-1.5 max-h-48 overflow-y-auto pr-2 custom-scrollbar">
+              {Object.entries(countryCounts)
+                .sort(([, a], [, b]) => b - a)
+                .map(([country, count]) => (
+                  <div
+                    key={country}
+                    className="flex items-center justify-between text-sm hover:bg-white/5 px-1 py-0.5 rounded transition-colors"
+                  >
+                    <span className="text-zinc-300 truncate">
+                      <span className="mr-1.5">{flagEmoji(country)}</span>
+                      {countryName(country)}
+                    </span>
+                    <span className="font-semibold text-white bg-white/10 px-2 py-0.5 rounded-full text-xs">
+                      {count}
+                    </span>
+                  </div>
+                ))}
+            </div>
+          </div>
+          <div className="pt-3 border-t border-white/5">
+            <div className="flex items-center gap-2 text-sm text-zinc-500 mb-2">
+              <ExternalLink className="h-4 w-4" />
+              <span>Top sources</span>
+            </div>
+            <div className="space-y-1.5">
+              {Object.entries(referrerCounts)
+                .sort(([, a], [, b]) => b - a)
+                .slice(0, 5)
+                .map(([referrer, count]) => (
+                  <div
+                    key={referrer}
+                    className="flex items-center justify-between text-sm px-1 py-0.5 rounded hover:bg-white/5 transition-colors"
+                  >
+                    <span className="truncate text-zinc-300">{referrer}</span>
+                    <span className="font-semibold text-white bg-white/10 px-2 py-0.5 rounded-full text-xs">
+                      {count}
+                    </span>
+                  </div>
+                ))}
+            </div>
+          </div>
+        </CollapsibleContent>
+      </Collapsible>
+    </>
+  );
+
   return (
     <div className="h-screen w-full relative bg-[#020410] overflow-hidden">
       <style jsx global>{`
         .stars {
           position: absolute;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
+          inset: 0;
           background-image:
             radial-gradient(1px 1px at 25px 5px, white, rgba(255, 255, 255, 0)),
             radial-gradient(1px 1px at 50px 25px, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0)),
-            radial-gradient(
-              1.5px 1.5px at 125px 20px,
-              rgba(255, 255, 255, 0.6),
-              rgba(255, 255, 255, 0)
-            ),
+            radial-gradient(1.5px 1.5px at 125px 20px, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0)),
             radial-gradient(2px 2px at 250px 80px, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0));
           background-size: 350px 350px;
           opacity: 0.5;
           pointer-events: none;
         }
-        @keyframes pulse {
+        @keyframes ripple-ping {
           0% {
-            transform: scale(0.5);
-            opacity: 1;
+            transform: scale(0.35);
+            opacity: 0.9;
           }
           100% {
-            transform: scale(2.5);
+            transform: scale(2.6);
             opacity: 0;
           }
+        }
+        @keyframes feed-in {
+          from {
+            opacity: 0;
+            transform: translateX(14px);
+          }
+          to {
+            opacity: 1;
+            transform: none;
+          }
+        }
+        .feed-item {
+          animation: feed-in 0.35s ease-out both;
         }
         .maplibregl-popup-content {
           background: transparent;
@@ -551,6 +905,9 @@ export function LiveVisitorsPage({ websiteId }: { websiteId: string }) {
         }
         .maplibregl-popup-tip {
           display: none;
+        }
+        .maplibregl-popup-close-button {
+          display: none !important;
         }
         .maplibregl-ctrl-group {
           background-color: #18181b !important;
@@ -563,23 +920,24 @@ export function LiveVisitorsPage({ websiteId }: { websiteId: string }) {
         .maplibregl-ctrl button:hover {
           background-color: #27272a !important;
         }
-        /* Hide the info/attribution icon at bottom */
         .maplibregl-ctrl-attrib,
         .maplibregl-compact {
           display: none !important;
         }
       `}</style>
 
-      {/* Star Field */}
       <div className="stars" />
 
-      {/* Stats Panel - Top Left */}
-      <div className="absolute top-6 left-6 z-[1000] space-y-3">
-        {/* Branding Header */}
+      {/* ------------------------- Desktop panel ------------------------- */}
+      <div className="absolute top-6 left-6 z-[1000] space-y-3 hidden lg:block">
         <div className="flex items-center gap-3 px-2">
           <Logo className="h-6 w-auto" />
           <div className="h-5 w-px bg-white/20"></div>
-          <span className="text-white/80 text-sm font-medium">Real time</span>
+          <span className="text-white/80 text-sm font-medium">Live</span>
+          <span className="text-[11px] text-zinc-500 ml-auto flex items-center gap-1.5">
+            <span className={`inline-block h-1.5 w-1.5 rounded-full ${lastSync && Date.now() - lastSync < 25000 ? 'bg-emerald-400' : 'bg-zinc-600'}`} />
+            updated {timeAgo(lastSync)}
+          </span>
         </div>
 
         <Card className="w-80 shadow-2xl border-white/10 bg-black/40 backdrop-blur-md text-zinc-200">
@@ -589,223 +947,95 @@ export function LiveVisitorsPage({ websiteId }: { websiteId: string }) {
               <CardTitle className="text-lg font-semibold text-white">Live Visitors</CardTitle>
             </div>
           </CardHeader>
-
-          {/* Control Buttons Row - Between Header and Content */}
-          <div className="flex items-center justify-between px-2 py-2 border-b border-white/5 bg-white/5">
-            <div className="flex w-full gap-1">
-              <Button
-                variant="ghost"
-                size="sm"
-                className={`flex-1 h-8 hover:bg-white/10 transition-colors ${copied ? 'text-green-400' : 'text-zinc-400 hover:text-white'}`}
-                title={copied ? 'Copied!' : 'Share public link'}
-                onClick={handleShare}
-              >
-                {copied ? (
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="14"
-                    height="14"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <polyline points="20 6 9 17 4 12"></polyline>
-                  </svg>
-                ) : (
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="14"
-                    height="14"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
-                    <polyline points="16 6 12 2 8 6"></polyline>
-                    <line x1="12" y1="2" x2="12" y2="15"></line>
-                  </svg>
-                )}
-              </Button>
-              <div className="h-4 my-auto w-px bg-white/10 mx-1"></div>
-              <Button
-                variant="ghost"
-                size="sm"
-                className={`flex-1 h-8 hover:bg-white/10 transition-colors ${isAutoPanning ? 'text-indigo-400 bg-white/10' : 'text-zinc-400 hover:text-white'}`}
-                title={isAutoPanning ? 'Stop Auto Panning' : 'Start Auto Panning'}
-                onClick={toggleAutoPanning}
-              >
-                <RotateCw className={`h-3.5 w-3.5 ${isAutoPanning ? 'animate-spin' : ''}`} />
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                className={`flex-1 h-8 hover:bg-white/10 transition-colors ${isMusicPlaying ? 'text-indigo-400 bg-white/10' : 'text-zinc-400 hover:text-white'}`}
-                title={isMusicPlaying ? 'Stop Music' : 'Start Music'}
-                onClick={toggleMusic}
-              >
-                {isMusicPlaying ? (
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="14"
-                    height="14"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <rect x="6" y="4" width="4" height="16"></rect>
-                    <rect x="14" y="4" width="4" height="16"></rect>
-                  </svg>
-                ) : (
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="14"
-                    height="14"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M9 18V5l12-2v13"></path>
-                    <circle cx="6" cy="18" r="3"></circle>
-                    <circle cx="18" cy="16" r="3"></circle>
-                  </svg>
-                )}
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="flex-1 h-8 hover:bg-white/10 text-zinc-400 hover:text-white transition-colors"
-                title="Full screen"
-                onClick={toggleFullscreen}
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="14"
-                  height="14"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
-                </svg>
-              </Button>
-            </div>
-          </div>
-
-          <CardContent className="space-y-4 pt-4">
-            {/* Website Info */}
-            <div>
-              <div className="flex items-center gap-2 text-sm text-zinc-400 mb-1">
-                <GlobeIcon className="h-4 w-4" />
-                <span className="text-sm font-medium">Website</span>
-              </div>
-              <p className="font-bold text-white text-lg">{website?.name}</p>
-              <p className="text-sm text-zinc-500">{website?.domain}</p>
-            </div>
-
-            {/* Live Count */}
-            <div className="pt-3 border-t border-white/5">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-zinc-400 font-medium">Active Now</span>
-                <div className="flex items-center gap-2">
-                  <span className="text-4xl font-bold text-indigo-400">{visitorCount}</span>
-                  <div className="relative flex h-3 w-3">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-500 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-3 w-3 bg-indigo-500"></span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Details - Collapsible */}
-            <Collapsible
-              open={isDetailsOpen}
-              onOpenChange={setIsDetailsOpen}
-              className="pt-3 border-t border-white/5"
-            >
-              <CollapsibleTrigger className="flex items-center justify-between w-full text-sm text-zinc-400 hover:text-white transition-colors group">
-                <span className="font-medium">Details</span>
-                <ChevronDown
-                  className={`h-4 w-4 transition-transform text-zinc-500 group-hover:text-zinc-300 ${isDetailsOpen ? 'rotate-180' : ''}`}
-                />
-              </CollapsibleTrigger>
-              <CollapsibleContent className="space-y-4 pt-3">
-                {/* Countries */}
-                <div>
-                  <div className="flex items-center gap-2 text-sm text-zinc-500 mb-2">
-                    <MapPin className="h-4 w-4" />
-                    <span>Locations</span>
-                  </div>
-                  <div className="space-y-2 max-h-48 overflow-y-auto pr-2 custom-scrollbar">
-                    {Object.entries(countryCounts)
-                      .sort(([, a], [, b]) => (b as number) - (a as number))
-                      .map(([country, count]) => (
-                        <div
-                          key={country}
-                          className="flex items-center justify-between text-sm group/item hover:bg-white/5 p-1 rounded transition-colors"
-                        >
-                          <span className="text-zinc-300">{country}</span>
-                          <span className="font-semibold text-white bg-white/10 px-2 py-0.5 rounded-full text-xs">
-                            {count as number}
-                          </span>
-                        </div>
-                      ))}
-                  </div>
-                </div>
-
-                {/* Top Referrers */}
-                <div className="pt-3 border-t border-white/5">
-                  <div className="flex items-center gap-2 text-sm text-zinc-500 mb-2">
-                    <ExternalLink className="h-4 w-4" />
-                    <span>Top Sources</span>
-                  </div>
-                  <div className="space-y-2">
-                    {Object.entries(
-                      visitors.reduce(
-                        (acc: any, v: any) => {
-                          const referrer = v.referrer || 'Direct';
-                          acc[referrer] = (acc[referrer] || 0) + 1;
-                          return acc;
-                        },
-                        {} as Record<string, number>,
-                      ),
-                    )
-                      .sort(([, a], [, b]) => (b as number) - (a as number))
-                      .slice(0, 5)
-                      .map(([referrer, count]) => (
-                        <div
-                          key={referrer}
-                          className="flex items-center justify-between text-sm p-1 rounded hover:bg-white/5 transition-colors"
-                        >
-                          <span className="truncate text-zinc-300">{referrer}</span>
-                          <span className="font-semibold text-white bg-white/10 px-2 py-0.5 rounded-full text-xs">
-                            {count as number}
-                          </span>
-                        </div>
-                      ))}
-                  </div>
-                </div>
-              </CollapsibleContent>
-            </Collapsible>
-          </CardContent>
+          <CardContent className="pt-3 space-y-0">{panelBody}</CardContent>
         </Card>
       </div>
 
-      {/* MapLibre Map */}
+      {/* ------------------------- Mobile top bar ------------------------ */}
+      <div className="absolute top-4 inset-x-4 z-[1000] lg:hidden">
+        <button
+          onClick={() => setSheetOpen(true)}
+          className="w-full flex items-center gap-3 rounded-xl border border-white/10 bg-black/50 backdrop-blur-md px-4 py-3 text-left"
+        >
+          <Logo className="h-5 w-auto" />
+          <div className="min-w-0">
+            <p className="text-white text-sm font-semibold leading-tight truncate">{websiteName || 'Live visitors'}</p>
+            <p className="text-[11px] text-zinc-500">updated {timeAgo(lastSync)}</p>
+          </div>
+          <div className="ml-auto flex items-center gap-2">
+            <span className="text-2xl font-bold text-indigo-400">{activeCount}</span>
+            <span className="relative flex h-2.5 w-2.5">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-500 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-indigo-500"></span>
+            </span>
+            <ChevronUp className="h-4 w-4 text-zinc-500" />
+          </div>
+        </button>
+
+        {/* compact feed under the bar */}
+        {feedEvents.length > 0 && (
+          <div className="mt-2 space-y-1.5">
+            {feedEvents.slice(0, 3).map(f => (
+              <FeedRow key={f.id} f={f} compact />
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* ------------------------- Mobile bottom sheet ------------------- */}
+      {sheetOpen && (
+        <div className="fixed inset-0 z-[1200] lg:hidden">
+          <button className="absolute inset-0 bg-black/60" aria-label="Close" onClick={() => setSheetOpen(false)} />
+          <div className="absolute inset-x-0 bottom-0 max-h-[75vh] overflow-y-auto rounded-t-2xl border-t border-white/10 bg-[#0b0b0e]/95 backdrop-blur-md p-5 pb-8">
+            <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-white/20" />
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <Activity className="h-5 w-5 text-indigo-400" />
+                <span className="text-lg font-semibold text-white">Live Visitors</span>
+              </div>
+              <button onClick={() => setSheetOpen(false)} className="p-1.5 rounded-md text-zinc-400 hover:text-white hover:bg-white/10">
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <div className="space-y-0 text-zinc-200">{panelBody}</div>
+          </div>
+        </div>
+      )}
+
+      {/* --------------------------- Activity feed ----------------------- */}
+      <div className="absolute top-6 right-6 z-[900] w-72 hidden lg:flex flex-col gap-2 pointer-events-none">
+        {feedEvents.slice(0, 7).map(f => (
+          <FeedRow key={f.id} f={f} />
+        ))}
+      </div>
+
+      {/* ---------------------------- Empty state ------------------------ */}
+      {!isDemo && !isLoading && windowCount === 0 && (
+        <div className="absolute inset-0 z-[800] flex items-center justify-center pointer-events-none">
+          <div className="pointer-events-auto text-center rounded-2xl border border-white/10 bg-black/50 backdrop-blur-md px-8 py-8 max-w-sm mx-4">
+            <div className="mx-auto mb-4 relative flex h-3 w-3">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-500 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-3 w-3 bg-indigo-500"></span>
+            </div>
+            <p className="text-white font-semibold text-lg">It's quiet right now</p>
+            <p className="text-sm text-zinc-400 mt-1.5">
+              No visitors in the last hour. This view updates live — leave it open and watch them
+              land.
+            </p>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleShare}
+              className="mt-4 border border-white/10 bg-white/5 text-zinc-200 hover:bg-white/10 hover:text-white"
+            >
+              {copied ? <Check className="h-3.5 w-3.5 mr-1.5 text-green-400" /> : <Share2 className="h-3.5 w-3.5 mr-1.5" />}
+              {copied ? 'Link copied' : 'Share this view'}
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* ------------------------------- Map ------------------------------ */}
       <MapGL
         onLoad={handleMapLoad}
         onMouseDown={handleInteractionStart}
@@ -815,37 +1045,33 @@ export function LiveVisitorsPage({ websiteId }: { websiteId: string }) {
         onDragStart={handleInteractionStart}
         onDragEnd={handleInteractionEnd}
         ref={mapRef}
-        initialViewState={{
-          longitude: 0,
-          latitude: 20,
-          zoom: 2.5,
-        }}
+        initialViewState={{ longitude: 0, latitude: 20, zoom: 2.5 }}
         interactiveLayerIds={['visitor-dots']}
         onClick={e => {
           const feature = e.features?.[0];
           if (feature) {
             e.originalEvent.stopPropagation();
-            // Coordinates in GeoJSON are [lng, lat]
             const coords = (feature.geometry as any).coordinates;
-            const props = feature.properties as any;
-            // Map properties back to our visitor object structure
-            // Note: GeoJSON properties are serialized, ensure types match or cast
-            setSelectedVisitor({
-              id: props.id,
-              country: props.country,
-              city: props.city,
-              lat: coords[1],
-              lng: coords[0],
-              referrer: props.referrer,
-              page: props.page,
-              time: props.time,
-            });
+            setHoveredVisitor(null);
+            setSelectedVisitor({ ...(feature.properties as any), lng: coords[0], lat: coords[1] });
           }
         }}
-        onMouseEnter={() => {
-          if (mapRef.current) mapRef.current.getCanvas().style.cursor = 'pointer';
+        onMouseMove={e => {
+          const feature = e.features?.[0];
+          if (feature) {
+            const coords = (feature.geometry as any).coordinates;
+            const props = feature.properties as any;
+            if (!selectedVisitor || selectedVisitor.id !== props.id) {
+              setHoveredVisitor({ ...props, lng: coords[0], lat: coords[1] });
+            }
+            if (mapRef.current) mapRef.current.getCanvas().style.cursor = 'pointer';
+          } else {
+            setHoveredVisitor(null);
+            if (mapRef.current) mapRef.current.getCanvas().style.cursor = 'default';
+          }
         }}
         onMouseLeave={() => {
+          setHoveredVisitor(null);
           if (mapRef.current) mapRef.current.getCanvas().style.cursor = 'default';
         }}
         style={{ width: '100%', height: '100%' }}
@@ -854,8 +1080,39 @@ export function LiveVisitorsPage({ websiteId }: { websiteId: string }) {
         logoPosition="bottom-right"
       >
         <NavigationControl position="bottom-right" showCompass={false} />
-        <FullscreenControl position="bottom-right" />
 
+        {/* Arrival / activity ripples */}
+        {ripples.map(r => (
+          <Marker key={r.id} longitude={r.lng} latitude={r.lat} anchor="center">
+            <span
+              className="block rounded-full pointer-events-none"
+              style={{
+                width: r.big ? 34 : 18,
+                height: r.big ? 34 : 18,
+                border: `2px solid ${r.big ? '#a5b4fc' : '#6366f1'}`,
+                animation: `ripple-ping ${r.big ? '1.3s' : '1.1s'} cubic-bezier(0, 0, 0.2, 1) infinite`,
+              }}
+            />
+          </Marker>
+        ))}
+
+        {/* Hover preview */}
+        {hoveredVisitor && (!selectedVisitor || selectedVisitor.id !== hoveredVisitor.id) && (
+          <Popup
+            longitude={hoveredVisitor.lng}
+            latitude={hoveredVisitor.lat}
+            anchor="bottom"
+            closeOnClick={false}
+            closeButton={false}
+            offset={16}
+          >
+            <div className="pointer-events-none">
+              <VisitorCard v={hoveredVisitor} compact />
+            </div>
+          </Popup>
+        )}
+
+        {/* Pinned card */}
         {selectedVisitor && !isPopupOccluded && (
           <Popup
             longitude={selectedVisitor.lng}
@@ -864,98 +1121,134 @@ export function LiveVisitorsPage({ websiteId }: { websiteId: string }) {
             onClose={() => setSelectedVisitor(null)}
             closeOnClick={false}
             offset={20}
-            // Custom CSS to hide default MapLibre popup elements
-            style={
-              {
-                '--maplibregl-popup-max-width': 'none', // Allow custom width
-              } as React.CSSProperties
-            }
           >
-            <style>
-              {`
-                                .maplibregl-popup-close-button {
-                                    display: none !important;
-                                }
-                                .maplibregl-popup-tip {
-                                    display: none;
-                                }
-                                .maplibregl-ctrl-group {
-                                    background-color: #18181b !important;
-                                    border: 1px solid #27272a !important;
-                                }
-                                .maplibregl-ctrl button {
-                                    color: #f4f4f5 !important;
-                                    border: none !important;
-                                }
-                                .maplibregl-ctrl button:hover {
-                                    background-color: #27272a !important;
-                                }
-                                /* Hide the info/attribution icon at bottom */
-                                .maplibregl-ctrl-attrib,
-                                .maplibregl-compact {
-                                    display: none !important;
-                                }
-                            `}
-            </style>
-            <div className="relative w-60 bg-zinc-950/95 backdrop-blur-md border border-zinc-800 rounded-lg shadow-xl overflow-hidden p-0">
-              {/* Close Button at top-right of the card */}
-              <div className="absolute top-2 right-2 z-10">
-                <button
-                  onClick={e => {
-                    e.stopPropagation();
-                    setSelectedVisitor(null);
-                  }}
-                  className="p-1 rounded-md text-zinc-500 hover:text-white hover:bg-zinc-800 transition-colors"
-                >
-                  <X className="h-3.5 w-3.5" />
-                </button>
-              </div>
-
-              <div className="p-4">
-                {/* Header: Avatar + Location */}
-                <div className="flex items-center gap-3 mb-4 pr-6">
-                  <img
-                    src={`https://api.dicebear.com/9.x/notionists-neutral/svg?seed=${selectedVisitor.id}`}
-                    alt="Avatar"
-                    className="w-10 h-10 rounded-full bg-zinc-900 border border-zinc-700"
-                  />
-                  <div>
-                    <p className="text-sm font-semibold text-white leading-tight">
-                      {selectedVisitor.country}
-                    </p>
-                    <p className="text-xs text-zinc-400 font-medium">{selectedVisitor.city}</p>
-                  </div>
-                </div>
-
-                {/* Content Rows */}
-                <div className="space-y-2">
-                  <div className="flex justify-between items-center text-xs">
-                    <span className="text-zinc-500 font-medium">Page</span>
-                    <span
-                      className="text-zinc-200 font-medium truncate max-w-[120px]"
-                      title={selectedVisitor.page}
-                    >
-                      {selectedVisitor.page}
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center text-xs">
-                    <span className="text-zinc-500 font-medium">Source</span>
-                    <span className="text-zinc-200 font-medium truncate max-w-[120px]">
-                      {selectedVisitor.referrer}
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center text-xs">
-                    <span className="text-zinc-500 font-medium">Time</span>
-                    <span className="text-zinc-200 font-medium border border-zinc-700 bg-zinc-900 rounded px-1.5 py-0.5">
-                      {selectedVisitor.time}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <VisitorCard v={selectedVisitor} onClose={() => setSelectedVisitor(null)} />
           </Popup>
         )}
       </MapGL>
+    </div>
+  );
+}
+
+/* ------------------------------ subcomponents ----------------------------- */
+
+function Sparkline({ values }: { values: number[] }) {
+  const w = 272;
+  const h = 30;
+  const max = Math.max(...values, 1);
+  const pts = values.map((v, i) => [
+    (i / Math.max(values.length - 1, 1)) * w,
+    h - (v / max) * (h - 4) - 2,
+  ]);
+  const line = pts.map(p => p.join(',')).join(' ');
+  const area = `0,${h} ${line} ${w},${h}`;
+  return (
+    <svg width="100%" height={h} viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none">
+      <polygon points={area} fill="rgba(99,102,241,0.15)" />
+      <polyline points={line} fill="none" stroke="#818cf8" strokeWidth="1.5" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function FeedRow({ f, compact }: { f: FeedEvent; compact?: boolean }) {
+  return (
+    <div
+      className={`feed-item pointer-events-auto flex items-center gap-2.5 rounded-lg border border-white/10 bg-black/50 backdrop-blur-md px-3 ${compact ? 'py-1.5' : 'py-2'}`}
+    >
+      <span className="text-base leading-none shrink-0">{flagEmoji(f.country)}</span>
+      <div className="min-w-0 flex-1">
+        <p className="text-[13px] text-zinc-200 leading-tight truncate">
+          <span className="font-medium text-white">{f.city !== 'Unknown' ? f.city : countryName(f.country)}</span>
+          <span className="text-zinc-500"> → </span>
+          <span className="text-indigo-300">{f.urlPath}</span>
+        </p>
+        {f.eventName && !compact && (
+          <p className="text-[11px] text-amber-300/90 leading-tight flex items-center gap-1 mt-0.5">
+            <MousePointerClick className="h-3 w-3" />
+            {f.eventName}
+          </p>
+        )}
+      </div>
+      <span className="text-[11px] text-zinc-500 shrink-0">{timeAgo(f.createdAt)}</span>
+    </div>
+  );
+}
+
+function VisitorCard({ v, onClose, compact }: { v: any; onClose?: () => void; compact?: boolean }) {
+  const active = Date.now() - Number(v.lastSeen || 0) <= ACTIVE_MS;
+  const duration = Number(v.lastSeen || 0) - Number(v.firstSeen || 0);
+  return (
+    <div className="relative w-64 bg-zinc-950/95 backdrop-blur-md border border-zinc-800 rounded-lg shadow-xl overflow-hidden">
+      {onClose && (
+        <div className="absolute top-2 right-2 z-10">
+          <button
+            onClick={e => {
+              e.stopPropagation();
+              onClose();
+            }}
+            className="p-1 rounded-md text-zinc-500 hover:text-white hover:bg-zinc-800 transition-colors"
+          >
+            <X className="h-3.5 w-3.5" />
+          </button>
+        </div>
+      )}
+
+      <div className="p-4">
+        <div className="flex items-center gap-3 mb-3 pr-6">
+          <img
+            src={`https://api.dicebear.com/9.x/notionists-neutral/svg?seed=${v.id}`}
+            alt="Visitor avatar"
+            className="w-9 h-9 rounded-full bg-zinc-900 border border-zinc-700"
+          />
+          <div className="min-w-0">
+            <p className="text-sm font-semibold text-white leading-tight truncate">
+              {flagEmoji(v.country)} {v.city !== 'Unknown' ? v.city : countryName(v.country)}
+            </p>
+            <p className="text-xs text-zinc-400 font-medium truncate">{countryName(v.country)}</p>
+          </div>
+          <span
+            className={`ml-auto shrink-0 text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${active ? 'bg-emerald-500/15 text-emerald-300' : 'bg-zinc-800 text-zinc-400'}`}
+          >
+            {active ? 'active' : 'idle'}
+          </span>
+        </div>
+
+        <div className="space-y-1.5">
+          <Row label="Viewing" value={v.currentPath} mono />
+          {v.entryPath && v.entryPath !== v.currentPath && (
+            <Row label="Entered at" value={v.entryPath} mono />
+          )}
+          <Row label="Source" value={v.referrer || 'Direct'} />
+          {!compact && (
+            <>
+              <div className="flex justify-between items-center text-xs">
+                <span className="text-zinc-500 font-medium">Device</span>
+                <span className="text-zinc-200 font-medium flex items-center gap-1.5 truncate max-w-[140px]">
+                  <DeviceIcon device={v.device} className="h-3 w-3 text-zinc-400" />
+                  {[v.browser, v.os].filter(Boolean).join(' · ') || v.device || '—'}
+                </span>
+              </div>
+              <Row label="Pages" value={String(v.pageCount ?? 1)} />
+              {duration > 0 && <Row label="Time on site" value={fmtDuration(duration)} />}
+            </>
+          )}
+          <Row label="Last active" value={timeAgo(Number(v.lastSeen) || null)} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Row({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
+  return (
+    <div className="flex justify-between items-center text-xs gap-3">
+      <span className="text-zinc-500 font-medium shrink-0">{label}</span>
+      <span
+        className={`text-zinc-200 font-medium truncate max-w-[150px] ${mono ? 'text-indigo-300' : ''}`}
+        title={value}
+      >
+        {value}
+      </span>
     </div>
   );
 }

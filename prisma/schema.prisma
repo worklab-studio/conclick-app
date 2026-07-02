@@ -108,6 +108,8 @@ model Session {
   country    String?   @db.Char(2)
   region     String?   @db.VarChar(20)
   city       String?   @db.VarChar(50)
+  latitude   Float?
+  longitude  Float?
   distinctId String?   @map("distinct_id") @db.VarChar(50)
   createdAt  DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
 
@@ -505,4 +507,21 @@ model ImportedStat {
   @@id([websiteId, date, source])
   @@index([websiteId, date])
   @@map("imported_stat")
+}
+
+// Growth milestones (first 100/500/1k/5k/10k…/1M visitors or revenue). The
+// unique key makes "celebrate once" free — a re-cross is a no-op insert.
+// `notifiedAt` lets the daily digest announce a freshly-crossed milestone
+// exactly once even if a send fails mid-batch.
+model Milestone {
+  id         String    @id @default(uuid()) @map("milestone_id") @db.Uuid
+  websiteId  String    @map("website_id") @db.Uuid
+  type       String    @db.VarChar(20) // 'visitors' | 'revenue'
+  threshold  BigInt    @map("threshold")
+  reachedAt  DateTime  @default(now()) @map("reached_at") @db.Timestamptz(6)
+  notifiedAt DateTime? @map("notified_at") @db.Timestamptz(6)
+
+  @@unique([websiteId, type, threshold])
+  @@index([websiteId])
+  @@map("milestone")
 }

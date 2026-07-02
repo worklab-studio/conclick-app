@@ -3,6 +3,10 @@ import { decrypt, encrypt, secret } from '@/lib/crypto';
 import { formatMinorCurrency } from '@/lib/format';
 import { createNotification } from '@/lib/notifications';
 import type { DigestSite } from '@/lib/email';
+import type { DigestSnapshot } from '@/lib/digest/snapshot';
+import type { Narrative } from '@/lib/digest/narrative';
+import { collectMilestones, collectSpikes } from '@/lib/digest/narrative';
+import { milestoneLabel } from '@/lib/digest/milestones';
 
 /**
  * Founder notification channels: Slack / Discord / Telegram. One structured
@@ -114,6 +118,55 @@ export function digestMessage(sites: DigestSite[]): ChannelMessage {
   return { title: 'Daily digest', lines, accent: 'violet' };
 }
 
+// Hyped daily summary for chat channels. Title = the LLM headline; lines lead
+// with milestones/spikes, then the headline metrics. Green accent when there's
+// something to celebrate, violet otherwise.
+export function hypeDigestMessage(snapshot: DigestSnapshot, narrative: Narrative): ChannelMessage {
+  const t = snapshot.totals;
+  const milestones = collectMilestones(snapshot);
+  const spikes = collectSpikes(snapshot);
+  const lines: string[] = [];
+
+  for (const m of milestones) {
+    lines.push(`🏆 **${m.hit.siteName}** crossed **${milestoneLabel(m.hit, m.ccy)}**`);
+  }
+  for (const x of spikes) {
+    lines.push(
+      x.s.kind === 'traffic'
+        ? `📈 Overall traffic on **${x.site}** is **${x.s.multiple}×** its usual (${x.s.today} visitors)`
+        : x.s.isNew
+          ? `📈 New traffic from **${x.s.label}** on ${x.site} — ${x.s.today} visits`
+          : `📈 **${x.s.label}** sent **${x.s.multiple}×** its usual to ${x.site} (${x.s.today} visits)`,
+    );
+  }
+
+  const dyd = snapshot.deltas.vsYesterdayPct;
+  const dArrow = dyd == null ? '' : ` · ${dyd > 0 ? '▲' : dyd < 0 ? '▼' : '→'} ${Math.abs(dyd)}% vs yesterday`;
+  lines.push(`**${t.visitors.toLocaleString('en-US')}** visitors · ${t.pageviews.toLocaleString('en-US')} pageviews${dArrow}`);
+
+  if (t.revenueMinor > 0) lines.push(`💰 **${formatMinorCurrency(t.revenueMinor, t.currency)}** in revenue`);
+
+  const topSite = snapshot.sites.slice().sort((a, b) => b.visitors - a.visitors)[0];
+  const topSource = topSite?.topReferrers[0]?.label;
+  if (topSource && topSource !== 'Direct') lines.push(`Top source: ${topSource}`);
+
+  const cmp: string[] = [];
+  if (snapshot.deltas.vsLastWeekPct != null)
+    cmp.push(`${Math.abs(snapshot.deltas.vsLastWeekPct)}% ${snapshot.deltas.vsLastWeekPct >= 0 ? 'above' : 'below'} weekly avg`);
+  if (snapshot.deltas.vsLastMonthPct != null)
+    cmp.push(`${Math.abs(snapshot.deltas.vsLastMonthPct)}% ${snapshot.deltas.vsLastMonthPct >= 0 ? 'ahead of' : 'behind'} last month`);
+  if (cmp.length) lines.push(cmp.join(' · '));
+
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://app.conclick.io';
+  lines.push(`👉 ${appUrl}/websites`);
+
+  return {
+    title: narrative.channelHeadline,
+    lines,
+    accent: milestones.length || spikes.length ? 'green' : 'violet',
+  };
+}
+
 export function paymentAlertMessage(info: {
   siteName: string;
   amountMinor: bigint | number;
@@ -185,6 +238,19 @@ export async function sendDigestToChannels(userId: string, sites: DigestSite[]) 
   if (!channels.length) return;
   const msg = digestMessage(sites);
   await Promise.allSettled(channels.map(c => sendToChannel(c.type, c.config, msg)));
+}
+
+/** Hyped-digest fan-out. Returns true if at least one channel accepted it. */
+export async function sendHypeDigestToChannels(
+  userId: string,
+  snapshot: DigestSnapshot,
+  narrative: Narrative,
+): Promise<boolean> {
+  const channels = await getUserChannels(userId, 'digest');
+  if (!channels.length) return false;
+  const msg = hypeDigestMessage(snapshot, narrative);
+  const results = await Promise.allSettled(channels.map(c => sendToChannel(c.type, c.config, msg)));
+  return results.some(r => r.status === 'fulfilled');
 }
 
 /**

@@ -13,6 +13,9 @@ primary_region = "bom"
     NEXT_PUBLIC_CLERK_SIGN_IN_FALLBACK_REDIRECT_URL = "/websites"
     NEXT_PUBLIC_CLERK_SIGN_UP_FALLBACK_REDIRECT_URL = "/websites"
     NEXT_PUBLIC_APP_URL = "https://app.conclick.io"
+    # Public marketing/canonical host for the SEO pages (served under conclick.io
+    # via the Framer rewrite). Drives all canonicals/sitemap/OG/internal links.
+    NEXT_PUBLIC_SITE_URL = "https://conclick.io"
 
 [env]
   DATABASE_TYPE = "postgresql"

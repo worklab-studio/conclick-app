@@ -40,18 +40,37 @@ export default function ({ children }) {
       appearance={{
         baseTheme: dark,
         variables: {
-          colorPrimary: '#6366f1',
+          colorPrimary: '#6C63C9',
           colorText: '#fafafa',
           colorTextSecondary: '#a1a1aa',
-          colorBackground: '#111114',
-          colorInputBackground: '#1c1c22',
+          colorBackground: 'hsl(0, 0%, 8%)',
+          colorInputBackground: '#18181b',
           colorInputText: '#fafafa',
-          borderRadius: '0.75rem',
+          colorTextOnPrimaryBackground: '#ffffff',
+          borderRadius: '0.5rem',
           fontFamily: '"Inter", system-ui, sans-serif',
         },
         elements: {
-          card: 'shadow-2xl',
-          headerSubtitle: 'text-zinc-400',
+          rootBox: 'mx-auto w-full max-w-[25rem]',
+          cardBox: 'shadow-xl',
+          card: 'rounded-2xl border border-[hsl(0,0%,12%)] bg-[hsl(0,0%,8%)]',
+          headerTitle: 'text-[17px] font-semibold',
+          headerSubtitle: 'text-[13px] text-zinc-400',
+          socialButtonsBlockButton:
+            'h-10 border border-[hsl(0,0%,16%)] bg-[hsl(0,0%,10%)] transition-colors hover:bg-[hsl(0,0%,13%)]',
+          socialButtonsBlockButtonText: 'text-sm font-medium text-zinc-200',
+          dividerLine: 'bg-[hsl(0,0%,14%)]',
+          dividerText: 'text-xs text-zinc-500',
+          formFieldLabel: 'text-[13px] font-medium text-zinc-300',
+          formFieldInput:
+            'h-10 border border-[hsl(0,0%,16%)] bg-[#18181b] text-sm placeholder:text-muted-foreground/50 focus:border-[#6C63C9] focus:ring-1 focus:ring-[#6C63C9]',
+          formButtonPrimary:
+            'h-10 bg-[#6C63C9] text-sm font-semibold text-white normal-case shadow-none transition-colors hover:bg-[#5b53b8]',
+          formFieldInputShowPasswordButton: 'text-zinc-500 hover:text-zinc-300',
+          footerActionText: 'text-zinc-400',
+          footerActionLink: 'font-medium text-[#9d95e0] hover:text-[#b3abea]',
+          formResendCodeLink: 'text-[#9d95e0] hover:text-[#b3abea]',
+          identityPreviewEditButton: 'text-[#9d95e0]',
         },
       }}
       localization={{
@@ -89,7 +108,6 @@ export default function ({ children }) {
           <link rel="mask-icon" href="/images/conclick-logo.svg" color="#5e5ba4" />
           <meta name="msapplication-TileColor" content="#5e5ba4" />
           <meta name="theme-color" content="#0a0a0a" />
-          <meta name="robots" content="noindex,nofollow" />
           <style
             dangerouslySetInnerHTML={{
               __html: `
@@ -117,4 +135,8 @@ export const metadata: Metadata = {
     template: '%s | Conclick',
     default: 'Conclick',
   },
+  // The app is private by default — only the public (seo) marketing pages flip
+  // this to index:true. Set via the Metadata API (not a literal <head> tag) so a
+  // deeper segment's robots replaces it.
+  robots: { index: false, follow: false },
 };

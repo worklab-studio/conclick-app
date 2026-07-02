@@ -31,6 +31,8 @@ async function relationalQuery(websiteId: string, filters: QueryFilters) {
         session.country,
         session.city,
         session.region,
+        session.latitude as "latitude",
+        session.longitude as "longitude",
         website_event.url_path as "urlPath",
         website_event.referrer_domain as "referrerDomain"
     from website_event

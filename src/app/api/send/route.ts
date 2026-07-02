@@ -5,7 +5,7 @@ import clickhouse from '@/lib/clickhouse';
 import { parseRequest } from '@/lib/request';
 import { badRequest, json, forbidden, serverError } from '@/lib/response';
 import { fetchWebsite } from '@/lib/load';
-import { getClientInfo, hasBlockedIp } from '@/lib/detect';
+import { getClientInfo, hasBlockedIp, isDatacenterIp } from '@/lib/detect';
 import { createToken, parseToken } from '@/lib/jwt';
 import { secret, uuid, hash } from '@/lib/crypto';
 import { COLLECTION_TYPE, EVENT_TYPE } from '@/lib/constants';
@@ -110,13 +110,25 @@ export async function POST(request: Request) {
     }
 
     // Client info
-    const { ip, userAgent, device, browser, os, country, region, city } = await getClientInfo(
-      request,
-      payload,
-    );
+    const { ip, userAgent, device, browser, os, country, region, city, latitude, longitude } =
+      await getClientInfo(request, payload);
 
-    // Bot check
-    if (!process.env.DISABLE_BOT_CHECK && isbot(userAgent)) {
+    // Bot check — isbot catches self-identifying bots; the extra patterns + the
+    // empty-UA guard catch headless/automation tools and raw HTTP clients that
+    // spoof or omit a User-Agent (the client-side tracker also drops automation).
+    const EXTRA_BOT =
+      /headless|phantomjs|playwright|puppeteer|selenium|python-requests|aiohttp|node-fetch|go-http-client|okhttp|libwww|scrapy|java\/|\bwget\b/i;
+    if (
+      !process.env.DISABLE_BOT_CHECK &&
+      (!userAgent || isbot(userAgent) || EXTRA_BOT.test(userAgent))
+    ) {
+      return json({ beep: 'boop' });
+    }
+
+    // Datacenter / hosting IP — catches stealth bots that send a clean browser UA
+    // from a cloud IP (the kind the UA check above can't see). Real visitors are
+    // on residential/mobile networks.
+    if (await isDatacenterIp(ip)) {
       return json({ beep: 'boop' });
     }
 
@@ -146,6 +158,8 @@ export async function POST(request: Request) {
         country,
         region,
         city,
+        latitude,
+        longitude,
         distinctId: id,
         createdAt,
       });

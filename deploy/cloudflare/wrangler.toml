@@ -1,0 +1,40 @@
+# Deploys the Conclick SEO reverse-proxy Worker AND all nine routes in one shot.
+#
+#   cd "umami/deploy/cloudflare"
+#   npx wrangler login     # one-time: opens a browser to authorize YOUR Cloudflare account
+#   npx wrangler deploy    # uploads the worker + creates every route below
+#
+# After this, only two dashboard toggles remain (wrangler can't flip those):
+#   1. SSL/TLS -> Overview -> set mode to "Full"
+#   2. DNS -> set the conclick.io A records to Proxied (orange cloud)
+
+name = "conclick-seo-proxy"
+main = "conclick-seo-proxy.worker.js"
+compatibility_date = "2024-11-01"
+workers_dev = false
+
+routes = [
+  # Next.js static assets (CSS, JS, fonts) — REQUIRED or pages render unstyled
+  { pattern = "conclick.io/_next/*",        zone_name = "conclick.io" },
+  # detail pages
+  { pattern = "conclick.io/vs/*",           zone_name = "conclick.io" },
+  { pattern = "conclick.io/alternatives/*", zone_name = "conclick.io" },
+  { pattern = "conclick.io/tools/*",        zone_name = "conclick.io" },
+  { pattern = "conclick.io/glossary/*",     zone_name = "conclick.io" },
+  { pattern = "conclick.io/guides/*",       zone_name = "conclick.io" },
+  { pattern = "conclick.io/for/*",          zone_name = "conclick.io" },
+  { pattern = "conclick.io/blog/*",         zone_name = "conclick.io" },
+  # hub / index pages (exact, so they don't greedily match unrelated Framer paths)
+  { pattern = "conclick.io/compare",        zone_name = "conclick.io" },
+  { pattern = "conclick.io/alternatives",   zone_name = "conclick.io" },
+  { pattern = "conclick.io/tools",          zone_name = "conclick.io" },
+  { pattern = "conclick.io/glossary",       zone_name = "conclick.io" },
+  { pattern = "conclick.io/guides",         zone_name = "conclick.io" },
+  { pattern = "conclick.io/for",            zone_name = "conclick.io" },
+  { pattern = "conclick.io/blog",           zone_name = "conclick.io" },
+  # feeds + dynamic OG images + AI answer-engine manifest
+  { pattern = "conclick.io/sitemap.xml",    zone_name = "conclick.io" },
+  { pattern = "conclick.io/robots.txt",     zone_name = "conclick.io" },
+  { pattern = "conclick.io/og*",            zone_name = "conclick.io" },
+  { pattern = "conclick.io/llms.txt",       zone_name = "conclick.io" },
+]

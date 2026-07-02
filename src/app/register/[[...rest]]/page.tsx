@@ -1,25 +1,17 @@
 import { Metadata } from 'next';
 import { SignUp } from '@clerk/nextjs';
-import { Logo } from '@/components/logo';
+import { AuthShell, cleanDomain } from '@/components/auth/AuthShell';
 
-export default function Page() {
+export default async function Page({
+  searchParams,
+}: {
+  searchParams: Promise<{ site?: string | string[] }>;
+}) {
+  const { site } = await searchParams;
   return (
-    <div
-      style={{
-        minHeight: '100vh',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: '1.75rem',
-        padding: '2rem',
-        background:
-          'radial-gradient(1100px 520px at 50% -8%, rgba(99,102,241,0.20), transparent 62%), #09090b',
-      }}
-    >
-      <Logo className="h-12 w-auto" />
+    <AuthShell domain={cleanDomain(site)}>
       <SignUp />
-    </div>
+    </AuthShell>
   );
 }
 

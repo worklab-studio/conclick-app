@@ -89,6 +89,26 @@
     return dnt === 1 || dnt === '1' || dnt === 'yes';
   };
 
+  // Headless browsers and automation frameworks (Puppeteer, Selenium, Playwright,
+  // PhantomJS, etc.) set navigator.webdriver or leak in the UA. They run JS and
+  // otherwise look like a real Chrome, so the server-side isbot check can't catch
+  // them — we stop them here, at the source, so they never become a pageview.
+  const isAutomated = () => {
+    try {
+      return (
+        navigator.webdriver === true ||
+        / (Headless|PhantomJS|Electron|Playwright|Puppeteer)/i.test(navigator.userAgent || '') ||
+        !!window._phantom ||
+        !!window.callPhantom ||
+        !!window.__nightmare ||
+        '__selenium_unwrapped' in document ||
+        '__webdriver_evaluate' in document
+      );
+    } catch {
+      return false;
+    }
+  };
+
   /* Event handlers */
 
   const handlePush = (_state, _title, url) => {
@@ -361,6 +381,7 @@
   const trackingDisabled = () =>
     disabled ||
     !website ||
+    isAutomated() ||
     (localStorage && localStorage.getItem('umami.disabled')) ||
     (domain && !domains.includes(hostname)) ||
     (dnt && hasDoNotTrack());

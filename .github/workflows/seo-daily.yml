@@ -1,0 +1,94 @@
+name: SEO daily content (autopilot)
+
+# Fully autopilot: once a day it generates the next backlog page with an OpenAI
+# model, type-checks it, commits straight to the default branch, and (if a
+# FLY_API_TOKEN secret is present) deploys so the page goes live the same day.
+# No PR gate. Quality is enforced by the prompt rules + the tsc gate below.
+#
+# Secrets:
+#   OPENAI_API_KEY  (required) — the content model
+#   FLY_API_TOKEN   (optional) — set it to auto-deploy; omit to just commit
+# Knobs:
+#   SEO_MODEL repo/org variable (optional) — override the model, default gpt-4.1
+
+on:
+  schedule:
+    - cron: '17 14 * * *' # 14:17 UTC daily (off the :00 rush)
+  workflow_dispatch:
+    inputs:
+      count:
+        description: 'How many pages to generate'
+        default: '1'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: seo-daily
+  cancel-in-progress: false
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    # Job-level so the optional-deploy step can gate on it in its `if:`.
+    env:
+      FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install deps
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate next page(s)
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          SEO_MODEL: ${{ vars.SEO_MODEL }}
+        run: node scripts/seo/generate.mjs --count ${{ github.event.inputs.count || '1' }}
+
+      - name: Detect changes
+        id: diff
+        run: |
+          if git diff --quiet -- src/content; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "No new content generated (backlog empty or generation failed)."
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      # Build gate — the same production build the deploy runs. If a generated
+      # page fails to compile or static-generate, it never gets committed.
+      # (Using build-app, not `tsc`, because `next build` skips type validation
+      # in this repo — a bare tsc would false-fail on unrelated pre-existing types.)
+      - name: Build gate
+        if: steps.diff.outputs.changed == 'true'
+        env:
+          NEXT_PUBLIC_SITE_URL: https://conclick.io
+        run: pnpm run build-app
+
+      - name: Commit to default branch
+        if: steps.diff.outputs.changed == 'true'
+        run: |
+          git config user.name "conclick-seo-bot"
+          git config user.email "seo-bot@conclick.io"
+          git add src/content
+          git commit -m "chore(seo): autopilot content [skip ci]"
+          git push
+
+      # Auto-deploy so the new page is live the same day. Skipped automatically
+      # when FLY_API_TOKEN isn't set (then the page ships on your next deploy).
+      - name: Deploy to Fly
+        if: steps.diff.outputs.changed == 'true' && env.FLY_API_TOKEN != ''
+        run: |
+          curl -L https://fly.io/install.sh | sh
+          export FLYCTL_INSTALL="$HOME/.fly"
+          export PATH="$FLYCTL_INSTALL/bin:$PATH"
+          flyctl deploy -a conclick --remote-only --yes

@@ -8,6 +8,37 @@ import { safeDecodeURIComponent } from '@/lib/url';
 import { stripPort, getIpAddress } from '@/lib/ip';
 
 const MAXMIND = 'maxmind';
+const MAXMIND_ASN = 'maxmind_asn';
+
+// Network orgs that mean "cloud/hosting", i.e. almost certainly a bot — real
+// visitors are on residential/mobile ISPs, never these. Used to drop stealth bots
+// that send a clean browser UA from a datacenter IP (the kind isbot can't catch).
+const DATACENTER_RE =
+  /(amazon|aws|\bgoogle\b|microsoft|azure|digitalocean|hetzner|\bovh\b|linode|akamai|vultr|contabo|scaleway|oracle|alibaba|aliyun|tencent|leaseweb|m247|choopa|datacamp|hostwinds|colocrossing|quadranet|psychz|ioflood|gcore|fastly|hostinger|kamatera|upcloud|netcup|interserver|digital ?ocean|hosting|datacent|colocat|\bvps\b|\bllc\b.*cloud|cloud.*\bllc\b)/i;
+
+// True if the IP belongs to a hosting/cloud provider. Fails open (returns false
+// on any error) so it can never break ingestion. Disable with DISABLE_DATACENTER_CHECK.
+export async function isDatacenterIp(ip: string = ''): Promise<boolean> {
+  if (process.env.DISABLE_DATACENTER_CHECK || !ip) {
+    return false;
+  }
+  try {
+    if (await isLocalhost(ip)) {
+      return false;
+    }
+    if (!globalThis[MAXMIND_ASN]) {
+      const dir = path.join(process.cwd(), 'geo');
+      globalThis[MAXMIND_ASN] = await maxmind.open(
+        process.env.GEOLITE_ASN_DB_PATH || path.resolve(dir, 'GeoLite2-ASN.mmdb'),
+      );
+    }
+    const result: any = globalThis[MAXMIND_ASN]?.get(stripPort(ip));
+    const org = result?.autonomous_system_organization || '';
+    return DATACENTER_RE.test(org);
+  } catch {
+    return false;
+  }
+}
 
 const PROVIDER_HEADERS = [
   // Cloudflare headers
@@ -67,6 +98,8 @@ export async function getLocation(ip: string = '', headers: Headers, hasPayloadI
       country: 'US',
       region: 'US-CA',
       city: 'San Francisco',
+      latitude: 37.7749,
+      longitude: -122.4194,
     };
   }
 
@@ -107,6 +140,8 @@ export async function getLocation(ip: string = '', headers: Headers, hasPayloadI
       country,
       region: getRegionCode(country, region),
       city,
+      latitude: result.location?.latitude,
+      longitude: result.location?.longitude,
     };
   }
 }
@@ -118,11 +153,13 @@ export async function getClientInfo(request: Request, payload: Record<string, an
   const country = safeDecodeURIComponent(location?.country);
   const region = safeDecodeURIComponent(location?.region);
   const city = safeDecodeURIComponent(location?.city);
+  const latitude = (location as any)?.latitude ?? null;
+  const longitude = (location as any)?.longitude ?? null;
   const browser = browserName(userAgent);
   const os = detectOS(userAgent) as string;
   const device = getDevice(userAgent, payload?.screen);
 
-  return { userAgent, browser, os, ip, country, region, city, device };
+  return { userAgent, browser, os, ip, country, region, city, latitude, longitude, device };
 }
 
 export function hasBlockedIp(clientIp: string) {
