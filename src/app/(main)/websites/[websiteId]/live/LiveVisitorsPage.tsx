@@ -24,9 +24,12 @@ import {
   Laptop,
   Monitor,
   MousePointerClick,
+  ArrowRight,
 } from 'lucide-react';
 import MapGL, { Popup, Marker, NavigationControl } from 'react-map-gl/maplibre';
 import 'maplibre-gl/dist/maplibre-gl.css';
+import { createAvatar } from '@dicebear/core';
+import { notionistsNeutral } from '@dicebear/collection';
 import { Logo } from '@/components/logo';
 import { COUNTRY_CENTROIDS } from '@/lib/country-centroids';
 
@@ -77,6 +80,60 @@ const DeviceIcon = ({ device, className }: { device?: string; className?: string
   if (d === 'desktop') return <Monitor className={className} />;
   return <Laptop className={className} />;
 };
+
+// Generate visitor avatars locally (cached per seed) instead of calling
+// api.dicebear.com — keeps session ids off a third-party host, matching the
+// privacy-first positioning, and removes an external request/failure mode.
+const avatarCache = new Map<string, string>();
+const AVATAR_CACHE_MAX = 500; // FIFO cap so a 24/7 wall-display tab can't grow it unbounded
+function avatarFor(seed: string): string {
+  let uri = avatarCache.get(seed);
+  if (!uri) {
+    uri = createAvatar(notionistsNeutral, { seed, size: 64 }).toDataUri();
+    avatarCache.set(seed, uri);
+    if (avatarCache.size > AVATAR_CACHE_MAX) {
+      const oldest = avatarCache.keys().next().value;
+      if (oldest !== undefined) avatarCache.delete(oldest);
+    }
+  }
+  return uri;
+}
+
+const toRad = (d: number) => (d * Math.PI) / 180;
+
+// Great-circle angle (degrees) between two lng/lat points — used to tell which
+// visitors sit on the hemisphere facing away from the camera (>90° = hidden).
+function angularDistDeg(aLng: number, aLat: number, bLng: number, bLat: number): number {
+  const p1 = toRad(aLat);
+  const p2 = toRad(bLat);
+  const dl = toRad(bLng - aLng);
+  const c = Math.sin(p1) * Math.sin(p2) + Math.cos(p1) * Math.cos(p2) * Math.cos(dl);
+  return (Math.acos(Math.max(-1, Math.min(1, c))) * 180) / Math.PI;
+}
+
+// Averaging lng/lat directly breaks across the antimeridian, so average the 3D
+// unit vectors and convert back — the "center of mass" of the visitor cloud.
+function sphericalCentroid(coords: [number, number][]): [number, number] | null {
+  if (!coords.length) return null;
+  let x = 0;
+  let y = 0;
+  let z = 0;
+  for (const [lng, lat] of coords) {
+    const p = toRad(lat);
+    const l = toRad(lng);
+    x += Math.cos(p) * Math.cos(l);
+    y += Math.cos(p) * Math.sin(l);
+    z += Math.sin(p);
+  }
+  const lng = (Math.atan2(y, x) * 180) / Math.PI;
+  const lat = (Math.atan2(z, Math.sqrt(x * x + y * y)) * 180) / Math.PI;
+  return [lng, lat];
+}
+
+const reducedMotion = () =>
+  typeof window !== 'undefined' &&
+  !!window.matchMedia &&
+  window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 interface Visitor {
   id: string;
@@ -252,8 +309,12 @@ export function LiveVisitorsPage({ websiteId }: { websiteId: string }) {
   const [selectedVisitor, setSelectedVisitor] = useState<any | null>(null);
   const [hoveredVisitor, setHoveredVisitor] = useState<any | null>(null);
   const [isPopupOccluded, setIsPopupOccluded] = useState(false);
-  const [isAutoPanning, setIsAutoPanning] = useState(false);
+  const [isAutoPanning, setIsAutoPanning] = useState(true);
   const [isFollowing, setIsFollowing] = useState(false);
+  const [hidden, setHidden] = useState<{ count: number; centroid: [number, number] | null }>({
+    count: 0,
+    centroid: null,
+  });
   const [copied, setCopied] = useState(false);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [ripples, setRipples] = useState<Ripple[]>([]);
@@ -263,6 +324,9 @@ export function LiveVisitorsPage({ websiteId }: { websiteId: string }) {
   const mapRef = useRef<any>(null);
   const isInteracting = useRef(false);
   const followRef = useRef(false);
+  const pinnedRef = useRef(false);
+  const hoverRef = useRef(false);
+  const didInitialFrame = useRef(false);
   const seenSessions = useRef<Set<string> | null>(null);
   const seenFeed = useRef<Set<string> | null>(null);
 
@@ -295,6 +359,19 @@ export function LiveVisitorsPage({ websiteId }: { websiteId: string }) {
   useEffect(() => {
     followRef.current = isFollowing;
   }, [isFollowing]);
+
+  useEffect(() => {
+    pinnedRef.current = !!selectedVisitor;
+  }, [selectedVisitor]);
+
+  useEffect(() => {
+    hoverRef.current = !!hoveredVisitor;
+  }, [hoveredVisitor]);
+
+  // Respect the OS reduced-motion setting: don't auto-spin the globe.
+  useEffect(() => {
+    if (reducedMotion()) setIsAutoPanning(false);
+  }, []);
 
   /* ------------------------- derive visitors + feed ----------------------- */
 
@@ -460,6 +537,40 @@ export function LiveVisitorsPage({ websiteId }: { websiteId: string }) {
     );
   }, [feedEvents, visitors, getCoordinates]);
 
+  /* ---------------------- initial framing + back-side --------------------- */
+
+  // Rotate the crowd to the front once on first data so the globe never opens on
+  // an empty ocean. Instant jumpTo (not flyTo) so it doesn't fight the spin.
+  useEffect(() => {
+    if (didInitialFrame.current || !mapRef.current) return;
+    const active = visitors.filter(v => Date.now() - v.lastSeen <= ACTIVE_MS);
+    const pts = (active.length ? active : visitors)
+      .map(getCoordinates)
+      .filter(([lng, lat]) => lng || lat) as [number, number][];
+    const c = sphericalCentroid(pts);
+    if (!c) return;
+    didInitialFrame.current = true;
+    mapRef.current.getMap().jumpTo({ center: c });
+  }, [visitors, getCoordinates]);
+
+  // Count active visitors on the far side of the globe so we can offer a jump.
+  // Cheap enough to recompute on a 1s tick (reads the live camera center).
+  useEffect(() => {
+    const id = setInterval(() => {
+      const map = mapRef.current?.getMap?.();
+      if (!map) return;
+      const center = map.getCenter();
+      const behind = visitors
+        .filter(v => Date.now() - v.lastSeen <= ACTIVE_MS)
+        .map(getCoordinates)
+        .filter(
+          ([lng, lat]) => (lng || lat) && angularDistDeg(center.lng, center.lat, lng, lat) > 90,
+        ) as [number, number][];
+      setHidden({ count: behind.length, centroid: behind.length ? sphericalCentroid(behind) : null });
+    }, 1000);
+    return () => clearInterval(id);
+  }, [visitors, getCoordinates]);
+
   /* ------------------------------ auto-rotate ----------------------------- */
 
   useEffect(() => {
@@ -468,9 +579,17 @@ export function LiveVisitorsPage({ websiteId }: { websiteId: string }) {
     let raf = 0;
     let last = performance.now();
     const spin = (t: number) => {
-      const dt = t - last;
+      const dt = Math.min(t - last, 64); // clamp so a backgrounded tab doesn't lurch
       last = t;
-      if (!isInteracting.current) {
+      // Pause while the user is reading (hover/pinned card), dragging, following a
+      // new arrival, or when the tab is hidden — steady to inspect, easy on battery.
+      if (
+        !isInteracting.current &&
+        !hoverRef.current &&
+        !pinnedRef.current &&
+        !followRef.current &&
+        !document.hidden
+      ) {
         const center = map.getCenter();
         center.lng += (6 * dt) / 1000; // ~6°/s, frame-rate independent
         map.jumpTo({ center });
@@ -510,6 +629,28 @@ export function LiveVisitorsPage({ websiteId }: { websiteId: string }) {
   };
   const handleInteractionEnd = () => {
     isInteracting.current = false;
+  };
+
+  // Fly to a visitor's dot and pin their card — used by the activity-feed rows.
+  const focusVisitor = useCallback(
+    (sessionId: string) => {
+      const v = visitors.find(x => x.id === sessionId);
+      if (!v || !mapRef.current) return;
+      const [lng, lat] = getCoordinates(v);
+      setHoveredVisitor(null);
+      setSelectedVisitor({ ...v, lng, lat });
+      setIsAutoPanning(false);
+      const map = mapRef.current.getMap();
+      map.flyTo({ center: [lng, lat], zoom: Math.max(map.getZoom(), 2.8), duration: 1200 });
+    },
+    [visitors, getCoordinates],
+  );
+
+  // Spin the far-side visitors into view.
+  const revealHidden = () => {
+    if (!hidden.centroid || !mapRef.current) return;
+    setIsAutoPanning(false);
+    mapRef.current.getMap().flyTo({ center: hidden.centroid, zoom: 2.2, duration: 1400 });
   };
 
   /* ------------------------------- map wiring ----------------------------- */
@@ -687,6 +828,15 @@ export function LiveVisitorsPage({ websiteId }: { websiteId: string }) {
 
   const websiteName = website?.name || (isDemo ? 'Demo · SaaS starter' : '');
   const websiteDomain = website?.domain || (isDemo ? 'demo.conclick.io' : '');
+
+  // Ambient tab title so a backgrounded/pinned tab still shows the live count.
+  useEffect(() => {
+    const base = websiteName || 'Live visitors';
+    document.title = activeCount > 0 ? `● ${activeCount} live · ${base}` : base;
+    return () => {
+      document.title = base;
+    };
+  }, [activeCount, websiteName]);
 
   /* --------------------------------- render ------------------------------- */
 
@@ -1004,8 +1154,13 @@ export function LiveVisitorsPage({ websiteId }: { websiteId: string }) {
 
       {/* --------------------------- Activity feed ----------------------- */}
       <div className="absolute top-6 right-6 z-[900] w-72 hidden lg:flex flex-col gap-2 pointer-events-none">
+        {feedEvents.length > 0 && (
+          <div className="px-1 pb-0.5 text-[10px] font-medium uppercase tracking-[0.14em] text-zinc-500">
+            Recent activity
+          </div>
+        )}
         {feedEvents.slice(0, 7).map(f => (
-          <FeedRow key={f.id} f={f} />
+          <FeedRow key={f.id} f={f} onSelect={focusVisitor} />
         ))}
       </div>
 
@@ -1034,6 +1189,34 @@ export function LiveVisitorsPage({ websiteId }: { websiteId: string }) {
           </div>
         </div>
       )}
+
+      {/* --------------------- Behind-the-globe + legend ----------------- */}
+      {!isAutoPanning && hidden.count > 0 && (
+        <button
+          onClick={revealHidden}
+          className="absolute bottom-6 left-1/2 z-[950] flex -translate-x-1/2 items-center gap-2 rounded-full border border-white/10 bg-black/60 px-3.5 py-1.5 text-xs text-zinc-200 backdrop-blur-md transition-colors hover:border-indigo-400/40 hover:bg-black/80"
+        >
+          <span className="relative flex h-2 w-2">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-indigo-500 opacity-75" />
+            <span className="relative inline-flex h-2 w-2 rounded-full bg-indigo-500" />
+          </span>
+          {hidden.count} {hidden.count === 1 ? 'visitor' : 'visitors'} behind the globe
+          <ArrowRight className="h-3.5 w-3.5" />
+        </button>
+      )}
+
+      <div className="pointer-events-none absolute bottom-6 left-6 z-[900] hidden items-center gap-3 text-[11px] text-zinc-400 lg:flex">
+        <span className="flex items-center gap-1.5">
+          <span className="h-2 w-2 rounded-full bg-[#818cf8]" /> Active now
+        </span>
+        <span className="flex items-center gap-1.5">
+          <span className="h-2 w-2 rounded-full bg-[#52525b]" /> Recent · 1h
+        </span>
+      </div>
+
+      <div aria-live="polite" className="sr-only">
+        {activeCount} {activeCount === 1 ? 'visitor' : 'visitors'} active now on {websiteName}
+      </div>
 
       {/* ------------------------------- Map ------------------------------ */}
       <MapGL
@@ -1122,7 +1305,7 @@ export function LiveVisitorsPage({ websiteId }: { websiteId: string }) {
             closeOnClick={false}
             offset={20}
           >
-            <VisitorCard v={selectedVisitor} onClose={() => setSelectedVisitor(null)} />
+            <VisitorCard v={selectedVisitor} websiteId={websiteId} onClose={() => setSelectedVisitor(null)} />
           </Popup>
         )}
       </MapGL>
@@ -1150,10 +1333,22 @@ function Sparkline({ values }: { values: number[] }) {
   );
 }
 
-function FeedRow({ f, compact }: { f: FeedEvent; compact?: boolean }) {
+function FeedRow({
+  f,
+  compact,
+  onSelect,
+}: {
+  f: FeedEvent;
+  compact?: boolean;
+  onSelect?: (id: string) => void;
+}) {
+  const Tag: any = onSelect ? 'button' : 'div';
   return (
-    <div
-      className={`feed-item pointer-events-auto flex items-center gap-2.5 rounded-lg border border-white/10 bg-black/50 backdrop-blur-md px-3 ${compact ? 'py-1.5' : 'py-2'}`}
+    <Tag
+      onClick={onSelect ? () => onSelect(f.sessionId) : undefined}
+      className={`feed-item pointer-events-auto flex w-full items-center gap-2.5 rounded-lg border border-white/10 bg-black/50 px-3 text-left backdrop-blur-md ${
+        onSelect ? 'cursor-pointer transition-colors hover:border-indigo-400/40 hover:bg-black/70' : ''
+      } ${compact ? 'py-1.5' : 'py-2'}`}
     >
       <span className="text-base leading-none shrink-0">{flagEmoji(f.country)}</span>
       <div className="min-w-0 flex-1">
@@ -1170,11 +1365,21 @@ function FeedRow({ f, compact }: { f: FeedEvent; compact?: boolean }) {
         )}
       </div>
       <span className="text-[11px] text-zinc-500 shrink-0">{timeAgo(f.createdAt)}</span>
-    </div>
+    </Tag>
   );
 }
 
-function VisitorCard({ v, onClose, compact }: { v: any; onClose?: () => void; compact?: boolean }) {
+function VisitorCard({
+  v,
+  onClose,
+  compact,
+  websiteId,
+}: {
+  v: any;
+  onClose?: () => void;
+  compact?: boolean;
+  websiteId?: string;
+}) {
   const active = Date.now() - Number(v.lastSeen || 0) <= ACTIVE_MS;
   const duration = Number(v.lastSeen || 0) - Number(v.firstSeen || 0);
   return (
@@ -1196,8 +1401,10 @@ function VisitorCard({ v, onClose, compact }: { v: any; onClose?: () => void; co
       <div className="p-4">
         <div className="flex items-center gap-3 mb-3 pr-6">
           <img
-            src={`https://api.dicebear.com/9.x/notionists-neutral/svg?seed=${v.id}`}
+            src={avatarFor(String(v.id))}
             alt="Visitor avatar"
+            width={36}
+            height={36}
             className="w-9 h-9 rounded-full bg-zinc-900 border border-zinc-700"
           />
           <div className="min-w-0">
@@ -1234,6 +1441,16 @@ function VisitorCard({ v, onClose, compact }: { v: any; onClose?: () => void; co
           )}
           <Row label="Last active" value={timeAgo(Number(v.lastSeen) || null)} />
         </div>
+
+        {onClose && websiteId && (
+          <a
+            href={`/websites/${websiteId}/sessions?session=${v.id}`}
+            className="mt-3 flex items-center justify-center gap-1.5 rounded-md border border-indigo-500/30 bg-indigo-500/10 py-1.5 text-xs font-medium text-indigo-300 transition-colors hover:bg-indigo-500/20 hover:text-indigo-200"
+          >
+            View full journey
+            <ArrowRight className="h-3 w-3" />
+          </a>
+        )}
       </div>
     </div>
   );
