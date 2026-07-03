@@ -25,7 +25,10 @@ import {
   Monitor,
   MousePointerClick,
   ArrowRight,
+  ShieldCheck,
+  BadgeDollarSign,
 } from 'lucide-react';
+import { formatMinorCurrency } from '@/lib/format';
 import MapGL, { Popup, Marker, NavigationControl } from 'react-map-gl/maplibre';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { createAvatar } from '@dicebear/core';
@@ -168,6 +171,21 @@ interface Ripple {
   lng: number;
   lat: number;
   big: boolean;
+  gold?: boolean; // revenue landed here
+}
+
+interface RevenueRow {
+  id: string;
+  sessionId: string | null;
+  type: string; // payment | refund
+  amountMinor: number; // refunds negative
+  currency: string;
+  gateway: string;
+  occurredAt: number;
+  country: string | null;
+  city: string | null;
+  latitude: number | null;
+  longitude: number | null;
 }
 
 /* ----------------------------- demo simulation --------------------------- */
@@ -207,7 +225,25 @@ const DEMO_BASES: Array<[string, string, number, number, string, string, string]
   ['ZA', 'Cape Town', -33.9249, 18.4241, 'firefox', 'Windows 10', 'laptop'],
 ];
 
-function seedDemo(): { visitors: Visitor[]; feed: FeedEvent[]; counter: number } {
+const DEMO_AMOUNTS = [4900, 990, 2900, 14900, 1900];
+
+function demoRevenueFrom(v: Visitor, counter: number, at: number): RevenueRow {
+  return {
+    id: `demo-rev-${counter}-${at}`,
+    sessionId: v.id,
+    type: 'payment',
+    amountMinor: DEMO_AMOUNTS[counter % DEMO_AMOUNTS.length],
+    currency: 'USD',
+    gateway: 'stripe',
+    occurredAt: at,
+    country: v.country,
+    city: v.city,
+    latitude: v.lat,
+    longitude: v.lng,
+  };
+}
+
+function seedDemo(): { visitors: Visitor[]; feed: FeedEvent[]; counter: number; revenue: RevenueRow[] } {
   const now = Date.now();
   const visitors: Visitor[] = DEMO_BASES.slice(0, 12).map((b, i) => {
     const [country, city, lat, lng, browser, os, device] = b;
@@ -238,14 +274,23 @@ function seedDemo(): { visitors: Visitor[]; feed: FeedEvent[]; counter: number }
     urlPath: v.currentPath,
     createdAt: v.lastSeen,
   }));
-  return { visitors, feed, counter: 0 };
+  // One sale already on the board so the revenue lane shows immediately.
+  const revenue = [demoRevenueFrom(visitors[3], 1, now - 4 * 60_000)];
+  return { visitors, feed, counter: 0, revenue };
 }
 
-function advanceDemo(s: { visitors: Visitor[]; feed: FeedEvent[]; counter: number }) {
+function advanceDemo(s: { visitors: Visitor[]; feed: FeedEvent[]; counter: number; revenue: RevenueRow[] }) {
   const now = Date.now();
   const counter = s.counter + 1;
   let visitors = [...s.visitors];
+  let revenue = s.revenue;
   let feedEvent: FeedEvent;
+
+  // Every ~6th tick an active visitor converts (drives the gold ripple + row).
+  if (counter % 6 === 3 && visitors.length) {
+    const payer = visitors[counter % Math.min(visitors.length, 6)];
+    revenue = [demoRevenueFrom(payer, counter, now), ...revenue].slice(0, 10);
+  }
 
   if (counter % 4 === 0) {
     // A brand-new visitor lands (drives the arrival ripple + feed).
@@ -296,7 +341,7 @@ function advanceDemo(s: { visitors: Visitor[]; feed: FeedEvent[]; counter: numbe
     };
   }
 
-  return { visitors, feed: [feedEvent, ...s.feed].slice(0, 18), counter };
+  return { visitors, feed: [feedEvent, ...s.feed].slice(0, 18), counter, revenue };
 }
 
 /* -------------------------------- component ------------------------------ */
@@ -329,6 +374,7 @@ export function LiveVisitorsPage({ websiteId }: { websiteId: string }) {
   const didInitialFrame = useRef(false);
   const seenSessions = useRef<Set<string> | null>(null);
   const seenFeed = useRef<Set<string> | null>(null);
+  const seenRevenue = useRef<Set<string> | null>(null);
 
   const isDemo = websiteId === DEMO_WEBSITE_ID;
   const [demoState, setDemoState] = useState<ReturnType<typeof seedDemo> | null>(null);
@@ -441,6 +487,50 @@ export function LiveVisitorsPage({ websiteId }: { websiteId: string }) {
   const activeCount = activeVisitors.length;
   const windowCount = visitors.length;
 
+  /* ------------------------------- revenue -------------------------------- */
+
+  const revenueRows: RevenueRow[] = isDemo
+    ? demoState?.revenue || []
+    : realtimeData?.revenue || [];
+  const botsBlocked: number = isDemo ? 7 : realtimeData?.botsBlocked || 0;
+
+  // Net revenue in the window, headline in the dominant currency ("+" when mixed).
+  // Sort by MAJOR units (minor / 10^exponent) — raw minor units would let ¥1,500
+  // outrank $14.90 and handicap 3-decimal currencies.
+  const revenueSummary = useMemo(() => {
+    if (!revenueRows.length) return null;
+    const digitsFor = (ccy: string) => {
+      try {
+        return (
+          new Intl.NumberFormat('en', { style: 'currency', currency: ccy }).resolvedOptions()
+            .maximumFractionDigits ?? 2
+        );
+      } catch {
+        return 2;
+      }
+    };
+    const byCcy: Record<string, number> = {};
+    revenueRows.forEach(r => {
+      byCcy[r.currency] = (byCcy[r.currency] || 0) + r.amountMinor;
+    });
+    const entries = Object.entries(byCcy).sort(
+      ([ca, a], [cb, b]) => b / 10 ** digitsFor(cb) - a / 10 ** digitsFor(ca),
+    );
+    return { minor: entries[0][1], currency: entries[0][0], mixed: entries.length > 1 };
+  }, [revenueRows]);
+
+  // Per-session paid total for the "customer" badge on visitor cards.
+  const revenueBySession = useMemo(() => {
+    const m = new Map<string, { minor: number; currency: string }>();
+    revenueRows.forEach(r => {
+      if (!r.sessionId) return;
+      const cur = m.get(r.sessionId);
+      if (cur && cur.currency === r.currency) cur.minor += r.amountMinor;
+      else if (!cur) m.set(r.sessionId, { minor: r.amountMinor, currency: r.currency });
+    });
+    return m;
+  }, [revenueRows]);
+
   /* ------------------------------ coordinates ----------------------------- */
 
   const jitter = (seed: string): [number, number] => {
@@ -481,7 +571,14 @@ export function LiveVisitorsPage({ websiteId }: { websiteId: string }) {
 
   /* --------------------------- ripples + follow --------------------------- */
 
+  // Ripple "seen" sets must seed from the FIRST REAL PAYLOAD, not the first
+  // effect run — the effect fires once with empty data before the poll lands,
+  // and seeding an empty set would make every pre-existing session/sale in the
+  // window ripple (and fly the camera) as if it just happened.
+  const hasData = isDemo ? !!demoState : !!realtimeData;
+
   useEffect(() => {
+    if (!hasData) return;
     // Big ripple for brand-new sessions (skip the very first hydration).
     const ids = new Set(visitors.map(v => v.id));
     if (!seenSessions.current) {
@@ -509,9 +606,10 @@ export function LiveVisitorsPage({ websiteId }: { websiteId: string }) {
         duration: 1400,
       });
     }
-  }, [visitors, getCoordinates]);
+  }, [visitors, getCoordinates, hasData]);
 
   useEffect(() => {
+    if (!hasData) return;
     // Small ripple for each new pageview/event in the feed.
     const ids = new Set(feedEvents.map(f => f.id));
     if (!seenFeed.current) {
@@ -535,7 +633,51 @@ export function LiveVisitorsPage({ websiteId }: { websiteId: string }) {
     newRipples.forEach(r =>
       setTimeout(() => setRipples(list => list.filter(x => x.id !== r.id)), 2600),
     );
-  }, [feedEvents, visitors, getCoordinates]);
+  }, [feedEvents, visitors, getCoordinates, hasData]);
+
+  // Gold ripple where money just landed. Coordinates: exact payer lat/lng →
+  // the payer's live dot → country centroid, in that order.
+  useEffect(() => {
+    if (!hasData) return;
+    const ids = new Set(revenueRows.map(r => r.id));
+    if (!seenRevenue.current) {
+      seenRevenue.current = ids;
+      return;
+    }
+    const fresh = revenueRows.filter(r => !seenRevenue.current!.has(r.id) && r.amountMinor > 0);
+    seenRevenue.current = ids;
+    if (!fresh.length) return;
+
+    const coordsFor = (r: RevenueRow): [number, number] | null => {
+      if (typeof r.latitude === 'number' && typeof r.longitude === 'number')
+        return [r.longitude, r.latitude];
+      const v = r.sessionId ? visitors.find(x => x.id === r.sessionId) : null;
+      if (v) return getCoordinates(v);
+      const centroid = COUNTRY_CENTROIDS[(r.country || '').toUpperCase()];
+      return centroid ? [centroid[1], centroid[0]] : null;
+    };
+
+    const newRipples: Ripple[] = fresh
+      .slice(0, 3)
+      .map(r => ({ r, c: coordsFor(r) }))
+      .filter(x => x.c)
+      .map(({ r, c }) => ({ id: `r-gold-${r.id}`, lng: c![0], lat: c![1], big: true, gold: true }));
+    if (!newRipples.length) return;
+    setRipples(list => [...list, ...newRipples].slice(-8));
+    newRipples.forEach(r =>
+      setTimeout(() => setRipples(list => list.filter(x => x.id !== r.id)), 5200),
+    );
+
+    // A sale is always worth flying to when follow mode is on.
+    if (followRef.current && mapRef.current && newRipples[0]) {
+      const map = mapRef.current.getMap();
+      map.flyTo({
+        center: [newRipples[0].lng, newRipples[0].lat],
+        zoom: Math.max(map.getZoom(), 2.8),
+        duration: 1400,
+      });
+    }
+  }, [revenueRows, visitors, getCoordinates, hasData]);
 
   /* ---------------------- initial framing + back-side --------------------- */
 
@@ -923,6 +1065,36 @@ export function LiveVisitorsPage({ websiteId }: { websiteId: string }) {
         )}
       </div>
 
+      {/* Revenue · last hour — only when the site has payment events */}
+      {revenueSummary && (
+        <div className="pt-3 border-t border-white/5">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 text-sm text-zinc-400 font-medium">
+              <BadgeDollarSign className="h-4 w-4 text-amber-400/90" />
+              <span>Revenue · last hour</span>
+            </div>
+            <span className="text-xl font-bold text-amber-300">
+              {formatMinorCurrency(revenueSummary.minor, revenueSummary.currency)}
+              {revenueSummary.mixed ? ' +' : ''}
+            </span>
+          </div>
+        </div>
+      )}
+
+      {/* Bot-filter trust badge */}
+      {botsBlocked > 0 && (
+        <div
+          className="pt-3 border-t border-white/5 flex items-center gap-2 text-xs text-zinc-400"
+          title="Datacenter IPs, headless browsers, and known crawlers are dropped at ingest — they never touch these numbers"
+        >
+          <ShieldCheck className="h-4 w-4 text-emerald-400/80" />
+          <span>
+            <span className="font-semibold text-zinc-200">{botsBlocked}</span> bot{' '}
+            {botsBlocked === 1 ? 'hit' : 'hits'} blocked · last hour
+          </span>
+        </div>
+      )}
+
       {/* Viewing now */}
       {hotPages.length > 0 && (
         <div className="pt-3 border-t border-white/5">
@@ -1123,8 +1295,11 @@ export function LiveVisitorsPage({ websiteId }: { websiteId: string }) {
         </button>
 
         {/* compact feed under the bar */}
-        {feedEvents.length > 0 && (
+        {(feedEvents.length > 0 || revenueRows.length > 0) && (
           <div className="mt-2 space-y-1.5">
+            {revenueRows.slice(0, 1).map(r => (
+              <RevenueFeedRow key={r.id} r={r} compact />
+            ))}
             {feedEvents.slice(0, 3).map(f => (
               <FeedRow key={f.id} f={f} compact />
             ))}
@@ -1154,6 +1329,19 @@ export function LiveVisitorsPage({ websiteId }: { websiteId: string }) {
 
       {/* --------------------------- Activity feed ----------------------- */}
       <div className="absolute top-6 right-6 z-[900] w-72 hidden lg:flex flex-col gap-2 pointer-events-none">
+        {/* Sales pinned on top — never truncated by pageview flow */}
+        {revenueRows.slice(0, 3).map(r => {
+          // Only clickable when the payer still has a live dot to fly to.
+          const payer = r.sessionId ? visitors.find(v => v.id === r.sessionId) : undefined;
+          return (
+            <RevenueFeedRow
+              key={r.id}
+              r={r}
+              source={payer?.referrer}
+              onSelect={payer ? focusVisitor : undefined}
+            />
+          );
+        })}
         {feedEvents.length > 0 && (
           <div className="px-1 pb-0.5 text-[10px] font-medium uppercase tracking-[0.14em] text-zinc-500">
             Recent activity
@@ -1270,10 +1458,11 @@ export function LiveVisitorsPage({ websiteId }: { websiteId: string }) {
             <span
               className="block rounded-full pointer-events-none"
               style={{
-                width: r.big ? 34 : 18,
-                height: r.big ? 34 : 18,
-                border: `2px solid ${r.big ? '#a5b4fc' : '#6366f1'}`,
-                animation: `ripple-ping ${r.big ? '1.3s' : '1.1s'} cubic-bezier(0, 0, 0.2, 1) infinite`,
+                width: r.gold ? 44 : r.big ? 34 : 18,
+                height: r.gold ? 44 : r.big ? 34 : 18,
+                border: `2px solid ${r.gold ? '#fbbf24' : r.big ? '#a5b4fc' : '#6366f1'}`,
+                boxShadow: r.gold ? '0 0 18px rgba(251,191,36,0.45)' : undefined,
+                animation: `ripple-ping ${r.gold ? '1.6s' : r.big ? '1.3s' : '1.1s'} cubic-bezier(0, 0, 0.2, 1) infinite`,
               }}
             />
           </Marker>
@@ -1290,7 +1479,7 @@ export function LiveVisitorsPage({ websiteId }: { websiteId: string }) {
             offset={16}
           >
             <div className="pointer-events-none">
-              <VisitorCard v={hoveredVisitor} compact />
+              <VisitorCard v={hoveredVisitor} compact paid={revenueBySession.get(hoveredVisitor.id)} />
             </div>
           </Popup>
         )}
@@ -1305,7 +1494,12 @@ export function LiveVisitorsPage({ websiteId }: { websiteId: string }) {
             closeOnClick={false}
             offset={20}
           >
-            <VisitorCard v={selectedVisitor} websiteId={websiteId} onClose={() => setSelectedVisitor(null)} />
+            <VisitorCard
+            v={selectedVisitor}
+            websiteId={websiteId}
+            paid={revenueBySession.get(selectedVisitor.id)}
+            onClose={() => setSelectedVisitor(null)}
+          />
           </Popup>
         )}
       </MapGL>
@@ -1369,16 +1563,65 @@ function FeedRow({
   );
 }
 
+function RevenueFeedRow({
+  r,
+  source,
+  compact,
+  onSelect,
+}: {
+  r: RevenueRow;
+  source?: string;
+  compact?: boolean;
+  onSelect?: (id: string) => void;
+}) {
+  const refund = r.amountMinor < 0;
+  const Tag: any = onSelect ? 'button' : 'div';
+  return (
+    <Tag
+      onClick={onSelect && r.sessionId ? () => onSelect(r.sessionId!) : undefined}
+      className={`feed-item pointer-events-auto flex w-full items-center gap-2.5 rounded-lg border px-3 text-left backdrop-blur-md ${
+        refund
+          ? 'border-zinc-500/30 bg-zinc-500/10'
+          : 'border-amber-400/40 bg-amber-500/10'
+      } ${onSelect ? 'cursor-pointer transition-colors hover:border-amber-300/60 hover:bg-amber-500/20' : ''} ${
+        compact ? 'py-1.5' : 'py-2'
+      }`}
+    >
+      <span className="text-base leading-none shrink-0">{refund ? '↩️' : '💰'}</span>
+      <div className="min-w-0 flex-1">
+        <p className="text-[13px] leading-tight truncate">
+          <span className={`font-semibold ${refund ? 'text-zinc-300' : 'text-amber-200'}`}>
+            {formatMinorCurrency(r.amountMinor, r.currency)}
+          </span>
+          <span className="text-zinc-400">
+            {' '}
+            · {r.city && r.city !== 'Unknown' ? r.city : countryName(r.country || undefined)}
+          </span>
+        </p>
+        {!compact && (
+          <p className={`text-[11px] leading-tight truncate ${refund ? 'text-zinc-500' : 'text-amber-300/80'}`}>
+            {refund ? 'refund' : 'payment'} · {r.gateway}
+            {source && source !== 'Direct' ? ` · from ${source}` : ''}
+          </p>
+        )}
+      </div>
+      <span className="text-[11px] text-zinc-500 shrink-0">{timeAgo(r.occurredAt)}</span>
+    </Tag>
+  );
+}
+
 function VisitorCard({
   v,
   onClose,
   compact,
   websiteId,
+  paid,
 }: {
   v: any;
   onClose?: () => void;
   compact?: boolean;
   websiteId?: string;
+  paid?: { minor: number; currency: string };
 }) {
   const active = Date.now() - Number(v.lastSeen || 0) <= ACTIVE_MS;
   const duration = Number(v.lastSeen || 0) - Number(v.firstSeen || 0);
@@ -1413,10 +1656,17 @@ function VisitorCard({
             </p>
             <p className="text-xs text-zinc-400 font-medium truncate">{countryName(v.country)}</p>
           </div>
-          <span
-            className={`ml-auto shrink-0 text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${active ? 'bg-emerald-500/15 text-emerald-300' : 'bg-zinc-800 text-zinc-400'}`}
-          >
-            {active ? 'active' : 'idle'}
+          <span className="ml-auto flex shrink-0 items-center gap-1">
+            {paid && paid.minor > 0 && (
+              <span className="rounded-full bg-amber-500/15 px-1.5 py-0.5 text-[10px] font-semibold text-amber-300">
+                💰 {formatMinorCurrency(paid.minor, paid.currency)}
+              </span>
+            )}
+            <span
+              className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${active ? 'bg-emerald-500/15 text-emerald-300' : 'bg-zinc-800 text-zinc-400'}`}
+            >
+              {active ? 'active' : 'idle'}
+            </span>
           </span>
         </div>
 

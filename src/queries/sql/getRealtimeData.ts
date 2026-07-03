@@ -1,5 +1,6 @@
 import { QueryFilters } from '@/lib/types';
 import { getRealtimeActivity } from '@/queries/sql/getRealtimeActivity';
+import { getRealtimeRevenue } from '@/queries/sql/getRealtimeRevenue';
 import { getPageviewStats } from '@/queries/sql/pageviews/getPageviewStats';
 import { getSessionStats } from '@/queries/sql/sessions/getSessionStats';
 
@@ -14,10 +15,11 @@ function increment(data: object, key: string) {
 }
 
 export async function getRealtimeData(websiteId: string, filters: QueryFilters) {
-  const [activity, pageviews, sessions] = await Promise.all([
+  const [activity, pageviews, sessions, revenue] = await Promise.all([
     getRealtimeActivity(websiteId, filters),
     getPageviewStats(websiteId, filters),
     getSessionStats(websiteId, filters),
+    getRealtimeRevenue(websiteId),
   ]);
 
   const uniques = new Set();
@@ -64,6 +66,7 @@ export async function getRealtimeData(websiteId: string, filters: QueryFilters) 
     countries,
     urls,
     referrers,
+    revenue,
     events: events.reverse(),
     series: {
       views: pageviews,

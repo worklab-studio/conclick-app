@@ -3,6 +3,7 @@ import { getQueryFilters, parseRequest } from '@/lib/request';
 import { json, unauthorized } from '@/lib/response';
 import { canViewWebsite } from '@/permissions';
 import { getRealtimeData } from '@/queries/sql';
+import { botBlocksLastHour } from '@/lib/botBlocks';
 import { filterParams } from '@/lib/schema';
 import { startOfMinute, subMinutes } from 'date-fns';
 import { z } from 'zod';
@@ -39,5 +40,6 @@ export async function GET(
 
   const data = await getRealtimeData(websiteId, filters);
 
-  return json(data);
+  // Trust badge: how many bot sends were dropped at ingest this hour.
+  return json({ ...data, botsBlocked: botBlocksLastHour(websiteId) });
 }

@@ -6,6 +6,7 @@ import { parseRequest } from '@/lib/request';
 import { badRequest, json, forbidden, serverError } from '@/lib/response';
 import { fetchWebsite } from '@/lib/load';
 import { getClientInfo, hasBlockedIp, isDatacenterIp } from '@/lib/detect';
+import { recordBotBlock } from '@/lib/botBlocks';
 import { createToken, parseToken } from '@/lib/jwt';
 import { secret, uuid, hash } from '@/lib/crypto';
 import { COLLECTION_TYPE, EVENT_TYPE } from '@/lib/constants';
@@ -97,6 +98,13 @@ export async function POST(request: Request) {
         if (result) {
           cache = result;
         }
+
+        // A replayed token for a DIFFERENT website must not vouch for this
+        // payload's websiteId — drop it so the website lookup below still runs
+        // (and 400s on unknown ids before any bot accounting).
+        if (cache?.websiteId && cache.websiteId !== websiteId) {
+          cache = null;
+        }
       }
 
       // Find website (only on the first, uncached send — no extra hot-path query)
@@ -122,6 +130,7 @@ export async function POST(request: Request) {
       !process.env.DISABLE_BOT_CHECK &&
       (!userAgent || isbot(userAgent) || EXTRA_BOT.test(userAgent))
     ) {
+      recordBotBlock(websiteId);
       return json({ beep: 'boop' });
     }
 
@@ -129,6 +138,7 @@ export async function POST(request: Request) {
     // from a cloud IP (the kind the UA check above can't see). Real visitors are
     // on residential/mobile networks.
     if (await isDatacenterIp(ip)) {
+      recordBotBlock(websiteId);
       return json({ beep: 'boop' });
     }
 
