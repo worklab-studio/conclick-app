@@ -61,6 +61,13 @@ if (!queue.length) {
   process.exit(0);
 }
 
+if (!process.env.OPENAI_API_KEY) {
+  console.error(
+    'OPENAI_API_KEY is not set — cannot generate. In CI, add the repo secret; locally, prefix the command with OPENAI_API_KEY=…',
+  );
+  process.exit(1);
+}
+
 const client = new OpenAI(); // reads OPENAI_API_KEY
 const today = new Date().toISOString().slice(0, 10);
 
@@ -122,4 +129,11 @@ for (const topic of queue) {
 if (!dry && n > 0) {
   const total = regenerateIndex();
   console.log(`\nDone. ${n} new page(s); registry imports ${total} content files.`);
+}
+
+// A non-empty queue that produced zero pages means every attempt errored —
+// exit non-zero so CI shows red instead of a silent green no-op.
+if (!dry && queue.length > 0 && n === 0) {
+  console.error(`\nAll ${queue.length} generation attempt(s) failed.`);
+  process.exit(1);
 }

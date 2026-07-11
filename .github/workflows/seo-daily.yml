@@ -45,6 +45,17 @@ jobs:
           node-version: 20
           cache: pnpm
 
+      # Fail LOUDLY when the key is missing — a silent green no-op here once
+      # hid 9 days of "autopilot" that generated nothing.
+      - name: Require OPENAI_API_KEY
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          if [ -z "$OPENAI_API_KEY" ]; then
+            echo "::error::OPENAI_API_KEY repo secret is not set — autopilot cannot generate. Run: gh secret set OPENAI_API_KEY --repo ${{ github.repository }}"
+            exit 1
+          fi
+
       - name: Install deps
         run: pnpm install --frozen-lockfile
 
