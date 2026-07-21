@@ -172,6 +172,14 @@ export default {
   basePath,
   output: 'standalone',
 
+  // The OG route reads its Instrument Serif .woff off disk at request time.
+  // `output: 'standalone'` copies only what nft traces, and a font that fails to
+  // ship does NOT error — next/og quietly falls back to its bundled sans and
+  // every social card goes out in the wrong typeface. Name it explicitly.
+  outputFileTracingIncludes: {
+    '/og': ['./src/app/og/*.woff'],
+  },
+
   typescript: {
     ignoreBuildErrors: true,
   },

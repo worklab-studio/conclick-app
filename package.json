@@ -74,6 +74,7 @@
     "@date-fns/utc": "^1.2.0",
     "@dicebear/collection": "^9.2.3",
     "@dicebear/core": "^9.2.3",
+    "@fontsource/instrument-serif": "^5.3.0",
     "@fontsource/inter": "^5.2.8",
     "@hello-pangea/dnd": "^17.0.0",
     "@hookform/resolvers": "^5.2.2",

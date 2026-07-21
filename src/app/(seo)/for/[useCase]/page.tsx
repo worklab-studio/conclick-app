@@ -1,7 +1,8 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getEntry, useCaseParams } from '@/content';
-import { canonical, ogImageUrl } from '@/lib/seo';
+import { canonical, ogMeshUrl } from '@/lib/seo';
+import { heroWordFor, meshKeyFor } from '@/lib/mesh/word';
 import { ContentArticle } from '@/components/seo/ContentArticle';
 
 export const dynamicParams = false;
@@ -16,7 +17,7 @@ export async function generateMetadata({ params }: { params: Promise<{ useCase: 
   const e = getEntry('useCase', useCase);
   if (!e) return {};
   const url = canonical(`/for/${e.slug}`);
-  const images = [e.ogImage || ogImageUrl(e.h1, 'Use case')];
+  const images = [e.ogImage || ogMeshUrl(meshKeyFor(e), heroWordFor(e))];
   return {
     title: e.metaTitle,
     description: e.metaDescription,

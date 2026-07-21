@@ -1,7 +1,8 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getEntry, alternativeParams } from '@/content';
-import { canonical, ogImageUrl } from '@/lib/seo';
+import { canonical, ogMeshUrl } from '@/lib/seo';
+import { heroWordFor, meshKeyFor } from '@/lib/mesh/word';
 import { ContentArticle } from '@/components/seo/ContentArticle';
 
 export const dynamicParams = false;
@@ -20,7 +21,7 @@ export async function generateMetadata({
   const e = getEntry('alternative', competitor);
   if (!e) return {};
   const url = canonical(`/alternatives/${e.slug}`);
-  const images = [e.ogImage || ogImageUrl(e.h1, 'Alternatives')];
+  const images = [e.ogImage || ogMeshUrl(meshKeyFor(e), heroWordFor(e))];
   return {
     title: e.metaTitle,
     description: e.metaDescription,

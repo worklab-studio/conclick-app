@@ -2,7 +2,8 @@ import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 import { notFound } from 'next/navigation';
 import { getEntry, toolParams } from '@/content';
-import { canonical, ogImageUrl } from '@/lib/seo';
+import { canonical, ogMeshUrl } from '@/lib/seo';
+import { heroWordFor, meshKeyFor } from '@/lib/mesh/word';
 import { ContentArticle } from '@/components/seo/ContentArticle';
 import { UtmBuilder } from '@/components/seo/tools/UtmBuilder';
 
@@ -27,7 +28,7 @@ export async function generateMetadata({
   const e = getEntry('tool', tool);
   if (!e) return {};
   const url = canonical(`/tools/${e.slug}`);
-  const images = [e.ogImage || ogImageUrl(e.h1, 'Free tool')];
+  const images = [e.ogImage || ogMeshUrl(meshKeyFor(e), heroWordFor(e))];
   return {
     title: e.metaTitle,
     description: e.metaDescription,

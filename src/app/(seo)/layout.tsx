@@ -1,3 +1,9 @@
+// Instrument Serif — the display face for MeshHero's word and the serif-italic
+// accents in the blog headlines. Imported HERE, not in the root layout, so the
+// ~18KB face ships only with the seven public SEO routes and never enters the
+// signed-in app bundle. latin-400 only: the app is English-only and the word is
+// always a single lowercase latin token, so latin-ext would be dead weight.
+import '@fontsource/instrument-serif/latin-400.css';
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 import { SeoNav } from '@/components/seo/SeoNav';

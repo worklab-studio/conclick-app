@@ -58,6 +58,12 @@ export interface InternalLink {
   group: ContentType | 'integration';
 }
 
+/** One entry in the SOURCES list rendered at the foot of an article. */
+export interface Source {
+  label: string; // human-readable: "GA4 data sampling thresholds — Google"
+  url: string; // absolute, external
+}
+
 export interface LeadMagnet {
   kind: 'addWebsite' | 'tool';
   headline: string;
@@ -83,6 +89,37 @@ export interface ContentEntry {
   leadMagnet: LeadMagnet;
   datePublished: string; // ISO
   dateModified: string; // ISO
+
+  // ---------------------------------------------------------------------------
+  // Editorial / mesh-art additions. ALL OPTIONAL, and they must stay that way:
+  // next.config.ts sets typescript.ignoreBuildErrors, so a newly-required field
+  // would not fail the build — it would ship as `undefined` into production and
+  // render a blank hero on all 44 existing entries. Optional + a runtime
+  // fallback for every one of these is the only safe shape here.
+  // ---------------------------------------------------------------------------
+
+  /**
+   * The single serif word painted on the mesh hero, e.g. "capped." "growth.".
+   * Lowercase, 3-12 chars, include the trailing period — it is the whole visual
+   * idea. Omit it and src/lib/mesh/word.ts derives one from the slug.
+   */
+  heroWord?: string;
+
+  /** Display category for the blog index filter row, e.g. "Analytics". */
+  category?: string;
+
+  /** 2-5 lowercase tags for the TOPICS pill cloud, e.g. ["ga4", "privacy"]. */
+  topics?: string[];
+
+  /**
+   * Explicit citation list rendered as SOURCES.
+   *
+   * This is the highest-leverage field for GEO: an enumerated, linked source
+   * list is a primary signal LLM retrievers use to judge whether a page is
+   * trustworthy enough to cite. Prefer primary sources (vendor docs, the actual
+   * regulation, published research) over secondary commentary.
+   */
+  sources?: Source[];
 }
 
 // Maps a content type to its URL path (no leading host; siteUrl() prefixes it).

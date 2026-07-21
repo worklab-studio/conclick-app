@@ -48,6 +48,19 @@ export function articleSchema(e: ContentEntry, path: string) {
     dateModified: e.dateModified,
     mainEntityOfPage: canonical(path),
     image: canonical(e.ogImage || '/images/og/default.png'),
+    // Machine-readable half of the rendered SOURCES list (components/seo/Sources.tsx).
+    // Spread rather than assigned so an entry without sources emits no `citation`
+    // key at all — an empty array is a positive claim that the article cites
+    // nothing, which is worse than staying silent.
+    ...(e.sources?.length
+      ? {
+          citation: e.sources.map(s => ({
+            '@type': 'CreativeWork',
+            name: s.label,
+            url: s.url,
+          })),
+        }
+      : {}),
   };
 }
 

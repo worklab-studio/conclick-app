@@ -1,7 +1,8 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getEntry, glossaryParams } from '@/content';
-import { canonical, ogImageUrl } from '@/lib/seo';
+import { canonical, ogMeshUrl } from '@/lib/seo';
+import { heroWordFor, meshKeyFor } from '@/lib/mesh/word';
 import { ContentArticle } from '@/components/seo/ContentArticle';
 
 export const dynamicParams = false;
@@ -16,7 +17,7 @@ export async function generateMetadata({ params }: { params: Promise<{ term: str
   const e = getEntry('glossary', term);
   if (!e) return {};
   const url = canonical(`/glossary/${e.slug}`);
-  const images = [e.ogImage || ogImageUrl(e.h1, 'Glossary')];
+  const images = [e.ogImage || ogMeshUrl(meshKeyFor(e), heroWordFor(e))];
   return {
     title: e.metaTitle,
     description: e.metaDescription,

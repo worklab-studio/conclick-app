@@ -173,6 +173,20 @@ const entry: ContentEntry = {
     "sub": "Conclick gives you privacy-first analytics, heatmaps, funnels, and revenue attribution in one. Free for 14 days, no card.",
     "ctaLabel": "Add My Website"
   },
+  "sources": [
+    {
+      "label": "Regulation (EU) 2016/679 (GDPR): consent conditions, Article 7",
+      "url": "https://eur-lex.europa.eu/eli/reg/2016/679/oj"
+    },
+    {
+      "label": "Directive 2002/58/EC (ePrivacy): the origin of the cookie banner",
+      "url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32002L0058"
+    },
+    {
+      "label": "California Consumer Privacy Act (CCPA): Office of the Attorney General",
+      "url": "https://oag.ca.gov/privacy/ccpa"
+    }
+  ],
   "datePublished": "2026-06-18",
   "dateModified": "2026-06-18"
 };
