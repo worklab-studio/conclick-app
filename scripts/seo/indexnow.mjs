@@ -151,11 +151,45 @@ export async function submit(urlList, { key, dry = false } = {}) {
 
 // --- cli -------------------------------------------------------------------
 
+// Ledger of what has already been submitted. Git-tracked so the record survives
+// a machine change, and so a diff shows exactly what was announced and when.
+const LEDGER = path.join(HERE, 'indexnow-submitted.json');
+
+function readLedger() {
+  try {
+    const j = JSON.parse(fs.readFileSync(LEDGER, 'utf8'));
+    return j && typeof j === 'object' && j.submitted ? j : { submitted: {} };
+  } catch {
+    return { submitted: {} };
+  }
+}
+
+function writeLedger(led) {
+  const sorted = Object.fromEntries(Object.entries(led.submitted).sort(([a], [b]) => a.localeCompare(b)));
+  fs.writeFileSync(LEDGER, JSON.stringify({ submitted: sorted }, null, 2) + '\n');
+}
+
+/**
+ * URLs that exist now but have never been submitted.
+ *
+ * This is the mode the scheduled routine should use. Submitting "the page I just
+ * wrote" depends on the routine reaching that step: if it errors earlier, runs in
+ * review mode, or simply forgets, that page is never announced and NOTHING ever
+ * notices. Diffing against a ledger is self-healing — whatever was missed goes out
+ * on the next run, and re-running is a no-op rather than a duplicate submission.
+ */
+export async function newUrls() {
+  const led = readLedger();
+  const all = await resolveAllUrls();
+  return { fresh: all.filter(u => !led.submitted[u]), all, led };
+}
+
 function parseArgs(argv) {
-  const out = { all: false, dry: false, urls: [] };
+  const out = { all: false, new: false, dry: false, urls: [] };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     if (a === '--all') out.all = true;
+    else if (a === '--new') out.new = true;
     else if (a === '--dry' || a === '--dry-run') out.dry = true;
     else if (a === '--urls') {
       while (i + 1 < argv.length && !argv[i + 1].startsWith('--')) out.urls.push(argv[++i]);
@@ -166,9 +200,13 @@ function parseArgs(argv) {
 }
 
 const USAGE = `Usage:
+  node scripts/seo/indexnow.mjs --new [--dry]        <-- use this one in automation
   node scripts/seo/indexnow.mjs --all [--dry]
   node scripts/seo/indexnow.mjs --urls <u1> [u2 ...] [--dry]
 
+  --new     submit only URLs not yet in indexnow-submitted.json, then record them.
+            Idempotent and self-healing: a missed run is caught by the next one,
+            and re-running submits nothing.
   --all     submit every URL in the sitemap (live sitemap.xml, else local registry)
   --urls    submit specific URLs (paths like /blog/foo or full conclick.io URLs)
   --dry     print the exact payload and exit WITHOUT submitting
@@ -176,20 +214,48 @@ const USAGE = `Usage:
 
 async function main() {
   const args = parseArgs(process.argv.slice(2));
-  if (args.help || (!args.all && !args.urls.length)) {
+  if (args.help || (!args.all && !args.new && !args.urls.length)) {
     console.log(USAGE);
     process.exit(args.help ? 0 : 1);
   }
 
   const key = loadKey();
-  const urls = args.all ? await resolveAllUrls() : args.urls.map(absolutize);
+
+  let urls;
+  let ledger = null;
+  if (args.new) {
+    const { fresh, all, led } = await newUrls();
+    urls = fresh;
+    ledger = led;
+    console.log(`[indexnow] ${all.length} url(s) known, ${fresh.length} not yet submitted`);
+    if (!fresh.length) {
+      console.log('[indexnow] nothing new — no submission made');
+      return;
+    }
+  } else {
+    urls = args.all ? await resolveAllUrls() : args.urls.map(absolutize);
+  }
 
   console.log(`[indexnow] key ${key.slice(0, 6)}… keyLocation ${BASE}/${key}.txt`);
-  console.log(`[indexnow] ${urls.length} url(s):`);
+  console.log(`[indexnow] submitting ${urls.length} url(s):`);
   for (const u of urls) console.log(`  ${u}`);
 
+  let ok = true;
   for (let i = 0; i < urls.length; i += MAX_BATCH) {
-    await submit(urls.slice(i, i + MAX_BATCH), { key, dry: args.dry });
+    const res = await submit(urls.slice(i, i + MAX_BATCH), { key, dry: args.dry });
+    // submit() may return undefined on older paths; treat only an explicit
+    // failure as failure so we never silently skip recording a good submission.
+    if (res && res.ok === false) ok = false;
+  }
+
+  // Only record after a successful, non-dry submission. Recording a failed
+  // submission would permanently hide those URLs from --new, which is exactly
+  // the silent gap this mode exists to close.
+  if (ledger && ok && !args.dry) {
+    const at = new Date().toISOString();
+    for (const u of urls) ledger.submitted[u] = at;
+    writeLedger(ledger);
+    console.log(`[indexnow] recorded ${urls.length} url(s) in indexnow-submitted.json`);
   }
 }
 

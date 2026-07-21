@@ -80,7 +80,7 @@ const DONE = ['published', 'covered']; // clusters in these states block their w
 // INSERT column list, the INSERT params and the DO UPDATE params are all derived
 // from this one array so they can never drift apart.
 const UPSERT_COLS = [
-  'seed', 'cluster', 'content_type', 'format', 'intent',
+  'seed', 'cluster', 'topic', 'content_type', 'format', 'intent',
   'search_volume', 'keyword_difficulty', 'competition', 'cpc',
   'demand', 'opportunity', 'value', 'fit', 'score',
   'slug', 'source', 'notes', 'published_at',
@@ -96,6 +96,12 @@ CREATE TABLE IF NOT EXISTS keywords (
   keyword            TEXT PRIMARY KEY,
   seed               TEXT,
   cluster            TEXT NOT NULL DEFAULT '',
+  -- The seeds.txt "# cluster:" header this row came from ("geo-ai-citation",
+  -- "funnel-dropoff-diagnosis", ...). The cluster column is a per-keyword token
+  -- signature and is therefore almost 1:1 with rows (543 clusters / 545 rows),
+  -- so it cannot express topical spread. topic can, and the breadth bucket
+  -- partitions on it.
+  topic              TEXT,
   content_type       TEXT,
   format             TEXT,
   intent             TEXT,
@@ -178,6 +184,7 @@ export function openDb(file = DB_PATH) {
   // table, so an already-seeded backlog would keep failing on setStatus.
   const cols = db.prepare('PRAGMA table_info(keywords)').all().map(c => c.name);
   if (!cols.includes('reason')) db.exec('ALTER TABLE keywords ADD COLUMN reason TEXT');
+  if (!cols.includes('topic')) db.exec('ALTER TABLE keywords ADD COLUMN topic TEXT');
   return db;
 }
 
@@ -359,8 +366,16 @@ const BUCKETS = {
     where: `intent IN ('commercial','transactional')`,
     order: `score DESC, search_volume DESC, keyword ASC`,
   },
+  // Breadth means TOPICAL spread, so it partitions on `topic` (the seeds.txt
+  // cluster header) instead of `cluster`. Partitioning on `cluster` made this
+  // bucket a strict duplicate of `money`: cluster is a per-keyword token
+  // signature, so ROW_NUMBER never actually deduped anything and the result
+  // collapsed to a global `ORDER BY score DESC`. Intent boost is a hard ceiling
+  // (commercial x1.3 vs informational x1.0), so all 74 commercial rows outrank
+  // all 469 informational ones and no masterclass topic could ever surface.
   breadth: {
     where: `1=1`,
+    partition: `COALESCE(NULLIF(topic, ''), cluster)`,
     order: `score DESC, search_volume DESC, keyword ASC`,
   },
   // Deliberately NO volume floor anywhere in this file: NULL-volume long tails
@@ -398,7 +413,7 @@ export function pickNext(db, { bucket = 'money', n = 2 } = {}) {
     .prepare(
       `WITH cand AS (
          SELECT ${SEL},
-                ROW_NUMBER() OVER (PARTITION BY cluster ORDER BY ${b.order}) AS rn
+                ROW_NUMBER() OVER (PARTITION BY ${b.partition ?? 'cluster'} ORDER BY ${b.order}) AS rn
          FROM keywords k
          WHERE status = 'discovered'
            AND (${b.where})

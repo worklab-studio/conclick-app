@@ -19,10 +19,29 @@
 # POSITIONING
 #   Conclick = privacy-first analytics + heatmaps + funnels + revenue
 #   attribution in one. ICP = bootstrapped SaaS and ecommerce founders.
-#   The structural moat nobody else owns is the PRIVACY x HEATMAP intersection:
-#   every other privacy analytics tool (Plausible, Fathom, Simple, Pirsch,
-#   Umami) ships no heatmaps, and every heatmap tool (Hotjar, Clarity,
-#   Mouseflow, Crazy Egg) is cookie-based. Those rows are seeded heaviest.
+#   The defensible wedge is REVENUE ATTRIBUTION — tying Stripe / Paddle / Polar
+#   / Lemon Squeezy / Dodo payments back to source, campaign and funnel. Nothing
+#   else combines cookieless measurement with multi-processor payment
+#   attribution. Heatmaps are NOT a wedge: Matomo, TWIPLA, Piwik PRO, PostHog,
+#   Clicky, Silktide and Humblytics all ship privacy-positioned heatmaps, and
+#   Umami added them upstream in 3.2.0. Seed heatmaps as INTERPRETATION
+#   ("how to actually read a heatmap"), never as a capability claim.
+#
+# FILE ORDER IS LOAD-BEARING.
+#   MONEY clusters come first, MASTERCLASS clusters after. score.mjs walks this
+#   file in order and the `money` pick bucket takes from the top, so moving a
+#   masterclass cluster above the fold silently starves the commercial pages.
+#
+# HUB AND SPOKE — why the masterclass clusters exist.
+#   The masterclass pages do NOT convert directly, and they are not supposed to.
+#   Their job is topical authority, links and AI citation, which is what
+#   eventually makes the money pages above rank. Two rules keep them winnable:
+#     BROAD IN TOPIC, LONG-TAIL IN QUERY. "what is seo" belongs to HubSpot and
+#     Backlinko and is unwinnable for a young domain. "how to tell if your
+#     traffic is bots" is winnable and equally on-topic.
+#     PREFER A DECISION OR A DIAGNOSIS. "how do i know if...", "why is X showing
+#     Y", "should i use A or B". Those are underserved and they build trust.
+#   Head terms are conceded on purpose. Do not add them back.
 
 # cluster: money-product-intent | intent: commercial
 privacy friendly analytics
@@ -225,3 +244,412 @@ analytics mcp vs api
 best ai analytics tools for founders
 automate weekly analytics report with ai
 ai powered funnel analysis
+
+# ===========================================================================
+# MASTERCLASS HUB — everything below this line is authority content.
+#
+# These clusters teach SEO, GEO, measurement, CRO and growth generally. They
+# are informational by design; several will never mention Conclick at all, and
+# that is the intended outcome (see prompts.mjs, the masterclass brief).
+#
+# GATE NOTE: these seeds are phrased NATURALLY on purpose. The POSITIVE list in
+# gates.mjs was widened to cover SEO / GEO / CRO / growth vocabulary precisely
+# so that seeds no longer have to be contorted with a trailing "organic traffic"
+# just to survive the gate. If you add a seed here, phrase it the way a founder
+# would actually type it, then run it through relevant() to confirm.
+# ===========================================================================
+# cluster: geo-ai-citation | intent: informational
+how to get cited by chatgpt
+how to get cited by perplexity
+how do i know if chatgpt is recommending my product
+why chatgpt recommends competitors and not my saas
+how to check if my site appears in ai search traffic
+does schema markup help chatgpt cite you
+how to structure a page so an llm can quote it
+why perplexity cites reddit and not my site
+how to get my saas mentioned by an ai assistant
+do llms prefer comparison pages
+how often do llms refresh what they know about a site
+should i write faq sections for llm citation
+how to track brand mentions in chatgpt answers
+what makes content quotable by claude vs chatgpt
+how to write a first paragraph an llm will lift
+does being on wikipedia affect chatgpt citations
+generative engine optimization checklist for a small site
+is geo just seo with a new name
+how to measure if geo is working
+does geo replace organic traffic strategy
+
+# cluster: geo-measurement-attribution | intent: informational
+why is ai traffic showing as direct
+how to separate ai referral traffic from direct traffic
+chatgpt referral traffic not showing in analytics
+how to attribute revenue to chatgpt referrals
+do ai referrals convert better than organic traffic
+how to build an ai search channel group in analytics
+what percentage of traffic comes from llms
+how to tell if perplexity sent you a paying customer
+utm parameters for ai referral traffic
+how to track claude and gemini referrals separately
+is chatgpt traffic worth any revenue
+how to measure ai search traffic without ga4
+why does perplexity traffic have no referrer
+crawl to refer ratio for ai crawlers
+how to build a dashboard for ai traffic
+do ai bots inflate my pageview numbers
+how to filter ai crawler hits out of analytics
+how to prove ai search traffic drove a signup
+does chatgpt strip utm parameters from links
+
+# cluster: geo-crawler-policy | intent: informational
+what is llms.txt
+does llms.txt actually do anything
+llms.txt vs robots txt
+how to write llms.txt for a saas site
+should i block gptbot
+which ai crawlers should i allow
+is claudebot the same as claude searchbot
+does blocking gptbot hurt search traffic
+how much bandwidth do ai crawlers use
+what is indexnow and does it help search console
+how to see which ai crawlers visited my site
+do ai crawlers execute javascript tracking
+schema markup that helps an llm understand your site
+how to verify an ai crawler is not fake bot traffic
+should i let perplexity crawl my docs
+robots txt rules for llm crawlers
+does an llm see my page the same as a visitor
+
+# cluster: search-console-diagnosis | intent: informational
+why is my page not indexed google search console
+search console impressions up clicks down
+crawled currently not indexed in search console
+discovered currently not indexed how to fix search console
+how to read the search console query report
+why does search console show different numbers than analytics
+what does search console average position actually mean
+how to find pages losing organic traffic in search console
+why did my organic traffic drop after ai overviews
+how to tell if a traffic drop is seasonal or a penalty
+search console coverage report explained
+how long until a new page gets indexed search console
+how to get a new blog post indexed faster
+search console vs analytics organic traffic mismatch
+why do impressions come from queries i do not rank for
+how to spot keyword cannibalization in search console
+how to tell if a traffic drop is an algorithm update
+
+# cluster: onpage-technical-diagnosis | intent: informational
+how internal linking affects organic traffic
+how many internal links per page
+does site architecture affect organic traffic
+why orphan pages get no organic traffic
+how to structure a blog for topical authority
+should i noindex tag pages
+does title tag or h1 matter more for seo
+how to write a meta description that improves ctr
+why is my ctr low despite ranking well
+do i need to update old posts to keep organic traffic
+duplicate content across landing page variants
+how to fix thin pages that get no search traffic
+does page speed actually affect organic traffic
+how to consolidate two pages competing for the same keyword
+canonical tag mistakes that hurt organic traffic
+does word count affect organic traffic
+
+# cluster: keyword-research-content-strategy | intent: informational
+how to find keywords a new site can rank for
+how to tell if a keyword is too competitive
+how accurate is keyword difficulty
+how to do keyword research on a zero budget
+how to match search intent to a landing page
+how many blog posts before organic traffic starts
+how long does seo take to show organic traffic
+programmatic seo pages that actually get organic traffic
+how many programmatic pages is too many
+does ai written content still get organic traffic
+does e-e-a-t matter for a solo founder blog
+how to show e-e-a-t experience signals on a saas blog
+how to build topical authority as a one person team
+comparison pages or guides which drives more conversion
+how to decide what to write next for organic traffic
+do backlinks still matter for organic traffic
+how to get first backlinks for referral traffic
+
+# cluster: seo-for-modern-stacks | intent: informational
+nextjs seo checklist
+how to add metadata to nextjs app router
+does client side rendering hurt organic traffic
+webflow seo limitations
+framer site not getting indexed
+astro blog seo setup
+shopify duplicate product pages organic traffic
+how to add structured data to shopify
+sveltekit prerendering and organic traffic
+do single page apps get organic traffic
+how to add a sitemap to nextjs
+wordpress to astro migration organic traffic loss
+ghost blog seo settings
+does hosting a blog on a subdomain split organic traffic
+subfolder vs subdomain for blog organic traffic
+
+# cluster: metric-definitions-compared | intent: informational
+new visitors vs returning visitors
+events vs pageviews
+engagement rate vs bounce rate
+gross churn vs net churn
+macro conversions vs micro conversions
+scroll depth vs time on page
+rolling retention vs n day retention
+average order value vs revenue per visitor
+impressions vs clicks in search console
+pageviews vs unique pageviews
+
+# cluster: numbers-dont-match-diagnosis | intent: informational
+why is my analytics traffic lower than my server logs
+why are my ga4 and search console numbers different
+why is stripe revenue higher than my analytics revenue
+why are facebook ads conversions higher than analytics
+ad platform conversions not tracking correctly
+why is my bounce rate suddenly zero
+why is my direct traffic so high
+why is organic traffic showing as direct
+why are my conversion numbers wrong in ga4
+why is my ecommerce revenue missing from analytics
+why is my funnel conversion count higher than my signups
+duplicate pageviews in analytics
+why are my pageviews doubling
+why is my server side tracking count different from client side
+cross domain tracking not working
+why are my utm campaigns not showing in reports
+why is my mrr in analytics different from my payment processor
+which number should i trust analytics or stripe
+how many visitors do adblockers hide from analytics
+
+# cluster: bot-and-spam-traffic-diagnosis | intent: informational
+how to tell if your website traffic is bots
+how to identify bot traffic in analytics
+how to spot a bot traffic spike
+how to block referral spam in analytics
+ghost referral traffic fix
+why is my traffic spiking at night with no conversions
+are ai crawlers counted as traffic in analytics
+how to filter internal traffic from your analytics
+should i exclude bot traffic from my conversion rate
+how to block datacenter bot traffic in analytics
+bot filtering vs bot detection in analytics
+why are bots showing up in my heatmap clicks
+uptime monitors and preview bots inflating pageviews
+how to tell real users from scrapers in web traffic
+do ai bots like chatgpt inflate pageview counts
+
+# cluster: attribution-models-practical | intent: informational
+first touch vs last touch attribution
+linear vs time decay attribution
+position based vs data driven attribution
+multi touch vs single touch attribution
+attribution window vs lookback window
+how to choose an attribution model for a small saas
+why is my last click attribution overvaluing google
+self reported attribution vs utm tracking
+how to set up self reported attribution on signup
+incrementality testing vs attribution modeling
+how to run a holdout test to prove campaign incrementality
+why paid campaigns look better in ad platforms than in analytics
+what is a view through conversion
+dark traffic vs direct traffic explained
+how to attribute revenue across multiple visits
+should you use last click or linear attribution on a small budget
+attribution for products with long sales cycles
+
+# cluster: tracking-plan-and-utm-discipline | intent: informational
+how to build a tracking plan for a small saas
+event naming convention examples for web analytics
+object action vs verb noun event naming
+how many events should i track
+utm medium vs utm campaign
+should utm parameters be lowercase
+why are my utm tags getting stripped by redirects
+utm naming convention for a solo founder
+how to track email newsletter clicks without utm bloat
+why is my internal utm tagging breaking sessions
+custom event properties vs separate events
+how to name conversion events consistently across tools
+tracking plan spreadsheet template
+how to audit an existing tracking setup
+when to use a custom event vs a pageview goal
+
+# cluster: what-to-measure-by-stage | intent: informational
+which metrics matter before product market fit
+what to measure on a pre launch landing page
+minimum website traffic for ab test significance
+how many visitors before conversion rate is meaningful
+north star metric examples for bootstrapped saas
+leading vs lagging indicators in a saas dashboard
+activation rate vs conversion rate
+what to track in the first 90 days after launch
+which analytics reports to check weekly
+daily vs weekly vs monthly reporting cadence
+how often should i check my analytics dashboard
+when to stop tracking a metric
+ecommerce metrics that actually predict revenue
+how to set a realistic conversion rate goal
+what is an average session duration benchmark
+
+# cluster: data-quality-and-trust | intent: informational
+what is data thresholding in analytics
+cardinality limits in analytics reports
+why are my landing pages grouped as other in reports
+sampling vs thresholding explained
+how long should i keep raw analytics data
+data retention limits and what you lose
+why is my conversion rate different in two analytics dashboards
+timezone settings making my daily traffic report wrong
+how to validate that your analytics is actually correct
+first party vs third party tracking accuracy
+why is my session count higher on mobile
+session timeout settings and how they inflate your numbers
+single page app pageviews counted twice fix
+how to spot check your analytics against a known number
+why analytics numbers change after you look at them
+is 100 percent accurate analytics possible
+
+# cluster: funnel-dropoff-diagnosis | intent: informational
+how to find where users drop off in a funnel
+why is my funnel conversion rate so low
+how to tell if a funnel step is broken or just unpopular
+funnel drop off between signup and first action
+how many steps should a saas signup funnel have
+what is a normal drop off rate between funnel steps
+how to build a funnel when you only have 500 visitors
+why does my funnel show more conversions than stripe
+how to diagnose a sudden drop in conversion rate
+is funnel drop off a ux problem or a traffic quality problem
+how to segment a funnel by traffic source
+why do mobile visitors convert worse than desktop
+how to tell if visitors skip a funnel step
+what to fix first when every funnel step leaks
+how to measure a funnel that spans multiple sessions
+why does my conversion rate not match between two analytics dashboards
+
+# cluster: low-traffic-experimentation | intent: informational
+how to a/b test with low traffic
+minimum traffic needed for an a/b test
+how long should an a/b test run on a small site
+a/b testing when you only have 500 visitors a month
+how to calculate sample size for an a/b test without a stats tool
+what statistical significance actually means for a conversion test
+why did my a/b test never reach significance
+is a 10 percent conversion lift real or noise
+how to run experiments without an a/b testing tool
+sequential testing vs fixed sample a/b test
+what to do when an a/b test is inconclusive
+can i a/b test with 50 conversions a month
+before after test vs a/b test for low traffic sites
+how to prioritise conversion experiments with limited traffic
+why small a/b tests give false positives
+how to a/b test a landing page without splitting traffic
+painted door test vs a/b test for validating demand
+should i a/b test or just ship the change
+what counts as enough data to call an a/b test
+
+# cluster: landing-page-and-offer-optimisation | intent: informational
+how to tell if a landing page is underperforming
+why does my landing page get traffic but no signups
+how many sections should a saas landing page have
+what to change first on a landing page that does not convert
+how to measure which landing page section drives signups
+does above the fold still matter for conversion
+how to measure whether a headline change increased signups
+single page vs multi page saas site for conversion
+how to test social proof placement on a landing page
+why visitors scroll past my call to action
+how to know if my landing page or my traffic source is the problem
+how many ctas should a landing page have
+should i offer a free trial or a demo for more signups
+how to measure whether a testimonial section increases conversions
+plans page layout that increases signups
+how to test a plan tier change without hurting mrr
+how to measure the revenue impact of adding an annual plan
+anchoring plan tiers to increase revenue per visitor
+should i show plans before or after signup
+why do people visit my plans page and never checkout
+
+# cluster: heatmap-and-replay-interpretation | intent: informational
+how to actually read a heatmap
+what a heatmap cannot tell you
+how many sessions do you need for a useful heatmap
+why is my heatmap all red above the fold
+click map vs scroll map which to look at first
+how to spot rage clicks in a session recording
+what to look for in a session replay of a checkout
+how many session recordings should i watch
+dead clicks meaning in a heatmap
+why do users click things that are not links
+how to use a heatmap to find a broken form
+what a scroll heatmap tells you about page length
+how to compare heatmaps before and after a redesign
+mobile vs desktop heatmap differences
+how to sample session replays without watching hours of video
+what a click map shows that a funnel does not
+how to turn heatmap findings into an a/b test
+are session recordings worth it for a small site
+
+# cluster: checkout-and-form-conversion | intent: informational
+how to find where users abandon a checkout
+why do people abandon checkout at the payment step
+how many form fields is too many for conversion
+how to track form field abandonment
+why is my signup form conversion rate dropping
+one step vs multi step checkout conversion
+how to measure checkout drop off by payment method
+do i need a credit card upfront for free trial signups
+how to track failed payments as a conversion problem
+why does my checkout convert worse on mobile
+how to measure whether guest checkout converts better
+what checkout errors look like in analytics
+how to reduce form errors that kill conversions
+how to track which form field causes drop off
+how to tell if payment method choice is costing you revenue
+how to measure time to complete a signup form
+
+# cluster: activation-retention-churn | intent: informational
+how to define an activation event for a saas
+how to measure signup to activation rate
+what counts as an activated user in analytics
+how to find the aha moment in your funnel data
+why do signups never come back
+how to build an onboarding funnel report
+what churn rate is normal for early saas
+how to measure churn with fewer than 100 customers
+voluntary vs involuntary churn for small saas
+how to tell if churn is a product problem or an acquisition problem
+how to build a retention curve with limited data
+what a flattening retention curve actually means
+how to run a cohort analysis without a data team
+how to measure feature adoption with events
+is my ltv calculation wrong with only 6 months of data
+how to track expansion revenue separately from new mrr
+how to spot churn risk in product usage data
+why does my mrr grow while retention gets worse
+
+# cluster: founder-channel-strategy | intent: informational
+how to know which traffic channel is actually working
+how to pick a channel when every campaign looks the same in analytics
+how long before a new channel shows results in analytics
+how to measure content marketing without an analytics team
+how to tell if a blog post drove any signups
+how to attribute revenue to a blog post
+how to tell if a channel brings buyers or just visitors
+what to track on product hunt launch day
+how to compare newsletter and search traffic quality
+how to tell if seo is working before organic traffic arrives
+how many visitors do you need before optimising conversion
+how to compare paid traffic and organic traffic roi
+how to track referral traffic from a podcast appearance
+how to set up utm links for every channel consistently
+what metrics to watch in the first 90 days of a new saas
+how to build a weekly growth dashboard as a solo founder
+how to tell if a campaign is worth repeating
+why does my traffic grow but revenue stay flat
+how to measure word of mouth referral traffic

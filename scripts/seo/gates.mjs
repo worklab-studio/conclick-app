@@ -143,9 +143,34 @@ const NEGATIVE = [
   /\b(porn|xxx|escort|dating app)\b/,
   /\b(login|log in|sign in|signin|customer service number|phone number|contact number|helpline)\b/,
   /\b(meaning in hindi|in urdu|in tamil|traduccion|kya hai)\b/,
+  // Added alongside the masterclass POSITIVE widening. Accepting bare "seo"
+  // opens the done-for-you SERVICES orbit, which is buying intent for an agency
+  // retainer — a thing Conclick does not sell and cannot honestly write.
+  /\bseo (services?|compan(y|ies)|agenc(y|ies)|expert(s)?|specialists?|consultants?|packages?|reseller|audit service|outsourc\w*|freelancer)\b/,
+  /\b(marketing|advertising|web design|link building) (agency|agencies|services?|company|companies)\b/,
+  // Blackhat / paid-link orbit. Same reason: not ours, and not defensible.
+  /\b(buy backlinks|backlink packages?|guest post service|pbn|link farm|private blog network|black ?hat seo|rank and rent)\b/,
+  // "geo" is a POSITIVE token (generative engine optimization) but is also an
+  // ordinary networking prefix. Reject the networking sense explicitly.
+  /\bgeo.?(blocking|fencing|restrict\w*|location|targeting|ip|redirect)\b/,
 ];
 
 // PHASE 2 — must match at least one. Domain surface + every competitor brand.
+//
+// SCOPE NOTE (masterclass hub). This list used to describe Conclick's PRODUCT
+// surface only, which meant the gate rejected most of the topics the hub exists
+// to own: SEO, GEO/AI-search, CRO and experimentation, growth measurement. On a
+// naturally-phrased sample of masterclass queries it rejected or deferred 14/30.
+// The vocabulary blocks below widen the topic surface deliberately.
+//
+// This does NOT make the gate a pass-through. Two things keep it a filter:
+//   1. NEGATIVE still runs first and unconditionally, so the careers /
+//      certification / agency / spam orbit that "seo" and "keyword" otherwise
+//      drag in ("seo jobs near me", "seo salary", "google analytics academy
+//      exam") rejects before a single POSITIVE pattern is evaluated.
+//   2. Every widened token is still a MEASUREMENT-or-SEARCH term. Generic
+//      software, generic business and generic consumer queries have no match
+//      here and fall through to reject exactly as before.
 const POSITIVE = [
   // core domain
   /\banalytic(s)?\b|\btracking\b|\btracker\b|\btrack\b|\btelemetry\b/,
@@ -166,7 +191,36 @@ const POSITIVE = [
   /\bstripe\b|\bpaddle\b|\blemon ?squeezy\b|\bpolar\b|\bdodo\b|\brevenue\b|\bmrr\b|\barr\b|\bltv\b|\bcac\b|\bcheckout\b|\bsubscription\w*\b/,
   /\bdashboard(s)?\b|\breport(s|ing)?\b|\bkpi(s)?\b|\bmetric(s)?\b|\bsegment\w*\b|\bself.?host\w*\b|\bopen.?source\b/,
   // AI / MCP (Conclick ships conclick-mcp; almost no competitor does)
-  /\bmcp\b|\bmodel context protocol\b|\bclaude\b|\bchatgpt\b|\bperplexity\b|\bllm(s)?\b|\bai (agent|assistant|crawler|referral|traffic|analytics)\b|\bgenerative engine\b|\bgeo\b/,
+  // NOTE the trailing (s)? on the "ai <noun>" group. Without it the \b after
+  // "crawler" could not match before the plural "s", so "ai crawlers" — the
+  // more natural search phrasing — rejected while "ai crawler" accepted.
+  /\bmcp\b|\bmodel context protocol\b|\bclaude\b|\bchatgpt\b|\bperplexity\b|\bllm(s)?\b|\bai (agent|assistant|crawler|bot|referral|traffic|analytics|search|citation|overview|answer|visibility)(s)?\b|\bgenerative engine\b|\bgeo\b/,
+
+  // ---- MASTERCLASS: organic search -----------------------------------------
+  // "seo" is ours now. It is safe as a bare token ONLY because NEGATIVE already
+  // strips the entire careers/training/agency orbit ahead of this phase.
+  /\bseo\b|\bserp(s)?\b|\bsearch engine optimi[sz]\w*\b|\bai overview(s)?\b|\borganic search\b|\bsearch visibility\b/,
+  /\bkeyword(s)?\b|\bkeyword difficulty\b|\bsearch intent\b|\bcannibali[sz]\w*\b|\blong.?tail\b|\bhead term(s)?\b/,
+  /\bindexed\b|\bindexing\b|\bnoindex\b|\bdeindex\w*\b|\bindexnow\b|\bcrawl\w*\b|\brobots ?\.?txt\b|\bsitemap(s)?\b|\bcanonical\b/,
+  /\bmeta description\b|\btitle tag\b|\bh1\b|\bmeta ?data\b|\bschema markup\b|\bstructured data\b|\brich result(s)?\b|\bopen graph\b/,
+  /\binternal link\w*\b|\bbacklink(s)?\b|\banchor text\b|\borphan page(s)?\b|\btopical authority\b|\be-?e-?a-?t\b|\bdomain authority\b/,
+  /\brank(ing|s)? (for|in|on|higher|number|position)\b|\bsearch rank\w*\b|\bprogrammatic (seo|page|content)\w*\b|\bthin (page|content)\w*\b|\bduplicate content\b/,
+  /\bsubdomain\b|\bsubfolder\b|\bsubdirector\w*\b|\bprerender\w*\b|\b(client|server).?side render\w*\b|\bsingle page app(s)?\b|\bapp router\b/,
+
+  // ---- MASTERCLASS: GEO / AI-search surface --------------------------------
+  // Named crawlers are the block-or-allow decision the hub is built to answer.
+  /\bllms?\.txt\b|\bgptbot\b|\bcc ?bot\b|\bclaude ?bot\b|\boai.?search ?bot\b|\bperplexity ?bot\b|\bbytespider\b|\bgoogle.?extended\b/,
+  /\bgemini\b|\bcited by\b|\bcitation(s)?\b|\bquotable\b|\bbrand mention(s)?\b|\bcrawl to refer\b/,
+
+  // ---- MASTERCLASS: CRO / experimentation ----------------------------------
+  /\bsplit test\w*\b|\bstatistical(ly)? significan\w*\b|\bsample size\b|\bholdout\b|\bincrementality\b|\bfalse positive(s)?\b|\bpainted door\b/,
+  /\bcta(s)?\b|\bcall to action\b|\babove the fold\b|\bsocial proof\b|\btestimonial(s)?\b|\bheadline\b|\bplan tier(s)?\b/,
+  /\b(cart|checkout|form|basket) abandon\w*\b|\babandon\w* (a )?(rate|cart|checkout|form)\b|\bdrop.?off\b|\bform field(s)?\b|\brage click\w*\b|\bdead click\w*\b/,
+
+  // ---- MASTERCLASS: growth / lifecycle measurement -------------------------
+  /\bnorth star metric\b|\bproduct market fit\b|\bpmf\b|\bproduct hunt\b|\blaunch day\b|\bactivation\b|\baha moment\b|\bonboarding\b/,
+  /\b(traffic|marketing|acquisition|distribution) channel(s)?\b|\bchannel (mix|strategy|report|quality)\b|\bcohort analysis\b|\bretention curve\b|\bexpansion revenue\b|\bfeature adoption\b/,
+
   // competitor brands
   /\bplausible\b|\bfathom\b|\bmatomo\b|\bpiwik\b|\bposthog\b|\bmixpanel\b|\bamplitude\b|\bheap\b|\bhotjar\b/,
   /\bmicrosoft clarity\b|\bclarity\b|\bumami\b|\bsimple analytics\b|\bpirsch\b|\bswetrix\b|\bgoatcounter\b|\bcounter\.dev\b/,
@@ -229,34 +283,65 @@ const RULES = [
   },
   // 3. pricing — MUST precede the generic buckets. These are the x1.4
   //    transactional rows and they used to fall through to explainer.
+  //
+  //    Split into strong and weak signals. The old single regex treated bare
+  //    "cost" and "how much" as purchase intent, which published masterclass
+  //    queries as competitor pricing pages: "canonical tag mistakes that cost
+  //    organic traffic" and "how much bandwidth do ai crawlers use" both became
+  //    comparison/pricing/transactional. Weak signals now need a product in view.
   {
-    test: (s) => /\b(pricing|price|prices|cost|costs|how much|free tier|free plan|cheaper|cheapest|affordable|paid plan|per month)\b/.test(s),
+    test: (s) => {
+      if (/\b(pricing|prices|free tier|free plan|paid plan|per month|per year|cheaper|cheapest|affordable|billing)\b/.test(s)) return true;
+      if (!/\b(price|cost|costs|how much)\b/.test(s)) return false;
+      return BRAND.test(s) || /\b(tools?|software|apps?|platforms?|plans?|subscription|licen[cs]e|seat|tier)\b/.test(s);
+    },
     out: { content_type: 'comparison', format: 'pricing', intent: 'transactional' },
   },
   // 4. listicle — explicit ("best x"), and bare product-CATEGORY queries.
   //    A category noun phrase ("privacy friendly analytics", "cookieless
   //    session replay") is commercial shortlist intent, not a blog essay;
   //    without this clause the whole money cluster fell through to blog.
+  //    GUARD: a question is never a shortlist. "why is my heatmap all red above
+  //    the top" tripped on the substring "the top", and "why is my conversion
+  //    rate different in two analytics tools" tripped on "analytics tools" —
+  //    both published as commercial listicles. A query that OPENS with an
+  //    interrogative and carries no superlative is asking, not shopping.
   {
     test: (s) =>
-      /\b(best|top|cheap|popular|recommended)\b/.test(s) ||
+      !(/^(why|how|what|which|when|where|should|does|do|is|are|can|will|did)\b/.test(s) &&
+        !/\b(best|top \d|cheapest|most popular|recommended)\b/.test(s)) &&
+      (/\b(best|top|cheap|popular|recommended)\b/.test(s) ||
       /\b(tools?|software|apps?|platforms?|options?) for\b/.test(s) ||
       (/\b(privacy|privacy.?first|privacy.?friendly|cookieless|cookie ?less|gdpr|ccpa|self.?hosted|open.?source|lightweight|simple|minimal|real.?time|free|no.?cookie)\b/.test(s) &&
         /\b(analytics|heat ?maps?|tracking|tracker|session (replay|recording)|dashboard|attribution|funnels?)\b/.test(s)) ||
-      /\b(analytics|heat ?map|funnel|attribution|tracking) (tools?|software|apps?|platforms?)\b/.test(s),
+      /\b(analytics|heat ?map|funnel|attribution|tracking) (tools?|software|apps?|platforms?)\b/.test(s)),
     out: { content_type: 'alternative', format: 'listicle', intent: 'commercial' },
   },
   // 5. how-to / install / migration
+  //    MASTERCLASS: procedural shapes that carry no "how to" ("nextjs seo
+  //    checklist", "how to audit an existing tracking setup", "ghost blog seo
+  //    settings") are walkthroughs, not essays. Note "template" is deliberately
+  //    NOT here — it must reach the /tools/ fallback below.
   {
     test: (s) =>
       /\bhow (to|do i|can i)\b/.test(s) ||
-      /\b(add|install|set ?up|configure|implement|embed|connect|integrate|track|record|export|migrate|migration|move from|switch (from|to))\b/.test(s),
+      /\b(add|install|set ?up|configure|implement|embed|connect|integrate|track|record|export|migrate|migration|move from|switch (from|to))\b/.test(s) ||
+      /\b(checklist|step.?by.?step|walkthrough|audit|convention)\b/.test(s) ||
+      /\b(seo|analytics|tracking|privacy|cookie|consent|sitemap) settings\b/.test(s),
     out: { content_type: 'guide', format: 'how-to', intent: 'informational' },
   },
   // 6. troubleshooting
+  //    MASTERCLASS: the diagnosis long tail is the highest-trust shape we have,
+  //    and it barely overlapped this rule. "why is"/"why are" matched but
+  //    "why do my"/"why does my"/"why did my" did not, so "why does my checkout
+  //    convert worse on mobile" fell through to a blog essay. The possessive is
+  //    load-bearing: "why do llms prefer comparison pages" is an opinion piece,
+  //    "why do my pageviews double" is a support problem.
   {
     test: (s) =>
-      /\b(not working|not tracking|not showing|not firing|doesn'?t work|broken|fix|error|errors|missing|wrong|why is|why are|zero|undercount\w*|skew\w*|troubleshoot|data loss|data gone|thresholding|sampling|blocked|adblock\w*|duplicate)\b/.test(s),
+      /\b(not working|not tracking|not showing|not firing|not indexed|doesn'?t work|broken|fix|error|errors|missing|wrong|why is|why are|zero|undercount\w*|skew\w*|troubleshoot|data loss|data gone|thresholding|sampling|blocked|adblock\w*|duplicate)\b/.test(s) ||
+      /\bwhy (do|does|did|are|is)? ?(my|our|i|we)\b/.test(s) ||
+      /\b(mismatch|do not match|does not match|doubling|inflat\w*|stripped|discrepanc\w*|suddenly|spiking)\b/.test(s),
     out: { content_type: 'guide', format: 'troubleshooting', intent: 'informational' },
   },
   // 7. definitional
