@@ -23,7 +23,10 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { REPO, DIR } from './lib.mjs';
-import { loadAll, loadEntry, contextFor, validPaths, entryFile, TYPE_OF_DIR } from './entry-load.mjs';
+import {
+  loadAll, loadEntry, contextFor, validPaths, entryFile, entryPath,
+  parseEntrySource, TYPE_OF_DIR,
+} from './entry-load.mjs';
 import { runLaws, LAWS } from './laws.mjs';
 
 const BASELINE = path.join(REPO, 'scripts', 'seo', '.lint-baseline.json');
@@ -110,10 +113,34 @@ function selectRecords(args) {
       console.error(`--entry expects <type>/<slug>, got "${spec}". types: ${Object.keys(DIR).join(', ')}`);
       process.exit(2);
     }
-    const rec = all.find(r => r.key === `${type}/${slug}`);
+    let rec = all.find(r => r.key === `${type}/${slug}`);
     if (!rec) {
-      console.error(`no entry ${type}/${slug} (looked for ${path.relative(REPO, entryFile(type, slug))})`);
-      process.exit(2);
+      // Not in the live corpus — try loading it directly, which picks up
+      // src/content/_drafts/<dir>/<slug>.ts via entryFile().
+      //
+      // loadAll() deliberately scans only the live directories: drafts are not
+      // part of the corpus and must not appear in --all counts or the baseline.
+      // But --entry is exactly how the routine gates a page it just wrote in
+      // review mode, and without this the gate silently could not see it. The
+      // previous behaviour pushed the routine into staging a temp copy in the
+      // live directory, which then survived as an orphan that the next
+      // regenerateIndex() would sweep into the registry and publish unreviewed.
+      const file = entryFile(type, slug);
+      if (!fs.existsSync(file)) {
+        console.error(`no entry ${type}/${slug} (looked for ${path.relative(REPO, file)})`);
+        process.exit(2);
+      }
+      rec = {
+        type,
+        slug,
+        file,
+        relFile: path.relative(REPO, file),
+        key: `${type}/${slug}`,
+        path: entryPath(type, slug),
+        entry: parseEntrySource(fs.readFileSync(file, 'utf8'), `${type}/${slug}`),
+        isDraft: true,
+      };
+      console.log(`(draft) ${rec.relFile}`);
     }
     return [rec];
   }

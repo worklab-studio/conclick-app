@@ -1,11 +1,20 @@
 {
   "keywords": {
+    "cookieless session replay": {
+      "status": "skipped"
+    },
     "do heatmaps need cookie consent": {
       "status": "published",
       "slug": "do-heatmaps-need-cookie-consent",
       "published_at": "2026-07-21T16:52:27.842Z"
     },
+    "gdpr compliant heatmap": {
+      "status": "skipped"
+    },
     "privacy friendly heatmap tool": {
+      "status": "skipped"
+    },
+    "privacy friendly session recording": {
       "status": "skipped"
     }
   }

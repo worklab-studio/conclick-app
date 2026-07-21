@@ -56,9 +56,25 @@ MODE="publish"
 [ "${1:-}" = "--dry" ] && MODE="dry-run (write to _drafts, do not publish or deploy)"
 echo "mode: $MODE"
 
+# Inline the playbook rather than telling the agent to read it.
+#
+# SKILL.md lives in ~/.claude/scheduled-tasks/, outside the repo, so it is
+# outside the session's allowed working directory — the first dry run aborted at
+# step 0 because every read of it was blocked. bash has no such restriction, so
+# the script reads it and passes the text through. This also pins the routine to
+# the version that existed when the run started.
+SKILL="$HOME/.claude/scheduled-tasks/conclick-daily-content/SKILL.md"
+[ -f "$SKILL" ] || { echo "FAIL: playbook not found at $SKILL"; exit 1; }
+PLAYBOOK="$(cat "$SKILL")"
+
 PROMPT="Run the conclick-daily-content routine now.
 
-Read and follow ~/.claude/scheduled-tasks/conclick-daily-content/SKILL.md exactly, start to finish.
+Follow the playbook below exactly, start to finish. It is the canonical routine —
+do not substitute, summarise, or improvise around it.
+
+===== BEGIN PLAYBOOK =====
+${PLAYBOOK}
+===== END PLAYBOOK =====
 
 This is an UNATTENDED scheduled run. Nobody is watching, so:
 - Never ask a question. If a decision is genuinely ambiguous, mark the keyword needs-human, explain why in the report, and stop.
@@ -69,7 +85,16 @@ $([ "${1:-}" = "--dry" ] && echo '- DRY RUN: pass --drafts to write.mjs, and do 
 
 End with the run report from step 8."
 
-claude -p "$PROMPT" --permission-mode acceptEdits
+# --permission-mode acceptEdits auto-approves EDITS ONLY, not Bash. The first
+# dry run stalled on `node scripts/seo/kwstore.mjs report` for exactly that
+# reason. `dontAsk` honours the allow/deny lists in .claude/settings.json and
+# declines anything not covered instead of blocking on a prompt nobody can
+# answer — which is what an unattended run needs.
+#
+# Deliberately NOT bypassPermissions: this run commits to master and deploys to
+# production, so the deny list (fly secrets/ssh/postgres, gh secret, rm -rf,
+# prisma migrate, pnpm run build) has to stay enforced.
+claude -p "$PROMPT" --permission-mode dontAsk
 CODE=$?
 
 echo "=== exit $CODE at $(date) ==="

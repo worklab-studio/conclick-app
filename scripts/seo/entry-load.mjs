@@ -38,8 +38,24 @@ export function entryPath(type, slug) {
   return `/${URL_PREFIX[type]}/${slug}`;
 }
 
+/**
+ * Resolve an entry's file, checking the live directory first and then _drafts.
+ *
+ * The review-mode gate depended on this. write.mjs --drafts emits to
+ * src/content/_drafts/<dir>/<slug>.ts, which is deliberately invisible to
+ * regenerateIndex(), but lint resolved ONLY the live path — so `lint --entry`
+ * could not see a draft at all. In review mode the gate was therefore silently
+ * skipped unless the caller staged a temporary copy into the live directory,
+ * and that copy then survived as an orphan that the next regenerateIndex()
+ * would sweep into the registry and ship unreviewed. A gate that is bypassed
+ * exactly when a human is supposed to be reviewing is worse than no gate.
+ */
 export function entryFile(type, slug) {
-  return path.join(CONTENT, DIR[type], `${slug}.ts`);
+  const live = path.join(CONTENT, DIR[type], `${slug}.ts`);
+  if (fs.existsSync(live)) return live;
+  const draft = path.join(CONTENT, '_drafts', DIR[type], `${slug}.ts`);
+  if (fs.existsSync(draft)) return draft;
+  return live; // preserve the original path in the not-found error
 }
 
 /** Parse the object literal out of an entry file's source text. */

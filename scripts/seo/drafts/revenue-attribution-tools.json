@@ -1,0 +1,181 @@
+{
+  "type": "guide",
+  "slug": "revenue-attribution-tools",
+  "kind": "guide",
+  "keyword": "revenue attribution tool",
+  "draft": {
+    "h1": "Revenue Attribution Tools Worth Buying in 2026: A Founder's Shortlist",
+    "metaTitle": "Revenue Attribution Tools: A Founder's 2026 Shortlist",
+    "metaDescription": "The revenue attribution tools worth considering in 2026, sorted by who they actually fit. Bootstrapped SaaS, ecommerce, or a Segment stack: honest tradeoffs.",
+    "tldr": "The best revenue attribution tool depends on how many payment processors you run, whether you also need behavioural data, and how much engineering time you can spend. For most bootstrapped SaaS founders, one tool that captures traffic, behaviour and payments together beats stitching three of them.",
+    "intro": "I have spent the last two years building one of the tools on this list, and the year before that trying to piece attribution together from GA4, a Stripe export, and a spreadsheet that broke every time somebody upgraded mid-cycle. This is my honest read on which revenue attribution tool fits which team, without affiliate links or paid rankings. If the honest answer for your setup is a competitor or a spreadsheet, I say so.",
+    "sections": [
+      {
+        "type": "h2",
+        "text": "What counts as a revenue attribution tool, and what does not",
+        "id": "what-counts"
+      },
+      {
+        "type": "p",
+        "text": "A revenue attribution tool ties a specific payment back to the traffic source, campaign, and funnel path that earned it. That is a stricter bar than most software labelled analytics. Google Ads tells you a conversion happened; it does not know if that customer refunded a week later, upgraded to a bigger plan a month later, or churned out inside 60 days. GA4 with the ecommerce module gets closer, but the number it stores is the transaction value at checkout, not the actual money you kept after chargebacks and downgrades."
+      },
+      {
+        "type": "p",
+        "text": "The distinction matters because bad attribution funds the wrong campaigns. If your ad platform tells you a channel drove $5,000 of conversions and your Stripe dashboard says that cohort actually paid $1,800 after refunds and cancellations, you will scale the wrong thing for a full quarter before you notice. A real revenue attribution tool closes that loop by reading from the payment processor, not from a checkout event you fired client side."
+      },
+      {
+        "type": "h2",
+        "text": "The three categories you will actually choose between",
+        "id": "three-categories"
+      },
+      {
+        "type": "p",
+        "text": "Most of what is sold as revenue attribution splits into three families, and the right one for you is mostly a function of how much engineering you can spare."
+      },
+      {
+        "type": "ol",
+        "items": [
+          "Marketing-analytics tools with revenue events bolted on. GA4 with ecommerce, or a paid stack like Segment feeding a warehouse. Flexible if you already run a data team. Slow, brittle, and expensive if you do not.",
+          "Product-analytics platforms with revenue as one signal among many. PostHog, Mixpanel, Amplitude. Powerful when the question is behavioural. You will write instrumentation code, and you will maintain it forever.",
+          "Payment-first attribution tools. Read directly from Stripe or Paddle, tie each charge to the session that produced it. This is where Conclick, DataFast, and the MRR-focused tools like ProfitWell live."
+        ]
+      },
+      {
+        "type": "p",
+        "text": "Almost every attribution failure I have seen at small companies comes from choosing category one when the team fits category three. A solo founder does not need Segment. They need something that reads their Stripe events by Friday."
+      },
+      {
+        "type": "callout",
+        "text": "The number you actually want on your dashboard is revenue per source after refunds. If your tool shows conversions but not net revenue by acquisition channel, you have a marketing-analytics tool, not a revenue attribution tool."
+      },
+      {
+        "type": "h2",
+        "text": "How much engineering time is the tool actually asking for?",
+        "id": "engineering-time"
+      },
+      {
+        "type": "p",
+        "text": "Price is the metric buyers compare. Setup time is the one that decides whether the tool ever pays back. I have watched founders pick a $0 or $29 solution and then quietly write off 30 hours of an engineer configuring events, mapping identity across anonymous and logged-in sessions, and rebuilding the pipeline every time Stripe changes a webhook. That is a $6,000 tool wearing a $29 sticker."
+      },
+      {
+        "type": "p",
+        "text": "The honest question is time to first useful report. For a payment-first tool with a script tag and a Stripe OAuth click, that is measured in hours. For a Segment plus warehouse plus BI stack, it is measured in weeks. Neither is wrong. Pick the wrong one for your stage and you will have neither the data nor the money to keep looking."
+      },
+      {
+        "type": "h2",
+        "text": "The shortlist for bootstrapped SaaS and small ecommerce",
+        "id": "shortlist"
+      },
+      {
+        "type": "h3",
+        "text": "Conclick: behaviour plus payments in one dashboard",
+        "id": "conclick"
+      },
+      {
+        "type": "p",
+        "text": "This is the tool I build. It reads from Stripe, Paddle, Polar, Lemon Squeezy, and Dodo, and ties every payment back to the marketing source, campaign, and funnel path. It also captures real-screenshot heatmaps and auto-detected funnels, so the same page shows you which traffic paid and which pages killed the conversion. Pricing is $9 per month or $7 billed yearly, with a 14-day trial and an optional lifetime deal. Privacy-first by default: cookieless tracking, GDPR and CCPA friendly, though in some jurisdictions and configurations a banner may still be required, so check with your DPO rather than trusting a marketing page."
+      },
+      {
+        "type": "p",
+        "text": "Where Conclick loses honestly: no session recording, no feature flags, no in-app product analytics of the PostHog kind. If your questions are mostly about in-product feature usage rather than acquisition and conversion, look elsewhere."
+      },
+      {
+        "type": "h3",
+        "text": "DataFast: dedicated attribution, narrower feature set",
+        "id": "datafast"
+      },
+      {
+        "type": "p",
+        "text": "DataFast is the closest peer for solo founders. It also does payment-first attribution, plus social mention tracking that Conclick does not. Per their site (datafa.st), it is focused specifically on marketing channel attribution rather than on-page behaviour. If you do not care about heatmaps or funnel diagnosis, and social attribution is the piece you want, it is a fair pick. I wrote a full comparison so you can see where the lines actually fall."
+      },
+      {
+        "type": "h3",
+        "text": "PostHog: powerful if you are willing to write code",
+        "id": "posthog"
+      },
+      {
+        "type": "p",
+        "text": "PostHog is the strongest product-analytics platform in the list, per their docs at posthog.com. It has session replay, feature flags, experimentation, and event-based revenue tracking. The catch is that revenue attribution to acquisition source is something you build, not something you get. You will instrument the events, define the identity resolution, and maintain the dashboards. Excellent choice if you have engineering capacity and want product analytics too. Wrong choice if you were hoping to plug in Stripe and see the report tomorrow."
+      },
+      {
+        "type": "h3",
+        "text": "ProfitWell (Paddle Retain): MRR shape, not marketing source",
+        "id": "profitwell"
+      },
+      {
+        "type": "p",
+        "text": "ProfitWell, now sold as Paddle Retain per paddle.com, is free for MRR reporting and paid for churn recovery. It answers the CFO question of how MRR moved this month better than anything else. It does not answer which ad campaign produced that MRR. Use it alongside a marketing-attribution tool, not instead of one."
+      },
+      {
+        "type": "h3",
+        "text": "Segment plus a warehouse: the enterprise default",
+        "id": "segment"
+      },
+      {
+        "type": "p",
+        "text": "If you already have a data team, a Segment plus Snowflake or BigQuery pipeline into a BI layer will do anything you can imagine. It is the right answer for a Series B ecommerce brand with three checkout paths and a merchandising team. It is a very expensive answer for anyone earlier than that, both in seat costs and in the engineer-months it takes before the first useful chart lands."
+      },
+      {
+        "type": "h2",
+        "text": "How do I actually pick one?",
+        "id": "how-to-pick"
+      },
+      {
+        "type": "p",
+        "text": "A short decision tree from what I have watched work and fail. One payment processor, solo or two-person team, want an answer this week: pick a payment-first tool. Multiple processors, behavioural questions matter too, still under $1M ARR: same category, and lean toward the one that also gives you heatmaps and funnels so you are not paying twice. Product-led SaaS where in-app behaviour is the whole game: PostHog or Mixpanel, and expect to write code. Real data team, warehouse already exists, compliance requires you to own the pipeline: Segment plus your warehouse."
+      },
+      {
+        "type": "p",
+        "text": "One last honesty note. No revenue attribution tool is perfect. Cross-device journeys, dark social, and privacy-forward browsers all cost some fraction of the truth. Any vendor claiming 100% accuracy is either lying or has never worked with a real dataset. Aim for directionally right, updated daily, and cheap enough to keep running. Perfect will bankrupt you."
+      }
+    ],
+    "faq": [
+      {
+        "question": "What is the difference between a revenue attribution tool and Google Analytics?",
+        "answer": "A revenue attribution tool reads actual payments from Stripe or another processor and ties each charge back to the traffic source that earned it. Google Analytics tracks the conversion event you fire at checkout, which does not account for refunds, downgrades, or churn. That gap is why the same channel can look profitable in GA4 and unprofitable in your bank account."
+      },
+      {
+        "question": "Does GA4 do revenue attribution?",
+        "answer": "GA4 can attribute a purchase event to a channel using its data-driven attribution model, but it does not reconcile with your payment processor. It records the transaction value you fire at the moment of checkout, not the money you actually kept after refunds and cancellations. Per Google's own documentation, ecommerce values in GA4 are estimates based on the tags you send, not audited financials."
+      },
+      {
+        "question": "Can I build revenue attribution myself?",
+        "answer": "Yes, and plenty of teams do it with Segment, a data warehouse, and a BI tool. Expect a real engineering investment: identity resolution across anonymous and logged-in sessions, webhook plumbing for Stripe or Paddle, and ongoing maintenance every time your billing schema changes. For a small team, buying a tool that already ships this pipeline is usually cheaper than the engineering hours."
+      },
+      {
+        "question": "Which payment processors work with attribution tools?",
+        "answer": "Stripe is universally supported. Paddle, Polar, Lemon Squeezy, and Dodo are supported by newer payment-first tools like Conclick. Older enterprise stacks still lean on Stripe and Chargebee. If you use a niche or regional processor, confirm the integration exists before you commit, because rebuilding it via webhooks is real work."
+      },
+      {
+        "question": "Do I need cookies for revenue attribution?",
+        "answer": "Not necessarily. Modern attribution tools can use first-party identifiers such as a localStorage id or a server-set session id to link a visit to a purchase without any tracking cookie. Whether that setup needs a consent banner depends on your jurisdiction and how you configure it, so treat this as a question for your DPO rather than a settled fact from a vendor's landing page."
+      },
+      {
+        "question": "What is the cheapest revenue attribution tool?",
+        "answer": "The cheapest sticker price is a spreadsheet plus manual Stripe exports, which costs nothing and eats an afternoon a week. Among proper tools, payment-first options like Conclick start at $9 per month, and ProfitWell is free for basic MRR reporting. Cheapest software is rarely cheapest total cost once you count setup time; a $9 tool that runs itself usually beats a $0 tool that needs 20 hours of engineering."
+      }
+    ],
+    "internalLinks": [
+      {
+        "href": "/glossary/revenue-attribution",
+        "label": "Revenue attribution, defined",
+        "group": "glossary"
+      },
+      {
+        "href": "/blog/why-revenue-attribution-matters",
+        "label": "Why revenue attribution belongs at the centre of your analytics",
+        "group": "blog"
+      },
+      {
+        "href": "/vs/datafast",
+        "label": "Conclick vs DataFast: honest comparison",
+        "group": "comparison"
+      },
+      {
+        "href": "/guides/how-to-read-a-funnel",
+        "label": "How to read a funnel",
+        "group": "guide"
+      }
+    ]
+  }
+}
