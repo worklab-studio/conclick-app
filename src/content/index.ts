@@ -36,6 +36,7 @@ import glossary_marketing_attribution from './glossary/marketing-attribution';
 import glossary_revenue_attribution from './glossary/revenue-attribution';
 import glossary_sessions_vs_visitors from './glossary/sessions-vs-visitors';
 import glossary_utm from './glossary/utm';
+import guides_do_heatmaps_need_cookie_consent from './guides/do-heatmaps-need-cookie-consent';
 import guides_ga4_migration_guide from './guides/ga4-migration-guide';
 import guides_gdpr_analytics_checklist from './guides/gdpr-analytics-checklist';
 import guides_how_to_read_a_funnel from './guides/how-to-read-a-funnel';
@@ -82,6 +83,7 @@ const ENTRIES: ContentEntry[] = [
   glossary_revenue_attribution,
   glossary_sessions_vs_visitors,
   glossary_utm,
+  guides_do_heatmaps_need_cookie_consent,
   guides_ga4_migration_guide,
   guides_gdpr_analytics_checklist,
   guides_how_to_read_a_funnel,

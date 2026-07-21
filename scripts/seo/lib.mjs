@@ -121,7 +121,15 @@ export function assembleEntry(rec, dateISO) {
     intro: d.intro,
     sections: ensureTable(cleaned, hasRows),
     faq: d.faq || [],
-    internalLinks: [],
+    // Pass-through for the fields added with the blog redesign. Optional in the
+    // schema, so an older draft that omits them still produces a valid entry —
+    // but without these lines a draft that DOES set them loses them silently,
+    // which is how `sources` (the GEO citation list) would quietly never ship.
+    ...(d.heroWord ? { heroWord: d.heroWord } : {}),
+    ...(d.category ? { category: d.category } : {}),
+    ...(d.topics?.length ? { topics: d.topics } : {}),
+    ...(d.sources?.length ? { sources: d.sources } : {}),
+    internalLinks: Array.isArray(d.internalLinks) ? d.internalLinks : [],
     relatedTools: isComp(rec) || rec.kind === 'guide' ? ['utm-builder'] : [],
     leadMagnet: leadMagnetFor(rec),
     datePublished: dateISO,
