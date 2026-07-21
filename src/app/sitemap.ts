@@ -23,8 +23,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
     .map(e => e.dateModified)
     .sort()
     .at(-1);
+  // Core marketing pages live in Framer, so we have no real per-page mtime here.
+  // The newest entry date is a defensible proxy: the homepage/pricing surfaces
+  // link into the content set, and a missing lastmod is treated by Google as
+  // "unknown" — strictly worse than a slightly conservative date.
   const core = CORE.map(c => ({
     url: c.path ? `${base}/${c.path}` : base,
+    lastModified: newest,
     changeFrequency: 'monthly' as const,
     priority: c.priority,
   }));

@@ -1,0 +1,227 @@
+# Conclick pSEO seed keywords.
+#
+# Read by the expansion step; each line is fed to autocomplete/PAA scraping and
+# the harvested children land in kwstore with `seed` set to the line below.
+#
+# FORMAT
+#   `# cluster: <name> | intent: <fallback>` opens a group. Every non-comment
+#   line until the next header belongs to that group. score.mjs parses these
+#   headers to recover a cluster-level intent fallback, so rows whose own intent
+#   is unknown still price correctly instead of collapsing to informational.
+#   Blank lines and other `#` lines are ignored.
+#
+# HARD RULE — NEVER SEED A BARE COMPETITOR BRAND.
+#   A bare brand ("plausible", "hotjar") classifies as navigational, which is
+#   the ONLY penalty multiplier in score.mjs (x0.6). Every competitor seed here
+#   is pre-modified with vs / alternative / pricing / review so it lands on a
+#   x1.3 commercial or x1.4 transactional multiplier instead.
+#
+# POSITIONING
+#   Conclick = privacy-first analytics + heatmaps + funnels + revenue
+#   attribution in one. ICP = bootstrapped SaaS and ecommerce founders.
+#   The structural moat nobody else owns is the PRIVACY x HEATMAP intersection:
+#   every other privacy analytics tool (Plausible, Fathom, Simple, Pirsch,
+#   Umami) ships no heatmaps, and every heatmap tool (Hotjar, Clarity,
+#   Mouseflow, Crazy Egg) is cookie-based. Those rows are seeded heaviest.
+
+# cluster: money-product-intent | intent: commercial
+privacy friendly analytics
+privacy first analytics tool
+cookieless analytics tool
+gdpr compliant analytics
+best privacy analytics tools
+google analytics alternative
+best google analytics alternative
+self hosted analytics
+open source web analytics
+website analytics without cookies
+analytics without cookie banner
+privacy friendly heatmap tool
+gdpr compliant heatmap
+cookieless heatmap tool
+cookieless session replay
+privacy friendly session recording
+heatmap without cookies
+analytics with heatmaps and funnels
+heatmap and analytics in one tool
+all in one analytics and heatmap software
+revenue attribution tool
+stripe revenue attribution
+saas revenue attribution software
+marketing attribution for small business
+best analytics for saas founders
+analytics for indie hackers
+ecommerce analytics with revenue tracking
+funnel analysis tool for saas
+conversion funnel software pricing
+website analytics pricing comparison
+
+# cluster: competitor-comparison | intent: commercial
+google analytics vs plausible
+ga4 alternative
+google analytics alternative privacy
+plausible vs fathom
+plausible pricing
+plausible alternative
+fathom analytics pricing
+fathom analytics alternative
+matomo vs plausible
+matomo pricing
+matomo alternative
+piwik pro vs matomo
+posthog vs plausible
+posthog pricing
+posthog alternative
+mixpanel vs posthog
+mixpanel pricing
+mixpanel alternative
+amplitude vs mixpanel
+amplitude pricing
+heap vs mixpanel
+hotjar vs clarity
+hotjar pricing
+hotjar alternative
+hotjar alternative without cookies
+hotjar alternative free
+microsoft clarity alternative
+microsoft clarity vs hotjar
+fullstory alternative
+fullstory vs hotjar
+smartlook alternative
+mouseflow vs hotjar
+crazy egg alternative
+crazy egg vs hotjar
+lucky orange alternative
+umami vs plausible
+umami analytics review
+simple analytics vs plausible
+simple analytics pricing
+pirsch vs plausible
+swetrix vs umami
+goatcounter vs plausible
+cloudflare web analytics vs plausible
+cloudflare web analytics review
+vercel analytics vs plausible
+datafast analytics review
+
+# cluster: feature-long-tail | intent: commercial
+how to add analytics to framer
+how to add analytics to astro
+how to add analytics to ghost
+how to add analytics to squarespace
+how to add analytics to webflow
+how to add analytics to nextjs
+how to add analytics to shopify
+how to add analytics to wordpress without plugin
+how to add analytics to remix
+how to add analytics to sveltekit
+how to add analytics to a notion site
+how to add analytics to carrd
+how to install tracking script on webflow
+how to add heatmap to shopify
+how to add heatmap to nextjs
+how to record user sessions on website
+how to track outbound link clicks
+how to track button clicks without gtm
+how to track form submissions analytics
+how to track signups from utm
+how to track scroll depth
+how to set up conversion goals analytics
+how to track stripe revenue by campaign
+how to attribute revenue to marketing channel
+how to build a funnel report
+how to segment traffic by referrer
+how to track a saas free trial funnel
+how to track ecommerce checkout drop off
+how to measure landing page performance
+self hosted analytics on docker
+website analytics for framer sites
+analytics for astro blog
+analytics for ghost newsletter
+heatmap tool for webflow
+funnel tracking for shopify
+server side tracking without cookies
+
+# cluster: migration-pain | intent: informational
+ga4 data thresholding
+ga4 events not showing
+ga4 not tracking conversions
+ga4 sampling limit
+ga4 direct traffic wrong
+ga4 bounce rate missing
+ga4 too complicated
+why is ga4 so confusing
+universal analytics data gone
+how to export universal analytics data
+migrate from google analytics to plausible
+migrate from ga4 to matomo
+switch from hotjar to a privacy alternative
+google analytics blocked by adblock
+adblocker skewing analytics
+analytics undercounting traffic
+cookie banner killing analytics data
+consent mode v2 data loss
+google analytics gdpr fine
+is google analytics illegal in europe
+google analytics schrems ii ruling
+gtag not firing
+google tag manager not working
+tracking code not working on website
+analytics showing zero visitors
+referral traffic showing as direct
+self referral in google analytics
+utm parameters not tracking
+why is my traffic down analytics
+analytics numbers do not match stripe
+
+# cluster: glossary-definitional | intent: informational
+exit rate vs bounce rate
+pageviews vs sessions
+dau vs mau
+sessions vs users analytics
+unique visitors vs sessions
+first party vs third party cookies
+heatmap vs session recording
+scroll map vs click map
+last click vs first click attribution
+multi touch attribution vs last click
+direct traffic vs organic traffic
+conversion rate vs click through rate
+ltv vs cac
+mrr vs arr
+churn rate vs retention rate
+cohort analysis vs funnel analysis
+utm source vs utm medium
+utm campaign vs utm content
+server side vs client side tracking
+cookieless tracking vs fingerprinting
+gdpr vs ccpa analytics
+data sampling vs data thresholding
+event vs conversion analytics
+bot traffic vs real traffic
+landing page vs entry page
+time on page vs session duration
+attribution window meaning
+what is revenue attribution
+
+# cluster: ai-mcp | intent: commercial
+analytics mcp server
+mcp server for web analytics
+claude mcp analytics integration
+connect analytics to claude
+ask ai questions about website analytics
+ai website analytics tool
+ai analytics assistant for saas
+natural language analytics query
+chatgpt website analytics
+llm traffic analytics
+track ai referral traffic
+chatgpt referral traffic tracking
+how to track traffic from chatgpt
+perplexity referral traffic analytics
+ai crawler bot traffic tracking
+generative engine optimization analytics
+analytics mcp vs api
+best ai analytics tools for founders
+automate weekly analytics report with ai
+ai powered funnel analysis

@@ -37,4 +37,12 @@ routes = [
   { pattern = "conclick.io/robots.txt",     zone_name = "conclick.io" },
   { pattern = "conclick.io/og*",            zone_name = "conclick.io" },
   { pattern = "conclick.io/llms.txt",       zone_name = "conclick.io" },
+  # IndexNow key verification file. Served INLINE by the Worker (see INDEXNOW_KEY
+  # in the worker) — never proxied to Next, because a 404 during any Fly cold
+  # start or deploy window permanently invalidates the key with Bing/Yandex.
+  # Rotating the key means editing this pattern too.
+  { pattern = "conclick.io/67409878d24e964b1928338aac760bc0.txt", zone_name = "conclick.io" },
 ]
+
+# Note: conclick.io/blog/rss.xml needs no route of its own — the existing
+# conclick.io/blog/* pattern already proxies it to the Next.js app.

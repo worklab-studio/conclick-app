@@ -1,0 +1,123 @@
+{
+  "measuredAt": "2026-07-21T13:30:28.530Z",
+  "method": "Each vendor's documented embed script was requested once over HTTPS with `Accept-Encoding: gzip, deflate, br`, following redirects. Transfer bytes are the undecoded response body as served (measured with a raw node:https request, since fetch() silently decompresses); uncompressed bytes are that body inflated locally with node:zlib, cross-checked against a second fetch() of the same URL. Sizes exclude HTTP headers and any payload loaded lazily at runtime unless a note says otherwise. Vendors that could not be measured are reported as unmeasured, never estimated.",
+  "rows": [
+    {
+      "vendor": "Plausible",
+      "url": "https://plausible.io/js/script.js",
+      "status": 200,
+      "transferBytes": 1259,
+      "uncompressedBytes": 2855,
+      "encoding": "br",
+      "note": null
+    },
+    {
+      "vendor": "Fathom",
+      "url": "https://cdn.usefathom.com/script.js",
+      "status": 200,
+      "transferBytes": 2075,
+      "uncompressedBytes": 6905,
+      "encoding": "br",
+      "note": null
+    },
+    {
+      "vendor": "Umami (cloud)",
+      "url": "https://cloud.umami.is/script.js",
+      "status": 200,
+      "transferBytes": 2362,
+      "uncompressedBytes": 4639,
+      "encoding": "br",
+      "note": null
+    },
+    {
+      "vendor": "GoatCounter",
+      "url": "https://gc.zgo.at/count.js",
+      "status": 200,
+      "transferBytes": 3070,
+      "uncompressedBytes": 9213,
+      "encoding": "br",
+      "note": null
+    },
+    {
+      "vendor": "Conclick",
+      "url": "https://app.conclick.io/script.js",
+      "status": 200,
+      "transferBytes": 3078,
+      "uncompressedBytes": 6661,
+      "encoding": "gzip",
+      "note": null
+    },
+    {
+      "vendor": "Simple Analytics",
+      "url": "https://scripts.simpleanalyticscdn.com/latest.js",
+      "status": 200,
+      "transferBytes": 4072,
+      "uncompressedBytes": 7515,
+      "encoding": "br",
+      "note": null
+    },
+    {
+      "vendor": "Hotjar",
+      "url": "https://static.hotjar.com/c/hotjar-3279672.js?sv=6",
+      "status": 200,
+      "transferBytes": 6526,
+      "uncompressedBytes": 17010,
+      "encoding": "br",
+      "note": "A real site ID is required (a placeholder 404s), so this uses the public site ID embedded on Hotjar’s own site. Session recording pulls further modules at runtime."
+    },
+    {
+      "vendor": "Cloudflare Web Analytics",
+      "url": "https://static.cloudflareinsights.com/beacon.min.js",
+      "status": 200,
+      "transferBytes": 11364,
+      "uncompressedBytes": 31612,
+      "encoding": "gzip",
+      "note": null
+    },
+    {
+      "vendor": "Microsoft Clarity",
+      "url": "https://www.clarity.ms/tag/3t0wlogvdz",
+      "status": 200,
+      "transferBytes": 26233,
+      "uncompressedBytes": 75308,
+      "encoding": "identity+br",
+      "note": "The /tag/<id> URL is only a bootstrap. A real project ID is required (a placeholder returns HTTP 204 and an empty body), so this uses the public project ID embedded on clarity.microsoft.com itself. Sizes here are the sum of both files this entry point unconditionally loads: the bootstrap at 0.8 KB (863 B) transfer / 0.8 KB (863 B) uncompressed, plus https://scripts.clarity.ms/0.8.67/clarity.js (clarity.js library) at 24.8 KB (25,370 B) transfer / 72.7 KB (74,445 B) uncompressed."
+    },
+    {
+      "vendor": "Matomo (cloud CDN)",
+      "url": "https://cdn.matomo.cloud/matomo.js",
+      "status": 200,
+      "transferBytes": 26770,
+      "uncompressedBytes": 83875,
+      "encoding": "br",
+      "note": "Shared Matomo Cloud CDN build. Self-hosted and per-instance builds (<your-site>.matomo.cloud/matomo.js) are larger when plugins are enabled."
+    },
+    {
+      "vendor": "PostHog",
+      "url": "https://us-assets.i.posthog.com/static/array.js",
+      "status": 200,
+      "transferBytes": 73955,
+      "uncompressedBytes": 228680,
+      "encoding": "br",
+      "note": "array.js is the full product-analytics bundle; session replay and surveys pull additional chunks at runtime that are not counted here."
+    },
+    {
+      "vendor": "Google Analytics 4 (gtag.js)",
+      "url": "https://www.googletagmanager.com/gtag/js?id=G-XXXXXXX",
+      "status": 200,
+      "transferBytes": 144950,
+      "uncompressedBytes": 415912,
+      "encoding": "br",
+      "note": "gtag.js is served for any well-formed G-* measurement ID and the payload is effectively ID-independent (multiple IDs measured within 0.01% of each other). Loads further Google endpoints at runtime. uncompressed size unstable between requests (raw 415912 B vs fetch 415557 B)"
+    },
+    {
+      "vendor": "Google Tag Manager (gtm.js)",
+      "url": "https://www.googletagmanager.com/gtm.js?id=GTM-NDGPDFZ",
+      "status": 200,
+      "transferBytes": 166547,
+      "uncompressedBytes": 522259,
+      "encoding": "br",
+      "note": "NOT a fixed vendor constant: gtm.js is compiled per container and its size is a function of how many tags that particular site has configured. A placeholder container ID 404s, so this row measures real, publicly-embedded containers. Measured across 3 real public containers this run: 162.6 KB (166,547 B) (GTM-NDGPDFZ) to 215.0 KB (220,194 B) (GTM-N5LT88). The row shows GTM-NDGPDFZ."
+    }
+  ]
+}
