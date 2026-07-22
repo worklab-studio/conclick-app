@@ -6,8 +6,8 @@ const entry: ContentEntry = {
   "h1": "Vanity metrics are lying to you about what is working",
   "metaTitle": "Vanity Metrics Are Lying to Your Face",
   "metaDescription": "Pageviews, social likes, and newsletter open rates feel like progress. They are not. Here is how to find the numbers that actually move revenue.",
-  "tldr": "Vanity metrics are the analytics equivalent of applause — they feel great and prove nothing. Most founders are optimizing for numbers that have zero relationship to revenue, and the actual signals are buried three clicks deep in a tool they barely open. Stop tracking what flatters you. Start tracking what pays you.",
-  "intro": "Last year I watched a founder celebrate 40,000 monthly visitors. He had a t-shirt made. He told his accelerator cohort. He wrote a tweet thread. He also had $600 in MRR after 14 months of building. The visitors were real. The business was not. Vanity metrics do not just fail to help you — they actively steer you wrong, because they create the feeling of momentum where none exists. I have been guilty of this. You probably have too. Here is what I know now that I wish I had known earlier.",
+  "tldr": "Vanity metrics are the analytics equivalent of applause: they feel great and prove nothing. Most founders are optimizing for numbers that have zero relationship to revenue, and the actual signals are buried three clicks deep in a tool they barely open. Stop tracking what flatters you. Start tracking what pays you.",
+  "intro": "Last year I watched a founder celebrate 40,000 monthly visitors. He had a t-shirt made. He told his accelerator cohort. He wrote a tweet thread. He also had $600 in MRR after 14 months of building. The visitors were real. The business was not. Vanity metrics do not just fail to help you. They actively steer you wrong, because they create the feeling of momentum where none exists. I have been guilty of this. You probably have too. Here is what I know now that I wish I had known earlier.",
   "sections": [
     {
       "type": "h2",
@@ -16,7 +16,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "A vanity metric is any number that goes up and makes you feel good but has no proven connection to revenue or retention. Pageviews. Social followers. Email subscribers (in isolation). App downloads. Time on site as a standalone figure. None of these are inherently meaningless — but they become vanity metrics the moment you track them without anchoring them to money."
+      "text": "A vanity metric is any number that goes up and makes you feel good but has no proven connection to revenue or retention. Pageviews. Social followers. Email subscribers (in isolation). App downloads. Time on site as a standalone figure. None of these are inherently meaningless, but they become vanity metrics the moment you track them without anchoring them to money."
     },
     {
       "type": "p",
@@ -69,7 +69,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "The only way to answer this correctly is to connect your payment processor — Stripe, Paddle, Lemon Squeezy, whatever you use — to your analytics, so that actual payments get traced back to the session, campaign, or funnel step that caused them. Most analytics tools do not do this. Most founders therefore cannot answer the single most important question in their business."
+      "text": "The only way to answer this correctly is to connect your payment processor, whether Stripe, Paddle, or Lemon Squeezy, to your analytics, so that actual payments get traced back to the session, campaign, or funnel step that caused them. Most analytics tools do not do this. Most founders therefore cannot answer the single most important question in their business."
     },
     {
       "type": "h3",
@@ -95,7 +95,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "Heatmaps and click maps are underrated because most founders think of them as design tools. They are revenue tools. A rage click cluster on your pricing page CTA is not a UX problem — it is a broken button eating your conversions. Dead click zones where users expect something to be clickable are telling you your information architecture is wrong. Scroll depth showing 80% of users never reach your testimonials means your social proof is decorative."
+      "text": "Heatmaps and click maps are underrated because most founders think of them as design tools. They are revenue tools. A rage click cluster on your pricing page CTA is not a UX problem. It is a broken button eating your conversions. Dead click zones where users expect something to be clickable are telling you your information architecture is wrong. Scroll depth showing 80% of users never reach your testimonials means your social proof is decorative."
     },
     {
       "type": "p",
@@ -116,7 +116,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "This is the gap that newer, leaner tools are filling. Conclick, for instance, is built specifically for bootstrapped founders who want revenue attribution tied directly to payment processors like Stripe, Paddle, and Lemon Squeezy — without writing a single SQL query. It also surfaces heatmaps and auto-detected funnel drop-offs so you are not manually stitching together three different tools. I mention it because the problem of 'easy metrics vs. useful metrics' is partly a tooling problem, and the tooling has gotten better."
+      "text": "This is the gap that newer, leaner tools are filling. Conclick, for instance, is built specifically for bootstrapped founders who want revenue attribution tied directly to payment processors like Stripe, Paddle, and Lemon Squeezy, without writing a single SQL query. It also surfaces heatmaps and auto-detected funnel drop-offs so you are not manually stitching together three different tools. I mention it because the problem of 'easy metrics vs. useful metrics' is partly a tooling problem, and the tooling has gotten better."
     },
     {
       "type": "h2",
@@ -181,7 +181,28 @@ const entry: ContentEntry = {
       "answer": "Reviews are worth tracking because they affect conversion rate on landing pages and app stores, and that connection is measurable. Follower counts are almost never worth tracking for a bootstrapped SaaS unless you have actual data showing a follower-to-trial pipeline. Most founders do not. Most founders track it anyway."
     }
   ],
-  "internalLinks": [],
+  "internalLinks": [
+    {
+      "href": "/glossary/revenue-attribution",
+      "label": "What revenue attribution is",
+      "group": "glossary"
+    },
+    {
+      "href": "/guides/revenue-attribution-tools",
+      "label": "Revenue attribution tools compared",
+      "group": "guide"
+    },
+    {
+      "href": "/guides/how-to-read-a-funnel",
+      "label": "How to read a funnel",
+      "group": "guide"
+    },
+    {
+      "href": "/glossary/heatmap",
+      "label": "What a website heatmap is",
+      "group": "glossary"
+    }
+  ],
   "relatedTools": [
     "utm-builder"
   ],
@@ -192,7 +213,7 @@ const entry: ContentEntry = {
     "ctaLabel": "Add My Website"
   },
   "datePublished": "2026-06-18",
-  "dateModified": "2026-06-18"
+  "dateModified": "2026-07-22"
 };
 
 export default entry;
