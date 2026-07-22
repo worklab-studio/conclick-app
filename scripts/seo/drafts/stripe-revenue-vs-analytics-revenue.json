@@ -1,0 +1,92 @@
+{
+  "type": "guide",
+  "slug": "stripe-revenue-vs-analytics-revenue",
+  "kind": "guide",
+  "keyword": "why is stripe revenue higher than my analytics revenue",
+  "draft": {
+    "h1": "Why Is Stripe Revenue Higher Than My Analytics Revenue?",
+    "metaTitle": "Why Is Stripe Revenue Higher Than My Analytics?",
+    "metaDescription": "Stripe records every payment that settled; your analytics only counts checkouts that survive ad blockers, consent banners, and the redirect. Here is the fix.",
+    "heroWord": "mismatch",
+    "category": "Measurement",
+    "topics": ["revenue attribution", "stripe", "measurement", "analytics accuracy"],
+    "tldr": "Stripe is higher because it records every payment that actually cleared, on its own servers. Your analytics tool only counts checkouts where its script survived the ad blocker, the consent banner, and the redirect to the payment page. Renewals and dunning retries never load a browser at all, so analytics never sees them. Treat Stripe as the money ledger.",
+    "intro": "A founder messaged me last month in a mild panic. His Stripe dashboard said he had made about nine thousand dollars that month. His analytics tool, the one with the tidy funnel chart, insisted the figure was closer to five. He wanted to know which one was lying. Neither is. They measure two different things on two different machines, and once you see why, the gap stops being frightening and starts being useful. I have chased this exact discrepancy across dozens of small SaaS and store setups, so here is the honest anatomy of it.",
+    "sections": [
+      { "type": "h2", "text": "The short version: one counts money, one counts a guess", "id": "the-short-version" },
+      { "type": "p", "text": "Stripe knows what happened because Stripe is the thing that moved the money. A charge either cleared or it did not, and the processor wrote it down on its own servers with no dependency on the visitor's browser. Your analytics tool works the opposite way. It runs a script in the visitor's browser, waits for a purchase event to fire, and counts that event. Anything that stops the script from loading, or stops the event from firing, is a sale that happened in the bank but never happened in the dashboard. That asymmetry is the whole story. Money is recorded server-side; the marketing figure is reconstructed client-side, and the browser is a hostile place to count." },
+      { "type": "quote", "text": "Stripe records what cleared. Your analytics tool records what it was allowed to watch. Those are almost never the same number.", "cite": "the rule I give every founder who asks" },
+      { "type": "h2", "text": "Ad blockers eat the purchase event", "id": "ad-blockers" },
+      { "type": "p", "text": "The single biggest leak is the one nobody installed on purpose. Roughly 29.5% of internet users run an ad blocker at least some of the time, per GWI data cited by Backlinko in 2025, and the popular blocklists do not stop at display ads. They block analytics and tag scripts by name, including Google Analytics, Segment, and most heatmap tools. When the script is blocked, the pageview never fires, the checkout never fires, and the conversion never fires. But the card still gets charged, because the payment does not live inside the blocked script. So every ad-blocking customer is a paying ghost: real cash in your account, invisible in your marketing tool." },
+      { "type": "p", "text": "It gets worse, because the block rate is not random. It skews toward the exact people who tend to pay: developers, technical buyers, privacy-minded users. If you sell to that crowd, your undercount is not the global average, it is considerably deeper." },
+      { "type": "ul", "items": [
+        "The pageview, so the visit never appears in your tool at all.",
+        "The purchase event, so the sale is missing even though the money settled.",
+        "The identifier that would have stitched the visit to the sale, so even a recovered event arrives with no source attached."
+      ]},
+      { "type": "h2", "text": "Consent banners hide the buyers who declined", "id": "consent-banners" },
+      { "type": "p", "text": "If your analytics only loads after someone clicks Accept on a cookie banner, then every visitor who declines, ignores, or closes that banner is a person your tool cannot watch. Some of those people buy anyway. Stripe charges them the same as everyone else. Google's Consent Mode tries to patch this by sending cookieless pings and statistically modeling the missing conversions, but Napkyn's write-up on it is blunt: those modeled transactions only appear if modeling is switched on and your traffic clears Google's thresholds, and if it is off they vanish from the report entirely. In EU, iOS, and Safari-heavy audiences the missing slice is not a rounding error. Your bank does not care whether a shopper consented to analytics. The charge still settled." },
+      { "type": "h2", "text": "The checkout redirect breaks the session", "id": "checkout-redirect" },
+      { "type": "p", "text": "Here is the one that catches builders who did everything else right. When a buyer clicks pay and you send them to a hosted checkout on checkout.stripe.com, they leave your domain. Browsers now treat the analytics cookie as third-party across that hop, so the session resets. If the confirmation lives on the payment provider's page, the event never fires on your property at all. If it fires on your return page, the session that carried the original source, the Google Ads click, the newsletter link, has often already been severed, and the sale gets filed under direct or as a referral from the payment domain itself. William Chong documented the exact mechanism and the workaround: capture the client and session id before the redirect, then pass them back through the return URL. Stripe's own documentation walks you through wiring GA4 to the checkout funnel, which tells you how much manual plumbing this quietly demands. Most people never do it, so their money detaches from its source." },
+      { "type": "h2", "text": "Renewals and upgrades never load a browser", "id": "renewals" },
+      { "type": "p", "text": "This one is structural, and it is the reason the gap grows every month you run a subscription. Your analytics tool can only log a purchase when a human is in a browser to fire the event. A renewal is not that. Month two, month three, the annual re-bill, the failed-card retry that finally succeeds on a Thursday: all of these are server-to-server charges the processor runs on a schedule with nobody on the site. Stripe books every one of them. Your marketing tool saw the first checkout and nothing since. So a customer who signed up in January and is still paying in July shows up as one sale in analytics and seven charges in Stripe. Multiply that across a book of subscribers and the two figures were never going to agree. This is not something you fix in the tag manager. Recurring money simply has no pageview attached to it." },
+      { "type": "h2", "text": "Bots inflate the traffic, not the takings", "id": "bots" },
+      { "type": "p", "text": "The reasons above all make Stripe look bigger than analytics. Bots do something sneakier: they make analytics look busy while the money stays flat, which is the same mismatch wearing a different coat. Automated traffic, scrapers, and headless crawlers generate sessions and sometimes even fake form fills, but they never reach for a card. So your traffic chart climbs, your conversion rate sags, and none of it lands in the processor. If you are trying to reconcile two dashboards and the visit count looks enormous next to the deposits, some fraction of those visits were never people. The tell is always the same: activity rises, settled money does not." },
+      { "type": "h2", "text": "Why your analytics can also read too high", "id": "too-high" },
+      { "type": "p", "text": "I would be selling you a comforting half-truth if I stopped there, because the drift runs both ways. A client-side purchase event fires the instant someone hits the confirmation page, and it never un-fires. Refunds, chargebacks, disputed payments, and subscriptions that later reverse are all netted out inside Stripe, but the marketing tool that logged the original event usually keeps counting it. Some setups also double-fire the purchase event on a page refresh, padding the tally further. So it is entirely possible for your analytics to overstate gross sales at the same time it understates net ones. The point is not that one tool is honest and the other lies. It is that they measure at different moments, on different infrastructure, with different failure modes, and expecting a clean match is the actual mistake." },
+      { "type": "callout", "text": "Stop treating a match as the goal. Two systems this different will never tie to the penny. Aim instead for the two numbers moving together month over month. A stable gap you can explain is healthy. A gap that suddenly lurches is your signal to go looking." },
+      { "type": "h2", "text": "How to reconcile the two without losing your mind", "id": "reconcile" },
+      { "type": "ol", "items": [
+        "Pick your source of truth for money and make it the processor. Stripe, Paddle, Polar, Lemon Squeezy, whatever actually settles the card, is the ledger. Board decks and cash forecasts come from there, not from a browser script.",
+        "Use analytics for what it is genuinely good at: where people came from, what they did, where they dropped off. Direction, not dollars.",
+        "Read the payment data server-side and attach a source to each charge, so renewals and ad-blocked buyers still carry attribution. This is the only reliable way to close the loop that client-side events keep breaking.",
+        "Reconcile monthly, not daily. Refunds and settlement timing make a single day meaningless. A rolling month smooths that out and still catches a real problem early."
+      ]},
+      { "type": "p", "text": "If you already treat Stripe as the money ledger and use your analytics purely for behaviour, you are most of the way there. The remaining work is tying each payment back to a source without depending on a script that a third of your buyers are actively blocking." },
+      { "type": "h2", "text": "Where Conclick fits, and where it does not", "id": "where-conclick-fits" },
+      { "type": "p", "text": "I build Conclick, so read this with the appropriate suspicion. The reason it exists is this exact reconciliation problem. It reads charges server-side from Stripe, Paddle, Polar, Lemon Squeezy, and Dodo and ties each one back to the source and campaign that produced it, which sidesteps the ad-blocker and redirect leaks because the money is read from the processor rather than from a script in the buyer's browser. It measures visits without cookies, though it does keep a first-party visitor id in the browser's local storage to hold a session together, and whether that setup needs a consent banner depends on your jurisdiction and configuration, so treat that as a question for your own counsel and not as advice from me. Conclick is built on the open-source Umami engine, which I mention because hiding it would be exactly the thing this page is written against. It is also not the only way to solve this. If you have a data team, a warehouse pipeline reading Stripe webhooks does the same job. The principle matters more than the product: money is recorded where it settles, so read it from there." }
+    ],
+    "faq": [
+      {
+        "question": "Why is my Stripe revenue higher than my analytics revenue?",
+        "answer": "Because Stripe records every payment that actually settled, on its own servers, while your analytics tool only counts a purchase when its script loads in the buyer's browser and the event fires. Ad blockers, declined consent banners, and the redirect to a hosted checkout all stop that event, and subscription renewals never load a browser at all. Stripe sees the full picture; the marketing tool sees a filtered subset."
+      },
+      {
+        "question": "Which number should I trust, Stripe or Google Analytics?",
+        "answer": "Stripe, for anything involving money. It is the system that moved the funds, so it is the source of truth for sales, MRR, and forecasts. Use Google Analytics or any behavioural tool for the questions it is actually good at: traffic sources, funnel drop-off, and what people did on the page. The trouble starts when founders try to run the business off the marketing figure instead of the ledger."
+      },
+      {
+        "question": "Do ad blockers really block analytics purchase tracking?",
+        "answer": "Yes. Common blocklists target analytics and tag scripts directly, not only display ads, so the pageview and the purchase event never fire for those visitors. GWI data cited by Backlinko in 2025 put ad-blocker usage near 29.5% of internet users, and the rate runs higher among technical and privacy-minded audiences, who also tend to be paying customers. Stripe still charges them, so they surface as money with no visit attached."
+      },
+      {
+        "question": "Why does GA4 attribute sales to stripe.com or to 'direct'?",
+        "answer": "When a buyer is redirected to a hosted checkout on a different domain such as checkout.stripe.com, the browser resets the analytics session and the original source can be lost. The sale then gets filed as direct traffic or as a referral from the payment domain. Passing the client and session id through the return URL, or reading the charge server-side, is how you keep the real source attached to the money."
+      },
+      {
+        "question": "Do subscription renewals show up in analytics?",
+        "answer": "No, not on their own. Analytics records a purchase only when a person is on your site to trigger the event. A renewal is a server-to-server charge the processor runs on a schedule with nobody in a browser, so it never reaches your marketing tool. This is why the gap between the two dashboards widens every month you run a subscription business, and why MRR should come from Stripe."
+      },
+      {
+        "question": "Can my analytics ever show more revenue than Stripe?",
+        "answer": "Yes, in gross terms. A client-side purchase event fires at checkout and is not reversed when the customer refunds, disputes, or churns, so analytics can keep counting money that Stripe has already netted out. Some setups also double-fire the event on a page refresh. So analytics can overstate gross sales while still understating net ones, which is another reason a clean match between the two is the wrong thing to expect."
+      }
+    ],
+    "internalLinks": [
+      { "href": "/glossary/revenue-attribution", "label": "Revenue attribution, defined", "group": "glossary" },
+      { "href": "/blog/why-revenue-attribution-matters", "label": "Why revenue attribution belongs at the centre of your analytics", "group": "blog" },
+      { "href": "/glossary/marketing-attribution", "label": "Marketing attribution, explained", "group": "glossary" },
+      { "href": "/guides/is-ga4-sampling-your-data", "label": "Is GA4 sampling your data?", "group": "guide" },
+      { "href": "/blog/vanity-metrics-are-lying", "label": "Why traffic is a vanity metric and money is not", "group": "blog" },
+      { "href": "/vs/google-analytics", "label": "Conclick vs Google Analytics", "group": "comparison" },
+      { "href": "/for/ecommerce", "label": "Analytics for ecommerce", "group": "useCase" },
+      { "href": "/tools/utm-builder", "label": "Build clean UTM links", "group": "tool" }
+    ],
+    "sources": [
+      { "label": "Backlinko: Ad Blocker Usage and Demographic Statistics (GWI, Q2 2025)", "url": "https://backlinko.com/ad-blockers-users" },
+      { "label": "Napkyn: Impact of Consent Mode on Reporting and Transaction Data in GA4", "url": "https://www.napkyn.com/blog/impact-of-consent-mode-on-reporting-and-transaction-data-in-ga4" },
+      { "label": "William Chong: Maintaining the GA session across Stripe Checkout", "url": "https://blog.williamchong.cloud/code/2024/04/20/maintaining-ga-session-in-stripe-checkout.html" },
+      { "label": "Stripe Docs: Analyze your Checkout conversion funnel (with GA4)", "url": "https://docs.stripe.com/payments/checkout/analyze-conversion-funnel" }
+    ]
+  }
+}

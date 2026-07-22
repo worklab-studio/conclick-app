@@ -1,0 +1,90 @@
+{
+  "type": "guide",
+  "slug": "where-users-abandon-checkout",
+  "kind": "guide",
+  "keyword": "how to find where users abandon your checkout",
+  "draft": {
+    "h1": "How to Find Where Users Abandon Your Checkout",
+    "metaTitle": "Find Where Users Abandon Your Checkout (Funnel + Maps)",
+    "metaDescription": "Find the exact checkout step users abandon: build the funnel, rank drop-off by lost revenue, then read a click and scroll map to see why they leave.",
+    "heroWord": "dropoff",
+    "category": "CRO",
+    "topics": ["checkout", "conversion funnel", "heatmaps", "cro"],
+    "tldr": "Find where users abandon your checkout by turning it into discrete steps, measuring the drop-off between each one, and ranking those drops by the revenue they cost rather than by percentage. Then put a click and scroll map on the single worst step to see why people leave. The funnel tells you which step. The heatmap tells you why.",
+    "intro": "I have lost count of the founders who tell me their checkout is broken and then cannot tell me which part. They know the end-to-end number: a thousand people started, forty finished. That number is useless for fixing anything, because it never says where the money left. The good news is that finding the exact leak is a mechanical process, not a talent. You build the funnel, you find the biggest drop, then you point a heatmap at that one step and watch what people actually do. I run this on my own pricing and checkout pages every month.",
+    "sections": [
+      { "type": "h2", "text": "The short version", "id": "the-short-version" },
+      { "type": "p", "text": "There are three moves, in order. First, write your checkout out as a list of discrete steps, each one a page or an event you can count. Second, measure how many people enter and exit each step, then rank the gaps by the revenue they cost, not by the raw percentage. Third, take the single worst step and put a click map and a scroll map on it, so you stop guessing why people leave and start watching them leave. A funnel identifies which step is bleeding. A heatmap explains it. You need both, and you need them in that order." },
+      { "type": "p", "text": "Most people skip straight to the heatmap because it is the fun part. Then they spend a week studying a page that was never the problem. Do the funnel math first. It is boring, and it is the whole game." },
+
+      { "type": "h2", "text": "Step one: turn the checkout into countable steps", "id": "define-the-funnel" },
+      { "type": "p", "text": "A checkout is not one thing that either works or does not. It is a chain, and every link is a place someone can fall out. Before you open any tool, write the chain on paper." },
+      { "type": "p", "text": "For a typical ecommerce flow that looks like: product page, add to cart, cart view, shipping details, payment details, order confirmation. For a SaaS purchase it might be pricing page, plan select, account creation, card entry, activation. Your exact steps do not matter. What matters is that each one is a separate event you can put a number on." },
+      { "type": "p", "text": "Include the steps that feel too obvious to bother with. The email verification click. The address form. The little interstitial that says redirecting to payment. Those are exactly where silent leaks hide, because nobody thinks to measure them. If your analytics can only tell you that the cart page got two thousand visits, you do not have a funnel. You have a pile of pageviews. A funnel needs the transition between consecutive steps, which means firing an event at each one. If you have never built one, my longer walkthrough on reading a conversion funnel covers the setup in detail." },
+      { "type": "callout", "text": "If you can state the goal in one sentence and list every step between the visitor and that goal, you can build the funnel. If you cannot, that is the first thing to fix, and it is a product problem, not an analytics one." },
+
+      { "type": "h2", "text": "Step two: find the biggest drop, measured in money", "id": "find-the-biggest-drop" },
+      { "type": "p", "text": "Now you have entry and exit counts for each step. The drop-off rate at a step is entries minus exits, divided by entries. Calculate it for every step. You will get a column of percentages, and your instinct will be to attack the biggest one. Resist that." },
+      { "type": "p", "text": "The step worth fixing is not the one with the highest percentage. It is the one where the percentage, multiplied by the traffic, multiplied by your average order value, destroys the most revenue. A ninety percent drop on a step three people reach is a rounding error. A thirty percent drop on the step everyone reaches is your rent." },
+      { "type": "ol", "items": [
+        "List every step with its entry count and exit count for the same date range.",
+        "Compute the drop-off at each step: entries minus exits, divided by entries.",
+        "Multiply the people lost at each step by your average revenue per order to get the money left on the table there.",
+        "Rank the steps by that dollar figure, top to bottom.",
+        "The top row is your only job. Ignore the rest until it is fixed."
+      ]},
+      { "type": "p", "text": "This ranking is the entire reason to build a funnel. It tells you which one screen to obsess over, and gives you permission to ignore the other nine. The long-standing finding in conversion work is that fixing the single biggest drop beats squeezing every step by a point. Concentrate." },
+
+      { "type": "h2", "text": "Step three: put a heatmap on the worst step", "id": "heatmap-the-worst-step" },
+      { "type": "p", "text": "The funnel has now handed you one step and one question: why do people leave here? A number cannot answer that. A picture of behavior can. This is where a click map and a scroll map earn their keep." },
+      { "type": "p", "text": "Open the exact page the funnel flagged, and look at three things." },
+      { "type": "ul", "items": [
+        "The scroll map. How far down do people actually get? If your pay button, your trust badges, or your shipping options sit below where most people stop scrolling, they are invisible, and no amount of copywriting on them will help. On a checkout step this is the most common own-goal I see.",
+        "The click map, on things that should be clicked. Is anyone touching your primary button? Is a coupon field or a shipping estimator stealing attention and sending people off to hunt for a code they do not have? A click map shows where attention actually goes, not where you hoped it would.",
+        "The click map, on things that should not be clicked. Repeated taps on a non-interactive element, sometimes called rage clicks, are a flare going up. People are clicking a label, an icon, a static price, expecting it to do something. It looks clickable and it is not, or it is broken. That is a defect the funnel can smell but only the heatmap can point at."
+      ]},
+      { "type": "p", "text": "The reason I built Conclick's maps over a real screenshot of the page rather than a reconstructed overlay is exactly this moment. When you are staring at the worst step in your funnel, you need the map to sit on the page as it actually rendered, so what you see is what your visitor saw. A drifting DOM approximation here is worse than useless, because it moves the evidence." },
+
+      { "type": "h2", "text": "Match what you see to why people actually abandon", "id": "why-people-abandon" },
+      { "type": "p", "text": "You do not have to guess at the possible reasons in a vacuum. The Baymard Institute has spent years asking people why they left, and the answers are consistent enough to use as a checklist while you read your heatmap." },
+      { "type": "p", "text": "In their research on shoppers who abandoned checkout for a reason other than just browsing, the top causes were extra costs that were too high at 40 percent, delivery being too slow at 20 percent, not trusting the site with card details at 19 percent, being forced to create an account at 18 percent, and a checkout that was too long or complicated at 17 percent. Site errors and crashes tied that last one at 17 percent. The full list is in the sources below." },
+      { "type": "p", "text": "Now map those to what a heatmap shows. If the abandonment is about surprise costs, your scroll map will often show people reaching the line where shipping and tax appear and stopping cold. If it is the forced account, watch the click activity cluster around the login or create-account area and then die. If it is a long form, the scroll and click pattern down a tall address block tells you which field people quit on. The survey data names the suspects. The heatmap tells you whether they are guilty on your page. Neither one alone is enough." },
+      { "type": "callout", "text": "The point of the survey benchmarks is not to copy other people's fixes. It is to give you named suspects, so that when you read the heatmap on your worst step, you know which patterns are worth chasing." },
+
+      { "type": "h2", "text": "A worked example, with numbers", "id": "worked-example" },
+      { "type": "p", "text": "Say you sell a fifty dollar product. Here is one month of a four-step checkout." },
+      { "type": "ul", "items": [
+        "Cart view: 4,000 enter, 3,000 continue. A 25 percent drop, 1,000 people lost.",
+        "Shipping details: 3,000 enter, 2,400 continue. A 20 percent drop, 600 lost.",
+        "Payment details: 2,400 enter, 1,200 continue. A 50 percent drop, 1,200 lost.",
+        "Confirmation: 1,200 finish."
+      ]},
+      { "type": "p", "text": "The payment step has the scariest percentage and the biggest raw loss, so it wins twice: 50 percent of a large group, 1,200 people, times fifty dollars, is sixty thousand dollars of blocked revenue in one month on one screen. The cart drop looks bad too, but it costs fifty thousand, and the shipping step is thirty thousand. You go to the payment step first." },
+      { "type": "p", "text": "So you open the payment page heatmap. The scroll map shows two thirds of people never reaching the pay button, which sits under a tall list of saved-card options. The click map shows a cluster of rage clicks on a promo code field that looks like it demands filling in. You have two suspects in an afternoon: the button is buried, and the coupon box is manufacturing hesitation. Neither was visible in the funnel. The funnel only told you which door to open." },
+
+      { "type": "h2", "text": "Which tool does which job", "id": "which-tool" },
+      { "type": "p", "text": "You need two capabilities: a funnel that reports the drop between steps, and a click and scroll map you can point at a single step. Plenty of tools do one or the other, and some do both." },
+      { "type": "p", "text": "For the funnel half, most analytics products can do it, including GA4's funnel exploration reports, provided you have events firing at each step. For the heatmap half, there is a real field of privacy-positioned options. Matomo has had heatmaps for years and is genuinely good, especially self-hosted. Hotjar and Microsoft Clarity are the popular pairings. Each of these stores different things in the visitor's browser, which is a consent question worth checking before you install anything, and it varies by jurisdiction." },
+      { "type": "p", "text": "Conclick does both halves in one place. It measures without cookies, keeps a first-party visitor id in local storage rather than a cross-site profile, and renders its click and scroll maps over a real screenshot of the page. I built it because I was tired of exporting a drop-off number from one tool and a heatmap from another and eyeballing whether they agreed. It is built on the open-source Umami engine, which I mention because hiding it would be dishonest. If you only ever need a heatmap and never a funnel, several tools are a fine answer. If you want the drop-off step and the reason it drops in the same view, that is the narrower thing Conclick is for." }
+    ],
+    "faq": [
+      { "question": "How do I find exactly where users abandon my checkout?", "answer": "Turn the checkout into discrete steps, fire an event at each one, and measure how many people enter and exit each step. Rank the gaps by the revenue they cost rather than by percentage, then put a click and scroll map on the single worst step to see why people leave. The funnel identifies the step, and the heatmap explains it." },
+      { "question": "Should I fix the step with the highest drop-off percentage?", "answer": "Not necessarily. The step worth fixing is the one where drop-off rate, traffic volume, and average order value combine to lose the most money. A ninety percent drop on a step three people reach matters far less than a thirty percent drop on a step everyone hits. Rank by dollars lost, not by percentage." },
+      { "question": "What is the average checkout abandonment rate?", "answer": "The Baymard Institute, compiling 50 studies as of September 2025, puts the average online shopping cart abandonment rate at 70.22 percent. Mobile tends to run higher than desktop. A large share of that is people who were just browsing and never intended to buy, so treat the benchmark as context, not a target to match." },
+      { "question": "What should a heatmap tell me about an abandoned checkout step?", "answer": "Three things. Whether people scroll far enough to see the pay button and the total cost, whether they click the primary action or get distracted by fields like a coupon box, and whether they rage-click something that looks interactive but is not. Those three patterns cover most on-page reasons a checkout step leaks." },
+      { "question": "Do I need two separate tools for the funnel and the heatmap?", "answer": "No, though plenty of people run one of each. You need a funnel that reports the drop between steps and a click and scroll map you can point at a single step. Some tools do both. Conclick does both and renders its maps over a real screenshot of the page, which I built because reconciling a drop-off number from one tool with a heatmap from another was tedious." },
+      { "question": "Why do people abandon checkout most often?", "answer": "In Baymard's research on shoppers who left for a reason other than browsing, the top causes were extra costs too high at 40 percent, slow delivery at 20 percent, not trusting the site with card details at 19 percent, forced account creation at 18 percent, and a too-long or complicated checkout at 17 percent. Use those as suspects to check against your own heatmap." }
+    ],
+    "internalLinks": [
+      { "href": "/glossary/conversion-funnel", "label": "What a conversion funnel is", "group": "glossary" },
+      { "href": "/guides/how-to-read-a-funnel", "label": "How to read a funnel and fix the biggest leak", "group": "guide" },
+      { "href": "/glossary/heatmap", "label": "How website heatmaps work", "group": "glossary" },
+      { "href": "/for/ecommerce", "label": "Analytics for ecommerce stores", "group": "useCase" },
+      { "href": "/vs/hotjar", "label": "Conclick vs Hotjar", "group": "comparison" }
+    ],
+    "sources": [
+      { "label": "Baymard Institute: Cart & Checkout Abandonment Rate Statistics", "url": "https://baymard.com/lists/cart-abandonment-rate" },
+      { "label": "Baymard Institute: How to Reduce Cart Abandonment", "url": "https://baymard.com/learn/reduce-cart-abandonment" }
+    ]
+  }
+}

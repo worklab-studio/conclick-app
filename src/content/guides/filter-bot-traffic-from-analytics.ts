@@ -1,0 +1,224 @@
+import type { ContentEntry } from '../schema';
+
+const entry: ContentEntry = {
+  "type": "guide",
+  "slug": "filter-bot-traffic-from-analytics",
+  "h1": "How to Filter Bot Traffic From Analytics (and Why GA4 Misses Most of It)",
+  "metaTitle": "How to Filter Bot Traffic From Analytics: 2026 Guide",
+  "metaDescription": "GA4 only filters bots that identify themselves, so headless browsers and datacenter traffic slip through. Here is how bot filtering works, layer by layer.",
+  "tldr": "Filter automated hits in three buckets: ones that name themselves, headless browsers that look like real Chrome, and clean-looking hits from datacenter IPs. GA4 only removes the first bucket using the IAB known-bots list, which it cannot disable or customize. To catch the rest you need user-agent pattern matching plus a datacenter-IP (ASN) check at the point of ingest.",
+  "intro": "I built Conclick's bot filtering after watching a customer's real traffic get buried under junk that Google Analytics happily counted as visitors. The honest version of this problem is uncomfortable: most tools, GA4 included, only remove the automated hits polite enough to announce themselves. The interesting ones lie about being machines. This is how I think about catching them, and exactly where each layer breaks.",
+  "sections": [
+    {
+      "type": "h2",
+      "text": "The short answer",
+      "id": "the-short-answer"
+    },
+    {
+      "type": "p",
+      "text": "There are three kinds of non-human traffic, and you filter each one differently. The polite crawlers announce themselves in the user-agent string, so any tool can drop them. The automation frameworks run real JavaScript and look almost human, so you match them on known signatures. The stealth ones send a clean browser fingerprint from a rented server, and the only reliable tell is the network they arrive from. Do all three at the point where data enters your system, not in a report afterward, because a hit you never stored cannot skew a number later."
+    },
+    {
+      "type": "p",
+      "text": "Google Analytics does the first job and skips the other two. That is the whole reason your dashboard shows visitors from cities you do not sell to, sessions that last zero seconds, and spikes that never buy anything. If you remember one thing from this page: the useful automated hits to catch are the ones that lie about being machines, and no public list will ever contain them."
+    },
+    {
+      "type": "h2",
+      "text": "The three kinds of bots you are actually fighting",
+      "id": "three-kinds-of-bots"
+    },
+    {
+      "type": "p",
+      "text": "I find the whole thing easier to reason about once you split it by how hard each type is to see."
+    },
+    {
+      "type": "ul",
+      "items": [
+        "Self-identifying crawlers. Googlebot, Bingbot, Ahrefs, Screaming Frog and thousands more put a token like bot, crawler or spider in their user-agent. A library such as isbot removes them in one line. This is the easy tier and every serious tool handles it.",
+        "Headless browsers and automation tools. Puppeteer, Playwright, Selenium and headless Chrome execute JavaScript, so they fire your tracking tag exactly like a person. They usually still leak: the word Headless in the user-agent, a navigator.webdriver flag set to true, or a raw client string like python-requests or go-http-client. You catch these with pattern matching, not a public list.",
+        "Stealth traffic from datacenter IPs. This is the hard tier. A scraper on a rented cloud box can send a pristine Chrome user-agent and pass every check above. What it cannot easily fake is its network. Real people browse from residential and mobile ISPs. Almost nobody loads your site from an Amazon, Google Cloud, Azure, Hetzner or OVH address, so the network behind the IP becomes the signal."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Why GA4 misses most of them",
+      "id": "why-ga4-misses-them"
+    },
+    {
+      "type": "p",
+      "text": "GA4 removes known bots automatically, using a mix of Google's own research and the IAB/ABC International Spiders and Bots List. That covers the first tier well. The problem is what Google's own documentation admits about control."
+    },
+    {
+      "type": "quote",
+      "text": "At this time, you cannot disable known bot traffic exclusion or see how much known bot traffic was excluded.",
+      "cite": "Google Analytics Help, Known bot-traffic exclusion"
+    },
+    {
+      "type": "p",
+      "text": "So you get exactly one filter, you cannot tune it, and you cannot even see how much it took out. More to the point, a known-bots list can only contain machines that identify themselves. Headless Chrome presenting a normal user-agent, and a scraper on a datacenter IP, are on no list at all, because from the outside they look like a visitor. They run your tags, count as sessions, and quietly inflate everything downstream from bounce rate to conversion rate."
+    },
+    {
+      "type": "p",
+      "text": "This is not a theory I am asking you to take on faith. Plausible ran a controlled test, pointing Puppeteer-driven requests at a dummy site, and Google Analytics recorded the fake pageviews in all three scenarios they tried, including one sent from a datacenter IP. Those are their numbers on their own test, and it favours their product, so read it as a directional result rather than gospel. It matches what I see in the field."
+    },
+    {
+      "type": "h2",
+      "text": "How to spot the pattern in your own dashboard",
+      "id": "how-to-spot-bot-patterns"
+    },
+    {
+      "type": "p",
+      "text": "You do not need a specialist tool to find this. Open your analytics and look for the fingerprints automation leaves behind."
+    },
+    {
+      "type": "ul",
+      "items": [
+        "Zero-second sessions clustered on one fingerprint. A machine loads a page and leaves in the same instant, over and over, from what looks like a single visitor.",
+        "One browser and operating system combination, often an outdated version, driving an unrealistic share of your hits.",
+        "Direct visits with no referrer landing deep inside your site, on URLs no human would type from memory.",
+        "Sudden volume from a country or city that has never converted and matches no campaign you ran.",
+        "IP addresses that resolve to a hosting company. Paste a suspicious one into any ASN lookup, and if it comes back as AWS, Google Cloud or a data center, it is almost certainly a machine."
+      ]
+    },
+    {
+      "type": "p",
+      "text": "None of these is proof on its own. Together they are a pattern, and once you have seen it a few times you stop trusting a raw pageview count that has not been filtered first."
+    },
+    {
+      "type": "h2",
+      "text": "How Conclick filters bots in three layers",
+      "id": "how-conclick-filters-bots"
+    },
+    {
+      "type": "p",
+      "text": "I build Conclick, which is built on the open-source Umami engine, so treat this as the founder telling you how his own tool works rather than a neutral survey. Umami ships the first line of defence. The automation and datacenter layers are what I added on top, because the known-bot filter alone was not enough for the customers I care about."
+    },
+    {
+      "type": "p",
+      "text": "Every incoming hit passes three server-side checks before anything is written to the database, and a rejected hit gets a tiny response and is never stored:"
+    },
+    {
+      "type": "ul",
+      "items": [
+        "Layer one drops self-identifying crawlers with the isbot library, and also rejects any request that arrives with no user-agent at all, which is a classic sign of a raw script.",
+        "Layer two matches a list of automation and HTTP-client signatures: headless, puppeteer, playwright, selenium, python-requests, go-http-client, scrapy, wget and their relatives. The browser-side tracker also refuses to send when navigator.webdriver is set, so a lot of automation dies before it ever reaches the server.",
+        "Layer three looks up the IP's autonomous system in a MaxMind ASN database and drops the hit if the network belongs to a cloud or hosting provider. This is the layer that catches the stealth traffic with a spotless user-agent, and it is the one most privacy-first tools skip."
+      ]
+    },
+    {
+      "type": "callout",
+      "text": "Datacenter-IP filtering is not free of risk. A small number of real people browse through commercial VPNs or corporate proxies that exit on datacenter networks, and an aggressive rule drops them too. That is a deliberate trade: I would rather lose a sliver of genuine hits than let a scraper farm quietly double someone's numbers. The check can be turned off if that trade is wrong for your site, and no filter of this kind is ever perfect."
+    },
+    {
+      "type": "h2",
+      "text": "What you can do today, whatever tool you use",
+      "id": "what-you-can-do-today"
+    },
+    {
+      "type": "p",
+      "text": "You do not have to switch tools to improve this. A few practical moves get you most of the way:"
+    },
+    {
+      "type": "ul",
+      "items": [
+        "In GA4, add IP exclusions for your own office and known offenders, build a segment that removes zero-engagement sessions, and validate the hostname so hits from cloned or spoofed copies of your domain drop out of the main view.",
+        "Judge suspicious visits by their network, not just their user-agent. An ASN lookup takes ten seconds and settles most arguments about whether something is a person.",
+        "Run two analytics tools on the same site for a week and compare the totals. The gap between them is roughly the automated traffic one of them is still counting.",
+        "Do not chase one hundred percent. Sophisticated invalid traffic rotates through residential proxies and mimics human timing, so any honest figure you land on is a floor, not the whole picture. The goal is decisions you can trust, not a spotless funnel."
+      ]
+    }
+  ],
+  "faq": [
+    {
+      "question": "Does GA4 filter bot traffic automatically?",
+      "answer": "Yes, but only partly. GA4 automatically excludes known bots using Google's research and the IAB/ABC International Spiders and Bots List, and that filter is always on. You cannot disable it, customize it, or see how much it removed. It only catches machines that identify themselves, so headless browsers and datacenter traffic still get counted as visitors."
+    },
+    {
+      "question": "Why do bots still show up in GA4 if it filters them?",
+      "answer": "Because a known-bots list can only contain machines that announce themselves in the user-agent. Automation frameworks like Puppeteer and Selenium, and scrapers running from cloud servers with a normal Chrome user-agent, are on no list. They execute your tracking tag exactly like a human visitor and get recorded as real sessions."
+    },
+    {
+      "question": "How do I spot bot traffic manually?",
+      "answer": "Look for zero-second sessions from a single fingerprint, one outdated browser and OS combination driving heavy volume, direct visits landing deep in your site with no referrer, spikes from places that never convert, and IPs that resolve to a hosting provider. Paste a suspicious IP into an ASN lookup; if it belongs to AWS or a data center, it is almost certainly automated."
+    },
+    {
+      "question": "What is datacenter-IP or ASN bot filtering?",
+      "answer": "Every IP belongs to an autonomous system, which is the network that owns it. Real visitors come from residential and mobile ISPs, while automated traffic often runs from cloud providers like AWS, Google Cloud, Azure or Hetzner. Datacenter-IP filtering looks up the network behind each hit and drops the ones from hosting providers. It is the most reliable way to catch stealth bots that carry a clean user-agent."
+    },
+    {
+      "question": "Can you ever filter one hundred percent of bots?",
+      "answer": "No, and anyone who promises that is selling something. Advanced invalid traffic rotates residential proxies and copies human behaviour closely enough that some of it is indistinguishable from a person. Good filtering removes the obvious and the moderately clever automated hits, which is most of the volume, and leaves you numbers you can actually make decisions on."
+    }
+  ],
+  "heroWord": "bots",
+  "category": "Measurement",
+  "topics": [
+    "bot traffic",
+    "ga4",
+    "data quality",
+    "bot filtering"
+  ],
+  "sources": [
+    {
+      "label": "Google Analytics Help: Known bot-traffic exclusion",
+      "url": "https://support.google.com/analytics/answer/9888366?hl=en"
+    },
+    {
+      "label": "Plausible: We tested how Google Analytics filters bot traffic",
+      "url": "https://plausible.io/blog/testing-bot-traffic-filtering-google-analytics"
+    },
+    {
+      "label": "IAB/ABC International Spiders and Bots List",
+      "url": "https://www.iab.com/guidelines/iab-abc-international-spiders-bots-list/"
+    },
+    {
+      "label": "MaxMind: GeoLite ASN databases",
+      "url": "https://dev.maxmind.com/geoip/docs/databases/asn/"
+    }
+  ],
+  "internalLinks": [
+    {
+      "href": "/guides/is-ga4-sampling-your-data",
+      "label": "Is GA4 sampling your data?",
+      "group": "guide"
+    },
+    {
+      "href": "/vs/google-analytics",
+      "label": "Conclick vs Google Analytics",
+      "group": "comparison"
+    },
+    {
+      "href": "/vs/plausible",
+      "label": "Conclick vs Plausible",
+      "group": "comparison"
+    },
+    {
+      "href": "/glossary/sessions-vs-visitors",
+      "label": "Sessions vs visitors, explained",
+      "group": "glossary"
+    },
+    {
+      "href": "/glossary/bounce-rate",
+      "label": "What bounce rate really measures",
+      "group": "glossary"
+    },
+    {
+      "href": "/for/ecommerce",
+      "label": "Analytics for ecommerce",
+      "group": "useCase"
+    }
+  ],
+  "relatedTools": [
+    "utm-builder"
+  ],
+  "leadMagnet": {
+    "kind": "addWebsite",
+    "headline": "Put this into practice",
+    "sub": "Conclick gives you privacy-first analytics, heatmaps, funnels, and revenue attribution in one. Free for 14 days, no card.",
+    "ctaLabel": "Add My Website"
+  },
+  "datePublished": "2026-07-22",
+  "dateModified": "2026-07-22"
+};
+
+export default entry;

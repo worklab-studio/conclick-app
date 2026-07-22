@@ -1,5 +1,10 @@
 {
   "keywords": {
+    "cookieless heatmap tool": {
+      "status": "published",
+      "slug": "cookieless-heatmap-tool",
+      "published_at": "2026-07-22T03:50:58.060Z"
+    },
     "cookieless session replay": {
       "status": "skipped"
     },
@@ -11,11 +16,92 @@
     "gdpr compliant heatmap": {
       "status": "skipped"
     },
+    "how to a/b test with low traffic": {
+      "status": "published",
+      "slug": "ab-testing-with-low-traffic",
+      "published_at": "2026-07-22T04:03:27.406Z"
+    },
+    "how to add analytics to a next.js site": {
+      "status": "published",
+      "slug": "add-analytics-to-nextjs",
+      "published_at": "2026-07-22T04:06:02.782Z"
+    },
+    "how to filter bot traffic from analytics": {
+      "status": "published",
+      "slug": "filter-bot-traffic-from-analytics",
+      "published_at": "2026-07-22T04:06:02.777Z"
+    },
+    "how to find where users abandon your checkout": {
+      "status": "published",
+      "slug": "where-users-abandon-checkout",
+      "published_at": "2026-07-22T04:06:02.778Z"
+    },
+    "how to get cited by chatgpt": {
+      "status": "published",
+      "slug": "how-to-get-cited-by-chatgpt",
+      "published_at": "2026-07-22T04:03:26.975Z"
+    },
+    "how to read a heatmap": {
+      "status": "published",
+      "slug": "how-to-read-a-heatmap",
+      "published_at": "2026-07-22T04:06:02.779Z"
+    },
     "privacy friendly heatmap tool": {
       "status": "skipped"
     },
     "privacy friendly session recording": {
       "status": "skipped"
+    },
+    "revenue attribution tool": {
+      "status": "skipped"
+    },
+    "revenue attribution tools compared": {
+      "status": "published",
+      "slug": "revenue-attribution-tools",
+      "published_at": "2026-07-22T04:06:02.784Z"
+    },
+    "saas revenue attribution software": {
+      "status": "skipped"
+    },
+    "search console impressions up but clicks down": {
+      "status": "published",
+      "slug": "impressions-up-clicks-down",
+      "published_at": "2026-07-22T04:06:02.777Z"
+    },
+    "should i block gptbot": {
+      "status": "published",
+      "slug": "should-i-block-gptbot",
+      "published_at": "2026-07-22T04:03:27.119Z"
+    },
+    "what a click map shows that a funnel doesn't": {
+      "status": "published",
+      "slug": "click-map-vs-funnel",
+      "published_at": "2026-07-22T04:06:02.785Z"
+    },
+    "what is llms.txt": {
+      "status": "published",
+      "slug": "what-is-llms-txt",
+      "published_at": "2026-07-22T04:03:27.027Z"
+    },
+    "why is ai traffic showing as direct in analytics": {
+      "status": "published",
+      "slug": "why-ai-traffic-shows-as-direct",
+      "published_at": "2026-07-22T04:06:02.773Z"
+    },
+    "why is my page not indexed in google search console": {
+      "status": "published",
+      "slug": "why-is-my-page-not-indexed",
+      "published_at": "2026-07-22T04:06:02.775Z"
+    },
+    "why is organic traffic showing as direct": {
+      "status": "published",
+      "slug": "organic-traffic-showing-as-direct",
+      "published_at": "2026-07-22T04:03:27.315Z"
+    },
+    "why is stripe revenue higher than my analytics revenue": {
+      "status": "published",
+      "slug": "stripe-revenue-vs-analytics-revenue",
+      "published_at": "2026-07-22T04:03:27.261Z"
     }
   }
 }

@@ -10,6 +10,8 @@ import alternatives_mixpanel from './alternatives/mixpanel';
 import alternatives_plausible from './alternatives/plausible';
 import alternatives_posthog from './alternatives/posthog';
 import alternatives_umami from './alternatives/umami';
+import blog_ab_testing_with_low_traffic from './blog/ab-testing-with-low-traffic';
+import blog_click_map_vs_funnel from './blog/click-map-vs-funnel';
 import blog_cookie_banners_killing_your_data from './blog/cookie-banners-killing-your-data';
 import blog_metrics_early_saas_should_watch from './blog/metrics-early-saas-should-watch';
 import blog_vanity_metrics_are_lying from './blog/vanity-metrics-are-lying';
@@ -36,11 +38,24 @@ import glossary_marketing_attribution from './glossary/marketing-attribution';
 import glossary_revenue_attribution from './glossary/revenue-attribution';
 import glossary_sessions_vs_visitors from './glossary/sessions-vs-visitors';
 import glossary_utm from './glossary/utm';
+import glossary_what_is_llms_txt from './glossary/what-is-llms-txt';
+import guides_add_analytics_to_nextjs from './guides/add-analytics-to-nextjs';
 import guides_do_heatmaps_need_cookie_consent from './guides/do-heatmaps-need-cookie-consent';
+import guides_filter_bot_traffic_from_analytics from './guides/filter-bot-traffic-from-analytics';
 import guides_ga4_migration_guide from './guides/ga4-migration-guide';
 import guides_gdpr_analytics_checklist from './guides/gdpr-analytics-checklist';
+import guides_how_to_get_cited_by_chatgpt from './guides/how-to-get-cited-by-chatgpt';
 import guides_how_to_read_a_funnel from './guides/how-to-read-a-funnel';
+import guides_how_to_read_a_heatmap from './guides/how-to-read-a-heatmap';
+import guides_impressions_up_clicks_down from './guides/impressions-up-clicks-down';
 import guides_is_ga4_sampling_your_data from './guides/is-ga4-sampling-your-data';
+import guides_organic_traffic_showing_as_direct from './guides/organic-traffic-showing-as-direct';
+import guides_revenue_attribution_tools from './guides/revenue-attribution-tools';
+import guides_should_i_block_gptbot from './guides/should-i-block-gptbot';
+import guides_stripe_revenue_vs_analytics_revenue from './guides/stripe-revenue-vs-analytics-revenue';
+import guides_where_users_abandon_checkout from './guides/where-users-abandon-checkout';
+import guides_why_ai_traffic_shows_as_direct from './guides/why-ai-traffic-shows-as-direct';
+import guides_why_is_my_page_not_indexed from './guides/why-is-my-page-not-indexed';
 import tools_utm_builder from './tools/utm-builder';
 import usecases_agencies from './use-cases/agencies';
 import usecases_ecommerce from './use-cases/ecommerce';
@@ -57,6 +72,8 @@ const ENTRIES: ContentEntry[] = [
   alternatives_plausible,
   alternatives_posthog,
   alternatives_umami,
+  blog_ab_testing_with_low_traffic,
+  blog_click_map_vs_funnel,
   blog_cookie_banners_killing_your_data,
   blog_metrics_early_saas_should_watch,
   blog_vanity_metrics_are_lying,
@@ -83,11 +100,24 @@ const ENTRIES: ContentEntry[] = [
   glossary_revenue_attribution,
   glossary_sessions_vs_visitors,
   glossary_utm,
+  glossary_what_is_llms_txt,
+  guides_add_analytics_to_nextjs,
   guides_do_heatmaps_need_cookie_consent,
+  guides_filter_bot_traffic_from_analytics,
   guides_ga4_migration_guide,
   guides_gdpr_analytics_checklist,
+  guides_how_to_get_cited_by_chatgpt,
   guides_how_to_read_a_funnel,
+  guides_how_to_read_a_heatmap,
+  guides_impressions_up_clicks_down,
   guides_is_ga4_sampling_your_data,
+  guides_organic_traffic_showing_as_direct,
+  guides_revenue_attribution_tools,
+  guides_should_i_block_gptbot,
+  guides_stripe_revenue_vs_analytics_revenue,
+  guides_where_users_abandon_checkout,
+  guides_why_ai_traffic_shows_as_direct,
+  guides_why_is_my_page_not_indexed,
   tools_utm_builder,
   usecases_agencies,
   usecases_ecommerce,

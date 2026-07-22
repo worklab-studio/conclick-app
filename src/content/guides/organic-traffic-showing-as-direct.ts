@@ -1,0 +1,222 @@
+import type { ContentEntry } from '../schema';
+
+const entry: ContentEntry = {
+  "type": "guide",
+  "slug": "organic-traffic-showing-as-direct",
+  "h1": "Why Is Organic Traffic Showing as Direct? The Dark Traffic Problem",
+  "metaTitle": "Why Is Organic Traffic Showing as Direct? Dark Traffic Fix",
+  "metaDescription": "Organic clicks land in Direct when the referrer gets stripped: HTTPS-to-HTTP hops, in-app browsers, email, and AI answers. Here is how to shrink that bucket.",
+  "tldr": "Organic visits get filed as Direct when your analytics never receives a referrer, so it cannot see where the click came from. The usual culprits are HTTPS-to-HTTP downgrades, in-app browsers, email clients, mobile apps, and AI answer engines that strip the header. Tag the links you control with UTMs, fix the referrer chain on your own pages, and the Direct bucket shrinks.",
+  "intro": "I get asked this more than almost any other analytics question, and the honest answer is that your dashboard is not lying to you: it genuinely does not know where those people came from. When a browser loads your page with no referrer and no campaign tag attached, most tools have exactly one honest place to file the visit, and that place is called Direct. Organic search clicks normally carry a referrer, so when they land in the Direct bucket instead, something snapped the chain between the search result and your page. That is the dark traffic problem, and it is almost always fixable once you find the broken link.",
+  "sections": [
+    {
+      "type": "h2",
+      "text": "What Direct actually means",
+      "id": "what-direct-means"
+    },
+    {
+      "type": "p",
+      "text": "Direct is not a source. It is the absence of one. In Google Analytics you see it written as (direct) / (none), and that slash tells the whole story: no source, no medium. The tool received a pageview with nothing attached that would let it work out provenance, so it dropped the session into the fallback bin rather than guessing."
+    },
+    {
+      "type": "p",
+      "text": "The classic mental model is that Direct means someone typed your URL or clicked a bookmark. That was roughly true fifteen years ago. Today the bin has swollen into a catch-all for every visit where the plumbing failed. Real people who found you through search, a newsletter, or an AI answer are sitting in there, mislabelled, because the one signal that would have identified them never arrived."
+    },
+    {
+      "type": "h2",
+      "text": "Why organic clicks lose their referrer",
+      "id": "why-organic-loses-referrer"
+    },
+    {
+      "type": "p",
+      "text": "The HTTP referrer header is the thing your analytics reads to say a visit came from search or another site. It is also fragile, and a few very common situations wipe it out before the visitor ever reaches you."
+    },
+    {
+      "type": "ul",
+      "items": [
+        "The HTTPS to HTTP downgrade. Browsers refuse to send the referrer when a secure page links to an insecure one. Chrome's default referrer policy, strict-origin-when-cross-origin, drops it entirely on that downgrade. If any hop in a redirect chain is plain HTTP, the referrer is gone by the time the visitor lands on your final HTTPS page.",
+        "Redirect chains and link shorteners. Every extra bounce is a chance to lose the header. A JavaScript redirect, a meta refresh, or a shortener that itself lives on HTTP can quietly launder a search visit into an unattributed one.",
+        "Your own referrer policy. If your pages send a strict no-referrer policy, or a plugin sets one, you can strip the signal on the exact clicks you most want to keep. Worth checking your response headers before you blame anyone else.",
+        "Cross-domain and payment hops. Sending someone through a checkout on another domain, or across your marketing site to your app, without cross-domain measurement configured, makes the second domain treat the first as an outside referral or as Direct."
+      ]
+    },
+    {
+      "type": "p",
+      "text": "Here is the part most write-ups get muddled, and it matters. If genuine Google search clicks are showing up as Direct, UTMs will not save you, because you cannot append tags to the links Google renders in its results. You do not control that markup. For real organic search leaking into Direct, the fix is the referrer chain above: force HTTPS everywhere, kill insecure redirect hops, and check your own referrer policy. UTMs are for the other traffic hiding in that bucket, which is the next section."
+    },
+    {
+      "type": "h2",
+      "text": "The dark traffic that hides in Direct",
+      "id": "dark-traffic-in-direct"
+    },
+    {
+      "type": "p",
+      "text": "A large slice of what you think is organic is actually dark traffic: visits from channels that simply do not pass a referrer at all. None of it is your fault, and no browser setting on your end can force these sources to identify themselves. But you can tag your way out of most of it."
+    },
+    {
+      "type": "ul",
+      "items": [
+        "In-app browsers. A link opened inside Instagram, TikTok, LinkedIn, or Slack often runs in an embedded webview that passes no referrer. The visitor came from social, and your report swears they came from nowhere.",
+        "Email clients. Desktop and mobile mail apps frequently open links with no referrer. Newsletter traffic is one of the biggest silent contributors to the Direct bucket.",
+        "Messaging apps. WhatsApp, iMessage, Signal, Telegram, and DMs pass nothing. This is the dark social everyone underestimates, and it is a huge share of how content actually spreads.",
+        "Documents. A link in a PDF, a slide deck, a Notion page, or a native mobile app usually arrives with no header.",
+        "AI answer engines. When someone clicks a citation inside ChatGPT, Perplexity, or Gemini, the referrer is often stripped by the app or its in-app browser, so the visit lands in Direct even though an AI sent it."
+      ]
+    },
+    {
+      "type": "p",
+      "text": "On the AI point specifically, the ground is shifting fast. Google added a native AI Assistant channel to GA4's default channel group on 13 May 2026, which assigns an ai-assistant medium to sessions it recognises from ChatGPT, Gemini, and Claude. That catches the clicks that do arrive with a recognised referrer. It does not rescue the ones that come through a mobile app or webview with the header stripped, so a meaningful chunk of AI traffic still falls into Direct regardless. Treat the new channel as a floor on your AI numbers, not the full picture."
+    },
+    {
+      "type": "callout",
+      "text": "Direct is a confession, not a category. It is your analytics saying: someone arrived, and I could not see where from. Every point you claw back out of that bucket is a marketing decision you get to make on evidence instead of a shrug."
+    },
+    {
+      "type": "h2",
+      "text": "How to shrink the Direct bucket",
+      "id": "shrink-the-direct-bucket"
+    },
+    {
+      "type": "p",
+      "text": "You will never get this bin to zero, and you should not try. Some visitors really do type your URL. But you can move a lot of misfiled sessions back where they belong by tagging every link you personally control."
+    },
+    {
+      "type": "ol",
+      "items": [
+        "Tag your own links with UTMs. Every newsletter link, every social post, every partner placement, every QR code, every link in a slide deck should carry utm_source, utm_medium, and utm_campaign. Because UTMs live in the URL itself, they survive when the referrer does not, which is exactly why they beat the header for anything you can tag.",
+        "Standardise your naming. utm_source=newsletter on one campaign and utm_source=email-newsletter on the next fragments the same channel into two rows. Pick a convention, write it down, and build links from a single tool so nobody freelances.",
+        "Force HTTPS and prune redirects. Redirect every insecure request to HTTPS, remove any HTTP hop from your redirect chains, and prefer server-side 301s over JavaScript or meta-refresh bounces that can drop the referrer.",
+        "Configure cross-domain measurement. If your site and app or checkout live on different domains, set them up as one property so a hop between them is not logged as a new referral or as Direct.",
+        "Audit your own referrer policy. Check that your pages are not sending no-referrer to the sites you link out to, and are not stripping the signal on internal navigation your analytics depends on."
+      ]
+    },
+    {
+      "type": "p",
+      "text": "The single highest-leverage habit here is the first one. Once every link you control is tagged, the traffic still landing in Direct is far closer to genuinely unknowable, and you can stop second-guessing it."
+    },
+    {
+      "type": "h2",
+      "text": "Channel rules do the rest",
+      "id": "channel-rules"
+    },
+    {
+      "type": "p",
+      "text": "Tagging fixes the input. Channel rules fix how your tool sorts what it already has. GA4 ships a default channel grouping that decides whether a session is Organic, Email, Social, or Direct based on source and medium, and its defaults are not always right for how you actually name things."
+    },
+    {
+      "type": "p",
+      "text": "The most common own-goal is a medium that does not match what the tool expects. If your email links use utm_medium=newsletter instead of email, GA4 may not file them under Email, and depending on the rest of the signals they can drift toward Direct or Referral. Building a custom channel group with regex that matches your real naming, or simply aligning your UTMs to the mediums GA4 recognises, pulls those sessions into the right column."
+    },
+    {
+      "type": "p",
+      "text": "None of this is glamorous. It is naming discipline plus a couple of header fixes. But it is the difference between a Direct bucket that is genuinely unattributable and one that is quietly eating a third of your real marketing performance."
+    },
+    {
+      "type": "h2",
+      "text": "How I handle this in Conclick",
+      "id": "how-conclick-handles-it"
+    },
+    {
+      "type": "p",
+      "text": "I build Conclick, so read this as the interested party it is. My take is unglamorous: no analytics tool can invent a referrer that the browser never sent, so anyone promising to eliminate Direct is overselling. What a tool can do is read UTMs cleanly, keep a tidy channel model, and tie the campaign that produced a visit to the revenue it eventually produced, so you can argue about the traffic that matters rather than the bucket that does not."
+    },
+    {
+      "type": "p",
+      "text": "Conclick is built on the open-source Umami engine, and like most privacy-first tools it leans on UTMs plus the referrer rather than a cross-site profile, which means the same dark traffic lands in Direct for us too. That is honest physics, not a product gap. The useful move is not to chase a smaller Direct number for its own sake, but to tag your links so the number that remains is one you can actually trust."
+    }
+  ],
+  "faq": [
+    {
+      "question": "Why is my organic traffic showing up as direct in GA4?",
+      "answer": "Because GA4 received the pageview with no referrer and no campaign parameters, so it had nothing to attribute the session to and filed it as (direct) / (none). For clicks that were genuinely organic search, the referrer was usually lost to an HTTPS-to-HTTP downgrade, a redirect hop, or a referrer policy on your own pages. For everything else in that bucket, the source simply never passes a referrer to begin with."
+    },
+    {
+      "question": "Does HTTPS to HTTP really strip the referrer?",
+      "answer": "Yes. Under the modern default browser referrer policy, strict-origin-when-cross-origin, no referrer is sent when a secure HTTPS page leads to an insecure HTTP one. If any link in a redirect chain is plain HTTP, the original referrer is gone by the time the visitor reaches your final page, and the visit looks Direct."
+    },
+    {
+      "question": "Why does traffic from ChatGPT or Perplexity show as direct?",
+      "answer": "When someone clicks a citation inside an AI assistant, the link often opens in a mobile app or in-app browser that does not pass a referrer, so the visit lands in Direct. Google added an AI Assistant channel to GA4 in May 2026 that catches recognised AI referrers, but sessions that arrive with the header stripped still fall into Direct."
+    },
+    {
+      "question": "Can UTMs fix organic search traffic that shows as direct?",
+      "answer": "No, not for real Google search clicks, because you cannot add UTM tags to the links Google renders in its own results. For genuine organic search leaking into Direct, fix the referrer chain: force HTTPS, remove insecure redirect hops, and check your referrer policy. UTMs are for the links you do control, like email, social, and partner placements."
+    },
+    {
+      "question": "How much direct traffic is normal?",
+      "answer": "There is no universal number, and anyone who quotes you one is guessing. It varies enormously by audience, device mix, and how much of your growth comes from dark social and AI. The useful benchmark is your own trend: tag every link you control, fix your referrer chain, and watch whether the bucket shrinks. If it stays large after that, what remains is closer to genuinely unknowable."
+    }
+  ],
+  "heroWord": "dark",
+  "category": "Measurement",
+  "topics": [
+    "dark traffic",
+    "attribution",
+    "direct traffic",
+    "utm",
+    "referrer"
+  ],
+  "sources": [
+    {
+      "label": "Chrome for Developers: A new default Referrer-Policy, strict-origin-when-cross-origin",
+      "url": "https://developer.chrome.com/blog/referrer-policy-new-chrome-default/"
+    },
+    {
+      "label": "MDN: Referrer-Policy header",
+      "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Referrer-Policy"
+    },
+    {
+      "label": "Search Engine Journal: Google Analytics Adds AI Assistant As Default Channel Group",
+      "url": "https://www.searchenginejournal.com/google-analytics-adds-ai-assistant-as-default-channel-group/574974/"
+    },
+    {
+      "label": "Google Analytics Help: Default channel group",
+      "url": "https://support.google.com/analytics/answer/9756891"
+    }
+  ],
+  "internalLinks": [
+    {
+      "href": "/glossary/utm",
+      "label": "UTM parameters, explained",
+      "group": "glossary"
+    },
+    {
+      "href": "/tools/utm-builder",
+      "label": "Build consistent UTMs with the free builder",
+      "group": "tool"
+    },
+    {
+      "href": "/glossary/marketing-attribution",
+      "label": "How marketing attribution actually works",
+      "group": "glossary"
+    },
+    {
+      "href": "/glossary/sessions-vs-visitors",
+      "label": "Sessions vs visitors",
+      "group": "glossary"
+    },
+    {
+      "href": "/for/newsletters",
+      "label": "Analytics for newsletters",
+      "group": "useCase"
+    },
+    {
+      "href": "/guides/is-ga4-sampling-your-data",
+      "label": "Is GA4 sampling your data?",
+      "group": "guide"
+    }
+  ],
+  "relatedTools": [
+    "utm-builder"
+  ],
+  "leadMagnet": {
+    "kind": "addWebsite",
+    "headline": "Put this into practice",
+    "sub": "Conclick gives you privacy-first analytics, heatmaps, funnels, and revenue attribution in one. Free for 14 days, no card.",
+    "ctaLabel": "Add My Website"
+  },
+  "datePublished": "2026-07-22",
+  "dateModified": "2026-07-22"
+};
+
+export default entry;

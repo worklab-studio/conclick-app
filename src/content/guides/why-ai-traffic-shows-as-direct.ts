@@ -1,0 +1,218 @@
+import type { ContentEntry } from '../schema';
+
+const entry: ContentEntry = {
+  "type": "guide",
+  "slug": "why-ai-traffic-shows-as-direct",
+  "h1": "Why AI Traffic Shows as Direct in Your Analytics (and What It Hides)",
+  "metaTitle": "Why AI Traffic Shows as Direct in Analytics",
+  "metaDescription": "AI apps open links with no referrer, so ChatGPT and Perplexity visits land in your Direct bucket. Why it happens, and how to build an AI channel that helps.",
+  "tldr": "AI apps like ChatGPT and Perplexity open links without a referrer header, and any visit with no referrer lands in your Direct bucket. GA4 added a native AI Assistant channel in May 2026, but it only catches visits that still carry a referrer, so a large share of AI visits stay hidden in Direct. Tagging and revenue attribution close the rest of the gap.",
+  "intro": "I kept seeing the same thing in my own dashboard and in every founder screenshot that landed in my inbox: a fat Direct number that made no sense. Nobody types a 40-character blog URL by hand. When I dug in, most of that Direct was AI. People were asking ChatGPT or Perplexity a question, clicking through, and arriving with no fingerprint at all. This is why that happens, what the fix does, and where the fix quietly runs out.",
+  "sections": [
+    {
+      "type": "h2",
+      "text": "The short answer",
+      "id": "the-short-answer"
+    },
+    {
+      "type": "p",
+      "text": "Your analytics tool decides where a visit came from by reading the referrer, the small piece of data a browser passes that names the page which sent you. When someone follows a link out of an AI app, that piece of data is usually missing. No referrer means no source to name, and GA4 files every source-less visit under Direct, the same bucket as someone who typed your address from memory or clicked a bookmark. So the visit is real, the intent is real, and the label is wrong."
+    },
+    {
+      "type": "p",
+      "text": "That is the whole mechanic. The AI did not hide from you on purpose. The app simply never told your site where the click came from, and Direct is the drawer everything unlabelled falls into."
+    },
+    {
+      "type": "h2",
+      "text": "The ways an AI visit loses its referrer",
+      "id": "ways-a-visit-loses-its-referrer"
+    },
+    {
+      "type": "p",
+      "text": "There is not one cause, there are several, and they stack on top of each other. These are the ones I see most."
+    },
+    {
+      "type": "ul",
+      "items": [
+        "Native apps and in-app browsers. The ChatGPT and Perplexity mobile apps, and the ChatGPT desktop app, open your link through an embedded webview or hand it straight to the operating system. Neither reliably passes a referrer header. This is the single biggest reason AI visits arrive blank, because so much AI use now happens inside an app rather than a browser tab.",
+        "Referrer policy. A site can instruct browsers to send a shortened referrer or none at all, and the modern default for cross-site HTTPS links already strips the path. So even a plain browser click can reach you with the source blanked or trimmed.",
+        "Copy and paste. People read an answer, copy the URL, and paste it into a fresh tab. A pasted URL carries no referrer by definition. It is indistinguishable from typing the address in by hand.",
+        "Redirectors and wrappers. Some links pass through an intermediate hop before they reach you, and the referrer that survives, if any, points at the wrapper rather than the AI tool that generated the recommendation."
+      ]
+    },
+    {
+      "type": "callout",
+      "text": "The pattern to remember: the referrer is an HTTP header, and headers are the first thing dropped when a link leaves an app, a webview, or a clipboard. Anything living in the URL itself survives all three. That one distinction is most of the game."
+    },
+    {
+      "type": "h2",
+      "text": "GA4's AI Assistant channel: what it fixes, what it misses",
+      "id": "ga4-ai-assistant-channel"
+    },
+    {
+      "type": "p",
+      "text": "In May 2026, Google added a native AI Assistant channel to GA4's default channel group. When a visit arrives with a referrer that Google recognises as an AI assistant, GA4 now assigns the medium ai-assistant, tags the campaign as (ai-assistant), and files the session under a dedicated AI Assistant channel instead of leaving it in Referral. Google names ChatGPT, Gemini, and Claude as examples, and it needs no setup from you. It rolled out gradually, so some properties saw it before others."
+    },
+    {
+      "type": "p",
+      "text": "This is a genuine improvement, and if you have it, use it. But read the condition again: it only fires when a visit arrives with a referrer Google can read. Every one of the source-less cases above still falls into Direct. The AI Assistant channel shows you the floor of your AI traffic, the visits that happened to keep their header, not the ceiling. Treat that number as a known undercount, not a total."
+    },
+    {
+      "type": "quote",
+      "text": "AI assistant traffic that arrives without a referrer header still lands in Direct.",
+      "cite": "Search Engine Journal, on GA4's AI Assistant channel, 2026"
+    },
+    {
+      "type": "h2",
+      "text": "How to build or extend an AI source channel group",
+      "id": "build-an-ai-channel-group"
+    },
+    {
+      "type": "p",
+      "text": "If your property has not received the native channel yet, or you want to catch tools Google is not classifying, you can build your own. In GA4 this lives under Admin, then Channel groups. You create a custom channel group, add a channel named something like AI Referrals, and set a condition on the source. A regular expression across the AI hostnames does the job."
+    },
+    {
+      "type": "ul",
+      "items": [
+        "Match the source against the AI domains you care about: chatgpt.com, openai.com, perplexity.ai, gemini.google.com, claude.ai, and so on. Keep that list somewhere you will actually maintain it, because new tools appear constantly and an out-of-date pattern silently undercounts.",
+        "Add the tag AI tools append themselves. ChatGPT Search auto-appends utm_source=chatgpt.com to the links it cites, and because that lives in the URL rather than a header, it survives the app, the webview, and the clipboard. Match on it and you recover visits the referrer never would have carried.",
+        "Remember you cannot tag the links an AI tool generates for you. UTMs only help on the links you control yourself, like your newsletter or your own social posts, and a builder keeps those tags consistent so they do not fragment your own reports."
+      ]
+    },
+    {
+      "type": "p",
+      "text": "Both routes, the native channel and your custom one, share the same ceiling. They can only classify a visit that carried something to classify. When the referrer is gone and there is no tag in the URL, no channel group can conjure a source out of nothing. That is not a setting you got wrong. It is the physics of the thing."
+    },
+    {
+      "type": "h2",
+      "text": "The question a channel group cannot answer",
+      "id": "did-it-convert"
+    },
+    {
+      "type": "p",
+      "text": "Say you win. Say your AI channel is dialled in and you are catching most of what carries a referrer or a tag. You now know how many sessions came from ChatGPT last month. Here is the question that number does not answer: did any of them pay you?"
+    },
+    {
+      "type": "p",
+      "text": "This is where I stopped caring about the channel report on its own. A session count is a vanity number until it is tied to money. GA4 can attribute a conversion event to the AI Assistant channel, but the value it stores is whatever you fired at checkout, not the revenue you actually kept after refunds, downgrades, and failed renewals. And its attribution windows and last-click habits routinely hand the credit to whatever touched the visitor last, which for a long AI-influenced journey is rarely the AI tool that started it."
+    },
+    {
+      "type": "p",
+      "text": "The founder question is simpler and harder: of the visits I can trace to AI, which ones turned into paying customers, and how much of that money survived the month? Answering it means holding the first-touch source all the way through the journey and reconciling it against the actual payment, not against a checkout event you fired client-side."
+    },
+    {
+      "type": "h2",
+      "text": "Where Conclick fits, and where it does not",
+      "id": "where-conclick-fits"
+    },
+    {
+      "type": "p",
+      "text": "I build Conclick, so weigh this accordingly. Conclick captures the landing source, the referrer plus any tag like utm_source=chatgpt.com, as a first-party value stored against the visitor, then ties later payments from Stripe, Paddle, Polar, Lemon Squeezy, and Dodo back to that source. So the line on the dashboard is not sessions from ChatGPT, it is revenue from ChatGPT, after refunds, tied to the visit that started it. That is the thing I could never get GA4 and a Stripe export to tell me without a spreadsheet that broke every month."
+    },
+    {
+      "type": "p",
+      "text": "Now the honest limit. Conclick captures a source, it does not invent one. If an AI visit arrives with no referrer and no tag, Conclick is staring at the same blank GA4 is, and it will sit in Direct here too. What first-party capture buys you is for the visits that do carry a source: it holds that source through the whole journey to payment instead of losing it to a last-click model or an expired session. It raises the ceiling on what you can tie to money. It does not abolish the floor, and anyone who tells you their tool abolishes the floor is selling you something."
+    },
+    {
+      "type": "p",
+      "text": "On privacy, Conclick measures without cookies, but it does keep a first-party visitor identifier in the browser's local storage so a journey holds together from first visit to payment. That is not a tracking cookie, but it is a persistent client-side identifier, and whether it needs a consent banner depends on your jurisdiction and how you configure it. It may qualify for an exemption in some cases and not others. That is a question for your own lawyer rather than a line on a landing page, and nothing here is legal advice. Conclick is built on the open-source Umami engine, which I mention wherever it is relevant rather than only where it flatters us."
+    }
+  ],
+  "faq": [
+    {
+      "question": "Why does ChatGPT traffic show as Direct instead of Referral?",
+      "answer": "Because the ChatGPT app or its embedded webview usually opens your link without a referrer header, and GA4 files every referrer-less visit under Direct. It is the same bucket as a typed URL or a bookmark. A plain browser click that keeps its referrer can now land in GA4's AI Assistant channel instead, but app clicks, pasted links, and privacy-trimmed referrers stay in Direct."
+    },
+    {
+      "question": "Does GA4 track AI traffic now?",
+      "answer": "Partly. In May 2026 Google added a native AI Assistant channel to GA4's default channel group that classifies AI visits by their referrer and assigns the medium ai-assistant. It works only when the visit arrives with a referrer Google recognises, so referrer-less AI clicks from apps, webviews, and copy-paste still fall into Direct and are not counted in that channel. Treat the AI Assistant number as a floor, not a full picture."
+    },
+    {
+      "question": "How do I separate AI traffic from real direct traffic?",
+      "answer": "You cannot cleanly separate the referrer-less part, because a source-less AI visit and a genuine type-in look identical to your analytics. What you can do is capture the signals that survive: match on utm_source=chatgpt.com and similar tags AI tools append to the URL, and use GA4's AI Assistant channel for the visits that keep a referrer. Treat the result as a floor, and watch it move over time rather than trusting it as an exact total."
+    },
+    {
+      "question": "Is utm_source=chatgpt.com reliable?",
+      "answer": "It is more reliable than the referrer, because it lives in the URL and survives apps, webviews, and copy-paste. But it is appended by ChatGPT Search for the links it cites, not by every AI tool or every ChatGPT mode, so it captures a slice rather than everything. Match on it, and also match on the AI hostnames in your referrer, and combine the two conditions rather than relying on either alone."
+    },
+    {
+      "question": "Can I tell whether AI traffic actually converted?",
+      "answer": "Not from a channel report by itself. A channel group tells you a visit happened, not whether it paid. To connect an AI visit to revenue you need to hold the first-touch source through the whole journey and reconcile it against the actual payment, after refunds, rather than a checkout event. That is a revenue-attribution question, and for a bootstrapped founder it is the one worth answering."
+    },
+    {
+      "question": "Why is my Direct traffic suddenly so high?",
+      "answer": "If your Direct number has climbed over the last year, a large part of it is probably AI. As more people ask ChatGPT, Perplexity, and Gemini and then click through from an app, more source-less visits arrive, and they all pile into Direct. A rising Direct line with no matching change in bookmarks or type-in behaviour is usually AI traffic wearing a disguise."
+    }
+  ],
+  "heroWord": "invisible",
+  "category": "GEO",
+  "topics": [
+    "ai traffic",
+    "attribution",
+    "ga4",
+    "direct traffic"
+  ],
+  "sources": [
+    {
+      "label": "Google Analytics Help: [GA4] Default channel group",
+      "url": "https://support.google.com/analytics/answer/9756891"
+    },
+    {
+      "label": "Search Engine Journal: Google Analytics Adds AI Assistant As Default Channel Group",
+      "url": "https://www.searchenginejournal.com/google-analytics-adds-ai-assistant-as-default-channel-group/574974/"
+    },
+    {
+      "label": "Semrush: GA4 adds AI Assistant channel for referral tracking",
+      "url": "https://www.semrush.com/blog/ga4-adds-ai-assistant-channel/"
+    },
+    {
+      "label": "Seer Interactive: Are AI sites like ChatGPT sending your website traffic?",
+      "url": "https://www.seerinteractive.com/insights/are-ai-sites-like-chatgpt-sending-your-website-traffic"
+    }
+  ],
+  "internalLinks": [
+    {
+      "href": "/glossary/utm",
+      "label": "UTM parameters, explained",
+      "group": "glossary"
+    },
+    {
+      "href": "/glossary/marketing-attribution",
+      "label": "What marketing attribution means",
+      "group": "glossary"
+    },
+    {
+      "href": "/glossary/revenue-attribution",
+      "label": "Revenue attribution, defined",
+      "group": "glossary"
+    },
+    {
+      "href": "/blog/why-revenue-attribution-matters",
+      "label": "Why revenue attribution belongs at the centre of your analytics",
+      "group": "blog"
+    },
+    {
+      "href": "/vs/google-analytics",
+      "label": "Conclick vs Google Analytics",
+      "group": "comparison"
+    },
+    {
+      "href": "/tools/utm-builder",
+      "label": "Build consistent UTMs for the links you control",
+      "group": "tool"
+    }
+  ],
+  "relatedTools": [
+    "utm-builder"
+  ],
+  "leadMagnet": {
+    "kind": "addWebsite",
+    "headline": "Put this into practice",
+    "sub": "Conclick gives you privacy-first analytics, heatmaps, funnels, and revenue attribution in one. Free for 14 days, no card.",
+    "ctaLabel": "Add My Website"
+  },
+  "datePublished": "2026-07-22",
+  "dateModified": "2026-07-22"
+};
+
+export default entry;

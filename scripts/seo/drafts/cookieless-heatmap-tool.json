@@ -1,0 +1,197 @@
+{
+  "type": "guide",
+  "slug": "cookieless-heatmap-tool",
+  "kind": "guide",
+  "keyword": "cookieless heatmap tool",
+  "draft": {
+    "h1": "The Cookieless Heatmap Tools Worth Using in 2026 (A Founder's Shortlist)",
+    "metaTitle": "Cookieless Heatmap Tools: A Founder's 2026 Shortlist",
+    "metaDescription": "The cookieless heatmap tools worth trying in 2026, ranked by what actually matters: clean click data without cookies, honest GDPR fit, and no sneaky pricing.",
+    "tldr": "A cookieless heatmap tool captures click, scroll and rage-click data using a first-party localStorage identifier rather than a tracking cookie, so most jurisdictions treat it as low-risk analytics. In 2026 the honest options are Conclick (which I build), Matomo with its paid Heatmap plugin, and Microsoft Clarity when your data is fine going to Microsoft.",
+    "intro": "I build a cookieless heatmap tool as part of Conclick, so I have opinions here, and the first opinion is that most software marketed this way is either mislabelled or covered in caveats. The honest version of the promise is a script that captures where people click, how far they scroll and where they rage-click, without setting a third-party tracking cookie and without a persistent device fingerprint. That still needs an identifier of some kind, usually a first-party value in localStorage, which is exactly the part most vendor landing pages gloss over.",
+    "heroWord": "cookieless.",
+    "category": "Analytics",
+    "topics": ["heatmaps", "privacy", "gdpr", "cookieless"],
+    "sections": [
+      {
+        "type": "h2",
+        "text": "What does cookieless actually mean for a heatmap?",
+        "id": "what-cookieless-means"
+      },
+      {
+        "type": "p",
+        "text": "The word cookieless started life as an ad-tech term about third-party cookies, the kind ad networks used to follow people across sites. When an analytics vendor writes cookieless on their landing page in 2026, they usually mean something narrower and much more useful to you: no cookies set by their own script, first-party or third-party. That is the definition worth holding them to."
+      },
+      {
+        "type": "p",
+        "text": "That distinction matters because most European supervisory authorities treat first-party analytics cookies as lower-risk and treat third-party tracking cookies as high-risk. A truly cookieless heatmap tool sits at the low end of that risk spectrum. It typically stores a session identifier in localStorage or in a first-party in-memory context, derives the click and scroll data from that, and reports the results in aggregate."
+      },
+      {
+        "type": "p",
+        "text": "What cookieless does not mean, in practice, is stateless. If a tool kept literally no identifier per visitor, it could not build a heatmap at all: every click would be one click, disconnected from every other click on the page. So the claim to actually look for on a vendor's site is not zero state ever, it is no cookies, first-party identifier only, no cross-site tracking, no device fingerprinting."
+      },
+      {
+        "type": "h2",
+        "text": "Why heatmaps need some identifier, even without cookies",
+        "id": "why-identifiers"
+      },
+      {
+        "type": "p",
+        "text": "A pure aggregate would not be enough. If two visitors click the same button, the heatmap has to know those are two clicks by different people, and it also has to know that both share a similar behaviour pattern to be worth grouping. That means every cookieless heatmap tool uses some kind of pseudonymous identifier under the hood. The interesting question is what kind."
+      },
+      {
+        "type": "p",
+        "text": "Three approaches are common in 2026. The first is a random id written to localStorage on the visitor's own device. It lives on their machine, only your domain can read it, and it goes away when they clear their storage or open an incognito window. This is what Conclick does, and per Fathom's public documentation at usefathom.com a first-party identifier is what Fathom's aggregate reports depend on too. The second approach is a rotating hashed value of IP plus User-Agent, changed daily; Plausible describes exactly this pattern on plausible.io. It never touches the client device, but it does depend on the network path and can group unrelated visitors on a shared corporate NAT. The third is genuine anonymisation via bucketing, which is what Cloudflare Web Analytics per cloudflare.com does, at the cost of not being able to render a per-visitor heatmap at all."
+      },
+      {
+        "type": "callout",
+        "text": "The relevance for a buyer: only the localStorage approach reliably supports the rich click, scroll and rage-click views a heatmap is actually meant to show. Most cookieless heatmap tools worth shortlisting therefore use option one, and you are really choosing between how honestly the vendor discloses it."
+      },
+      {
+        "type": "h2",
+        "text": "The shortlist of cookieless heatmap tools in 2026",
+        "id": "shortlist"
+      },
+      {
+        "type": "h3",
+        "text": "Conclick (the one I build)",
+        "id": "conclick"
+      },
+      {
+        "type": "p",
+        "text": "Conclick captures real-screenshot heatmaps with click density, scroll depth, rage clicks and dead clicks, without setting a tracking cookie. It uses a first-party localStorage identifier, which is documented plainly on our own site. Pricing is $9 per month or $7 billed yearly, with a 14-day free trial and an optional lifetime deal. Conclick is built on the open-source Umami analytics codebase, so the traffic-analytics layer inherits a stable, well-audited foundation. It also ties every payment from Stripe, Paddle, Polar, Lemon Squeezy or Dodo back to the session that produced it, which is where the value really compounds if you run a paid product."
+      },
+      {
+        "type": "p",
+        "text": "Where Conclick loses honestly: it does not offer full session replay, and it does not offer an on-page survey widget. If those are the pieces you actually need, a different tool is a better answer, and I would rather you know that up front."
+      },
+      {
+        "type": "h3",
+        "text": "Matomo with the Heatmap and Session Recording plugin",
+        "id": "matomo"
+      },
+      {
+        "type": "p",
+        "text": "Matomo is open-source analytics with an optional Heatmap and Session Recording premium plugin, described on matomo.org. If you self-host and disable cookies in the tracker configuration, per Matomo's own FAQ the heatmap layer can run without setting a cookie for aggregate use. Session recording is a separate matter and does set a first-party cookie. Setup cost is real: expect a weekend to install Matomo, configure it, and get the plugin licence key working. Right pick when you already run a Matomo instance and want to keep the whole stack under your control."
+      },
+      {
+        "type": "h3",
+        "text": "Microsoft Clarity",
+        "id": "clarity"
+      },
+      {
+        "type": "p",
+        "text": "Clarity is free at any traffic level and offers heatmaps plus session recordings. Per clarity.microsoft.com and the enforcement notice Microsoft posted in October 2025, Clarity's default setup does use cookies (_clck and _clsk), and in the EEA, UK and Switzerland it now requires a consent signal via its Consent V2 API. There is a reduced mode without cookies, but the practical implication is that Clarity is only usefully cookieless when you configure it that way and accept the diagnostic limits. The other honest caveat is where the data lives, which is Microsoft. That is fine for a side project and worth thinking twice about for a serious commercial product."
+      },
+      {
+        "type": "h3",
+        "text": "Hotjar with Reduced Tracking",
+        "id": "hotjar"
+      },
+      {
+        "type": "p",
+        "text": "Hotjar is not cookieless in its default setup per hotjar.com, but they publish a Reduced Tracking mode that skips the third-party cookie and reduces the persistent identifiers. First-party storage is still used. Worth considering when you already pay for Hotjar and mostly want to tighten the compliance story, less worth it as a whole-stack switch just for the cookie question. If you were switching anyway, you are already reading a shortlist, and Hotjar is not the answer."
+      },
+      {
+        "type": "h2",
+        "text": "How do I actually pick between them?",
+        "id": "how-to-pick"
+      },
+      {
+        "type": "p",
+        "text": "The decision usually comes down to three questions. Do you also want traffic analytics and revenue in the same dashboard, or is the heatmap a standalone diagnostic? Are you willing to self-host, or do you want a hosted tool that ships in an afternoon? And how confidently can you defend the setup to a data protection officer if one asks?"
+      },
+      {
+        "type": "p",
+        "text": "If your answers are one dashboard, hosted, and I want a clean privacy story: Conclick or Clarity, and Clarity's story is weaker because the data lives with Microsoft. If your answers include self-host and you already run a PHP stack: Matomo with the paid plugin becomes the honest pick, and the plugin cost is real. If you already have Hotjar and mostly want to reduce the compliance surface rather than migrate: their Reduced Tracking mode may be enough for now, and you can revisit later. If your primary need is session replay rather than aggregate heatmaps, none of these will be the perfect fit and the honest answer is a session-replay-first tool with the consent banner it requires."
+      },
+      {
+        "type": "h2",
+        "text": "But do I still need a consent banner?",
+        "id": "consent-banner"
+      },
+      {
+        "type": "p",
+        "text": "Sometimes. Being cookieless does not automatically exempt you from consent requirements in every jurisdiction, and I would rather you hear that from a page trying to sell you the category than from a regulator. The French CNIL has stated that first-party analytics using a persistent identifier can qualify for the strictly-necessary exemption when the data does not leave the operator's control, per their Sheet n°16 on analytics. The exemption is narrow, and the burden of proving you meet it is on you."
+      },
+      {
+        "type": "p",
+        "text": "In practice, a cookieless heatmap tool reduces the number of banners you legally need to show without eliminating them everywhere. The honest answer for most operators is: still talk to your DPO, still write down which identifiers you set and why, and treat every vendor's marketing copy as a starting point rather than the settled legal position. I wrote a longer piece on when heatmaps specifically need consent, linked below."
+      }
+    ],
+    "faq": [
+      {
+        "question": "Do cookieless heatmap tools still need a consent banner?",
+        "answer": "Sometimes, depending on the jurisdiction and how the tool identifies visitors. First-party localStorage identifiers used only for aggregate analytics can qualify for the strictly-necessary cookie exemption under EU rules, per guidance from the French CNIL, but the exemption is narrow. If you sell into Europe, get the setup reviewed by a data protection officer before you rely on it as a defence."
+      },
+      {
+        "question": "What is the difference between cookieless and privacy-first?",
+        "answer": "Cookieless describes a technical implementation: no cookies. Privacy-first describes design intent: minimal data collection, no cross-site tracking, transparent handling of what is collected. A tool can be cookieless and still ship data to a third-party ad network, and it can use cookies while being genuinely privacy-respecting. Read the vendor's data-flow docs, not just the badge on the landing page."
+      },
+      {
+        "question": "Can Hotjar be used without cookies?",
+        "answer": "Yes, in Reduced Tracking mode per Hotjar's own documentation. That mode disables the third-party cookie and cuts back on some session identifiers, at the cost of losing session replay and some detailed reports. The default setup does use cookies, so cookieless with Hotjar is a configuration choice you have to make explicitly, not the shipping default."
+      },
+      {
+        "question": "Are cookieless heatmaps less accurate?",
+        "answer": "Usually not for aggregate click and scroll data, which is what a heatmap actually renders. They can be less accurate for cross-device journeys, because a first-party localStorage identifier only survives on the same browser. If you need to follow a specific visitor across their phone and laptop, no cookieless tool will do that reliably, and cookie-based ones only do it when the visitor is logged in on both devices."
+      },
+      {
+        "question": "Does Google Analytics have a cookieless heatmap?",
+        "answer": "Google Analytics 4 does not produce heatmaps at all, per Google's product documentation at analytics.google.com. It gives you page-level engagement metrics and event data, but no click density or scroll depth visualisation. If you need a heatmap alongside GA4, you install a separate tool and accept the extra script."
+      },
+      {
+        "question": "What is the cheapest cookieless heatmap tool?",
+        "answer": "Microsoft Clarity is free at the sticker level once you configure it into its cookieless mode. Conclick's entry tier is $9 per month or $7 billed yearly with a 14-day free trial and no card. Matomo's Heatmap and Session Recording plugin has a one-time licence fee that scales with traffic per matomo.org. Cheapest sticker is rarely cheapest total once you count where the data ends up and how much of your afternoon it takes to configure properly."
+      }
+    ],
+    "internalLinks": [
+      {
+        "href": "/guides/do-heatmaps-need-cookie-consent",
+        "label": "Do heatmaps need cookie consent, per tool",
+        "group": "guide"
+      },
+      {
+        "href": "/glossary/cookieless-analytics",
+        "label": "Cookieless analytics, defined",
+        "group": "glossary"
+      },
+      {
+        "href": "/glossary/heatmap",
+        "label": "What a website heatmap is",
+        "group": "glossary"
+      },
+      {
+        "href": "/alternatives/hotjar",
+        "label": "The best Hotjar alternatives in 2026",
+        "group": "alternative"
+      }
+    ],
+    "sources": [
+      {
+        "label": "CNIL, Sheet n°16: Use analytics on your websites and applications",
+        "url": "https://www.cnil.fr/en/sheet-ndeg16-use-analytics-your-websites-and-applications"
+      },
+      {
+        "label": "Matomo FAQ: Does Heatmap and Session Recording set any cookies?",
+        "url": "https://matomo.org/faq/heatmap-session-recording/faq_24303/"
+      },
+      {
+        "label": "Microsoft Clarity: Consent for visitors in the EEA, UK and Switzerland",
+        "url": "https://learn.microsoft.com/en-us/clarity/setup-and-installation/cookie-consent"
+      },
+      {
+        "label": "Hotjar: Cookies set by the Hotjar tracking code",
+        "url": "https://help.hotjar.com/hc/en-us/articles/36819973371409-Cookies-Set-by-the-Hotjar-Tracking-Code"
+      },
+      {
+        "label": "Plausible: Data policy and identifier design",
+        "url": "https://plausible.io/data-policy"
+      },
+      {
+        "label": "Cloudflare Web Analytics: how it works without cookies",
+        "url": "https://developers.cloudflare.com/web-analytics/"
+      }
+    ]
+  }
+}
