@@ -660,6 +660,7 @@ function cmdPrioritize(db, kw) {
 const USAGE = `kwstore — keyword backlog
 
   report                      readable table of the whole backlog
+  add "<kw>" [type] [note]    queue a new keyword (news-watch, manual finds)
   pick <bucket> [n]           next keywords to write (money|breadth|explore|refresh)
   brief "<keyword>"           keyword + cached SERP/PAA as a writing brief
   published "<kw>" "<slug>"   mark written & shipped
@@ -680,6 +681,24 @@ async function main(argv) {
     switch (cmd) {
       case 'report':
         return printTable(allKeywords(db, args[0] ? { status: args[0] } : {}));
+      // The news-watch routine's only write path: a change in the world made a
+      // query searchable that the seed harvesters never generated. Deliberately
+      // does NOT set status — a new row is `discovered` and still has to survive
+      // the daily routine's pick, cannibalization and servability checks.
+      case 'add': {
+        if (!args[0]) throw new Error('add: keyword required');
+        const existing = getKeyword(db, args[0]);
+        upsertKeyword(db, args[0], {
+          content_type: args[1] ?? null,
+          notes: args[2] ?? null,
+          source: 'news-watch',
+        });
+        return console.log(
+          existing
+            ? `add: "${normalize(args[0])}" already existed (status=${existing.status}) — fields merged, status untouched`
+            : `add: queued "${normalize(args[0])}"${args[1] ? ` as ${args[1]}` : ''}`,
+        );
+      }
       case 'pick': {
         const rows = pickNext(db, { bucket: args[0] || 'money', n: args[1] ?? 2 });
         return printTable(rows);

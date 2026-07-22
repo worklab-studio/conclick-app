@@ -10,6 +10,7 @@
 // Usage:
 //   node scripts/seo/write.mjs scripts/seo/drafts/<slug>.json
 //   node scripts/seo/write.mjs <draft.json> --drafts   # emit to _drafts (review gate)
+//   node scripts/seo/write.mjs --reindex               # rebuild index.ts from disk
 //
 // Draft JSON shape:
 // {
@@ -30,8 +31,19 @@ const args = process.argv.slice(2);
 const file = args.find(a => !a.startsWith('--'));
 const toDrafts = args.includes('--drafts');
 
+// Back-out path. Review mode is off, so a failed entry is already on disk AND
+// already in the registry by the time lint runs. Deleting the file is half the
+// fix; without this the stale import stays in index.ts and the build breaks on
+// a module that no longer exists.
+if (args.includes('--reindex')) {
+  const total = regenerateIndex();
+  console.log(`index  ${total} entries`);
+  console.log(`RESULT ${JSON.stringify({ ok: true, reindex: true, total })}`);
+  process.exit(0);
+}
+
 if (!file) {
-  console.error('usage: node scripts/seo/write.mjs <draft.json> [--drafts]');
+  console.error('usage: node scripts/seo/write.mjs <draft.json> [--drafts] | --reindex');
   process.exit(1);
 }
 

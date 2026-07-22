@@ -42,7 +42,17 @@ yarn-error.log*
 *.env.*
 
 # Claude Code local dev config (preview launch settings)
-.claude/
+# ...except the permission allowlist. The three SEO routines run unattended with
+# --permission-mode dontAsk, so this file is what decides whether a scheduled run
+# works or silently stops at step 0. Untracked, it lived on exactly one laptop
+# and nothing recorded when it changed. Local overrides still belong in
+# settings.local.json, which stays ignored.
+#
+# `.claude/*` and not `.claude/`: git cannot re-include a file whose parent
+# directory is excluded, so the directory has to stay walkable for the negation
+# below to have any effect.
+.claude/*
+!.claude/settings.json
 
 *.dev.yml
 

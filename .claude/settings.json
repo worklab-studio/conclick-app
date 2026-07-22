@@ -1,0 +1,87 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+
+  "//": [
+    "Permissions for the UNATTENDED SEO routines (scripts/seo/run-routine.sh).",
+    "Three of them share this list: daily-content, weekly-traffic, news-watch.",
+    "",
+    "A scheduled `claude -p` run is non-interactive: any permission prompt has",
+    "nobody to answer it, so the run stalls. The runner uses",
+    "--permission-mode dontAsk, which honours these lists and DECLINES anything",
+    "not covered rather than blocking forever.",
+    "",
+    "PATTERN SYNTAX — this cost two failed dry runs. A Bash pattern must be the",
+    "FULL command prefix followed by `:*`. `Bash(node scripts/seo/:*)` does NOT",
+    "match `node scripts/seo/kwstore.mjs stats`; it was silently denied and the",
+    "routine aborted at step 0. Each script needs its own entry.",
+    "",
+    "Scoped rather than bypassPermissions on purpose: this routine commits to",
+    "master and deploys to production, so it should do exactly that and nothing",
+    "else. `pnpm run build` is denied because it runs check-db against the live",
+    "production database — the gate is `build-app`.",
+    "",
+    "`git checkout -- src/content/` and `rm src/content/` are the back-out path",
+    "from daily-content.md step 4. Review mode is off, so a lint-failing entry",
+    "is already on disk AND in the registry by the time the gate runs; without",
+    "these two the routine cannot undo it and the next run would commit it.",
+    "Both are scoped to src/content so neither can reach anything else."
+  ],
+
+  "permissions": {
+    "allow": [
+      "Bash(node scripts/seo/kwstore.mjs:*)",
+      "Bash(node scripts/seo/write.mjs:*)",
+      "Bash(node scripts/seo/lint.mjs:*)",
+      "Bash(node scripts/seo/indexnow.mjs:*)",
+      "Bash(node scripts/seo/suggest.mjs:*)",
+      "Bash(node scripts/seo/harvest.mjs:*)",
+      "Bash(node scripts/seo/import-seeds.mjs:*)",
+      "Bash(node scripts/seo/gsc.mjs:*)",
+      "Bash(node --check:*)",
+      "Bash(pnpm run build-app)",
+
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+
+      "Bash(git checkout -- src/content/:*)",
+      "Bash(rm src/content/:*)",
+
+      "Bash(fly deploy:*)",
+      "Bash(fly releases:*)",
+      "Bash(curl:*)",
+      "Bash(ls:*)",
+      "Bash(cat:*)",
+      "Bash(grep:*)",
+      "Bash(head:*)",
+      "Bash(tail:*)",
+
+      "Read",
+      "Glob",
+      "Grep",
+      "Edit",
+      "Write",
+      "WebSearch",
+      "WebFetch",
+      "TodoWrite"
+    ],
+
+    "deny": [
+      "Bash(rm -rf:*)",
+      "Bash(fly secrets:*)",
+      "Bash(fly ssh:*)",
+      "Bash(fly postgres:*)",
+      "Bash(fly tokens:*)",
+      "Bash(gh secret:*)",
+      "Bash(gh variable:*)",
+      "Bash(pnpm run build)",
+      "Bash(npx prisma migrate:*)",
+      "Bash(npx prisma db push:*)",
+      "Read(./.env)",
+      "Read(./.env.*)"
+    ]
+  }
+}

@@ -1,73 +1,105 @@
 #!/bin/bash
-# Unattended SEO content routine runner.
+# Unattended SEO routine runner.
 #
-# Invoked by launchd (io.conclick.seo-daily.plist) three times a day. Each run
-# writes ONE page, so three runs = three posts. One run writing three pages was
-# the alternative and it is worse: quality degrades across a single context, a
-# mid-run failure loses all three, and the three land as one burst.
+#   ./scripts/seo/run-routine.sh                     # daily-content (the default)
+#   ./scripts/seo/run-routine.sh weekly-traffic
+#   ./scripts/seo/run-routine.sh news-watch
+#   ./scripts/seo/run-routine.sh daily-content --dry # write to _drafts, never publish
 #
-# Runs `claude -p` against the routine playbook. Non-interactive, so permissions
-# come from .claude/settings.json — an un-allowlisted command hangs the run
-# forever with nobody to approve it.
+# Invoked by launchd. Three agents share this one script:
 #
-# Manual run (do this before trusting the schedule):
-#   ./scripts/seo/run-routine.sh
-#   ./scripts/seo/run-routine.sh --dry     # write to _drafts, never publish
+#   daily-content   3x/day  io.conclick.seo-daily    writes one page per run
+#   weekly-traffic  Mon     io.conclick.seo-weekly   repairs what GSC says is weak
+#   news-watch      4x/day  io.conclick.seo-news     queues, never publishes
+#
+# Runs `claude -p` against a playbook. Non-interactive, so permissions come from
+# .claude/settings.json — an un-allowlisted command hangs the run forever with
+# nobody to approve it.
+#
+# THE PLAYBOOK LIVES IN THE REPO. It used to be read from
+# ~/.claude/scheduled-tasks/<name>/SKILL.md — outside the repo, with the repo's
+# ROUTINE.md kept in sync by hand. Two copies of a 150-line behavioural contract
+# drift, and the drift is invisible: the file you edit is not the file that
+# runs. scripts/seo/routines/ is now the only copy.
 
 set -uo pipefail
 
 REPO="/Users/worklab/Conclick beta/umami"
 LOG_DIR="$HOME/.conclick-seo-logs"
-STAMP="$(date +%Y-%m-%d_%H%M%S)"
-LOG="$LOG_DIR/run-$STAMP.log"
 LOCK="/tmp/conclick-seo-routine.lock"
 
+# --- args ------------------------------------------------------------------
+
+ROUTINE="daily-content"
+DRY=""
+for arg in "$@"; do
+  case "$arg" in
+    --dry) DRY="1" ;;
+    -*) echo "unknown flag: $arg"; exit 2 ;;
+    *) ROUTINE="$arg" ;;
+  esac
+done
+
+STAMP="$(date +%Y-%m-%d_%H%M%S)"
+LOG="$LOG_DIR/$ROUTINE-$STAMP.log"
 mkdir -p "$LOG_DIR"
+
+exec >>"$LOG" 2>&1
+echo "=== conclick $ROUTINE — $(date) ==="
 
 # Homebrew is not on launchd's PATH. Without this, `claude`, `node`, `pnpm` and
 # `fly` are all "command not found" and every scheduled run fails identically.
 export PATH="/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:$PATH"
 
-exec >>"$LOG" 2>&1
-echo "=== conclick seo routine — $(date) ==="
-
-# Single-flight. Runs are ~15 min and fire 4h apart, so an overlap means the
-# previous run wedged. Stale lock older than 90 min is assumed dead.
+# --- lock ------------------------------------------------------------------
+#
+# ONE lock across all three routines, not one each. They share a git working
+# tree: two agents committing at once produces a conflict or a half-staged
+# commit, and the weekly routine edits the very files the daily one writes.
+# Schedules are staggered so contention should be rare; when it happens the
+# loser exits rather than queueing, because a routine that starts 40 minutes
+# late is one running on assumptions it made at boot.
 if [ -e "$LOCK" ]; then
   if [ -n "$(find "$LOCK" -mmin +90 2>/dev/null)" ]; then
-    echo "stale lock (>90m), removing"; rm -f "$LOCK"
+    echo "stale lock (>90m), removing: $(cat "$LOCK" 2>/dev/null)"; rm -f "$LOCK"
   else
-    echo "another run holds the lock, exiting"; exit 0
+    echo "another run holds the lock ($(cat "$LOCK" 2>/dev/null)), exiting"; exit 0
   fi
 fi
-echo $$ > "$LOCK"
+echo "$ROUTINE pid=$$ started=$(date)" > "$LOCK"
 trap 'rm -f "$LOCK"' EXIT
 
 cd "$REPO" || { echo "repo not found"; exit 1; }
 
-# Preflight. Each of these has already broken a run at least once.
+# --- preflight -------------------------------------------------------------
+# Each of these has already broken a run at least once.
+
 command -v claude >/dev/null || { echo "FAIL: claude not on PATH"; exit 1; }
 command -v node   >/dev/null || { echo "FAIL: node not on PATH"; exit 1; }
-command -v fly    >/dev/null || echo "WARN: fly missing — routine will commit but not deploy"
-fly auth whoami   >/dev/null 2>&1 || echo "WARN: fly not authenticated — deploy step will fail"
 git rev-parse --is-inside-work-tree >/dev/null 2>&1 || { echo "FAIL: not a git repo"; exit 1; }
 
-MODE="publish"
-[ "${1:-}" = "--dry" ] && MODE="dry-run (write to _drafts, do not publish or deploy)"
-echo "mode: $MODE"
+PLAYBOOK_FILE="$REPO/scripts/seo/routines/$ROUTINE.md"
+if [ ! -f "$PLAYBOOK_FILE" ]; then
+  echo "FAIL: no playbook at $PLAYBOOK_FILE"
+  echo "available: $(ls "$REPO/scripts/seo/routines" 2>/dev/null | sed 's/\.md$//' | tr '\n' ' ')"
+  exit 1
+fi
 
-# Inline the playbook rather than telling the agent to read it.
-#
-# SKILL.md lives in ~/.claude/scheduled-tasks/, outside the repo, so it is
-# outside the session's allowed working directory — the first dry run aborted at
-# step 0 because every read of it was blocked. bash has no such restriction, so
-# the script reads it and passes the text through. This also pins the routine to
-# the version that existed when the run started.
-SKILL="$HOME/.claude/scheduled-tasks/conclick-daily-content/SKILL.md"
-[ -f "$SKILL" ] || { echo "FAIL: playbook not found at $SKILL"; exit 1; }
-PLAYBOOK="$(cat "$SKILL")"
+# Only the routines that ship need fly. news-watch never deploys, so warning
+# about fly there would just train the reader to ignore warnings.
+if [ "$ROUTINE" != "news-watch" ]; then
+  command -v fly >/dev/null || echo "WARN: fly missing — routine will commit but not deploy"
+  fly auth whoami >/dev/null 2>&1 || echo "WARN: fly not authenticated — deploy step will fail"
+fi
 
-PROMPT="Run the conclick-daily-content routine now.
+echo "playbook: $PLAYBOOK_FILE"
+echo "mode: $([ -n "$DRY" ] && echo 'dry-run (write to _drafts, do not publish or deploy)' || echo 'publish')"
+
+# Pin the run to the playbook as it was at boot, so an edit mid-run cannot
+# change the contract halfway through.
+PLAYBOOK="$(cat "$PLAYBOOK_FILE")"
+
+PROMPT="Run the conclick-$ROUTINE routine now.
 
 Follow the playbook below exactly, start to finish. It is the canonical routine —
 do not substitute, summarise, or improvise around it.
@@ -77,13 +109,12 @@ ${PLAYBOOK}
 ===== END PLAYBOOK =====
 
 This is an UNATTENDED scheduled run. Nobody is watching, so:
-- Never ask a question. If a decision is genuinely ambiguous, mark the keyword needs-human, explain why in the report, and stop.
+- Never ask a question. If a decision is genuinely ambiguous, record it as needs-human, explain why in the report, and stop.
 - Never bypass the lint gate, and never edit .lint-baseline.json to make a new violation pass.
-- Write exactly ONE page this run.
-- If the backlog is dry, or every candidate fails servability or cannibalization, publish nothing and say so. A run that correctly publishes nothing is a successful run.
-$([ "${1:-}" = "--dry" ] && echo '- DRY RUN: pass --drafts to write.mjs, and do NOT commit, push or deploy.')
+- If there is nothing worth doing, do nothing and say so. A run that correctly changes nothing is a successful run.
+$([ -n "$DRY" ] && echo '- DRY RUN: pass --drafts to write.mjs, and do NOT commit, push or deploy.')
 
-End with the run report from step 8."
+End with the run report from the playbook's final step."
 
 # --permission-mode acceptEdits auto-approves EDITS ONLY, not Bash. The first
 # dry run stalled on `node scripts/seo/kwstore.mjs report` for exactly that
@@ -100,9 +131,9 @@ CODE=$?
 echo "=== exit $CODE at $(date) ==="
 if [ $CODE -ne 0 ]; then
   # Surface failures instead of letting them rot in a log nobody opens.
-  osascript -e 'display notification "SEO routine failed. Check ~/.conclick-seo-logs" with title "Conclick"' 2>/dev/null || true
+  osascript -e "display notification \"$ROUTINE routine failed. Check ~/.conclick-seo-logs\" with title \"Conclick\"" 2>/dev/null || true
 fi
 
 # Keep 30 days of logs.
-find "$LOG_DIR" -name 'run-*.log' -mtime +30 -delete 2>/dev/null || true
+find "$LOG_DIR" -name '*.log' -mtime +30 -delete 2>/dev/null || true
 exit $CODE

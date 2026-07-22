@@ -8,7 +8,10 @@ description: Write, gate, and publish Conclick SEO pages from the keyword backlo
 Repo: `/Users/worklab/Conclick beta/umami` — always `cd` there first.
 You are the writer. There is no LLM API in this pipeline.
 
-**A run that correctly publishes nothing is a successful run.** Report and stop.
+**A run that correctly publishes nothing is a successful run.** But it is not a
+run that does nothing: when publishing is off the table, go to step 7 and
+repair. Idling was the 2026-07-22 failure — two of three slots reported "quota
+met" and stopped, spending an agent's full context to print a sentence.
 
 ---
 
@@ -16,17 +19,22 @@ You are the writer. There is no LLM API in this pipeline.
 
 ```bash
 cd "/Users/worklab/Conclick beta/umami" && node scripts/seo/kwstore.mjs stats
+node scripts/seo/gsc.mjs ratio
 ```
 
 `ENGINE_START = 2026-02-01`.
 
 **Write exactly ONE page per run.** Three scheduled runs a day (09:12, 14:22, 18:42 local) = three posts a day. Never write two in one run: quality degrades across a single context, one failure would lose the whole batch, and three pages committed in the same minute reads as a burst rather than a cadence.
 
-**Hard ceiling: 3 non-draft pages per calendar day.** If three already exist for today, print `quota met` and STOP. Never compute `days_since_START × 3` and try to settle a debt — from a February start that arithmetic claims ~500 pages owed, and publishing into that is precisely the velocity fingerprint that gets a site classified as scaled content. The start date is for reporting, not a backlog to repay.
+**Hard ceiling: 3 non-draft pages per calendar day.** Count entries whose `datePublished` is today. If three already exist, print `quota met` and **go to step 7 (REPAIR)** — do not stop, and do not write a fourth. Never compute `days_since_START × 3` and try to settle a debt — from a February start that arithmetic claims ~500 pages owed, and publishing into that is precisely the velocity fingerprint that gets a site classified as scaled content. The start date is for reporting, not a backlog to repay.
+
+**A hand-written batch counts against the ceiling.** If a human committed pages today, the quota is consumed by them. That is correct and not a bug to route around.
 
 **Never backdate `datePublished`.** A page's date is the day it was written. Fabricating a publication history is trivially detectable (sitemap lastmod, first-crawl date, and the Wayback record all contradict it) and it is the one lie that costs the whole domain its credibility.
 
-**Indexation signal — report it, never silently skip.** Print the indexed/submitted ratio in every run report. A low ratio means Google is not keeping up with what already exists, so new pages spread crawl budget thinner rather than adding reach. The operator chose 3/day knowingly, so this is a number to surface, not a veto: publish anyway, but if the ratio is under 40% say so loudly and recommend that the next slot go to step 7 (repair) instead.
+**Indexation signal — report it, never silently skip.** `gsc.mjs ratio` prints `ratio=` as its last line; put that number in every run report. A low ratio means Google is not keeping up with what already exists, so new pages spread crawl budget thinner rather than adding reach. The operator chose 3/day knowingly, so this is a number to surface, not a veto: publish anyway, but **if the ratio is under 40%, skip writing and go to step 7 (REPAIR)** instead, and say why.
+
+If `gsc.mjs ratio` fails because the credential is missing, print its error verbatim in the report and continue — an unmeasurable ratio is a reason to flag, not a reason to skip the day's page.
 
 ## 1. PICK
 
@@ -88,26 +96,36 @@ Write a draft to `scripts/seo/drafts/<slug>.json`:
 ## 4. GATE
 
 ```bash
-node scripts/seo/write.mjs scripts/seo/drafts/<slug>.json --drafts   # review mode
-node scripts/seo/lint.mjs --entry <type>/<slug>                      # gates the draft directly
+node scripts/seo/write.mjs scripts/seo/drafts/<slug>.json   # writes the live entry
+node scripts/seo/lint.mjs --entry <type>/<slug>
 pnpm run build-app
 ```
 
-In review mode use `--entry <type>/<slug>`, not `--changed`: `--changed` reads the
-git diff of `src/content/<dir>/`, which a `_drafts` file is not in, so it would
-report nothing and the gate would pass vacuously. `--entry` resolves `_drafts`
-explicitly and prints `(draft)` so the log shows what was gated.
+**Review mode is OFF.** Pages go straight to `src/content/<dir>/`. It was on for
+the first two weeks; 15/15 of the first real batch passed lint on the first pass,
+so the training wheels came off on 2026-07-22. Do not pass `--drafts` and do not
+reintroduce a promote step.
 
-**Never copy a draft into the live directory to make lint see it.** That was the
-old workaround and it leaves an orphan the next `regenerateIndex()` sweeps into
-the registry and publishes unreviewed — the exact failure review mode exists to
-prevent.
+Use `--entry <type>/<slug>` rather than `--changed`. Both work now that entries
+are written live, but `--entry` names the thing you gated, so the log says what
+was checked instead of implying it by a diff.
 
-`--drafts` writes to `src/content/_drafts/`, invisible to the registry. **Keep review mode ON until ~14 days / ~25 clean pages.** Then drop `--drafts`.
+**If lint fails, you must leave the registry clean.** `write.mjs` has already run
+`regenerateIndex()`, so a failed entry is *in* `src/content/index.ts` right now.
+Either fix the draft and re-run `write.mjs` until lint is green, or back the
+entry out completely:
+
+```bash
+git checkout -- src/content/index.ts && rm src/content/<dir>/<slug>.ts
+node scripts/seo/write.mjs --reindex   # or re-run write.mjs on a fixed draft
+```
+
+Never leave a lint-failing entry in the tree at the end of a run: the next run
+commits everything with `git add -A` and would publish it unreviewed.
 
 Use `build-app`, never `build` — `build` runs `check-db`, which opens a live production database connection. The writer must never touch prod Postgres.
 
-Lint fails → fix the draft and re-run. Never bypass the gate. Never edit `.lint-baseline.json` to make a new violation pass.
+Never bypass the gate. Never edit `.lint-baseline.json` to make a new violation pass.
 
 ## 5. RECORD
 
@@ -115,7 +133,7 @@ Lint fails → fix the draft and re-run. Never bypass the gate. Never edit `.lin
 node scripts/seo/kwstore.mjs published "<keyword>" "<slug>"
 ```
 
-## 6. SHIP (only when review mode is off)
+## 6. SHIP
 
 ```bash
 git add -A && git commit --no-verify -m "chore(seo): <slug> [skip ci]"
@@ -130,8 +148,8 @@ The working tree is what ships, so deploy AFTER committing.
 **Run `indexnow.mjs --new` on EVERY run, even when you published nothing.** It
 diffs the live sitemap against `indexnow-submitted.json` and submits only what has
 never been announced, then records it. That makes it self-healing: if an earlier
-run crashed before shipping, or ran in review mode, the page it missed goes out on
-the next run instead of being silently lost forever. Re-running submits nothing, so
+run crashed before shipping, the page it missed goes out on the next run instead
+of being silently lost forever. Re-running submits nothing, so
 there is no cost to calling it every time. Never go back to `--urls <the one page
 I just wrote>`; that is the version that loses pages.
 
@@ -141,12 +159,47 @@ Verify the new URL returns 200 before reporting success.
 content registry at build time, so the deploy above updates them. Confirm the new
 slug appears in `conclick.io/sitemap.xml` as part of your verification.
 
-## 7. REPAIR (moratorium slot, or when the backlog is dry)
+## 7. REPAIR
 
-Instead of publishing: run `node scripts/seo/lint.mjs --all`, pick the top orphaned or weakest existing page, and improve it — add genuine internal links, tighten a title that earns impressions but no clicks, add a missing source. Bump `dateModified` **only** for a substantive change, never for a reformat.
+**You arrive here whenever writing is off the table:** quota already met for
+today, indexation ratio under 40%, the backlog is dry, or every candidate failed
+step 1. This is the normal state of a slot, not an exception — expect to spend
+more runs here than in step 3, and treat it as the real work rather than a
+consolation prize.
+
+Repair exactly **one** page per run, for the same reason you write only one.
+
+Pick the target with evidence, in this order:
+
+```bash
+node scripts/seo/gsc.mjs opportunities   # real impressions: retitle + striking distance
+node scripts/seo/lint.mjs --all          # grandfathered violations, worst first
+```
+
+1. **Retitle** — a page with impressions and CTR under 2%. The title and meta
+   description are the whole problem; the body is already earning attention.
+2. **Striking distance** — a page ranking 5-20 for a real query. Deepen the
+   section that query implies, add the primary source it is missing.
+3. **Orphan repair** — a page with no contextual inbound links. Add genuine
+   in-prose `[anchor](/path)` links **from** related pages **to** it. Never add a
+   link that a reader would not want to follow.
+4. **Grandfathered lint** — clear violations off the baseline, oldest first.
+
+Then gate exactly as step 4 does (`lint.mjs --entry`, `pnpm run build-app`) and
+ship as step 6 does.
+
+Bump `dateModified` **only** for a substantive change, never for a reformat. A
+sitemap full of pages whose `lastmod` moves without their content moving is a
+freshness signal that stops being believed.
+
+**Always commit at the end of a repair run, even if the only change is
+`indexnow-submitted.json`.** A dirty ledger left in the working tree rides along
+on some unrelated future commit, and if the tree is ever reset it takes the
+record of what was announced with it — after which the pages in it are never
+re-submitted, because the ledger is what makes `--new` self-healing.
 
 ## 8. REPORT
 
-≤15 lines: quota, what was picked and why, what was rejected and why, lint result, what shipped (or why nothing did), and the backlog count remaining.
+≤15 lines: quota, indexation ratio, whether this was a WRITE or a REPAIR run and why, what was picked and rejected and why, lint result, what shipped, and the backlog count remaining.
 
-Be honest. "Nothing worth publishing today" is a real and correct outcome.
+Be honest. "Nothing worth publishing today, so I repaired X instead" is a real and correct outcome. "Quota met, stopped" is not — that means step 7 was skipped.
