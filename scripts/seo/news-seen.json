@@ -1,3 +1,39 @@
 {
-  "seen": []
+  "seen": [
+    {
+      "url": "https://www.digitalapplied.com/blog/google-weekend-algorithm-update-july-2026-volatility-triage",
+      "title": "Google weekend algorithm volatility, July 18-19 2026",
+      "at": "2026-07-22",
+      "verdict": "ignored",
+      "reason": "Fails Real: Google Search Status Dashboard shows no ranking incident for Jul 18-21; SERP-tool chatter without a primary confirmation is not an announced update."
+    },
+    {
+      "url": "https://scale-xpert.com/google-search-console-updates-social-platform-properties-seo/",
+      "title": "GSC platform properties for social/video accounts",
+      "at": "2026-07-22",
+      "verdict": "ignored",
+      "reason": "Announced early July, outside the last-3-days window; older than the beat."
+    },
+    {
+      "url": "https://www.numinix.com/blog/july-2026-seo-algorithm-news-update/",
+      "title": "Google Local Service Ads migrating to Google Ads / Performance Max pay-per-lead, Jul 21 2026",
+      "at": "2026-07-22",
+      "verdict": "ignored",
+      "reason": "Off-beat: paid-ads migration, not analytics/privacy/SEO organic/GEO. Conclick has no first-hand credibility on LSA-to-PMax transitions."
+    },
+    {
+      "url": "https://everything-pr.com/perplexity-citation-source-index-2026",
+      "title": "5W AI Communications self-citation study across ChatGPT/Claude/Gemini/Perplexity, published Jul 20 2026",
+      "at": "2026-07-22",
+      "verdict": "ignored",
+      "reason": "Observational research, not a platform change; fails 'changes what someone should do' and does not create an urgent new query."
+    },
+    {
+      "url": "https://posthog.com/changelog",
+      "title": "PostHog release Jul 20 2026 (remote-config internal restructure)",
+      "at": "2026-07-22",
+      "verdict": "ignored",
+      "reason": "Explicitly 'no behavior change'; fails 'changes what someone should do'."
+    }
+  ]
 }
