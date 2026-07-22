@@ -34,6 +34,13 @@
       "at": "2026-07-22",
       "verdict": "ignored",
       "reason": "Explicitly 'no behavior change'; fails 'changes what someone should do'."
+    },
+    {
+      "url": "https://developers.google.com/search/case-studies/cross-regional-video-seo-case-study",
+      "title": "Google Search Central cross-regional Video SEO case study (Weather.com, Italiaonline, ABP News), published Jul 19 2026",
+      "at": "2026-07-22",
+      "verdict": "ignored",
+      "reason": "Primary source and in-window, but it's a case study reinforcing existing video-schema guidance — no policy change, no new query created. Fails 'changes what someone should do' and 'creates a query that did not exist before'."
     }
   ]
 }
