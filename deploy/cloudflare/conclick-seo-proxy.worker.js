@@ -42,14 +42,25 @@ const INDEXNOW_KEY = '67409878d24e964b1928338aac760bc0';
 // AI-crawler `Disallow` lines, which would silently un-list us from ChatGPT,
 // Perplexity, and Claude retrieval while this file claims the opposite).
 //
-// To make this file authoritative you MUST disable it in the dashboard:
-//   Cloudflare dashboard -> conclick.io zone -> Security -> Bots
-//     -> AI Crawl Control -> turn OFF the managed robots.txt / "block AI
-//        crawlers" managed rules.
+// DISABLED 2026-07-22. It had been on since the zone was set up, so every
+// `Allow` below was cosmetic and GPTBot/ClaudeBot/Google-Extended were each
+// carrying a `Disallow: /` above their allow line.
 //
-// Verify after deploying:  curl -s https://conclick.io/robots.txt
+// The toggle is NOT under Security -> Bots, which is where this comment used to
+// send people and where the docs' "Security Settings -> Bot traffic" wording
+// also points. The switch lives at:
+//   Cloudflare dashboard -> conclick.io zone
+//     -> AI Crawl Control -> Signals -> "Managed robots.txt"
+//
+// Verify:  curl -s https://conclick.io/robots.txt | head -1
 // The FIRST line must be the "# Conclick" comment below. If anything precedes
-// it, the managed block is still on and this allowlist is cosmetic.
+// it, the managed block is back on and this allowlist is cosmetic again.
+//
+// Worth re-checking after 2026-09-15: Cloudflare changes its AI-bot defaults
+// that day. conclick.io currently has Search/Agent/Training all set to "Allow
+// (do not block)" and "Block AI bots" off, which is what keeps mixed-purpose
+// crawlers like GPTBot reachable — the new defaults bite zones that block
+// Training, not this one. Confirm it stayed that way.
 // ---------------------------------------------------------------------------
 const ROBOTS = `# Conclick — explicit AI-crawler allowlist. See deploy/cloudflare/conclick-seo-proxy.worker.js
 # Retrieval/citation crawlers are allowed by name rather than relying on the
