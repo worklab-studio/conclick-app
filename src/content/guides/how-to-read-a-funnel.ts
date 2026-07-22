@@ -6,8 +6,8 @@ const entry: ContentEntry = {
   "h1": "How to Read a Conversion Funnel and Fix the Biggest Leak",
   "metaTitle": "How to Read a Conversion Funnel and Fix the Leak",
   "metaDescription": "Most conversion funnels bleed money at one step. Here is how to find that step, understand why people leave, and fix it without guessing.",
-  "tldr": "Your conversion funnel almost always has one step that accounts for the majority of lost revenue. Find it by measuring drop-off rates at each step, then diagnose it with behavioral data — session recordings, heatmaps, and exit surveys — before you change anything. Fix the biggest leak first. Everything else is a rounding error until you do.",
-  "intro": "I have watched founders spend months A/B testing button colors while their pricing page was hemorrhaging 80% of visitors. The problem is not that they did not care. It is that they were looking at the wrong number. A conversion funnel is not a marketing diagram — it is a map of where your revenue leaks. Here is how to read it honestly and fix what actually matters.",
+  "tldr": "Your conversion funnel almost always has one step that accounts for the majority of lost revenue. Find it by measuring drop-off rates at each step, then diagnose it with behavioral data (session recordings, heatmaps, and exit surveys) before you change anything. Fix the biggest leak first. Everything else is a rounding error until you do.",
+  "intro": "I have watched founders spend months A/B testing button colors while their pricing page was hemorrhaging 80% of visitors. The problem is not that they did not care. It is that they were looking at the wrong number. A conversion funnel is not a marketing diagram. It is a map of where your revenue leaks. Here is how to read it honestly and fix what actually matters.",
   "sections": [
     {
       "type": "h2",
@@ -16,11 +16,11 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "A conversion funnel is a sequence of steps between a visitor and a payment. Each step has an entry count and an exit count. The difference is your leak. That is it. The complexity people add on top — multi-touch attribution, assisted conversions, micro-funnels — is useful eventually, but it is noise until you know where the main drain is."
+      "text": "A [conversion funnel](/glossary/conversion-funnel) is a sequence of steps between a visitor and a payment. Each step has an entry count and an exit count. The difference is your leak. That is it. The complexity people add on top (multi-touch attribution, assisted conversions, micro-funnels) is useful eventually, but it is noise until you know where the main drain is."
     },
     {
       "type": "p",
-      "text": "A typical SaaS funnel looks like this: landing page → sign-up page → onboarding → first key action → paid conversion. An ecommerce funnel is usually: product page → add to cart → checkout → payment confirmation. The exact steps depend on your product, but the principle is the same — you need a number for each transition."
+      "text": "A typical SaaS funnel looks like this: landing page → sign-up page → onboarding → first key action → paid conversion. An ecommerce funnel is usually: product page → add to cart → [checkout → payment confirmation](/guides/where-users-abandon-checkout). The exact steps depend on your product, but the principle is the same: you need a number for each transition."
     },
     {
       "type": "p",
@@ -37,7 +37,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "Then instrument each step as a distinct event or pageview. If your analytics tool cannot tell you how many people entered step three and how many exited to step four, you do not have a funnel yet — you have a list of pages. The transition rate between consecutive steps is the number that matters."
+      "text": "Then instrument each step as a distinct event or pageview. If your analytics tool cannot tell you how many people entered step three and how many exited to step four, you do not have a funnel yet; you have a list of pages. The transition rate between consecutive steps is the number that matters."
     },
     {
       "type": "p",
@@ -64,7 +64,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "Here is a concrete example. Say your sign-up page converts at 60% — pretty good. Your pricing page converts at 20% — sounds bad. But if 500 people hit the sign-up page and 3,000 hit the pricing page, the pricing page is losing 2,400 people versus 200 people on the sign-up page. At a $50 average sale, the pricing page leak is worth $120,000 in potential monthly revenue. The sign-up page leak is $10,000. You do the math."
+      "text": "Here is a concrete example. Say your sign-up page converts at 60%, which is pretty good. Your pricing page converts at 20%, which sounds bad. But if 500 people hit the sign-up page and 3,000 hit the pricing page, the pricing page is losing 2,400 people versus 200 people on the sign-up page. At a $50 average sale, the pricing page leak is worth $120,000 in potential monthly revenue. The sign-up page leak is $10,000. You do the math."
     },
     {
       "type": "callout",
@@ -86,7 +86,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "Heatmaps and click maps show you where attention goes and where it does not. On a pricing page, do people scroll past the plan comparison? Are they clicking on a feature name that is not a link, which means they want to know more but there is no path to learn it? Are there rage clicks on an element that looks interactive but is not? These patterns are invisible in a pageview count and obvious in a click map."
+      "text": "[Heatmaps and click maps](/guides/how-to-read-a-heatmap) show you where attention goes and where it does not. On a pricing page, do people scroll past the plan comparison? Are they clicking on a feature name that is not a link, which means they want to know more but there is no path to learn it? Are there rage clicks on an element that looks interactive but is not? These patterns are invisible in a pageview count and obvious in a click map."
     },
     {
       "type": "p",
@@ -99,7 +99,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "Put a one-question exit survey on the page that is leaking. Ask something specific: \"What stopped you from signing up today?\" Give four options that reflect your real hypotheses — pricing, missing feature, not sure if it fits my use case, just browsing — and a free-text field. Run it for two weeks. You will hear the same two or three answers repeatedly. Those are your real conversion blockers."
+      "text": "Put a one-question exit survey on the page that is leaking. Ask something specific: \"What stopped you from signing up today?\" Give four options that reflect your real hypotheses (pricing, missing feature, not sure if it fits my use case, just browsing) and a free-text field. Run it for two weeks. You will hear the same two or three answers repeatedly. Those are your real conversion blockers."
     },
     {
       "type": "p",
@@ -112,7 +112,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "A 20% conversion rate from organic search and a 20% conversion rate from cold paid traffic are not the same problem. Organic visitors read your content before they arrive; paid visitors may have no idea what your product does. If you are segmenting your funnel by traffic source and you are not, you should be — you might find that the leak only exists for one channel. That changes the fix entirely."
+      "text": "A 20% conversion rate from organic search and a 20% conversion rate from cold paid traffic are not the same problem. Organic visitors read your content before they arrive; paid visitors may have no idea what your product does. If you are segmenting your funnel by traffic source and you are not, you should be, because you might find that the leak only exists for one channel. That changes the fix entirely."
     },
     {
       "type": "h2",
@@ -142,7 +142,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "Most tools give you the funnel visualization. Fewer give you revenue attribution that actually connects pageviews to payments. I built Conclick because I kept needing to stitch together three separate tools to answer one question: which traffic source, campaign, or funnel step is producing paid customers? The revenue attribution in Conclick connects directly to Stripe, Paddle, Polar, Lemon Squeezy, and Dodo, so every payment traces back to the source and funnel step that earned it. The heatmaps and click maps are real-screenshot overlays, not wireframe approximations, and the auto-detected funnels surface your single biggest drop-off with the revenue blocked by it. It is cookieless, usually requires no consent banner, and takes about two minutes to set up. There is a 14-day free trial, no card required."
+      "text": "Most tools give you the funnel visualization. Fewer give you revenue attribution that actually connects pageviews to payments. I built Conclick because I kept needing to stitch together three separate tools to answer one question: which traffic source, campaign, or funnel step is producing paid customers? The revenue attribution in Conclick connects directly to Stripe, Paddle, Polar, Lemon Squeezy, and Dodo, so every payment traces back to the source and funnel step that earned it. The heatmaps and click maps are real-screenshot overlays, not wireframe approximations, and the auto-detected funnels surface your single biggest drop-off with the revenue blocked by it. It is cookieless and in most cases needs no consent banner; Conclick stores a first-party identifier in localStorage, and whether that requires consent depends on your jurisdiction, so check with your own counsel. Setup takes about two minutes, and there is a 14-day free trial, no card required."
     },
     {
       "type": "p",
@@ -165,7 +165,7 @@ const entry: ContentEntry = {
   "faq": [
     {
       "question": "What is a good conversion rate for a SaaS pricing page?",
-      "answer": "Benchmarks vary widely by traffic source and pricing model, but a realistic range for organic or direct traffic is 3% to 8% from pricing page visit to trial sign-up. Cold paid traffic is often under 2%. Rather than benchmarking against industry averages, track your own rate over time and segment by traffic source — a paid ad visitor and a referral visitor behave very differently on the same page, and treating them as one number hides the real story."
+      "answer": "Benchmarks vary widely by traffic source and pricing model, but a realistic range for organic or direct traffic is 3% to 8% from pricing page visit to trial sign-up. Cold paid traffic is often under 2%. Rather than benchmarking against industry averages, track your own rate over time and segment by traffic source: a paid ad visitor and a referral visitor behave very differently on the same page, and treating them as one number hides the real story."
     },
     {
       "question": "How many steps should a conversion funnel have?",
@@ -173,22 +173,43 @@ const entry: ContentEntry = {
     },
     {
       "question": "How long should I wait before concluding a funnel fix worked?",
-      "answer": "For most small SaaS products, three to four weeks of consistent traffic is enough to see a meaningful signal. The bigger the traffic volume, the faster you get signal. Avoid the temptation to check daily — conversion rates fluctuate with day-of-week and traffic mix, and you will chase noise. Set a measurement window before you make the change, then wait for it."
+      "answer": "For most small SaaS products, three to four weeks of consistent traffic is enough to see a meaningful signal. The bigger the traffic volume, the faster you get signal. Avoid the temptation to check daily; conversion rates fluctuate with day-of-week and traffic mix, and you will chase noise. Set a measurement window before you make the change, then wait for it."
     },
     {
       "question": "What is the difference between a micro-conversion and a macro-conversion?",
-      "answer": "A macro-conversion is the main goal: a purchase, a paid subscription, a booked demo. A micro-conversion is an intermediate action that predicts the macro: signing up for a trial, completing onboarding, adding a payment method. Micro-conversions are useful for diagnosing where people drop out before they get to payment. They are not useful as the primary metric — a high trial sign-up rate paired with low paid conversion just means your sign-up is easy and your onboarding is broken."
+      "answer": "A macro-conversion is the main goal: a purchase, a paid subscription, a booked demo. A micro-conversion is an intermediate action that predicts the macro: signing up for a trial, completing onboarding, adding a payment method. Micro-conversions are useful for diagnosing where people drop out before they get to payment. They are not useful as the primary metric: a high trial sign-up rate paired with low paid conversion just means your sign-up is easy and your onboarding is broken."
     },
     {
       "question": "Should I fix the top-of-funnel traffic problem or the conversion rate problem first?",
-      "answer": "Fix the conversion rate first, almost always. Doubling your conversion rate on existing traffic is equivalent to doubling your ad spend with no additional cost. If you are converting at 1% and you spend money to get more traffic, you are paying to feed a leaky bucket. Get the funnel to a reasonable baseline, then scale traffic. The exception is if your traffic volume is so low that you cannot measure conversion rate meaningfully — in that case, you need enough volume to see the data."
+      "answer": "Fix the conversion rate first, almost always. Doubling your conversion rate on existing traffic is equivalent to doubling your ad spend with no additional cost. If you are converting at 1% and you spend money to get more traffic, you are paying to feed a leaky bucket. Get the funnel to a reasonable baseline, then scale traffic. The exception is if your traffic volume is so low that you cannot measure conversion rate meaningfully. In that case, you need enough volume to see the data."
     },
     {
       "question": "How do I know if my funnel problem is messaging or product?",
-      "answer": "If people sign up and immediately churn, it is usually a product problem or a targeting problem — the promise and the reality do not match. If people hit the page and do not sign up at all, it is usually a messaging or friction problem. Exit surveys on the sign-up page help distinguish the two. Asking churned users \"what did you expect that you did not get?\" is the fastest way to diagnose the product gap. These are different problems with different fixes, and mixing them up leads to months of wasted optimization."
+      "answer": "If people sign up and immediately churn, it is usually a product problem or a targeting problem: the promise and the reality do not match. If people hit the page and do not sign up at all, it is usually a messaging or friction problem. Exit surveys on the sign-up page help distinguish the two. Asking churned users \"what did you expect that you did not get?\" is the fastest way to diagnose the product gap. These are different problems with different fixes, and mixing them up leads to months of wasted optimization."
     }
   ],
-  "internalLinks": [],
+  "internalLinks": [
+    {
+      "href": "/glossary/conversion-funnel",
+      "label": "What is a conversion funnel?",
+      "group": "glossary"
+    },
+    {
+      "href": "/guides/where-users-abandon-checkout",
+      "label": "Where users abandon checkout",
+      "group": "guide"
+    },
+    {
+      "href": "/guides/how-to-read-a-heatmap",
+      "label": "How to read a heatmap",
+      "group": "guide"
+    },
+    {
+      "href": "/blog/click-map-vs-funnel",
+      "label": "Click map vs funnel: which to use",
+      "group": "blog"
+    }
+  ],
   "relatedTools": [
     "utm-builder"
   ],
@@ -199,7 +220,7 @@ const entry: ContentEntry = {
     "ctaLabel": "Add My Website"
   },
   "datePublished": "2026-06-18",
-  "dateModified": "2026-06-18"
+  "dateModified": "2026-07-22"
 };
 
 export default entry;

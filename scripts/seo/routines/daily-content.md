@@ -127,6 +127,12 @@ Use `build-app`, never `build` — `build` runs `check-db`, which opens a live p
 
 Never bypass the gate. Never edit `.lint-baseline.json` to make a new violation pass.
 
+**Known flake:** on node v24.7.0, `lint.mjs` occasionally segfaults (exit 139)
+during process teardown AFTER printing its verdict. If the output says PASS but
+the exit code is 139, re-run once; a clean re-run is authoritative. Three
+independent sessions hit this on 2026-07-22. Judge by the printed verdict plus
+one retry, never by a single 139.
+
 ## 5. RECORD
 
 ```bash

@@ -6,7 +6,7 @@ const entry: ContentEntry = {
   "h1": "Is GA4 Sampling Your Data? How to Tell and What to Do",
   "metaTitle": "Is GA4 Sampling Your Data? How to Tell",
   "metaDescription": "GA4 samples data in Explorations above ~10M events. Here's how to spot it, which reports are affected, and your real options to get accurate numbers.",
-  "tldr": "GA4 samples data in Explorations once your property crosses roughly 10 million events in the date range you query — and it does so silently, with a small icon most people miss. Standard reports (Acquisition, Engagement, Monetization) are unsampled, but the moment you build a custom Exploration, you may be looking at estimates, not facts. The fix depends on your budget: free tier users can shorten date ranges or switch to BigQuery export; GA4 360 users get higher thresholds; everyone else should consider whether a second, purpose-built analytics tool covers the queries they actually run day to day.",
+  "tldr": "GA4 samples data in Explorations once your property passes roughly 10 million events in the queried date range, and it does so silently, behind a shield icon most people miss. Standard reports stay unsampled; custom Explorations may be estimates, not facts. The fixes: shorten the date range, use the free BigQuery export, or run the queries that matter in a tool that never samples.",
   "intro": "GA4 has a sampling problem it does not advertise loudly. I spent an embarrassing amount of time optimizing a funnel based on Exploration data, only to notice the shield icon and realize I was working from a 72% sample. Here is everything I wish someone had told me plainly.",
   "sections": [
     {
@@ -16,11 +16,11 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "Sampling means GA4 analyzed a subset of your events and extrapolated the results to represent the whole. It is not inherently evil — statistical sampling works fine at scale for broad trends. The problem is that conversion funnels, cohort analysis, and segment-level breakdowns are precisely the queries where you need exact numbers, and those are exactly the queries GA4 runs through its sampled Explorations engine."
+      "text": "Sampling means GA4 analyzed a subset of your events and extrapolated the results to represent the whole. It is not inherently evil; statistical sampling works fine at scale for broad trends. The problem is that conversion funnels, cohort analysis, and segment-level breakdowns are precisely the queries where you need exact numbers, and those are exactly the queries GA4 runs through its sampled Explorations engine."
     },
     {
       "type": "p",
-      "text": "GA4 has two distinct reporting surfaces. Standard reports — the Acquisition, Engagement, and Monetization tabs — run on pre-aggregated data and are not sampled. Explorations — Funnel exploration, Path exploration, Cohort exploration, Segment overlap — query raw event data and hit the sampling threshold. That distinction matters more than almost anything else in this article."
+      "text": "GA4 has two distinct reporting surfaces. Standard reports (the Acquisition, Engagement, and Monetization tabs) run on pre-aggregated data and are not sampled. Explorations (Funnel exploration, Path exploration, Cohort exploration, Segment overlap) query raw event data and hit the sampling threshold. That distinction matters more than almost anything else in this article."
     },
     {
       "type": "h2",
@@ -29,7 +29,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "Open any Exploration in GA4. Look at the top right of the canvas. You will see either a green shield icon (unsampled) or a yellow/orange shield (sampled). Click it. GA4 will tell you the exact percentage of sessions it analyzed — something like 'Based on 68.3% of sessions for this date range.' That number is the signal. Anything below 100% means your report is an estimate."
+      "text": "Open any Exploration in GA4. Look at the top right of the canvas. You will see either a green shield icon (unsampled) or a yellow/orange shield (sampled). Click it. GA4 will tell you the exact percentage of sessions it analyzed, something like 'Based on 68.3% of sessions for this date range.' That number is the signal. Anything below 100% means your report is an estimate."
     },
     {
       "type": "p",
@@ -43,7 +43,7 @@ const entry: ContentEntry = {
     {
       "type": "ul",
       "items": [
-        "Your funnel conversion rates shift noticeably when you change the date range by a few days — sampling percentage changes, so the estimate changes.",
+        "Your funnel conversion rates shift noticeably when you change the date range by a few days: the sampling percentage changes, so the estimate changes.",
         "Segment comparisons in Explorations show suspiciously round numbers or inconsistencies with what your standard reports show.",
         "A cohort analysis shows patterns that do not match your gut check from revenue data or other sources.",
         "You add a breakdown dimension to an Exploration and the totals no longer match the top-level number."
@@ -56,7 +56,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "Standard reports are built on pre-aggregated tables that GA4 computes continuously. Acquisition overview, traffic source breakdown, page and screen views, user counts, basic conversion events — these are not sampled regardless of your event volume. If you need to answer 'how much organic traffic did we get last month,' the standard reports are accurate."
+      "text": "Standard reports are built on pre-aggregated tables that GA4 computes continuously. Acquisition overview, traffic source breakdown, page and screen views, user counts, basic conversion events: these are not sampled regardless of your event volume. If you need to answer 'how much organic traffic did we get last month,' the standard reports are accurate."
     },
     {
       "type": "p",
@@ -64,7 +64,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "callout",
-      "text": "The cruelest part of GA4 sampling: it hits hardest on the exact analyses that justify your biggest spending decisions — funnel optimization, campaign ROI, and cohort retention. The queries that matter most are the ones least likely to be accurate."
+      "text": "The cruelest part of GA4 sampling: it hits hardest on the exact analyses that justify your biggest spending decisions: funnel optimization, campaign ROI, and cohort retention. The queries that matter most are the ones least likely to be accurate."
     },
     {
       "type": "h2",
@@ -96,7 +96,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "GA4 has a free BigQuery export. Once your raw events are in BigQuery, you can query them without any sampling at all — you are hitting the real data. This is genuinely the best technical solution for teams that need unsampled historical analysis and have someone who can write SQL. The catch: BigQuery has its own costs at scale, the export has a 24-48 hour lag, and you need someone who knows what they are doing to write queries that are meaningful."
+      "text": "GA4 has a free BigQuery export. Once your raw events are in BigQuery, you can query them without any sampling at all, because you are hitting the real data. This is genuinely the best technical solution for teams that need unsampled historical analysis and have someone who can write SQL. The catch: BigQuery has its own costs at scale, the export has a 24-48 hour lag, and you need someone who knows what they are doing to write queries that are meaningful."
     },
     {
       "type": "h3",
@@ -114,11 +114,11 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "This is what I actually recommend for most small teams. GA4 is fine for broad traffic visibility. Where it falls short is connecting traffic source to revenue, showing you accurate conversion funnels without sampling, and giving you behavioral data like click maps and scroll depth. These are the things that actually change what you ship next."
+      "text": "This is what I actually recommend for most small teams. GA4 is fine for broad traffic visibility. Where it falls short is [connecting traffic source to revenue](/glossary/revenue-attribution), showing you [accurate conversion funnels](/guides/how-to-read-a-funnel) without sampling, and giving you behavioral data like click maps and scroll depth. These are the things that actually change what you ship next."
     },
     {
       "type": "p",
-      "text": "I built Conclick for exactly this use case. It stores all event data, never samples, and is designed around the question 'which traffic actually made money.' It connects directly to Stripe, Paddle, Polar, Lemon Squeezy, and Dodo Payments so you can tie every conversion back to the source, campaign, and funnel step that earned it. It also generates real-screenshot heatmaps and auto-detects your biggest funnel drop-off with the revenue estimate attached to fixing it. It is not a GA4 replacement for enterprise teams who need the full Google ecosystem — but for a founder who wants to know why conversions dropped last Tuesday and which channel is actually profitable, it is more useful than a sampled Exploration. $9/month, no card required for the trial, two-minute setup."
+      "text": "I built Conclick for exactly this use case. It stores all event data, never samples, and is designed around the question 'which traffic actually made money.' It connects directly to Stripe, Paddle, Polar, Lemon Squeezy, and Dodo Payments so you can tie every conversion back to the source, campaign, and funnel step that earned it. It also generates real-screenshot heatmaps and auto-detects your biggest funnel drop-off with the revenue estimate attached to fixing it. It is not a GA4 replacement for enterprise teams who need the full Google ecosystem. But for a founder who wants to know why conversions dropped last Tuesday and which channel is actually profitable, it is more useful than a sampled Exploration. $9/month, no card required for the trial, two-minute setup."
     },
     {
       "type": "h2",
@@ -128,10 +128,10 @@ const entry: ContentEntry = {
     {
       "type": "ol",
       "items": [
-        "Open your most important GA4 Explorations. Check the shield icon. If they are green and unsampled, you are fine — stop here.",
+        "Open your most important GA4 Explorations. Check the shield icon. If they are green and unsampled, you are fine. Stop here.",
         "If sampled: is your date range longer than 30 days? Try shortening it. Does sampling disappear? Then narrow date ranges are your workflow.",
         "If you need multi-month funnel or cohort analysis and you have SQL skills: set up the BigQuery export. It is free to set up, costs a few dollars a month at typical indie scale, and gives you exact numbers.",
-        "If the queries you actually need are 'where are conversions dropping' and 'which channel makes money' — evaluate whether a purpose-built analytics tool covers those better than GA4 Explorations with sampling errors baked in.",
+        "If the queries you actually need are 'where are conversions dropping' and 'which channel makes money', evaluate whether a purpose-built analytics tool covers those better than GA4 Explorations with sampling errors baked in.",
         "If you are an enterprise team spending over $10K/month on paid acquisition: BigQuery export plus a BI tool is the right answer. GA4 360 only if your team is already embedded in Google's enterprise stack."
       ]
     },
@@ -156,26 +156,42 @@ const entry: ContentEntry = {
     },
     {
       "question": "Are GA4 standard reports (like Acquisition) ever sampled?",
-      "answer": "No. Standard reports in GA4 are built on pre-aggregated data tables and are not subject to the sampling threshold. Only Explorations — Funnel exploration, Path exploration, Cohort exploration, Segment overlap, and Free form explorations with custom segments — use the raw event query engine that triggers sampling."
+      "answer": "No. Standard reports in GA4 are built on pre-aggregated data tables and are not subject to the sampling threshold. Only Explorations (Funnel exploration, Path exploration, Cohort exploration, Segment overlap, and Free form explorations with custom segments) use the raw event query engine that triggers sampling."
     },
     {
       "question": "How do I check if a specific GA4 Exploration is sampled?",
-      "answer": "Open the Exploration and look for the shield icon in the top-right corner of the report canvas. A green shield means unsampled. A yellow or orange shield means GA4 analyzed only a portion of your events. Clicking the icon shows the exact sampling rate — for example, 'Based on 71.4% of sessions.' Anything below 100% is a sampled estimate."
+      "answer": "Open the Exploration and look for the shield icon in the top-right corner of the report canvas. A green shield means unsampled. A yellow or orange shield means GA4 analyzed only a portion of your events. Clicking the icon shows the exact sampling rate, for example 'Based on 71.4% of sessions.' Anything below 100% is a sampled estimate."
     },
     {
       "question": "Does the BigQuery export from GA4 remove sampling?",
-      "answer": "Yes. The BigQuery export sends raw, unsampled event data to a BigQuery table. Queries you run directly against BigQuery are not subject to GA4's Explorations sampling limits. The export is free to configure, though BigQuery charges for storage and query processing — typically a few dollars a month for a small to mid-size property. The main drawbacks are a 24-48 hour data lag and the requirement to write SQL."
+      "answer": "Yes. The BigQuery export sends raw, unsampled event data to a BigQuery table. Queries you run directly against BigQuery are not subject to GA4's Explorations sampling limits. The export is free to configure, though BigQuery charges for storage and query processing, typically a few dollars a month for a small to mid-size property. The main drawbacks are a 24-48 hour data lag and the requirement to write SQL."
     },
     {
       "question": "Can I get unsampled data in GA4 without paying for GA4 360?",
-      "answer": "Yes, through two approaches. First, shorten your date range until the event count falls below the 10M threshold — this often eliminates sampling for recent date windows. Second, use the free BigQuery export and run queries there. GA4 360 raises the threshold to around 1 billion events, but at roughly $50K/year it is only realistic for large enterprises."
+      "answer": "Yes, through two approaches. First, shorten your date range until the event count falls below the 10M threshold; this often eliminates sampling for recent date windows. Second, use the free BigQuery export and run queries there. GA4 360 raises the threshold to around 1 billion events, but at roughly $50K/year it is only realistic for large enterprises."
     },
     {
       "question": "Is GA4 sampling different from Universal Analytics sampling?",
       "answer": "The mechanics are similar but the thresholds and triggers are different. Universal Analytics sampled at the session level for complex reports, with a threshold around 500K sessions. GA4 samples at the event level in Explorations, with a threshold around 10M events. In practice, GA4 sampling affects more mid-size businesses than UA did, because event-based tracking generates far more data points than session-based tracking for the same amount of user activity."
     }
   ],
-  "internalLinks": [],
+  "internalLinks": [
+    {
+      "href": "/guides/ga4-migration-guide",
+      "label": "Migrating off GA4: a practical guide",
+      "group": "guide"
+    },
+    {
+      "href": "/vs/google-analytics",
+      "label": "Conclick vs Google Analytics",
+      "group": "comparison"
+    },
+    {
+      "href": "/alternatives/google-analytics",
+      "label": "Google Analytics alternatives",
+      "group": "alternative"
+    }
+  ],
   "relatedTools": [
     "utm-builder"
   ],
@@ -186,7 +202,7 @@ const entry: ContentEntry = {
     "ctaLabel": "Add My Website"
   },
   "datePublished": "2026-06-18",
-  "dateModified": "2026-06-18"
+  "dateModified": "2026-07-22"
 };
 
 export default entry;

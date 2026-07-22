@@ -6,7 +6,7 @@ const entry: ContentEntry = {
   "h1": "Why Revenue Attribution Belongs at the Center of Your Analytics",
   "metaTitle": "Revenue Attribution Is Your Most Valuable Metric",
   "metaDescription": "Most analytics tools tell you who visited. Revenue attribution tells you who paid. Here's why that distinction is the difference between growing and guessing.",
-  "tldr": "Pageviews and sessions are vanity metrics dressed up as strategy. The only number that actually tells you whether your marketing is working is revenue per source — and most founders are flying blind because their analytics tool stops before the checkout. Fix that, and everything downstream gets sharper.",
+  "tldr": "Pageviews and sessions are vanity metrics dressed up as strategy. The only number that actually tells you whether your marketing is working is revenue per source, and most founders are flying blind because their analytics tool stops before the checkout. Fix that, and everything downstream gets sharper.",
   "intro": "I spent eight months obsessing over our traffic numbers. Organic was up 40%. Newsletter clicks were solid. A couple of blog posts were pulling in thousands of visits a month. I felt like I was building something real. Then I looked at where our paying customers were actually coming from, and I wanted to delete every dashboard I'd ever made. Three channels accounted for 90% of our revenue. None of them were the ones I'd been pouring time into.",
   "sections": [
     {
@@ -88,7 +88,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "Some founders hear 'attribution' and immediately think of the cross-site tracking nightmare that killed third-party cookies, the cookie consent banners that everyone clicks through without reading, the GDPR fines that occasionally make the news. That concern is legitimate for a particular kind of attribution — the kind that involves tracking people across the web and building behavioral profiles."
+      "text": "Some founders hear 'attribution' and immediately think of the cross-site tracking nightmare that killed third-party cookies, the cookie consent banners that everyone clicks through without reading, the GDPR fines that occasionally make the news. That concern is legitimate for a particular kind of attribution: the kind that involves tracking people across the web and building behavioral profiles."
     },
     {
       "type": "p",
@@ -96,7 +96,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "The cookieless analytics tools that have emerged in the last few years — built partly in response to the privacy regulatory environment — have figured out how to do session-level attribution without the surveillance apparatus. It is a narrower signal than what you get from a fully instrumented tracking stack, but for most small SaaS businesses, it is more than enough to make better decisions."
+      "text": "The cookieless analytics tools that have emerged in the last few years, built partly in response to the privacy regulatory environment, have figured out how to do session-level attribution without the surveillance apparatus. It is a narrower signal than what you get from a fully instrumented tracking stack, but for most small SaaS businesses, it is more than enough to make better decisions."
     },
     {
       "type": "h2",
@@ -105,11 +105,11 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "If you are running on Stripe, Paddle, Lemon Squeezy, Polar, or Dodo, the mechanical setup is not complicated. You need an analytics tool that accepts payment webhooks and matches them to sessions. The matching logic is usually UTM parameters or referrer data captured at session start, then associated with a payment event when it fires. The whole thing can take under a day to wire up correctly."
+      "text": "If you are running on Stripe, Paddle, Lemon Squeezy, Polar, or Dodo, the mechanical setup is not complicated. You need an analytics tool that accepts payment webhooks and matches them to sessions. The matching logic is usually [UTM parameters](/glossary/utm) or referrer data captured at session start, then associated with a payment event when it fires. The whole thing can take under a day to wire up correctly."
     },
     {
       "type": "p",
-      "text": "The harder part is discipline in your UTM tagging. If half your links have UTM parameters and half do not, your attribution data will be incomplete in ways that are hard to diagnose. Spend a day auditing every place you link to your site — newsletters, social profiles, partner pages, ad campaigns — and make sure every one of them has a consistent UTM structure. It is tedious. It pays for itself immediately."
+      "text": "The harder part is discipline in your UTM tagging. If half your links have UTM parameters and half do not, your attribution data will be incomplete in ways that are hard to diagnose. Spend a day auditing every place you link to your site (newsletters, social profiles, partner pages, ad campaigns) and make sure every one of them has a [consistent UTM structure](/tools/utm-builder). It is tedious. It pays for itself immediately."
     },
     {
       "type": "p",
@@ -136,7 +136,7 @@ const entry: ContentEntry = {
   "faq": [
     {
       "question": "Does revenue attribution require me to track users with cookies?",
-      "answer": "No. First-party attribution works by capturing UTM parameters or referrer data at session start and associating them with a payment event when it fires — all within your own domain. Cookieless analytics tools handle this without persistent identifiers, which means you usually do not need a consent banner under GDPR or CCPA."
+      "answer": "No. First-party attribution works by capturing UTM parameters or referrer data at session start and associating them with a payment event when it fires, all within your own domain. Cookieless analytics tools handle this without persistent identifiers, which means you usually do not need a consent banner under GDPR or CCPA."
     },
     {
       "question": "What payment processors support this kind of attribution?",
@@ -148,14 +148,35 @@ const entry: ContentEntry = {
     },
     {
       "question": "My checkout is on a separate domain or a hosted payment page. Can I still attribute revenue?",
-      "answer": "Yes, with some extra work. You need to pass the session source data through to the checkout flow — usually as URL parameters that survive the redirect — so the payment webhook can carry it back. Most payment processors allow custom metadata on the payment object, which is where you store the attribution data for later retrieval."
+      "answer": "Yes, with some extra work. You need to pass the session source data through to the checkout flow (usually as URL parameters that survive the redirect) so the payment webhook can carry it back. Most payment processors allow custom metadata on the payment object, which is where you store the attribution data for later retrieval."
     },
     {
       "question": "How is revenue attribution different from just looking at which channels send the most signups?",
       "answer": "Conversion-to-signup and conversion-to-payment are often very different rates by channel. A channel that drives lots of free signups may produce almost no paying customers. A channel with modest signup volume might convert to paid at three times the rate. You can only see this if you track the payment event, not just the signup event. LTV by source is the most important dimension, and you cannot see it at all from signup data alone."
     }
   ],
-  "internalLinks": [],
+  "internalLinks": [
+    {
+      "href": "/glossary/revenue-attribution",
+      "label": "Revenue attribution, defined",
+      "group": "glossary"
+    },
+    {
+      "href": "/guides/revenue-attribution-tools",
+      "label": "Revenue attribution tools compared",
+      "group": "guide"
+    },
+    {
+      "href": "/guides/stripe-revenue-vs-analytics-revenue",
+      "label": "Stripe revenue vs analytics revenue",
+      "group": "guide"
+    },
+    {
+      "href": "/glossary/utm",
+      "label": "What are UTM parameters?",
+      "group": "glossary"
+    }
+  ],
   "relatedTools": [
     "utm-builder"
   ],
@@ -166,7 +187,7 @@ const entry: ContentEntry = {
     "ctaLabel": "Add My Website"
   },
   "datePublished": "2026-06-18",
-  "dateModified": "2026-06-18"
+  "dateModified": "2026-07-22"
 };
 
 export default entry;

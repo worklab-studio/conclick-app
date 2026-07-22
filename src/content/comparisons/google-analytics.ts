@@ -6,7 +6,7 @@ const entry: ContentEntry = {
   "h1": "Conclick vs Google Analytics 4: An Honest Comparison",
   "metaTitle": "Conclick vs Google Analytics 4: Honest Comparison",
   "metaDescription": "GA4 is free and powerful. Conclick costs $9/mo and tells you which traffic makes money. Here's when each one is the right tool.",
-  "tldr": "Google Analytics 4 is the right choice if you run Google Ads, need free enterprise-grade reporting, or have a dedicated analyst. Conclick is the better choice if you are a solo founder or small SaaS team who needs to know which traffic and campaigns are generating actual revenue — not just sessions. GA4 is free; Conclick starts at $9/month and includes a 14-day free trial with no credit card required.",
+  "tldr": "Google Analytics 4 is the right choice if you run Google Ads, need free enterprise-grade reporting, or have a dedicated analyst. Conclick is the better choice if you are a solo founder or small SaaS team who needs to know which traffic and campaigns generate actual revenue, not just sessions. GA4 is free; Conclick starts at $9/month with a 14-day free trial, no credit card required.",
   "intro": "I built Conclick because I kept staring at GA4 dashboards trying to answer one question: which of these traffic sources is actually making me money? The answer was never in there without a lot of configuration I never had time to set up right. This comparison is my honest take on when GA4 is the better tool, and when it is not.",
   "sections": [
     {
@@ -16,7 +16,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "GA4 tells you what your visitors are doing. Conclick tells you which visitors are paying you — and where the ones who did not pay dropped off. That is not a knock on GA4. It is just a different product for a different job."
+      "text": "GA4 tells you what your visitors are doing. Conclick tells you which visitors are paying you, and where the ones who did not pay dropped off. That is not a knock on GA4. It is just a different product for a different job."
     },
     {
       "type": "h2",
@@ -54,7 +54,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "Funnels in GA4 exist and are genuinely powerful, but they are manual. You define each step. Conclick auto-detects funnel patterns from your actual traffic and surfaces the single biggest drop-off with the revenue figure attached. If 60% of your checkout visitors abandon on the payment step, and your average order value is $49, Conclick shows you roughly what you are losing per week so you can decide whether fixing that step is worth more than anything else on your roadmap."
+      "text": "Funnels in GA4 exist and are genuinely powerful, but they are manual. You define each step. Conclick auto-detects funnel patterns from your actual traffic and surfaces the single [biggest drop-off](/guides/how-to-read-a-funnel) with the revenue figure attached. If 60% of your checkout visitors abandon on the payment step, and your average order value is $49, Conclick shows you roughly what you are losing per week so you can decide whether fixing that step is worth more than anything else on your roadmap."
     },
     {
       "type": "h2",
@@ -63,11 +63,11 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "GA4 uses cookies and cross-site tracking. Under GDPR and CCPA, that means a consent banner. Consent banners reduce your analytics data quality — some estimates put opt-out rates at 30 to 60% depending on region and how aggressive the banner is. You end up making decisions based on a partial picture and you still have to maintain a cookie policy."
+      "text": "GA4 uses cookies and cross-site tracking. Under GDPR and CCPA, that means a consent banner. [Consent banners](/blog/cookie-banners-killing-your-data) reduce your analytics data quality: some estimates put opt-out rates at 30 to 60% depending on region and how aggressive the banner is. You end up making decisions based on a partial picture and you still have to maintain a cookie policy."
     },
     {
       "type": "p",
-      "text": "Conclick is cookieless. It does not fingerprint users. It uses a privacy-friendly counting method that is compliant with GDPR and CCPA without requiring a consent banner in most jurisdictions. The script is lightweight and adds no noticeable page weight. You get clean data because you are not scaring off half your visitors before they click anything."
+      "text": "Conclick is cookieless. It does not fingerprint users. It uses a privacy-friendly counting method that is [compliant with GDPR](/glossary/gdpr-compliant-analytics) and CCPA without requiring a consent banner in most jurisdictions. The script is lightweight and adds no noticeable page weight. You get clean data because you are not scaring off half your visitors before they click anything."
     },
     {
       "type": "callout",
@@ -94,7 +94,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "None of that is spin. If your business is built on Google Ads or you need deep custom SQL analysis, GA4 is the right tool. The comparison is not GA4 bad, Conclick good — it is about which one answers the questions your business actually asks every day."
+      "text": "None of that is spin. If your business is built on Google Ads or you need deep custom SQL analysis, GA4 is the right tool. The comparison is not GA4 bad, Conclick good. It is about which one answers the questions your business actually asks every day."
     },
     {
       "type": "h2",
@@ -120,7 +120,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "Use Conclick if you are a bootstrapped founder or small team, you accept payments through Stripe or another supported processor, and you want to spend five minutes a week in your analytics — not five hours. The daily digest to Slack or email means you do not even need to open a dashboard to catch spikes and milestones."
+      "text": "Use Conclick if you are a bootstrapped founder or small team, you accept payments through Stripe or another supported processor, and you want to spend five minutes a week in your analytics, not five hours. The daily digest to Slack or email means you do not even need to open a dashboard to catch spikes and milestones."
     }
   ],
   "faq": [
@@ -130,37 +130,58 @@ const entry: ContentEntry = {
     },
     {
       "question": "Does Conclick replace Hotjar or Microsoft Clarity as well as GA4?",
-      "answer": "For most small SaaS and e-commerce teams, yes. Conclick includes real-screenshot click maps, scroll depth tracking, rage clicks, and dead clicks — the core heatmap features most founders actually use. If you need session recordings (full video replay of individual user sessions), Conclick does not have those today, and Hotjar or Clarity would cover that gap."
+      "answer": "For most small SaaS and e-commerce teams, yes. Conclick includes real-screenshot click maps, scroll depth tracking, rage clicks, and dead clicks: the core heatmap features most founders actually use. If you need session recordings (full video replay of individual user sessions), Conclick does not have those today, and Hotjar or Clarity would cover that gap."
     },
     {
       "question": "GA4 is free. How do I justify paying $9/month for Conclick?",
-      "answer": "The question is whether the tool pays for itself. If Conclick identifies one traffic source that is sending sessions but zero revenue, and you stop spending time or money on it, you have already recovered the cost. The revenue attribution feature alone — connecting payments from Stripe, Paddle, Polar, Lemon Squeezy, or Dodo to the exact campaign that generated them — typically answers that question within the first week of use."
+      "answer": "The question is whether the tool pays for itself. If Conclick identifies one traffic source that is sending sessions but zero revenue, and you stop spending time or money on it, you have already recovered the cost. The revenue attribution feature alone, connecting payments from Stripe, Paddle, Polar, Lemon Squeezy, or Dodo to the exact campaign that generated them, typically answers that question within the first week of use."
     },
     {
       "question": "Does Conclick work for content sites and blogs, or just SaaS?",
-      "answer": "The core analytics, heatmaps, and funnel detection work for any website. The revenue attribution feature is most useful if you process payments through one of the supported processors. For a pure content site monetized through ads rather than direct payments, GA4 remains a strong free option — Conclick's differentiation is strongest where there is a payment flow to connect."
+      "answer": "The core analytics, heatmaps, and funnel detection work for any website. The revenue attribution feature is most useful if you process payments through one of the supported processors. For a pure content site monetized through ads rather than direct payments, GA4 remains a strong free option; Conclick's differentiation is strongest where there is a payment flow to connect."
     },
     {
       "question": "Do I still need a cookie consent banner if I use Conclick?",
       "answer": "In most jurisdictions, no. Conclick is cookieless and does not use cross-site tracking or fingerprinting, so it typically falls outside the scope of GDPR and CCPA consent requirements. You should still confirm this with your legal counsel based on your specific situation and the regions you operate in, but the majority of Conclick users remove their analytics consent banner after switching."
     },
     {
-      "question": "How does Conclick's GA4 import work — can I bring my historical data over?",
+      "question": "How does Conclick's GA4 import work? Can I bring my historical data over?",
       "answer": "Conclick has a Google Analytics 4 import feature that pulls your historical GA4 data into your Conclick account so you are not starting from zero. There is also a Google Search Console integration that surfaces your organic search performance alongside your traffic and revenue data in a single view. The import is a one-time or recurring sync, not a live data bridge between the two platforms."
     }
   ],
-  "internalLinks": [],
+  "internalLinks": [
+    {
+      "href": "/guides/ga4-migration-guide",
+      "label": "GA4 migration guide",
+      "group": "guide"
+    },
+    {
+      "href": "/guides/is-ga4-sampling-your-data",
+      "label": "Is GA4 sampling your data?",
+      "group": "guide"
+    },
+    {
+      "href": "/alternatives/google-analytics",
+      "label": "Google Analytics alternatives",
+      "group": "alternative"
+    },
+    {
+      "href": "/blog/cookie-banners-killing-your-data",
+      "label": "Cookie banners are killing your data",
+      "group": "blog"
+    }
+  ],
   "relatedTools": [
     "utm-builder"
   ],
   "leadMagnet": {
     "kind": "addWebsite",
     "headline": "See what Google Analytics 4 can't show you",
-    "sub": "Add your site and Conclick shows which traffic actually makes money — heatmaps, funnels, and revenue in one dashboard. Free for 14 days, no card.",
+    "sub": "Add your site and Conclick shows which traffic actually makes money: heatmaps, funnels, and revenue in one dashboard. Free for 14 days, no card.",
     "ctaLabel": "Add My Website"
   },
   "datePublished": "2026-06-18",
-  "dateModified": "2026-06-18",
+  "dateModified": "2026-07-22",
   "comparison": {
     "competitor": "Google Analytics 4",
     "competitorUrl": "https://analytics.google.com",

@@ -6,7 +6,7 @@ const entry: ContentEntry = {
   "h1": "Analytics for Agencies: What Client Work Actually Demands",
   "metaTitle": "Analytics for Agencies: Prove Client ROI, Not Pageviews",
   "metaDescription": "Agencies need to show clients which traffic made money, where the funnel breaks, and why. Here's how Conclick's revenue attribution and heatmaps do that.",
-  "tldr": "Agencies need to prove that their work generated revenue, not just traffic. Conclick connects client payments directly to campaigns, funnels, and pages — so you can show up to a review meeting with a number, not a chart. It takes about two minutes to install per client site, no consent banners needed, and starts at $9/month.",
+  "tldr": "Agencies need to prove that their work generated revenue, not just traffic. Conclick connects client payments directly to campaigns, funnels, and pages, so you can show up to a review meeting with a number, not a chart. It installs in about two minutes per client site, generally needs no consent banner (jurisdiction-dependent), and starts at $9/month.",
   "intro": "I built Conclick for founders who were tired of explaining to themselves why traffic was up but revenue wasn't. Turns out agencies have the same problem, just with an audience: a client sitting across the table who wants to know what they actually got for the retainer. Pageviews don't answer that question. Revenue attribution does.",
   "sections": [
     {
@@ -33,7 +33,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "Conclick's revenue attribution works differently. Connect the client's Stripe, Paddle, Polar, Lemon Squeezy, or Dodo account and every payment is tied back to the source, campaign, and funnel step that earned it. Not the last click — the full picture of what traffic actually converted to money. You can walk into a review and say: the SEO content drove $3,200 in new revenue this month. The paid campaign drove $1,100. Email drove $800. That's a conversation, not a defense."
+      "text": "Conclick's [revenue attribution](/glossary/revenue-attribution) works differently. Connect the client's Stripe, Paddle, Polar, Lemon Squeezy, or Dodo account and every payment is tied back to the source, campaign, and funnel step that earned it. Not the last click. The full picture of what traffic actually converted to money. You can walk into a review and say: the SEO content drove $3,200 in new revenue this month. The paid campaign drove $1,100. Email drove $800. That's a conversation, not a defense."
     },
     {
       "type": "h2",
@@ -50,7 +50,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "callout",
-      "text": "The most valuable number in any client report isn't conversion rate — it's estimated revenue lost to the biggest drop-off. When you can put a dollar figure on a UX problem, clients fix it. When you show them a percentage, they ask you to make another slide."
+      "text": "The most valuable number in any client report isn't conversion rate. It's estimated revenue lost to the biggest drop-off. When you can put a dollar figure on a UX problem, clients fix it. When you show them a percentage, they ask you to make another slide."
     },
     {
       "type": "h2",
@@ -59,7 +59,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "Most heatmap tools use a DOM reconstruction that approximates what the page looked like. Conclick uses real screenshots as the base layer, so what you see in the heatmap is exactly what the visitor saw — including any A/B test variant, personalization layer, or dynamic content that was live at the time."
+      "text": "Most heatmap tools use a DOM reconstruction that approximates what the page looked like. Conclick uses real screenshots as the base layer, so what you see in the heatmap is exactly what the visitor saw, including any A/B test variant, personalization layer, or dynamic content that was live at the time."
     },
     {
       "type": "p",
@@ -67,7 +67,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "These aren't things you'd use in every client report. But when a client says the landing page isn't converting and you need to show them why, a real-screenshot heatmap with rage click markers is a concrete answer. It ends the discussion about whether the CTA button placement is a problem."
+      "text": "These aren't things you'd use in every client report. But when a client says the landing page isn't converting and you need to show them why, a [real-screenshot heatmap](/guides/how-to-read-a-heatmap) with rage click markers is a concrete answer. It ends the discussion about whether the CTA button placement is a problem."
     },
     {
       "type": "h2",
@@ -80,7 +80,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "The daily digest — a summary of the past 24 hours with traffic spikes, revenue milestones, and funnel movement — goes out by email and can push to Slack, Discord, or Telegram. If you're managing a client channel in Slack, you can have the digest drop in there each morning. It's a lightweight way to stay visible without writing a weekly update."
+      "text": "The daily digest summarizes the past 24 hours: traffic spikes, revenue milestones, and funnel movement. It goes out by email and can push to Slack, Discord, or Telegram. If you're managing a client channel in Slack, you can have the digest drop in there each morning. It's a lightweight way to stay visible without writing a weekly update."
     },
     {
       "type": "h2",
@@ -89,11 +89,11 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "Conclick is cookieless and doesn't fingerprint users. That means most client sites don't need a consent banner for the analytics script alone — one less compliance conversation when onboarding a new client in the EU. The script is lightweight and takes about two minutes to install. There's a Google Search Console integration and GA4 import if the client is coming off Google Analytics and wants to preserve historical data."
+      "text": "Conclick is cookieless and doesn't fingerprint users; it stores a first-party identifier in localStorage. In most cases the analytics script alone doesn't need a consent banner, but that depends on the client's jurisdiction, so have them check with their own counsel. It's still one less compliance conversation than a cookie-based stack when onboarding a new client in the EU. The script is lightweight and takes about two minutes to install. There's a Google Search Console integration and [GA4 import](/guides/ga4-migration-guide) if the client is coming off Google Analytics and wants to preserve historical data."
     },
     {
       "type": "p",
-      "text": "I want to be honest about where Conclick is not the right tool. If a client has a complex enterprise analytics stack, multiple data warehouses, and a team of analysts building custom attribution models, they don't need Conclick — they need a data engineer and BigQuery. Conclick is for small-to-mid-sized SaaS and ecommerce clients who want to understand their business without maintaining infrastructure. That's the audience it was built for."
+      "text": "I want to be honest about where Conclick is not the right tool. If a client has a complex enterprise analytics stack, multiple data warehouses, and a team of analysts building custom attribution models, they don't need Conclick; they need a data engineer and BigQuery. Conclick is for small-to-mid-sized SaaS and ecommerce clients who want to understand their business without maintaining infrastructure. That's the audience it was built for."
     },
     {
       "type": "h2",
@@ -103,7 +103,7 @@ const entry: ContentEntry = {
     {
       "type": "ol",
       "items": [
-        "Start a 14-day free trial — no credit card needed. Add the tracking script to the client's site in two minutes.",
+        "Start a 14-day free trial (no credit card needed). Add the tracking script to the client's site in two minutes.",
         "Connect the client's payment processor (Stripe, Paddle, Polar, Lemon Squeezy, or Dodo) to enable revenue attribution.",
         "Let it run for a few days. Auto-detected funnels and heatmaps start populating once there's enough traffic.",
         "Set up goals and conversions with revenue values for any non-payment conversion events (demo bookings, lead form submits, etc.).",
@@ -115,30 +115,46 @@ const entry: ContentEntry = {
   "faq": [
     {
       "question": "Can I manage multiple client sites under one Conclick account?",
-      "answer": "Each Conclick site is a separate workspace. You can have multiple sites on one account and switch between them. Pricing is per site, so if you're managing five client sites, that's five subscriptions. At $7/month per site billed yearly, it's a cost you can pass through to clients or absorb as part of a reporting retainer — either way it's not a meaningful line item."
+      "answer": "Each Conclick site is a separate workspace. You can have multiple sites on one account and switch between them. Pricing is per site, so if you're managing five client sites, that's five subscriptions. At $7/month per site billed yearly, it's a cost you can pass through to clients or absorb as part of a reporting retainer. Either way it's not a meaningful line item."
     },
     {
-      "question": "How does the revenue attribution actually work — is it last-click or something else?",
-      "answer": "Conclick connects your client's payment processor (Stripe, Paddle, Polar, Lemon Squeezy, or Dodo) and ties each payment back to the visitor session and source that started it. The attribution model follows the full session journey rather than just the last click. It's not a multi-touch fractional model like some enterprise tools — it's a clear view of which source and campaign the paying customer came from, which is usually what clients need to make decisions."
+      "question": "How does the revenue attribution actually work? Is it last-click or something else?",
+      "answer": "Conclick connects your client's payment processor (Stripe, Paddle, Polar, Lemon Squeezy, or Dodo) and ties each payment back to the visitor session and source that started it. The attribution model follows the full session journey rather than just the last click. It's not a multi-touch fractional model like some enterprise tools. It's a clear view of which source and campaign the paying customer came from, which is usually what clients need to make decisions."
     },
     {
       "question": "Do clients need to install a consent banner to use Conclick on their site?",
-      "answer": "Usually not. Conclick is cookieless and doesn't track individual users across sessions or devices. Under GDPR and CCPA, anonymous aggregate analytics without persistent identifiers typically don't require consent. That said, your client's legal situation is their own — if they have specific compliance requirements or are in a regulated industry, they should verify with their legal counsel. For most small SaaS and ecommerce sites, the answer is no banner needed."
+      "answer": "Usually not. Conclick is cookieless and doesn't track individual users across sessions or devices. Under GDPR and CCPA, anonymous aggregate analytics without persistent identifiers typically don't require consent. That said, your client's legal situation is their own. If they have specific compliance requirements or are in a regulated industry, they should verify with their legal counsel. For most small SaaS and ecommerce sites, the answer is no banner needed."
     },
     {
       "question": "Can we give clients access to their own analytics without giving them access to other clients?",
-      "answer": "Yes. Each site workspace is isolated. You can grant a client read-only access to their specific workspace, or generate a public dashboard link for them, without exposing any other client's data. The public dashboard link is useful for sending before a meeting — the client can look at their own numbers without needing an account."
+      "answer": "Yes. Each site workspace is isolated. You can grant a client read-only access to their specific workspace, or generate a public dashboard link for them, without exposing any other client's data. The public dashboard link is useful for sending before a meeting: the client can look at their own numbers without needing an account."
     },
     {
       "question": "How are heatmaps different from tools like Hotjar or Microsoft Clarity?",
-      "answer": "The main functional difference is that Conclick uses real screenshots as the base layer for heatmaps rather than a DOM reconstruction. This means the heatmap shows exactly what the visitor saw, including dynamic content, A/B test variants, and live personalization. Hotjar and Clarity are more mature products with larger feature sets — session recordings, for example, are something Conclick doesn't do. If session recordings are critical to a client engagement, that's worth knowing upfront."
+      "answer": "The main functional difference is that Conclick uses real screenshots as the base layer for heatmaps rather than a DOM reconstruction. This means the heatmap shows exactly what the visitor saw, including dynamic content, A/B test variants, and live personalization. Hotjar and Clarity are more mature products with larger feature sets; session recordings, for example, are something Conclick doesn't do. If session recordings are critical to a client engagement, that's worth knowing upfront."
     },
     {
-      "question": "What if the client's site doesn't have a connected payment processor — is Conclick still useful?",
+      "question": "What if the client's site doesn't have a connected payment processor? Is Conclick still useful?",
       "answer": "Yes. Revenue attribution requires a connected payment processor, but the rest of the product works independently: auto-detected funnels, heatmaps, click maps, user journeys, the live visitor map, the daily digest, and goal tracking with manual revenue values. If a client has lead generation goals rather than direct payments, you can assign a revenue value per goal (like a dollar value per demo booked) and still get meaningful ROI metrics without a direct payment integration."
     }
   ],
-  "internalLinks": [],
+  "internalLinks": [
+    {
+      "href": "/blog/why-revenue-attribution-matters",
+      "label": "Why revenue attribution matters",
+      "group": "blog"
+    },
+    {
+      "href": "/guides/how-to-read-a-funnel",
+      "label": "Reading a funnel report",
+      "group": "guide"
+    },
+    {
+      "href": "/glossary/gdpr-compliant-analytics",
+      "label": "GDPR-compliant analytics, explained",
+      "group": "glossary"
+    }
+  ],
   "relatedTools": [],
   "leadMagnet": {
     "kind": "addWebsite",
@@ -147,7 +163,7 @@ const entry: ContentEntry = {
     "ctaLabel": "Add My Website"
   },
   "datePublished": "2026-06-18",
-  "dateModified": "2026-06-18"
+  "dateModified": "2026-07-22"
 };
 
 export default entry;

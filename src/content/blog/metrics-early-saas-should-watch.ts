@@ -24,11 +24,11 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "A reasonable benchmark for a self-serve SaaS is 15–25%. If you are below 10%, your product has a gap between what you promise and what people experience. No amount of paid ads fixes that. More trials into a broken funnel is just accelerating your churn problem."
+      "text": "A reasonable benchmark for a self-serve SaaS is 15 to 25%. If you are below 10%, your product has a gap between what you promise and what people experience. No amount of paid ads fixes that. More trials into a broken funnel is just accelerating your churn problem."
     },
     {
       "type": "p",
-      "text": "If you are between 10–15%, you have a messaging or activation problem. People see enough value to start a trial but not enough to hand over a credit card. That is usually a time-to-value issue, which brings us to metric two."
+      "text": "If you are between 10 and 15%, you have a messaging or activation problem. People see enough value to start a trial but not enough to hand over a credit card. That is usually a time-to-value issue, which brings us to metric two."
     },
     {
       "type": "p",
@@ -36,7 +36,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "The calculation is simple: divide paying conversions in a period by trials started in the same period (use a lagged window if your trial is 14 days — look at trials that started 14+ days ago and see what converted). Check it weekly. It moves."
+      "text": "The calculation is simple: divide paying conversions in a period by trials started in the same period (use a lagged window if your trial is 14 days: look at trials that started 14+ days ago and see what converted). Check it weekly. It moves."
     },
     {
       "type": "h2",
@@ -111,7 +111,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "The problem is that most analytics tools tell you where people came from but not which sources produced customers who actually paid. Pageviews from a traffic source that never buys are worth less than zero — they cost you server resources and inflate your vanity numbers. You want to close the loop between traffic source and revenue."
+      "text": "The problem is that most analytics tools tell you where people came from but not which sources produced customers who actually paid. Pageviews from a traffic source that never buys are worth less than zero; they cost you server resources and inflate your vanity numbers. You want to close the loop between [traffic source and revenue](/glossary/revenue-attribution)."
     },
     {
       "type": "p",
@@ -147,7 +147,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "The diagnostic flow is this: if trial-to-paid is low, investigate time-to-first-value first. If time-to-first-value looks fine but conversion is still low, talk to people who did not convert. Do not guess. If revenue churn is high, look at cohorts by acquisition channel — you may have one bad channel poisoning the whole number. If your CAC payback is over 18 months on every channel, you either have a pricing problem or a retention problem, and you need to figure out which."
+      "text": "The diagnostic flow is this: if trial-to-paid is low, investigate time-to-first-value first. If time-to-first-value looks fine but conversion is still low, talk to people who did not convert. Do not guess. If revenue churn is high, look at cohorts by acquisition channel, because you may have one bad channel poisoning the whole number. If your CAC payback is over 18 months on every channel, you either have a pricing problem or a retention problem, and you need to figure out which."
     },
     {
       "type": "p",
@@ -155,13 +155,13 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "There is no shortcut past this. I have watched founders spend months A/B testing button colors while their trial conversion rate sat at 7% and nobody asked why. The metrics do not lie. The question is whether you are watching the right ones."
+      "text": "There is no shortcut past this. I have watched founders spend months [A/B testing button colors](/blog/ab-testing-with-low-traffic) while their trial conversion rate sat at 7% and nobody asked why. The metrics do not lie. The question is whether you are watching the right ones."
     }
   ],
   "faq": [
     {
       "question": "What counts as a \"good\" trial-to-paid conversion rate for a self-serve SaaS?",
-      "answer": "Generally 15–25% is solid for a self-serve product. Below 10% signals a gap between what you promise and what people experience during the trial. Above 25% usually means your traffic sources are well-targeted. The number varies by price point — a $200/month product will naturally convert lower than a $9/month product — but the directional benchmarks hold."
+      "answer": "Generally 15 to 25% is solid for a self-serve product. Below 10% signals a gap between what you promise and what people experience during the trial. Above 25% usually means your traffic sources are well-targeted. The number varies by price point (a $200/month product will naturally convert lower than a $9/month product), but the directional benchmarks hold."
     },
     {
       "question": "How do I define \"first value\" for my specific product?",
@@ -173,14 +173,35 @@ const entry: ContentEntry = {
     },
     {
       "question": "Should I be running paid ads before $10k MRR?",
-      "answer": "Only if you have already found at least one channel with a CAC payback under 12 months without paid ads — SEO, content, community, cold outreach, whatever works for your product. Paid ads before product-market fit is a way to spend money to learn things you could learn for free by talking to your early users. If your trial conversion is below 15%, fix that before spending on acquisition."
+      "answer": "Only if you have already found at least one channel with a CAC payback under 12 months without paid ads: SEO, content, community, cold outreach, whatever works for your product. Paid ads before product-market fit is a way to spend money to learn things you could learn for free by talking to your early users. If your trial conversion is below 15%, fix that before spending on acquisition."
     },
     {
       "question": "When should I start tracking more metrics beyond these four?",
       "answer": "Once all four core metrics are in a healthy range and you are consistently above $10k MRR with low churn, you have enough signal to start segmenting and optimizing. At that point, tracking things like expansion MRR, feature adoption rates, or NPS scores will give you actionable data. Before that, adding metrics mostly adds noise and spreads your attention thin."
     }
   ],
-  "internalLinks": [],
+  "internalLinks": [
+    {
+      "href": "/blog/vanity-metrics-are-lying",
+      "label": "Vanity metrics are lying to you",
+      "group": "blog"
+    },
+    {
+      "href": "/glossary/revenue-attribution",
+      "label": "What is revenue attribution?",
+      "group": "glossary"
+    },
+    {
+      "href": "/blog/ab-testing-with-low-traffic",
+      "label": "A/B testing with low traffic",
+      "group": "blog"
+    },
+    {
+      "href": "/for/saas",
+      "label": "Analytics for SaaS teams",
+      "group": "useCase"
+    }
+  ],
   "relatedTools": [
     "utm-builder"
   ],
@@ -191,7 +212,7 @@ const entry: ContentEntry = {
     "ctaLabel": "Add My Website"
   },
   "datePublished": "2026-06-18",
-  "dateModified": "2026-06-18"
+  "dateModified": "2026-07-22"
 };
 
 export default entry;

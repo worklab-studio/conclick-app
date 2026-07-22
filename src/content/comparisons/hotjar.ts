@@ -6,7 +6,7 @@ const entry: ContentEntry = {
   "h1": "Conclick vs Hotjar: Which One Actually Tells You What's Making Money?",
   "metaTitle": "Conclick vs Hotjar: Honest Head-to-Head",
   "metaDescription": "Conclick and Hotjar both show where users click. Only one ties those clicks to revenue. An honest comparison for founders who need more than heatmaps.",
-  "tldr": "Hotjar is a genuinely good heatmap and user-research tool — it excels at session recordings and in-app surveys. Conclick is a privacy-first analytics platform built specifically for small SaaS and ecommerce founders who want to connect visitor behavior directly to revenue. If you need to know which ad campaign or funnel step is costing you money, Conclick is the better fit; if you need session recordings and customer surveys, Hotjar still has the edge there.",
+  "tldr": "Hotjar is a genuinely good user-research tool that excels at session recordings and in-app surveys. Conclick is privacy-first analytics for small SaaS and ecommerce founders who want to connect visitor behavior directly to revenue. If you need to know which campaign or funnel step is costing you money, pick Conclick; for session recordings and surveys, Hotjar keeps the edge.",
   "intro": "I built Conclick because I kept staring at heatmaps wondering whether the people clicking my CTA were paying customers or just curious. Hotjar told me where users clicked. It never told me whether those clicks turned into dollars. That one gap cost me months of optimizing the wrong things.",
   "sections": [
     {
@@ -16,11 +16,11 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "Hotjar is a behavior analytics tool. It answers questions like: where do people click, where do they drop off in a session, what do they say when you ask them. Those are useful questions. But Hotjar is not a revenue analytics platform. It has no concept of your payment processor, your MRR, or which UTM campaign actually converted. You need a separate tool for that — usually Google Analytics plus your Stripe dashboard plus a spreadsheet — and the connections between them are always manual and always stale."
+      "text": "Hotjar is a behavior analytics tool. It answers questions like: where do people click, where do they drop off in a session, what do they say when you ask them. Those are useful questions. But Hotjar is not a revenue analytics platform. It has no concept of your payment processor, your MRR, or which UTM campaign actually converted; that was true when I used it and still is as of July 2026. You need a separate tool for that (usually Google Analytics plus your Stripe dashboard plus a spreadsheet), and the connections between them are always manual and always stale."
     },
     {
       "type": "p",
-      "text": "Conclick connects to your payment processor directly — Stripe, Paddle, Polar, Lemon Squeezy, or Dodo — and ties every payment back to the source, campaign, and funnel step that produced it. You stop asking 'where do users click?' and start asking 'where does revenue come from?' That is a different question, and the answer changes what you actually do on Monday morning."
+      "text": "Conclick connects to your payment processor directly (Stripe, Paddle, Polar, Lemon Squeezy, or Dodo) and ties every payment back to the source, campaign, and funnel step that produced it. You stop asking 'where do users click?' and start asking 'where does revenue come from?' That is a different question, and the answer changes what you actually do on Monday morning."
     },
     {
       "type": "comparisonTable"
@@ -36,7 +36,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "Hotjar's session recordings are best-in-class. If you want to watch a real user fumble through your onboarding flow, replay their exact mouse movements, and see the moment they gave up — Hotjar is better at that than Conclick today. Their playback UI is mature, their filtering is strong, and they have years of polish on that feature."
+      "text": "Hotjar's session recordings are best-in-class. If you want to watch a real user fumble through your onboarding flow, replay their exact mouse movements, and see the moment they gave up, Hotjar is better at that than Conclick today. Their playback UI is mature, their filtering is strong, and they have years of polish on that feature."
     },
     {
       "type": "p",
@@ -58,7 +58,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "Connect your payment processor once and Conclick starts mapping payments back to the traffic source, campaign, and funnel that produced them. A $49/mo customer who came from a Reddit thread three weeks ago? You see that. A paid Google ad that drives 400 signups but zero paying customers? You see that too, and you stop spending on it."
+      "text": "Connect your payment processor once and Conclick starts [mapping payments back](/glossary/revenue-attribution) to the traffic source, campaign, and funnel that produced them. A $49/mo customer who came from a Reddit thread three weeks ago? You see that. A paid Google ad that drives 400 signups but zero paying customers? You see that too, and you stop spending on it."
     },
     {
       "type": "h3",
@@ -67,7 +67,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "Conclick captures real screenshots of your pages and overlays the click map directly on them. No approximated DOM reconstruction, no styling drift. Rage clicks and dead clicks are flagged automatically so you can find friction without watching hundreds of sessions manually."
+      "text": "Conclick captures real screenshots of your pages and overlays the [click map](/glossary/heatmap) directly on them. No approximated DOM reconstruction, no styling drift. Rage clicks and dead clicks are flagged automatically so you can find friction without watching hundreds of sessions manually."
     },
     {
       "type": "h3",
@@ -76,7 +76,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "Conclick detects your funnels automatically and surfaces the single biggest drop-off — with an estimate of the revenue you are losing to it each month. Not pageviews lost. Revenue. That number has a way of making the fix feel urgent."
+      "text": "Conclick detects your funnels automatically and surfaces the single biggest drop-off, with an estimate of the revenue you are losing to it each month. Not pageviews lost. Revenue. That number has a way of making the fix feel urgent."
     },
     {
       "type": "h3",
@@ -89,7 +89,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "callout",
-      "text": "The most expensive analytics mistake I see founders make: optimizing the page with the most traffic instead of the page that sits between a visitor and their credit card. Hotjar shows you clicks. Conclick shows you which clicks become money — and which funnels are bleeding it."
+      "text": "The most expensive analytics mistake I see founders make: optimizing the page with the most traffic instead of the page that sits between a visitor and their credit card. Hotjar shows you clicks. Conclick shows you which clicks become money, and which funnels are bleeding it."
     },
     {
       "type": "h2",
@@ -98,7 +98,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "Hotjar's free tier has real limitations — session recording volume is capped and some features like heatmaps are sampling-only on lower plans. Their paid plans start at $39/mo and scale up quickly once you add features like funnels or user attributes."
+      "text": "Hotjar's free tier has real limitations: session recording volume is capped and some features like heatmaps are sampling-only on lower plans. Their paid plans start at $39/mo and scale up quickly once you add features like funnels or user attributes."
     },
     {
       "type": "p",
@@ -111,7 +111,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "Conclick sends a daily digest by email, Slack, Discord, or Telegram. It is not a raw data dump — it surfaces spikes, milestones, and what changed overnight in plain language. Hotjar does not have anything like this. You have to log in and look. That is fine when you remember to. Most founders do not."
+      "text": "Conclick sends a daily digest by email, Slack, Discord, or Telegram. It is not a raw data dump; it surfaces spikes, milestones, and what changed overnight in plain language. Hotjar does not have anything like this as of July 2026. You have to log in and look. That is fine when you remember to. Most founders do not."
     },
     {
       "type": "h2",
@@ -121,12 +121,12 @@ const entry: ContentEntry = {
     {
       "type": "ul",
       "items": [
-        "You run a SaaS or ecommerce store and want to know which channel pays: Conclick",
+        "You run a SaaS or ecommerce store and want to know [which channel pays](/glossary/marketing-attribution): Conclick",
         "You want to watch session recordings of individual users: Hotjar",
         "You need in-app feedback surveys or NPS: Hotjar",
         "You are a bootstrapped founder who wants one tool that covers analytics, heatmaps, funnels, and revenue: Conclick",
         "You are on a UX research team doing continuous discovery: Hotjar",
-        "You want GDPR-friendly analytics without a consent banner: Conclick",
+        "You want GDPR-friendly, cookieless analytics that in most cases needs no consent banner: Conclick",
         "You already have GA4 and just need visual behavior research on top: either works, Hotjar has more recording depth"
       ]
     }
@@ -134,11 +134,11 @@ const entry: ContentEntry = {
   "faq": [
     {
       "question": "Does Conclick have session recordings like Hotjar?",
-      "answer": "Not currently. Conclick has real-screenshot heatmaps, click maps, rage-click and dead-click detection, and visual user journey flows — but it does not offer session-by-session video replay. If watching individual user sessions is your primary need, Hotjar's recordings are more mature. Conclick is focused on the revenue picture: which sources, campaigns, and funnel steps are producing and losing money."
+      "answer": "Not currently. Conclick has real-screenshot heatmaps, click maps, rage-click and dead-click detection, and visual user journey flows, but it does not offer session-by-session video replay. If watching individual user sessions is your primary need, Hotjar's recordings are more mature. Conclick is focused on the revenue picture: which sources, campaigns, and funnel steps are producing and losing money."
     },
     {
       "question": "How does Conclick's revenue attribution actually work?",
-      "answer": "You connect your payment processor — Stripe, Paddle, Polar, Lemon Squeezy, or Dodo — during setup. Conclick then ties each payment event back to the visitor's original source, UTM campaign, and the funnel path they took. You get a clear line between a traffic source and actual revenue, not just conversions or signups."
+      "answer": "You connect your payment processor (Stripe, Paddle, Polar, Lemon Squeezy, or Dodo) during setup. Conclick then ties each payment event back to the visitor's original source, UTM campaign, and the funnel path they took. You get a clear line between a traffic source and actual revenue, not just conversions or signups."
     },
     {
       "question": "Is Conclick GDPR compliant? Do I need a cookie banner?",
@@ -146,7 +146,7 @@ const entry: ContentEntry = {
     },
     {
       "question": "Hotjar has a free plan. Is Conclick worth paying for?",
-      "answer": "Hotjar's free tier caps session recordings and uses sampling on heatmaps, which means you are not always seeing complete data. Conclick starts at $9/mo with no sampling and includes revenue attribution, which Hotjar does not offer at any paid tier. For a founder making spending decisions based on analytics, the revenue-attribution feature alone tends to pay for the subscription quickly."
+      "answer": "Hotjar's free tier caps session recordings and uses sampling on heatmaps, which means you are not always seeing complete data. Conclick starts at $9/mo with no sampling and includes revenue attribution, which Hotjar does not offer at any paid tier per their pricing page as of July 2026. For a founder making spending decisions based on analytics, the revenue-attribution feature alone tends to pay for the subscription quickly."
     },
     {
       "question": "Can I use both Conclick and Hotjar together?",
@@ -157,18 +157,39 @@ const entry: ContentEntry = {
       "answer": "Yes. If you are running an ecommerce store on a platform that uses Stripe, Paddle, or one of the other supported processors, Conclick ties purchases back to traffic sources and funnel steps the same way it does for SaaS subscriptions. The auto-detected funnel feature is particularly useful for ecommerce checkout flows, where a single step with high drop-off can represent significant lost revenue per month."
     }
   ],
-  "internalLinks": [],
+  "internalLinks": [
+    {
+      "href": "/alternatives/hotjar",
+      "label": "Hotjar alternative",
+      "group": "alternative"
+    },
+    {
+      "href": "/glossary/heatmap",
+      "label": "What is a heatmap?",
+      "group": "glossary"
+    },
+    {
+      "href": "/guides/how-to-read-a-heatmap",
+      "label": "How to read a heatmap",
+      "group": "guide"
+    },
+    {
+      "href": "/vs/clarity",
+      "label": "Conclick vs Microsoft Clarity",
+      "group": "comparison"
+    }
+  ],
   "relatedTools": [
     "utm-builder"
   ],
   "leadMagnet": {
     "kind": "addWebsite",
     "headline": "See what Hotjar can't show you",
-    "sub": "Add your site and Conclick shows which traffic actually makes money — heatmaps, funnels, and revenue in one dashboard. Free for 14 days, no card.",
+    "sub": "Add your site and Conclick shows which traffic actually makes money: heatmaps, funnels, and revenue in one dashboard. Free for 14 days, no card.",
     "ctaLabel": "Add My Website"
   },
   "datePublished": "2026-06-18",
-  "dateModified": "2026-06-18",
+  "dateModified": "2026-07-22",
   "comparison": {
     "competitor": "Hotjar",
     "competitorUrl": "https://hotjar.com",
@@ -204,10 +225,10 @@ const entry: ContentEntry = {
         "note": "Conclick shows $ lost per drop-off"
       },
       {
-        "feature": "Cookieless / no consent banner",
+        "feature": "Cookieless / usually no consent banner",
         "conclick": true,
         "competitor": false,
-        "note": "Hotjar requires cookie consent (GDPR)"
+        "note": "Hotjar requires cookie consent (GDPR); banner needs are jurisdiction-dependent"
       },
       {
         "feature": "Daily digest via Slack/email",

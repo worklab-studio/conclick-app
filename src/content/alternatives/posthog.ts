@@ -7,11 +7,11 @@ const entry: ContentEntry = {
   "metaTitle": "Best PostHog Alternatives in 2026 (Ranked)",
   "metaDescription": "Tired of PostHog's complexity and cost? Here are the best PostHog alternatives in 2026, ranked for bootstrapped founders and small SaaS teams.",
   "tldr": "If you want revenue attribution that ties every payment to its source without a data engineering degree, Conclick is the sharpest PostHog alternative in 2026. Mixpanel wins on deep behavioral analytics for product teams with engineering support. Plausible and Matomo are solid if you just need lightweight, privacy-first traffic numbers.",
-  "intro": "PostHog is impressive. It's also a lot. Session replay, feature flags, A/B testing, a data warehouse, an entire event pipeline — if you're running a five-person SaaS, you probably don't need all of that. You need to know which traffic converts to paying customers and where people drop out of your funnel. These are different problems. I spent time with the real PostHog alternatives available right now, and here's what I found.",
+  "intro": "PostHog is impressive. It's also a lot. Session replay, feature flags, A/B testing, a data warehouse, an entire event pipeline. If you're running a five-person SaaS, you probably don't need all of that. You need to know which traffic converts to paying customers and where people drop out of your funnel. These are different problems. I spent time with the real PostHog alternatives available right now, and here's what I found.",
   "sections": [
     {
       "type": "h2",
-      "text": "1. Conclick — Best for Revenue Attribution and Bootstrapped SaaS",
+      "text": "1. Conclick: Best for Revenue Attribution and Bootstrapped SaaS",
       "id": "conclick"
     },
     {
@@ -20,7 +20,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "Setup is about two minutes. Paste a script tag, connect your payment processor, done. No consent banner required in most jurisdictions because it's cookieless by default — GDPR and CCPA friendly out of the box. That alone saves a non-trivial amount of friction for international SaaS."
+      "text": "Setup is about two minutes. Paste a script tag, connect your payment processor, done. No consent banner required in most jurisdictions because it's cookieless by default, and it's [GDPR and CCPA friendly](/glossary/gdpr-compliant-analytics) out of the box. That alone saves a non-trivial amount of friction for international SaaS."
     },
     {
       "type": "h3",
@@ -30,9 +30,9 @@ const entry: ContentEntry = {
     {
       "type": "ul",
       "items": [
-        "Revenue attribution: every payment from Stripe, Paddle, Polar, Lemon Squeezy, or Dodo gets tied back to its traffic source, UTM campaign, and funnel path. You can see that your Reddit post drove $1,200 in MRR last Tuesday.",
-        "Real-screenshot heatmaps: not wireframe overlays — actual screenshots of your pages with click density, rage clicks, dead clicks, and scroll depth overlaid on them. You see exactly what your users see.",
-        "Auto-detected funnels: Conclick finds your biggest revenue drop-offs without you having to define every step manually. For a solo founder, this is hours saved.",
+        "Revenue attribution: every payment from Stripe, Paddle, Polar, Lemon Squeezy, or Dodo gets tied back to its traffic source, [UTM campaign](/glossary/utm), and funnel path. You can see that your Reddit post drove $1,200 in MRR last Tuesday.",
+        "Real-screenshot heatmaps: not wireframe overlays but actual screenshots of your pages with click density, rage clicks, dead clicks, and scroll depth overlaid on them. You see exactly what your users see.",
+        "Auto-detected funnels: Conclick finds your [biggest revenue drop-offs](/guides/how-to-read-a-funnel) without you having to define every step manually. For a solo founder, this is hours saved.",
         "Visual user journeys: see the paths real visitors take through your site before and after converting.",
         "Live global visitor map: watch visits happen in real time.",
         "Daily digest: a 24-hour summary delivered to email, Slack, Discord, or Telegram. Useful if you don't want to log in every day.",
@@ -52,20 +52,20 @@ const entry: ContentEntry = {
     },
     {
       "type": "h2",
-      "text": "2. Mixpanel — Best for Deep Product Analytics",
+      "text": "2. Mixpanel: Best for Deep Product Analytics",
       "id": "mixpanel"
     },
     {
       "type": "p",
-      "text": "Mixpanel is the most mature behavioral analytics platform on this list. If you have a product team, an engineer who can set up event tracking properly, and questions like \"what sequence of actions leads to 30-day retention\" — Mixpanel answers those better than anyone else. Funnels, cohorts, retention curves, user-level event streams. The depth is real."
+      "text": "Mixpanel is the most mature behavioral analytics platform on this list. If you have a product team, an engineer who can set up event tracking properly, and questions like \"what sequence of actions leads to 30-day retention\", then Mixpanel answers those better than anyone else. Funnels, cohorts, retention curves, user-level event streams. The depth is real."
     },
     {
       "type": "p",
-      "text": "The catch: you need to instrument events deliberately. Copy-paste script and walk away doesn't give you much. Mixpanel rewards investment. Free tier is generous for early-stage (up to 20M events/month), but once you're growing, pricing climbs fast. No built-in revenue attribution from payment processors, no heatmaps. It's a different tool for a different job — tracking how users move through your product, not which traffic source makes you money."
+      "text": "The catch: you need to instrument events deliberately. Copy-paste script and walk away doesn't give you much. Mixpanel rewards investment. Free tier is generous for early-stage (up to 20M events/month), but once you're growing, pricing climbs fast. No built-in revenue attribution from payment processors, no heatmaps. It's a different tool for a different job: tracking how users move through your product, not which traffic source makes you money."
     },
     {
       "type": "h2",
-      "text": "3. Plausible — Best Lightweight Traffic Counter",
+      "text": "3. Plausible: Best Lightweight Traffic Counter",
       "id": "plausible"
     },
     {
@@ -74,16 +74,16 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "What it doesn't do: revenue attribution, heatmaps, funnels with behavioral depth, or session-level detail. Plausible is a traffic counter with excellent UX. That's not a criticism — if that's all you need, it's excellent. But if you're trying to figure out why your conversion rate dropped last week, Plausible won't tell you. Starts at $9/month for up to 10k monthly pageviews."
+      "text": "What it doesn't do: revenue attribution, heatmaps, funnels with behavioral depth, or session-level detail. Plausible is a traffic counter with excellent UX. That's not a criticism; if that's all you need, it's excellent. But if you're trying to figure out why your conversion rate dropped last week, Plausible won't tell you. Starts at $9/month for up to 10k monthly pageviews."
     },
     {
       "type": "h2",
-      "text": "4. Matomo — Best for Full Data Ownership",
+      "text": "4. Matomo: Best for Full Data Ownership",
       "id": "matomo"
     },
     {
       "type": "p",
-      "text": "Matomo is the open-source Google Analytics replacement that's been around since 2007 (originally Piwik). The self-hosted version is free and gives you complete ownership of your data — nothing leaves your server. That matters in regulated industries or for teams with strict data residency requirements."
+      "text": "Matomo is the open-source Google Analytics replacement that's been around since 2007 (originally Piwik). The self-hosted version is free and gives you complete ownership of your data: nothing leaves your server. That matters in regulated industries or for teams with strict data residency requirements."
     },
     {
       "type": "p",
@@ -96,7 +96,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "PostHog is a great product for product teams that need experimentation infrastructure. If that's you, stay. But if you're a founder who found yourself paying for PostHog and mostly using it to check traffic and wonder why conversions dropped — you're probably buying more tool than you need."
+      "text": "PostHog is a great product for product teams that need experimentation infrastructure. If that's you, stay. But if you're a founder who found yourself paying for PostHog and mostly using it to check traffic and wonder why conversions dropped, you're probably buying more tool than you need."
     },
     {
       "type": "p",
@@ -110,7 +110,7 @@ const entry: ContentEntry = {
   "faq": [
     {
       "question": "Is Conclick a direct replacement for PostHog?",
-      "answer": "Not feature-for-feature. PostHog includes feature flags, A/B testing, and a full event pipeline. Conclick focuses on revenue attribution, heatmaps, auto-detected funnels, and user journeys. If you used PostHog mainly for analytics rather than experimentation, Conclick covers that ground well and adds payment-processor attribution that PostHog lacks."
+      "answer": "Not feature-for-feature. PostHog includes feature flags, A/B testing, and a full event pipeline. Conclick focuses on revenue attribution, heatmaps, auto-detected funnels, and user journeys. If you used PostHog mainly for analytics rather than experimentation, Conclick covers that ground well and adds payment-processor attribution out of the box; per PostHog's docs as of July 2026, revenue tracking there needs manual setup."
     },
     {
       "question": "Do I need a consent banner if I switch to Conclick?",
@@ -118,11 +118,11 @@ const entry: ContentEntry = {
     },
     {
       "question": "Which PostHog alternative is best for a developer-heavy product team?",
-      "answer": "Mixpanel. It has the deepest behavioral analytics — retention curves, user-level event streams, cohort analysis — and it rewards teams who invest in proper event instrumentation. The free tier covers up to 20M events/month."
+      "answer": "Mixpanel. It has the deepest behavioral analytics (retention curves, user-level event streams, cohort analysis) and it rewards teams who invest in proper event instrumentation. The free tier covers up to 20M events/month."
     },
     {
       "question": "Can I import my existing Google Analytics data into these tools?",
-      "answer": "Conclick supports GSC and GA4 import so you're not starting from scratch. Most other alternatives don't offer native GA4 historical import — you'd typically start fresh and run the tools in parallel during a transition period."
+      "answer": "Conclick supports GSC and GA4 import so you're not starting from scratch. Most other alternatives don't offer native GA4 historical import; you'd typically start fresh and run the tools in parallel during a transition period."
     },
     {
       "question": "What's the cheapest option on this list?",
@@ -130,28 +130,49 @@ const entry: ContentEntry = {
     },
     {
       "question": "Does Conclick work for ecommerce as well as SaaS?",
-      "answer": "Yes. The revenue attribution engine connects to Stripe, Paddle, Polar, Lemon Squeezy, and Dodo — all common in both SaaS and digital product/ecommerce contexts. If you're selling anything with those processors, you can tie every sale back to its source traffic and campaign."
+      "answer": "Yes. The revenue attribution engine connects to Stripe, Paddle, Polar, Lemon Squeezy, and Dodo, all common in both SaaS and digital product/ecommerce contexts. If you're selling anything with those processors, you can tie every sale back to its source traffic and campaign."
     }
   ],
-  "internalLinks": [],
+  "internalLinks": [
+    {
+      "href": "/vs/posthog",
+      "label": "Conclick vs PostHog: the full head-to-head",
+      "group": "comparison"
+    },
+    {
+      "href": "/guides/how-to-read-a-funnel",
+      "label": "How to read a funnel",
+      "group": "guide"
+    },
+    {
+      "href": "/glossary/utm",
+      "label": "UTM parameters, explained",
+      "group": "glossary"
+    },
+    {
+      "href": "/glossary/gdpr-compliant-analytics",
+      "label": "What GDPR-compliant analytics means",
+      "group": "glossary"
+    }
+  ],
   "relatedTools": [
     "utm-builder"
   ],
   "leadMagnet": {
     "kind": "addWebsite",
     "headline": "See what PostHog can't show you",
-    "sub": "Add your site and Conclick shows which traffic actually makes money — heatmaps, funnels, and revenue in one dashboard. Free for 14 days, no card.",
+    "sub": "Add your site and Conclick shows which traffic actually makes money: heatmaps, funnels, and revenue in one dashboard. Free for 14 days, no card.",
     "ctaLabel": "Add My Website"
   },
   "datePublished": "2026-06-22",
-  "dateModified": "2026-06-22",
+  "dateModified": "2026-07-22",
   "comparison": {
     "competitor": "PostHog",
     "competitorUrl": "https://posthog.com",
     "rows": [
       {
         "feature": "Revenue attribution (payment processors)",
-        "conclick": "Yes — Stripe, Paddle, Polar, LS, Dodo",
+        "conclick": "Yes: Stripe, Paddle, Polar, LS, Dodo",
         "competitor": false,
         "note": "PostHog tracks events but has no native payment processor attribution"
       },
@@ -168,10 +189,10 @@ const entry: ContentEntry = {
         "note": "PostHog funnels require manual event definition"
       },
       {
-        "feature": "Cookieless / no consent banner",
+        "feature": "Cookieless / usually no consent banner",
         "conclick": true,
         "competitor": false,
-        "note": "PostHog uses cookies and typically requires a consent banner"
+        "note": "PostHog uses cookies and typically requires a consent banner; skipping one with Conclick depends on your jurisdiction"
       },
       {
         "feature": "Daily digest (email + Slack/Discord/Telegram)",

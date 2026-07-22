@@ -5,9 +5,9 @@ const entry: ContentEntry = {
   "slug": "revenue-attribution",
   "h1": "Revenue Attribution: What It Is and Why Most Analytics Gets It Wrong",
   "metaTitle": "Revenue Attribution: Definition, Models & How to Do It Right",
-  "metaDescription": "Revenue attribution connects your actual payments back to the traffic source, campaign, or funnel that earned them. Here's what it means and how to measure it correctly.",
-  "tldr": "Revenue attribution is the practice of crediting a specific marketing source, channel, or touchpoint with the revenue it generated — not just the clicks or signups. It answers the one question pageviews and conversion rates cannot: which traffic actually makes money?",
-  "intro": "Pageviews are vanity. Signups are vanity. The only number that tells you whether your marketing is working is revenue — and specifically, which source, campaign, or channel produced it. Revenue attribution is how you connect those dots. Without it, you are spending money on channels that feel productive but cannot prove they pay.",
+  "metaDescription": "Revenue attribution connects your actual payments back to the traffic source, campaign, or funnel that earned them. What it means and how to measure it right.",
+  "tldr": "Revenue attribution is the practice of crediting a specific marketing source, channel, or touchpoint with the revenue it generated, not just the clicks or signups. It answers the one question pageviews and conversion rates cannot: which traffic actually makes money?",
+  "intro": "Pageviews are vanity. Signups are vanity. The only number that tells you whether your marketing is working is revenue, and specifically which source, campaign, or channel produced it. Revenue attribution is how you connect those dots. Without it, you are spending money on channels that feel productive but cannot prove they pay.",
   "sections": [
     {
       "type": "h2",
@@ -20,7 +20,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "The key word is 'revenue' — not visits, not leads, not trial signups. Revenue attribution requires your analytics to actually know what payments happened and for how much. That means connecting your payment processor (Stripe, Paddle, Lemon Squeezy, Polar, Dodo Payments, etc.) to your analytics layer. Most tools stop at the signup event. That gap is where bad marketing decisions get made."
+      "text": "The key word is 'revenue': not visits, not leads, not trial signups. Revenue attribution requires your analytics to actually know what payments happened and for how much. That means connecting your payment processor (Stripe, Paddle, Lemon Squeezy, Polar, Dodo Payments, etc.) to your analytics layer. Most tools stop at the signup event. That gap is where bad marketing decisions get made."
     },
     {
       "type": "h2",
@@ -61,7 +61,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "callout",
-      "text": "Traffic that does not convert to revenue is not an asset — it is a cost. Attribution is the difference between knowing your marketing ROI and guessing it."
+      "text": "Traffic that does not convert to revenue is not an asset. It is a cost. Attribution is the difference between [knowing your marketing ROI](/blog/why-revenue-attribution-matters) and guessing it."
     },
     {
       "type": "p",
@@ -79,7 +79,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "UTM parameters (utm_source, utm_medium, utm_campaign, utm_content) are the standard way to label traffic. Every paid campaign should use them. Every newsletter link should use them. Without consistent UTM discipline, you are attributing revenue to 'direct' and 'organic' by default — which means no signal at all."
+      "text": "UTM parameters (utm_source, utm_medium, utm_campaign, utm_content) are the standard way to label traffic. Every paid campaign should use them. Every newsletter link should use them. Without consistent UTM discipline, you are attributing revenue to 'direct' and 'organic' by default, which means no signal at all."
     },
     {
       "type": "h3",
@@ -88,7 +88,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "The UTM is in the URL when someone lands. By the time they pay — days or weeks later — that URL is gone. Your analytics tool has to capture and store that first-touch source against the user identity, then carry it through to the payment event. This is where most lightweight analytics tools fail. They track pageviews. They do not connect a pageview to a Stripe charge."
+      "text": "The UTM is in the URL when someone lands. By the time they pay, days or weeks later, that URL is gone. Your analytics tool has to capture and store that first-touch source against the user identity, then carry it through to the payment event. This is where most lightweight analytics tools fail. They track pageviews. They do not connect a pageview to a Stripe charge."
     },
     {
       "type": "h3",
@@ -97,7 +97,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "The actual revenue data has to come in from your payment processor via webhook or API. When a customer pays, your analytics system matches that payment to the user record and therefore to the acquisition source. This requires either a native integration between your analytics tool and your payment processor, or custom event tracking where you send a revenue event from your backend."
+      "text": "The actual revenue data has to come in from your payment processor via webhook or API. When a customer pays, your analytics system matches that payment to the user record and therefore to the acquisition source. This requires either a [native integration](/guides/revenue-attribution-tools) between your analytics tool and your payment processor, or custom event tracking where you send a revenue event from your backend."
     },
     {
       "type": "h3",
@@ -119,7 +119,7 @@ const entry: ContentEntry = {
         "Trusting 'direct' traffic at face value. A large direct segment usually means UTM tracking is broken, ad links are missing parameters, or your tool is not capturing referrers correctly. Audit before concluding that direct traffic is your best channel.",
         "Treating MRR and one-time revenue the same. A source that drives annual plan buyers is worth far more than one that drives monthly subscribers, even at the same conversion rate. Segment by revenue amount, not just conversion event.",
         "Ignoring churn by source. Some acquisition channels produce customers who cancel in month two. Revenue attribution at the signup event misses this. If you can tag customers by source and track their retention, you will find that some 'good' channels produce terrible LTV.",
-        "Letting sampling and ad platform data override first-party data. Google Ads will tell you its campaigns drove X revenue. That number is modeled and often inflated. Your own first-party data, where you match your own payment records to your own tracking, is the only number worth trusting for budget decisions.",
+        "Letting sampling and ad platform data override first-party data. Google Ads will tell you its campaigns drove X revenue. That number is modeled and often inflated. Your own first-party data, where you match [your own payment records](/guides/stripe-revenue-vs-analytics-revenue) to your own tracking, is the only number worth trusting for budget decisions.",
         "Not accounting for the trial gap. For SaaS with a free trial, the acquisition channel that starts the trial may look weak if you only look at immediate conversions. Give the attribution window enough time to capture the trial-to-paid lag."
       ]
     },
@@ -130,17 +130,17 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "Conclick connects directly to Stripe, Paddle, Polar, Lemon Squeezy, and Dodo Payments and ties every payment back to the source, campaign, and funnel that earned it — without cookies, without a consent banner in most jurisdictions, and without needing a developer to wire up custom events. It also surfaces auto-detected funnels with the revenue lost at each drop-off point, so you can see not just which source earns the most but exactly where customers from that source are abandoning. For bootstrapped founders who want to know where their money actually comes from, it is a practical alternative to stitching together GA4, Stripe dashboards, and a spreadsheet."
+      "text": "Conclick connects directly to Stripe, Paddle, Polar, Lemon Squeezy, and Dodo Payments and ties every payment back to the source, campaign, and funnel that earned it: without cookies, without a consent banner in most jurisdictions, and without needing a developer to wire up custom events. It also surfaces auto-detected funnels with the revenue lost at each drop-off point, so you can see not just which source earns the most but exactly where customers from that source are abandoning. For bootstrapped founders who want to know where their money actually comes from, it is a practical alternative to stitching together GA4, Stripe dashboards, and a spreadsheet."
     }
   ],
   "faq": [
     {
       "question": "What is the difference between revenue attribution and conversion tracking?",
-      "answer": "Conversion tracking records that an event happened — a signup, a form submit, a trial start. Revenue attribution assigns a dollar amount to the source that drove that event. Conversion tracking tells you what happened. Revenue attribution tells you what it was worth. You need both, but revenue attribution is the one that tells you where to spend your marketing budget."
+      "answer": "Conversion tracking records that an event happened: a signup, a form submit, a trial start. Revenue attribution assigns a dollar amount to the source that drove that event. Conversion tracking tells you what happened. Revenue attribution tells you what it was worth. You need both, but revenue attribution is the one that tells you where to spend your marketing budget."
     },
     {
       "question": "Which attribution model should I use for SaaS?",
-      "answer": "For most small SaaS businesses, first-touch attribution for acquisition analysis and last-touch attribution for conversion analysis is the practical starting point. First-touch tells you which channels discover customers; last-touch tells you what closes them. If you have enough data and a complex multi-channel journey, a position-based (U-shaped) model is a reasonable middle ground. Data-driven models require significant conversion volume — typically thousands of paid conversions — before they are statistically meaningful."
+      "answer": "For most small SaaS businesses, first-touch attribution for acquisition analysis and last-touch attribution for conversion analysis is the practical starting point. First-touch tells you which channels discover customers; last-touch tells you what closes them. If you have enough data and a complex multi-channel journey, a position-based (U-shaped) model is a reasonable middle ground. Data-driven models require significant conversion volume (typically thousands of paid conversions) before they are statistically meaningful."
     },
     {
       "question": "Do I need UTM parameters for revenue attribution to work?",
@@ -152,14 +152,30 @@ const entry: ContentEntry = {
     },
     {
       "question": "How does revenue attribution work for subscription businesses with a free trial?",
-      "answer": "The attribution window has to cover the full trial period plus conversion lag. If your trial is 14 days and some customers take a few extra days to convert, a 21-day attribution window typically captures most conversions. The source that started the trial gets credited when the first payment fires. You should also track churn by acquisition source over time — a source with a high trial-to-paid rate but 60% churn in month three is not as good as it looks on the conversion dashboard."
+      "answer": "The attribution window has to cover the full trial period plus conversion lag. If your trial is 14 days and some customers take a few extra days to convert, a 21-day attribution window typically captures most conversions. The source that started the trial gets credited when the first payment fires. You should also track churn by acquisition source over time; a source with a high trial-to-paid rate but 60% churn in month three is not as good as it looks on the conversion dashboard."
     },
     {
       "question": "Can I do revenue attribution without third-party cookies?",
-      "answer": "Yes. First-party attribution — where your own analytics script reads UTM parameters from the landing URL, stores them in a first-party cookie or localStorage, and passes them through to your signup and payment events — does not require third-party cookies at all. This approach is more durable than third-party tracking and is fully compatible with privacy regulations like GDPR and CCPA. The limitation is cross-device attribution: if a customer discovers you on mobile and converts on desktop, first-party attribution will miss the link unless they are logged in across both sessions."
+      "answer": "Yes. First-party attribution (where your own analytics script reads UTM parameters from the landing URL, stores them in a first-party cookie or localStorage, and passes them through to your signup and payment events) does not require third-party cookies at all. This approach is more durable than third-party tracking and is fully compatible with privacy regulations like GDPR and CCPA. The limitation is cross-device attribution: if a customer discovers you on mobile and converts on desktop, first-party attribution will miss the link unless they are logged in across both sessions."
     }
   ],
-  "internalLinks": [],
+  "internalLinks": [
+    {
+      "href": "/guides/revenue-attribution-tools",
+      "label": "Revenue Attribution Tools Compared",
+      "group": "guide"
+    },
+    {
+      "href": "/guides/stripe-revenue-vs-analytics-revenue",
+      "label": "Stripe Revenue vs Analytics Revenue",
+      "group": "guide"
+    },
+    {
+      "href": "/blog/why-revenue-attribution-matters",
+      "label": "Why Revenue Attribution Matters",
+      "group": "blog"
+    }
+  ],
   "relatedTools": [],
   "leadMagnet": {
     "kind": "addWebsite",
@@ -168,7 +184,7 @@ const entry: ContentEntry = {
     "ctaLabel": "Add My Website"
   },
   "datePublished": "2026-06-18",
-  "dateModified": "2026-06-18"
+  "dateModified": "2026-07-22"
 };
 
 export default entry;

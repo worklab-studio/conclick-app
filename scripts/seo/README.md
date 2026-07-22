@@ -93,6 +93,10 @@ gsc.mjs harvest (real)  ──┘                                         JSON) 
   unattended run is declined silently and the routine stops at that step.
 - Never hand-write `src/content/**/<slug>.ts` and never edit
   `src/content/index.ts` — it is generated.
+- In-prose links are `[anchor](/path)` inside section `text`/`items` strings,
+  rendered by `src/components/seo/RichText.tsx` (p/ul/ol/quote/callout only —
+  headings don't render links). Unknown paths silently degrade to plain text.
+  The `internalLinks` array is the end-of-page rail, not a substitute.
 - Review mode is **off** (since 2026-07-22). A lint failure therefore has to be
   backed out, not left in the tree, or the next run commits it.
 - `ctr` from Search Console is a **fraction**. 0.02 is 2%.

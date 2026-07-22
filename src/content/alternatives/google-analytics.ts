@@ -5,13 +5,13 @@ const entry: ContentEntry = {
   "slug": "google-analytics",
   "h1": "The Best Google Analytics (GA4) Alternatives in 2026",
   "metaTitle": "Best Google Analytics (GA4) Alternatives in 2026",
-  "metaDescription": "Tired of GA4's complexity and data sampling? Here are the best Google Analytics 4 alternatives for founders in 2026, ranked by what actually matters: revenue clarity.",
-  "tldr": "If you want to know which traffic actually makes money, Conclick is the pick — it ties every payment back to its source, campaign, and funnel, with real-screenshot heatmaps and a daily digest. For pure privacy-first page-count analytics, Plausible and Fathom are solid. If you need deep product analytics with a free tier, PostHog is worth a look.",
-  "intro": "I switched off Google Analytics 4 because I kept asking the same question: which acquisition channel is actually making me money? GA4 could not answer that cleanly. It gave me sessions, bounce rates, and conversion events — but tying a Stripe payment back to the blog post someone read two weeks before subscribing? Good luck. That is the core problem with GA4 for bootstrapped founders. It was built for enterprise ad teams who want attribution across a giant media mix, not for a solo founder trying to decide whether to keep writing SEO content or kill the paid campaign. This roundup covers the tools I think are worth your attention in 2026, what each one is genuinely best for, and what they miss.",
+  "metaDescription": "Tired of GA4's complexity and data sampling? The best Google Analytics 4 alternatives for founders in 2026, ranked by what matters most: revenue clarity.",
+  "tldr": "If you want to know which traffic actually makes money, Conclick is the pick: it ties every payment back to its source, campaign, and funnel, with real-screenshot heatmaps and a daily digest. For pure privacy-first page-count analytics, Plausible and Fathom are solid. If you need deep product analytics with a free tier, PostHog is worth a look.",
+  "intro": "I switched off Google Analytics 4 because I kept asking the same question: which acquisition channel is actually making me money? GA4 could not answer that cleanly. It gave me sessions, bounce rates, and conversion events. But tying a Stripe payment back to the blog post someone read two weeks before subscribing? Good luck. That is the core problem with GA4 for bootstrapped founders. It was built for enterprise ad teams who want attribution across a giant media mix, not for a solo founder trying to decide whether to keep writing SEO content or kill the paid campaign. This roundup covers the tools I think are worth your attention in 2026, what each one is genuinely best for, and what they miss.",
   "sections": [
     {
       "type": "h2",
-      "text": "1. Conclick — Best for revenue-first analytics",
+      "text": "1. Conclick: Best for revenue-first analytics",
       "id": "conclick"
     },
     {
@@ -20,7 +20,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "Setup takes about two minutes — one script tag, and you are collecting data. No cookie banner required in most jurisdictions. Cookieless by design, GDPR and CCPA-friendly. If you have been dreading the consent-banner dance, that alone is worth something."
+      "text": "Setup takes about two minutes: one script tag, and you are collecting data. No cookie banner required in most jurisdictions. Cookieless by design, GDPR and CCPA-friendly. If you have been dreading the consent-banner dance, that alone is worth something."
     },
     {
       "type": "h3",
@@ -29,7 +29,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "Conclick connects directly to Stripe, Paddle, Polar, Lemon Squeezy, and Dodo Payments. Once you wire up one of those, every payment gets stamped with the traffic source, campaign, and funnel step that produced it. You can see that your ProductHunt traffic converts at 0.4% but your SEO content converts at 2.1% and pays 40% more per customer. That is the number that changes your week."
+      "text": "Conclick connects directly to Stripe, Paddle, Polar, Lemon Squeezy, and Dodo Payments. Once you wire up one of those, every payment gets stamped with the traffic source, campaign, and [funnel step](/glossary/conversion-funnel) that produced it. You can see that your ProductHunt traffic converts at 0.4% but your SEO content converts at 2.1% and pays 40% more per customer. That is the number that changes your week."
     },
     {
       "type": "h3",
@@ -38,7 +38,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "Not a CSS overlay. Conclick takes actual screenshots of your pages and layers the click data on top — rage clicks, dead clicks, scroll depth. If a button nobody clicks looks like it should work, you will see it. This is the kind of thing you previously needed a separate Hotjar subscription for."
+      "text": "Not a CSS overlay. Conclick takes actual screenshots of your pages and layers the click data on top: rage clicks, dead clicks, scroll depth. If a button nobody clicks looks like it should work, you will see it. This is the kind of thing you previously needed a separate [Hotjar subscription](/vs/hotjar) for."
     },
     {
       "type": "h3",
@@ -47,7 +47,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "Conclick detects your funnels automatically — you do not have to define them manually and guess which steps matter. It surfaces the drop-off point where you are losing the most revenue, not just the most visitors. There is also a visual user journey map and a live global visitor map if you like watching the world light up."
+      "text": "Conclick detects your funnels automatically, so you do not have to define them manually and guess which steps matter. It surfaces the drop-off point where you are losing the most revenue, not just the most visitors. There is also a visual user journey map and a live global visitor map if you like watching the world light up."
     },
     {
       "type": "h3",
@@ -56,7 +56,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "Each morning you get a summary of the last 24 hours — traffic, revenue, top sources — delivered to email, Slack, Discord, or Telegram. It is a narrative digest, not a table dump. Useful if you want to stay on top of things without opening a dashboard every morning."
+      "text": "Each morning you get a summary of the last 24 hours (traffic, revenue, top sources) delivered to email, Slack, Discord, or Telegram. It is a narrative digest, not a table dump. Useful if you want to stay on top of things without opening a dashboard every morning."
     },
     {
       "type": "h3",
@@ -74,14 +74,14 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "Who it is for: bootstrapped founders, small SaaS, ecommerce operators who want to know what traffic makes money — not just what traffic shows up."
+      "text": "Who it is for: bootstrapped founders, small SaaS, ecommerce operators who want to know what traffic makes money, not just what traffic shows up."
     },
     {
       "type": "comparisonTable"
     },
     {
       "type": "h2",
-      "text": "2. Plausible — Best for clean, no-fuss traffic reporting",
+      "text": "2. Plausible: Best for clean, no-fuss traffic reporting",
       "id": "plausible"
     },
     {
@@ -90,7 +90,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "It is cookieless, GDPR-friendly, and open source. You can self-host it if you want to avoid third-party data at all. The pricing starts at $9/month for up to 10k monthly pageviews, which is fair."
+      "text": "It is cookieless, [GDPR-friendly](/glossary/gdpr-compliant-analytics), and open source. You can self-host it if you want to avoid third-party data at all. The pricing starts at $9/month for up to 10k monthly pageviews, which is fair."
     },
     {
       "type": "p",
@@ -98,12 +98,12 @@ const entry: ContentEntry = {
     },
     {
       "type": "h2",
-      "text": "3. Fathom — Best for ultra-simple analytics with great support",
+      "text": "3. Fathom: Best for ultra-simple analytics with great support",
       "id": "fathom"
     },
     {
       "type": "p",
-      "text": "Fathom is philosophically similar to Plausible — privacy-first, cookieless, simple dashboard — but the product feel is slightly more polished and the support is genuinely good. It also has EU isolation for your data, which matters if your customers care about that."
+      "text": "Fathom is philosophically similar to Plausible (privacy-first, cookieless, simple dashboard), but the product feel is slightly more polished and the support is genuinely good. It also has EU isolation for your data, which matters if your customers care about that."
     },
     {
       "type": "p",
@@ -115,12 +115,12 @@ const entry: ContentEntry = {
     },
     {
       "type": "h2",
-      "text": "4. Matomo — Best for teams that need full data ownership and GA4 feature parity",
+      "text": "4. Matomo: Best for teams that need full data ownership and GA4 feature parity",
       "id": "matomo"
     },
     {
       "type": "p",
-      "text": "Matomo is what you pick when compliance or legal tells you the data cannot leave your servers. It is the only tool in this list that gives you something approaching GA4 feature parity — event tracking, funnels, goals, heatmaps (as paid add-ons), ecommerce tracking — while letting you self-host the whole thing."
+      "text": "Matomo is what you pick when compliance or legal tells you the data cannot leave your servers. It is the only tool in this list that gives you something approaching GA4 feature parity while letting you self-host the whole thing: event tracking, funnels, goals, heatmaps (as paid add-ons), and ecommerce tracking."
     },
     {
       "type": "p",
@@ -132,16 +132,16 @@ const entry: ContentEntry = {
     },
     {
       "type": "h2",
-      "text": "5. PostHog — Best for product analytics with a generous free tier",
+      "text": "5. PostHog: Best for product analytics with a generous free tier",
       "id": "posthog"
     },
     {
       "type": "p",
-      "text": "PostHog is the one tool in this list that competes on product analytics breadth. Session replay, funnels, feature flags, A/B testing, surveys — it is trying to be an all-in-one product intelligence platform. The free tier is genuinely useful: 1 million events per month free."
+      "text": "PostHog is the one tool in this list that competes on product analytics breadth. Session replay, funnels, feature flags, A/B testing, surveys: it is trying to be an all-in-one product intelligence platform. The free tier is genuinely useful, with 1 million events per month free."
     },
     {
       "type": "p",
-      "text": "It is open source and can be self-hosted. The cloud version is well-maintained. Setup is more involved than Plausible or Conclick — you are configuring events and properties, not just dropping in a script."
+      "text": "It is open source and can be self-hosted. The cloud version is well-maintained. Setup is more involved than Plausible or Conclick; you are configuring events and properties, not just dropping in a script."
     },
     {
       "type": "p",
@@ -170,7 +170,7 @@ const entry: ContentEntry = {
   "faq": [
     {
       "question": "Is Google Analytics 4 free?",
-      "answer": "Yes, GA4 is free for most sites. But free does not mean costless — GA4 requires significant time to configure correctly, uses data sampling on high-traffic properties, and shares your data with Google's ad network. For founders, the hidden cost is the hours spent making sense of a dashboard that was not built for your questions."
+      "answer": "Yes, GA4 is free for most sites. But free does not mean costless: GA4 requires significant time to configure correctly, uses data sampling on high-traffic properties, and shares your data with Google's ad network. For founders, the hidden cost is the hours spent making sense of a dashboard that was not built for your questions."
     },
     {
       "question": "Can I import my GA4 data into Conclick or Plausible?",
@@ -182,36 +182,52 @@ const entry: ContentEntry = {
     },
     {
       "question": "Which GA4 alternative is best for ecommerce?",
-      "answer": "Conclick, because it connects directly to Stripe, Paddle, Polar, Lemon Squeezy, and Dodo Payments. This means you see which traffic source, campaign, or funnel step produced each sale — not just which pages got views. Matomo also has ecommerce tracking if you need self-hosted infrastructure."
+      "answer": "Conclick, because it connects directly to Stripe, Paddle, Polar, Lemon Squeezy, and Dodo Payments. This means you see which traffic source, campaign, or funnel step produced each sale, not just which pages got views. Matomo also has ecommerce tracking if you need self-hosted infrastructure."
     },
     {
       "question": "Is PostHog a direct Google Analytics alternative?",
-      "answer": "Partly. PostHog is primarily a product analytics tool — it is excellent for tracking in-app behavior, running experiments, and managing feature flags. It is less focused on marketing analytics (traffic sources, campaign attribution) than GA4 or the privacy-first alternatives. If you care most about what users do inside your product, PostHog is strong. If you care about which marketing channel drives revenue, it is not the right center of gravity."
+      "answer": "Partly. PostHog is primarily a product analytics tool: it is excellent for tracking in-app behavior, running experiments, and managing feature flags. It is less focused on marketing analytics (traffic sources, campaign attribution) than GA4 or the privacy-first alternatives. If you care most about what users do inside your product, PostHog is strong. If you care about which marketing channel drives revenue, it is not the right center of gravity."
     },
     {
       "question": "What is the cheapest paid Google Analytics alternative?",
       "answer": "Conclick starts at $7/month on the annual plan with a 14-day free trial and no credit card required. GoatCounter is free and open source for low-traffic personal sites. Plausible and Fathom start at $9 and $15/month respectively. PostHog has a free tier up to 1 million events per month."
     }
   ],
-  "internalLinks": [],
+  "internalLinks": [
+    {
+      "href": "/vs/google-analytics",
+      "label": "Conclick vs Google Analytics 4, feature by feature",
+      "group": "comparison"
+    },
+    {
+      "href": "/guides/ga4-migration-guide",
+      "label": "GA4 migration guide: moving off Google Analytics without losing data",
+      "group": "guide"
+    },
+    {
+      "href": "/guides/is-ga4-sampling-your-data",
+      "label": "Is GA4 sampling your data? How to check",
+      "group": "guide"
+    }
+  ],
   "relatedTools": [
     "utm-builder"
   ],
   "leadMagnet": {
     "kind": "addWebsite",
     "headline": "See what Google Analytics 4 can't show you",
-    "sub": "Add your site and Conclick shows which traffic actually makes money — heatmaps, funnels, and revenue in one dashboard. Free for 14 days, no card.",
+    "sub": "Add your site and Conclick shows which traffic actually makes money: heatmaps, funnels, and revenue in one dashboard. Free for 14 days, no card.",
     "ctaLabel": "Add My Website"
   },
   "datePublished": "2026-06-22",
-  "dateModified": "2026-06-22",
+  "dateModified": "2026-07-22",
   "comparison": {
     "competitor": "Google Analytics 4",
     "competitorUrl": "https://analytics.google.com",
     "rows": [
       {
         "feature": "Revenue attribution (Stripe/Paddle etc.)",
-        "conclick": "Native — ties every payment to source, campaign, funnel",
+        "conclick": "Native: ties every payment to source, campaign, funnel",
         "competitor": false,
         "note": "GA4 tracks goals and conversions but does not connect to payment processors natively"
       },
@@ -243,7 +259,7 @@ const entry: ContentEntry = {
         "feature": "Free tier",
         "conclick": "14-day trial, no card",
         "competitor": "Free forever",
-        "note": "GA4 wins on price — it is permanently free"
+        "note": "GA4 wins on price; it is permanently free"
       },
       {
         "feature": "Data sampling",

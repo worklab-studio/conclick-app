@@ -6,8 +6,8 @@ const entry: ContentEntry = {
   "h1": "Conclick vs Pirsch: Which Analytics Tool Actually Shows You the Money?",
   "metaTitle": "Conclick vs Pirsch: Analytics That Shows Revenue",
   "metaDescription": "Pirsch is clean and privacy-first. Conclick adds revenue attribution, heatmaps, and funnels. Here's an honest breakdown of when each tool wins.",
-  "tldr": "Pirsch is a solid, privacy-first analytics tool that does pageviews and basic traffic well. Conclick does all of that and adds revenue attribution, real-screenshot heatmaps, and auto-detected funnels — making it the better choice if you need to know which traffic actually converts to money. If you just need clean traffic stats without the revenue layer, Pirsch is genuinely fine.",
-  "intro": "I built Conclick because pageview counts stopped meaning anything to me. I had traffic. I had signups. I had no idea which campaign actually made me money last Tuesday — and I had zero clue where in the funnel I was hemorrhaging it. Pirsch is a tool I respect: it is honest, fast, and private. But it answers a different question than the one that keeps founders up at night.",
+  "tldr": "Pirsch is a solid, privacy-first analytics tool that does pageviews and basic traffic well. Conclick does all of that and adds revenue attribution, real-screenshot heatmaps, and auto-detected funnels, which makes it the better choice if you need to know which traffic actually converts to money. If you just need clean traffic stats without the revenue layer, Pirsch is genuinely fine.",
+  "intro": "I built Conclick because pageview counts stopped meaning anything to me. I had traffic. I had signups. I had no idea which campaign actually made me money last Tuesday, and I had zero clue where in the funnel I was hemorrhaging it. Pirsch is a tool I respect: it is honest, fast, and private. But it answers a different question than the one that keeps founders up at night.",
   "sections": [
     {
       "type": "h2",
@@ -16,11 +16,11 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "Both tools are cookieless, both skip the consent-banner theater, both are lightweight. That table-stakes stuff is solved. The split happens the moment you ask: \"Which source made me $847 last week, and which one sent 400 visitors who bought nothing?\" Pirsch cannot answer that. Conclick was built specifically to answer that."
+      "text": "Both tools are cookieless, both skip the [consent-banner theater](/blog/cookie-banners-killing-your-data), both are lightweight. That table-stakes stuff is solved. The split happens the moment you ask: \"Which source made me $847 last week, and which one sent 400 visitors who bought nothing?\" Pirsch cannot answer that. Conclick was built specifically to answer that."
     },
     {
       "type": "p",
-      "text": "Conclick connects to your payment processor — Stripe, Paddle, Polar, Lemon Squeezy, or Dodo — and ties every transaction back to the UTM campaign, referrer, and funnel step that preceded it. You stop optimizing for traffic and start optimizing for revenue-per-visitor. That shift changes which decisions you make."
+      "text": "Conclick connects to your payment processor (Stripe, Paddle, Polar, Lemon Squeezy, or Dodo) and ties every transaction back to the [UTM campaign](/glossary/utm), referrer, and funnel step that preceded it. You stop optimizing for traffic and start optimizing for revenue-per-visitor. That shift changes which decisions you make."
     },
     {
       "type": "h2",
@@ -37,7 +37,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "Let me be direct: Pirsch has a well-regarded developer API and a clean, no-frills UI that some teams genuinely prefer. If your team is developer-heavy and wants to pipe raw event data into your own pipelines, Pirsch's API-first approach is mature and documented. The interface is minimal by design — there is no noise, no feature you didn't ask for."
+      "text": "Let me be direct: Pirsch has a well-regarded developer API and a clean, no-frills UI that some teams genuinely prefer. If your team is developer-heavy and wants to pipe raw event data into your own pipelines, Pirsch's API-first approach is mature and documented. The interface is minimal by design: no noise, no feature you didn't ask for."
     },
     {
       "type": "p",
@@ -67,7 +67,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "Pirsch has no heatmaps. Conclick uses real-page screenshots — not a wireframe approximation — as the base layer. You see clicks, scroll depth, rage clicks, and dead clicks overlaid on how your page actually looks. Rage clicks tell you where users are frustrated. Dead clicks tell you what they think is clickable but isn't. Scroll depth tells you whether anyone reads below the fold."
+      "text": "Pirsch has no heatmaps as of July 2026. Conclick uses real-page screenshots as the base layer, not a wireframe approximation. You see clicks, scroll depth, rage clicks, and dead clicks overlaid on how your page actually looks. Rage clicks tell you where users are frustrated. Dead clicks tell you what they think is clickable but isn't. Scroll depth tells you whether anyone reads below the fold."
     },
     {
       "type": "p",
@@ -80,7 +80,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "Pirsch has limited funnel functionality. Conclick auto-detects funnels from your actual traffic patterns and surfaces the single biggest drop-off — with the revenue lost to that drop-off attached. You don't spend an afternoon configuring funnel steps. The tool finds where you're bleeding and puts a dollar figure on it."
+      "text": "Pirsch has limited funnel functionality. Conclick [auto-detects funnels](/guides/how-to-read-a-funnel) from your actual traffic patterns and surfaces the single biggest drop-off, with the revenue lost to that drop-off attached. You don't spend an afternoon configuring funnel steps. The tool finds where you're bleeding and puts a dollar figure on it."
     },
     {
       "type": "p",
@@ -97,7 +97,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "Conclick sends a daily digest by email and to Slack, Discord, or Telegram. It is written in plain language — spikes, milestones, the biggest mover. It is the kind of update you'd read over coffee without opening a dashboard. Pirsch does not have this."
+      "text": "Conclick sends a daily digest by email and to Slack, Discord, or Telegram. It is written in plain language: spikes, milestones, the biggest mover. It is the kind of update you'd read over coffee without opening a dashboard. Pirsch does not offer an equivalent digest as of July 2026."
     },
     {
       "type": "h2",
@@ -140,11 +140,11 @@ const entry: ContentEntry = {
   "faq": [
     {
       "question": "Does Conclick require cookies or a consent banner?",
-      "answer": "No. Conclick is cookieless by design, which means it doesn't set any tracking cookies that would trigger GDPR or CCPA consent requirements in most jurisdictions. You skip the consent banner overhead and still get accurate data. The same is true of Pirsch — both tools solved this problem correctly."
+      "answer": "No. Conclick is cookieless by design, which means it doesn't set any tracking cookies that would trigger GDPR or CCPA consent requirements in most jurisdictions. You skip the consent banner overhead and still get accurate data. The same is true of Pirsch; both tools solved this problem correctly."
     },
     {
       "question": "How does Conclick revenue attribution actually work?",
-      "answer": "You connect your payment processor (Stripe, Paddle, Polar, Lemon Squeezy, or Dodo) and Conclick maps each payment event back to the visitor session that preceded it. It uses the same cookieless session tracking it uses for all traffic, so there's no extra tagging or third-party cookies involved. The result is a revenue figure attached to each source, campaign, and funnel path — not just a conversion count."
+      "answer": "You connect your payment processor (Stripe, Paddle, Polar, Lemon Squeezy, or Dodo) and Conclick maps each payment event back to the visitor session that preceded it. It uses the same cookieless session tracking it uses for all traffic, so there's no extra tagging or third-party cookies involved. The result is a revenue figure attached to each source, campaign, and funnel path, not just a conversion count."
     },
     {
       "question": "Can I import my existing Google Analytics data into Conclick?",
@@ -152,7 +152,7 @@ const entry: ContentEntry = {
     },
     {
       "question": "Is Pirsch better than Conclick for developers?",
-      "answer": "Pirsch has a mature, well-documented API that developer-focused teams value. If your primary use case involves piping raw event data into custom pipelines or building on top of the analytics programmatically, Pirsch's API-first design is a genuine advantage. Conclick is stronger on the product and revenue intelligence side — heatmaps, attribution, funnels — and is aimed more at the founder making growth decisions than the engineer integrating raw data."
+      "answer": "Pirsch has a mature, well-documented API that developer-focused teams value. If your primary use case involves piping raw event data into custom pipelines or building on top of the analytics programmatically, Pirsch's API-first design is a genuine advantage. Conclick is stronger on the product and revenue intelligence side (heatmaps, attribution, funnels) and is aimed more at the founder making growth decisions than the engineer integrating raw data."
     },
     {
       "question": "What payment processors does Conclick support for revenue attribution?",
@@ -160,21 +160,37 @@ const entry: ContentEntry = {
     },
     {
       "question": "How long does Conclick take to set up?",
-      "answer": "The analytics script typically takes about two minutes to install — paste one line into your site's HTML and you're collecting data. Connecting a payment processor takes a few more minutes depending on which processor you use. The free trial starts immediately with no card required, so the barrier to seeing real data is genuinely low."
+      "answer": "The analytics script typically takes about two minutes to install: paste one line into your site's HTML and you're collecting data. Connecting a payment processor takes a few more minutes depending on which processor you use. The free trial starts immediately with no card required, so the barrier to seeing real data is genuinely low."
     }
   ],
-  "internalLinks": [],
+  "internalLinks": [
+    {
+      "href": "/vs/plausible",
+      "label": "Conclick vs Plausible",
+      "group": "comparison"
+    },
+    {
+      "href": "/glossary/cookieless-analytics",
+      "label": "What is cookieless analytics?",
+      "group": "glossary"
+    },
+    {
+      "href": "/guides/revenue-attribution-tools",
+      "label": "Revenue attribution tools compared",
+      "group": "guide"
+    }
+  ],
   "relatedTools": [
     "utm-builder"
   ],
   "leadMagnet": {
     "kind": "addWebsite",
     "headline": "See what Pirsch can't show you",
-    "sub": "Add your site and Conclick shows which traffic actually makes money — heatmaps, funnels, and revenue in one dashboard. Free for 14 days, no card.",
+    "sub": "Add your site and Conclick shows which traffic actually makes money: heatmaps, funnels, and revenue in one dashboard. Free for 14 days, no card.",
     "ctaLabel": "Add My Website"
   },
   "datePublished": "2026-06-18",
-  "dateModified": "2026-06-18",
+  "dateModified": "2026-07-22",
   "comparison": {
     "competitor": "Pirsch",
     "competitorUrl": "https://pirsch.io",

@@ -5,13 +5,13 @@ const entry: ContentEntry = {
   "slug": "matomo",
   "h1": "The Best Matomo Alternatives in 2026",
   "metaTitle": "Best Matomo Alternatives in 2026",
-  "metaDescription": "Tired of Matomo's self-hosting complexity? Here are the best alternatives in 2026 — from revenue-attributing Conclick to lean tools like Plausible and Umami.",
-  "tldr": "If you want to know which traffic actually makes money, Conclick is the pick — it ties every Stripe/Paddle payment back to a source, campaign, and funnel step without cookies or a consent banner. For pure simplicity, Plausible is excellent. If you need self-hosted, open-source event analytics with product depth, PostHog is worth the setup cost.",
+  "metaDescription": "Tired of Matomo's self-hosting complexity? Here are the best alternatives in 2026, from revenue-attributing Conclick to lean tools like Plausible and Umami.",
+  "tldr": "If you want to know which traffic actually makes money, Conclick is the pick: it ties every Stripe/Paddle payment back to a source, campaign, and funnel step without cookies or a consent banner. For pure simplicity, Plausible is excellent. If you need self-hosted, open-source event analytics with product depth, PostHog is worth the setup cost.",
   "intro": "Matomo has been around forever. It was the default answer when Google Analytics felt too invasive. But \"privacy-first\" doesn't mean much if you're spending an afternoon configuring a server, wrestling with plugin pricing, and still can't answer the one question that matters: which traffic actually turns into revenue? That's the gap most of these tools aim to fill. Some do it better than others. Here's an honest look at what to use instead.",
   "sections": [
     {
       "type": "h2",
-      "text": "1. Conclick — Best for bootstrapped founders who want revenue attribution",
+      "text": "1. Conclick: Best for bootstrapped founders who want revenue attribution",
       "id": "conclick"
     },
     {
@@ -20,7 +20,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "Connect your Stripe, Paddle, Polar, Lemon Squeezy, or Dodo account and Conclick traces every payment back to its source — the specific campaign, referrer, or funnel step that started the journey. That's not a feature most analytics tools have. Plausible doesn't have it. Umami doesn't have it. Even PostHog requires you to wire it up yourself with custom events. Conclick does it out of the box."
+      "text": "Connect your Stripe, Paddle, Polar, Lemon Squeezy, or Dodo account and Conclick traces every payment back to its source: the specific campaign, referrer, or funnel step that started the journey. That's not a feature most analytics tools have. Plausible doesn't have it and Umami doesn't have it (I checked their public docs as of July 2026). Even PostHog requires you to wire it up yourself with custom events. Conclick does it out of the box."
     },
     {
       "type": "h3",
@@ -29,7 +29,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "Most heatmap tools overlay colored blobs on a reconstructed approximation of your page. Conclick takes actual screenshots and overlays the data on them. You see rage clicks — users hammering a button that doesn't respond. Dead clicks on elements people expect to be interactive. Scroll depth showing where people bail. This matters because you can see exactly what's broken, on the exact layout your visitors saw."
+      "text": "Most heatmap tools overlay colored blobs on a reconstructed approximation of your page. Conclick takes actual screenshots and overlays the data on them. You see rage clicks: users hammering a button that doesn't respond. Dead clicks on elements people expect to be interactive. [Scroll depth](/guides/how-to-read-a-heatmap) showing where people bail. This matters because you can see exactly what's broken, on the exact layout your visitors saw."
     },
     {
       "type": "h3",
@@ -38,7 +38,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "Conclick watches your traffic and automatically surfaces funnel patterns — it finds where users drop off in the flows that lead to revenue, without you manually defining every step first. Pair that with visual user journey maps and a live global visitor map, and you get a picture of your product that raw numbers never give you."
+      "text": "Conclick watches your traffic and automatically surfaces [funnel patterns](/glossary/conversion-funnel): it finds where users drop off in the flows that lead to revenue, without you manually defining every step first. Pair that with visual user journey maps and a live global visitor map, and you get a picture of your product that raw numbers never give you."
     },
     {
       "type": "h3",
@@ -47,7 +47,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "Every morning Conclick sends a plain-English summary of the last 24 hours — what happened, what's worth noticing. It lands in your email, Slack, Discord, or Telegram. No logging in, no dashboard fatigue. That alone is worth a lot if you're running a company and analytics is one of fifteen things on your plate."
+      "text": "Every morning Conclick sends a plain-English summary of the last 24 hours: what happened, what's worth noticing. It lands in your email, Slack, Discord, or Telegram. No logging in, no dashboard fatigue. That alone is worth a lot if you're running a company and analytics is one of fifteen things on your plate."
     },
     {
       "type": "h3",
@@ -56,7 +56,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "Cookieless by default, so in most cases you skip the consent banner entirely. GDPR and CCPA friendly. Setup takes about two minutes — drop in the script, connect your payment processor, done. GSC and GA4 import if you're migrating. $9/month, $7/month on the yearly plan, 14-day free trial, no card required. There's also an optional lifetime deal."
+      "text": "Cookieless by default, so in most cases you skip the consent banner entirely. [GDPR and CCPA friendly](/glossary/gdpr-compliant-analytics). Setup takes about two minutes: drop in the script, connect your payment processor, done. GSC and GA4 import if you're migrating. $9/month, $7/month on the yearly plan, 14-day free trial, no card required. There's also an optional lifetime deal."
     },
     {
       "type": "p",
@@ -67,7 +67,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "h2",
-      "text": "2. Plausible — Best for teams that just want clean traffic numbers",
+      "text": "2. Plausible: Best for teams that just want clean traffic numbers",
       "id": "plausible"
     },
     {
@@ -80,7 +80,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "h2",
-      "text": "3. Umami — Best free, self-hosted Matomo replacement",
+      "text": "3. Umami: Best free, self-hosted Matomo replacement",
       "id": "umami"
     },
     {
@@ -89,16 +89,16 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "The cost is the cost of your own server, your own uptime, and your own database backups. If you're a developer who's comfortable with that, Umami is an excellent choice — especially if data sovereignty is a hard requirement. There's also a cloud version starting at $9/month. Like Plausible, it has no revenue attribution layer, so it's a traffic analytics tool, not a revenue analytics tool."
+      "text": "The cost is the cost of your own server, your own uptime, and your own database backups. If you're a developer who's comfortable with that, Umami is an excellent choice, especially if data sovereignty is a hard requirement. There's also a cloud version starting at $9/month. Like Plausible, it has no revenue attribution layer as of July 2026, so it's a traffic analytics tool, not a revenue analytics tool."
     },
     {
       "type": "h2",
-      "text": "4. PostHog — Best for product teams who want everything in one place",
+      "text": "4. PostHog: Best for product teams who want everything in one place",
       "id": "posthog"
     },
     {
       "type": "p",
-      "text": "PostHog is a different category of tool. It's not just analytics — it's analytics, feature flags, session replay, A/B testing, and a data warehouse in a single platform. For a product team running experiments and tracking events across a complex app, it's genuinely powerful."
+      "text": "PostHog is a different category of tool. It's not just analytics: it's analytics, feature flags, session replay, A/B testing, and a data warehouse in a single platform. For a product team running experiments and tracking events across a complex app, it's genuinely powerful."
     },
     {
       "type": "p",
@@ -121,13 +121,13 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "The honest version: most Matomo users are switching because self-hosting is annoying, not because they need advanced features. For that majority, Plausible solves the problem cleanly. But if you're a founder trying to grow revenue — not just traffic — Conclick is the only tool in this list built around that specific job."
+      "text": "The honest version: most Matomo users are switching because self-hosting is annoying, not because they need advanced features. For that majority, Plausible solves the problem cleanly. But if you're a founder trying to grow revenue, not just traffic, Conclick is the only tool in this list built around that specific job."
     }
   ],
   "faq": [
     {
       "question": "Is Conclick a good replacement for Matomo?",
-      "answer": "Yes, especially if you're a SaaS or ecommerce founder. Conclick skips the self-hosting complexity, is cookieless by default, and adds revenue attribution that Matomo doesn't offer natively. Setup is about two minutes versus an afternoon with Matomo."
+      "answer": "Yes, especially if you're a SaaS or ecommerce founder. Conclick skips the self-hosting complexity, is cookieless by default, and adds revenue attribution that Matomo doesn't offer natively as of July 2026. Setup is about two minutes versus an afternoon with Matomo."
     },
     {
       "question": "Do I need a consent banner if I switch to Conclick?",
@@ -139,7 +139,7 @@ const entry: ContentEntry = {
     },
     {
       "question": "Is Plausible better than Matomo?",
-      "answer": "For simplicity and modern design, yes. Plausible has no self-hosting requirement (though it can be self-hosted), a cleaner UI, and no consent banner needed. It's less configurable than Matomo but far easier to live with day-to-day."
+      "answer": "For simplicity and modern design, yes. Plausible doesn't require self-hosting (though it can be self-hosted), has a cleaner UI, and in most cases needs no consent banner. It's less configurable than Matomo but far easier to live with day-to-day."
     },
     {
       "question": "Can I self-host any of these Matomo alternatives?",
@@ -150,18 +150,34 @@ const entry: ContentEntry = {
       "answer": "Umami is free to self-host. PostHog has a generous free tier (1M events/month on their cloud). GoatCounter is also free for small sites. Most polished hosted tools like Plausible and Conclick start at $9/month, but Conclick offers a 14-day free trial with no card required."
     }
   ],
-  "internalLinks": [],
+  "internalLinks": [
+    {
+      "href": "/vs/matomo",
+      "label": "Conclick vs Matomo: head to head",
+      "group": "comparison"
+    },
+    {
+      "href": "/guides/revenue-attribution-tools",
+      "label": "Revenue attribution tools compared",
+      "group": "guide"
+    },
+    {
+      "href": "/alternatives/umami",
+      "label": "The best Umami alternatives",
+      "group": "alternative"
+    }
+  ],
   "relatedTools": [
     "utm-builder"
   ],
   "leadMagnet": {
     "kind": "addWebsite",
     "headline": "See what Matomo can't show you",
-    "sub": "Add your site and Conclick shows which traffic actually makes money — heatmaps, funnels, and revenue in one dashboard. Free for 14 days, no card.",
+    "sub": "Add your site and Conclick shows which traffic actually makes money: heatmaps, funnels, and revenue in one dashboard. Free for 14 days, no card.",
     "ctaLabel": "Add My Website"
   },
   "datePublished": "2026-06-22",
-  "dateModified": "2026-06-22",
+  "dateModified": "2026-07-22",
   "comparison": {
     "competitor": "Matomo",
     "competitorUrl": "https://matomo.org",
@@ -182,7 +198,7 @@ const entry: ContentEntry = {
         "feature": "Revenue attribution (Stripe/Paddle/etc.)",
         "conclick": true,
         "competitor": false,
-        "note": "Conclick connects to Stripe, Paddle, Polar, Lemon Squeezy, and Dodo natively. Matomo has no equivalent."
+        "note": "Conclick connects to Stripe, Paddle, Polar, Lemon Squeezy, and Dodo natively. Matomo has no equivalent as of July 2026."
       },
       {
         "feature": "Real-screenshot heatmaps",
@@ -212,7 +228,7 @@ const entry: ContentEntry = {
         "feature": "Depth of raw event customization",
         "conclick": false,
         "competitor": true,
-        "note": "Matomo wins here — it has years of plugins, custom dimensions, and SQL-level access for large data teams."
+        "note": "Matomo wins here: it has years of plugins, custom dimensions, and SQL-level access for large data teams."
       },
       {
         "feature": "Starting price",
