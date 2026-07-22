@@ -2,6 +2,7 @@
 import type { ContentEntry, Section } from '@/content/schema';
 import { ComparisonTable } from './ComparisonTable';
 import { LeadMagnetCTA } from './LeadMagnetCTA';
+import { RichText } from './RichText';
 
 // Renders the typed Section[] body into styled prose primitives so content
 // authors / the AI pipeline never touch JSX. Tokens mirror src/components/legal.tsx.
@@ -19,13 +20,22 @@ function Block({ section, entry }: { section: Section; entry: ContentEntry }) {
           {section.text}
         </h3>
       );
+    // Body copy runs through RichText so `[anchor](/path)` becomes a real link.
+    // Headings deliberately do not: a link inside an h2 competes with the
+    // heading's own anchor and muddies the outline these pages are read by.
     case 'p':
-      return <p className="mb-4 text-[15px] leading-relaxed text-muted-foreground">{section.text}</p>;
+      return (
+        <p className="mb-4 text-[15px] leading-relaxed text-muted-foreground">
+          <RichText text={section.text} />
+        </p>
+      );
     case 'ul':
       return (
         <ul className="mb-5 ml-5 list-disc space-y-2 text-[15px] leading-relaxed text-muted-foreground marker:text-[#5e5ba4]">
           {section.items.map((it, i) => (
-            <li key={i}>{it}</li>
+            <li key={i}>
+              <RichText text={it} />
+            </li>
           ))}
         </ul>
       );
@@ -33,21 +43,23 @@ function Block({ section, entry }: { section: Section; entry: ContentEntry }) {
       return (
         <ol className="mb-5 ml-5 list-decimal space-y-2 text-[15px] leading-relaxed text-muted-foreground marker:text-[#8b88cf]">
           {section.items.map((it, i) => (
-            <li key={i}>{it}</li>
+            <li key={i}>
+              <RichText text={it} />
+            </li>
           ))}
         </ol>
       );
     case 'quote':
       return (
         <blockquote className="my-5 border-l-2 border-[#5e5ba4] pl-4 text-[15px] italic leading-relaxed text-muted-foreground">
-          {section.text}
+          <RichText text={section.text} />
           {section.cite && <footer className="mt-1 text-xs not-italic text-muted-foreground/70">— {section.cite}</footer>}
         </blockquote>
       );
     case 'callout':
       return (
         <div className="my-6 rounded-xl border border-[#5e5ba4]/30 bg-[#5e5ba4]/10 p-4 text-[15px] leading-relaxed text-zinc-200">
-          {section.text}
+          <RichText text={section.text} />
         </div>
       );
     case 'comparisonTable':

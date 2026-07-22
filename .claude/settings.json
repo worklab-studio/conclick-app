@@ -24,7 +24,16 @@
     "from daily-content.md step 4. Review mode is off, so a lint-failing entry",
     "is already on disk AND in the registry by the time the gate runs; without",
     "these two the routine cannot undo it and the next run would commit it.",
-    "Both are scoped to src/content so neither can reach anything else."
+    "Both are scoped to src/content so neither can reach anything else.",
+    "",
+    "`lint.mjs --baseline-init` is DENIED while the rest of lint.mjs is allowed.",
+    "It regenerates the grandfathered-violation baseline from scratch and cannot",
+    "tell a regression from history, so one run at the wrong moment permanently",
+    "grandfathers a brand-new violation — the exact 'never edit the baseline to",
+    "make a violation pass' rule, with a CLI flag in front of it. The routines",
+    "use --baseline-tighten, which can only remove or lower an entry. Keeping",
+    "--baseline-init a human-only command makes that structural rather than a",
+    "line of prose the model has to remember."
   ],
 
   "permissions": {
@@ -70,6 +79,7 @@
     ],
 
     "deny": [
+      "Bash(node scripts/seo/lint.mjs --baseline-init:*)",
       "Bash(rm -rf:*)",
       "Bash(fly secrets:*)",
       "Bash(fly ssh:*)",

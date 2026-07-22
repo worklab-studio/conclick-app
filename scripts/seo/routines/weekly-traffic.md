@@ -95,6 +95,14 @@ For each target:
   Vary the anchor text between sources — 40 pages linking with an identical
   anchor is the classic exact-match footprint.
 
+  **In-prose means inside a section's `text` or `items` string**, rendered by
+  `RichText` (`src/components/seo/RichText.tsx`) in `p`, `ul`, `ol`, `quote` and
+  `callout`. Headings do not render links. Adding to the `internalLinks` array
+  is not a substitute: that renders as an end-of-page card rail, which is the
+  template chrome search engines discount most. An unresolvable path degrades to
+  plain text rather than shipping a 404, so confirm the anchor actually survived
+  into the built page.
+
 Edit the entry in `src/content/<dir>/<slug>.ts` directly. This routine changes
 existing pages, so there is no draft JSON and no `write.mjs` step; if a change
 would be large enough to want one, it is a new page and belongs to the daily
@@ -116,6 +124,17 @@ run touches several existing files and the git diff is exactly the set you mean.
 
 `build-app`, never `build` — `build` runs `check-db` against the live production
 database.
+
+Once green, lock the week's repairs in:
+
+```bash
+node scripts/seo/lint.mjs --baseline-tighten
+```
+
+It only removes or lowers baseline entries, so a fixed violation stops being a
+standing allowance that a later regression could quietly re-fill. **Never
+`--baseline-init`** — that regenerates from scratch and would grandfather any
+new violation present at that moment.
 
 ## 5. SHIP
 

@@ -46,6 +46,7 @@ function parseArgs(argv) {
     if (t === '--all') a.mode = 'all';
     else if (t === '--changed') a.mode = 'changed';
     else if (t === '--baseline-init') a.mode = 'baseline-init';
+    else if (t === '--baseline-tighten') a.mode = 'baseline-tighten';
     else if (t === '--entry') {
       a.mode = 'entry';
       a.entry = argv[++i];
@@ -70,6 +71,7 @@ const USAGE = `content law gate — scripts/seo/lint.mjs
   --changed           check entries touched vs HEAD (staged, unstaged, untracked)
   --entry <type>/<slug>   check one entry, e.g. --entry comparison/plausible
   --baseline-init     record the current violations as grandfathered
+  --baseline-tighten  drop fixed violations from the baseline (never adds)
   --fix               auto-fix em/en dashes in the selected entry files
   -v, --verbose       also list grandfathered violations
 
@@ -195,6 +197,70 @@ function writeBaseline(records) {
   return doc;
 }
 
+/**
+ * Shrink the baseline to match reality, in the one direction that is safe.
+ *
+ * `--baseline-init` regenerates from scratch, which means running it at the
+ * wrong moment silently grandfathers a brand-new violation — it cannot tell a
+ * regression from history. So the repair routines must never call it. But
+ * without *something*, a repaired violation stays in the baseline as a standing
+ * allowance and can come back unnoticed: the gate compares against the old
+ * count and shrugs. Work gets undone and the gate reports PASS.
+ *
+ * This mode only ever removes or lowers an existing entry. A law absent from
+ * the baseline for an entry stays absent, and a count is never raised, so a new
+ * or worsened violation cannot enter through this door no matter when it runs.
+ */
+function tightenBaseline() {
+  const baseline = readBaseline();
+  if (!baseline) {
+    console.error(`no ${path.relative(REPO, BASELINE)} to tighten — run --baseline-init once first.`);
+    return null;
+  }
+
+  const paths = validPaths();
+  const current = {};
+  for (const rec of loadAll()) {
+    const found = runLaws(rec, contextFor(rec, { validPaths: paths }));
+    if (!found.length) continue;
+    current[rec.key] = Object.fromEntries(found.map(v => [v.law, v.count]));
+  }
+
+  const kept = {};
+  const byLaw = {};
+  let dropped = 0;
+  let reduced = 0;
+  let remaining = 0;
+
+  for (const [key, laws] of Object.entries(baseline.violations || {})) {
+    for (const [law, allowed] of Object.entries(laws)) {
+      const now = current[key]?.[law];
+      if (now === undefined) {
+        dropped++; // fixed outright
+        continue;
+      }
+      // min() is what makes this one-directional: a violation that got WORSE
+      // keeps its old, smaller allowance so the gate still fails it.
+      const value = Math.min(allowed, now);
+      if (value < allowed) reduced++;
+      (kept[key] ||= {})[law] = value;
+      byLaw[law] = (byLaw[law] || 0) + 1;
+      remaining++;
+    }
+  }
+
+  const doc = {
+    ...baseline,
+    generatedAt: new Date().toISOString().slice(0, 10),
+    entriesWithViolations: Object.keys(kept).length,
+    totalViolations: remaining,
+    byLaw: Object.fromEntries(Object.entries(byLaw).sort((a, b) => b[1] - a[1])),
+    violations: Object.fromEntries(Object.entries(kept).sort((a, b) => a[0].localeCompare(b[0]))),
+  };
+  fs.writeFileSync(BASELINE, JSON.stringify(doc, null, 2) + '\n');
+  return { dropped, reduced, remaining };
+}
+
 /* ------------------------------------------------------------------ */
 /* --fix (em/en dashes only)                                           */
 /* ------------------------------------------------------------------ */
@@ -238,6 +304,20 @@ function main() {
       `  ${doc.entriesScanned} entries scanned · ${doc.entriesWithViolations} with violations · ${doc.totalViolations} grandfathered violations`,
     );
     for (const [law, n] of Object.entries(doc.byLaw)) console.log(`    ${String(n).padStart(3)}  ${law}`);
+    return 0;
+  }
+
+  if (args.mode === 'baseline-tighten') {
+    const doc = tightenBaseline();
+    if (doc === null) return 2;
+    if (!doc.dropped && !doc.reduced) {
+      console.log('baseline unchanged — nothing has been fixed since it was written.');
+      return 0;
+    }
+    console.log(`tightened ${path.relative(REPO, BASELINE)}`);
+    console.log(`  ${doc.dropped} violation(s) fully fixed and removed`);
+    console.log(`  ${doc.reduced} violation(s) reduced to a lower allowance`);
+    console.log(`  ${doc.remaining} grandfathered violation(s) remain`);
     return 0;
   }
 

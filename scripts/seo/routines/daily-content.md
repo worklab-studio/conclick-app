@@ -183,10 +183,44 @@ node scripts/seo/lint.mjs --all          # grandfathered violations, worst first
 3. **Orphan repair** — a page with no contextual inbound links. Add genuine
    in-prose `[anchor](/path)` links **from** related pages **to** it. Never add a
    link that a reader would not want to follow.
+
+   **In-prose means inside a section's `text` or `items` string.** Adding
+   entries to the `internalLinks` array does NOT count and does not fix an
+   orphan: that field renders as a card rail at the end of the page, which is
+   template chrome, the class search engines discount most. The 2026-07-22
+   repair run satisfied `internal-links-min` with four `internalLinks` entries
+   and zero in-prose links, which is the letter of the law and none of the
+   point.
+
+   Both are worth having. Only one of them is contextual linking.
+
+   `RichText` (`src/components/seo/RichText.tsx`) renders `[anchor](/path)`
+   inside `p`, `ul`, `ol`, `quote` and `callout` text. **Headings do not render
+   links** — do not put one in an `h2` or `h3`. A path that does not resolve
+   against the live registry silently degrades to plain text, so a typo costs
+   the link rather than shipping a 404. Verify the anchor survived by checking
+   the built page, not by trusting the draft.
 4. **Grandfathered lint** — clear violations off the baseline, oldest first.
 
 Then gate exactly as step 4 does (`lint.mjs --entry`, `pnpm run build-app`) and
 ship as step 6 does.
+
+**Once the gate is green, lock the repair in:**
+
+```bash
+node scripts/seo/lint.mjs --baseline-tighten
+```
+
+This drops the violations you just fixed out of `.lint-baseline.json` so they
+can never come back unnoticed. Without it a repaired violation keeps its
+standing allowance in the baseline, and a later regression re-fills it while the
+gate still reports PASS: the work silently comes undone.
+
+`--baseline-tighten` only ever removes or lowers an entry, so it is safe to run
+at any point. **Never run `--baseline-init` instead.** That one regenerates from
+scratch and cannot tell a regression from history, so running it at the wrong
+moment grandfathers a brand-new violation permanently. It is a human,
+once-in-a-while command.
 
 Bump `dateModified` **only** for a substantive change, never for a reformat. A
 sitemap full of pages whose `lastmod` moves without their content moving is a
