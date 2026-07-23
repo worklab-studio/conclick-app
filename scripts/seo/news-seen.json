@@ -90,6 +90,27 @@
       "at": "2026-07-23",
       "verdict": "ignored",
       "reason": "Primary Google Search Central announcement of the toggle was Jun 3 2026 (outside the 3-day window); the Jul 21-22 'wider rollout' is only in secondary press (ppc.land, shopifreaks, mediapost, panstag) with no fresh Google primary post confirming a specific rollout event. Fails 'Real' under the primary-source rule."
+    },
+    {
+      "url": "https://developers.google.com/crawling/docs/crawl-budget",
+      "title": "Google 'Optimize your crawl budget' doc rewrite — 'conservative crawl capacity limit' shared across crawlers, Jul 22 2026",
+      "at": "2026-07-23",
+      "verdict": "ignored",
+      "reason": "Primary and in-window, but Google explicitly frames the changes as clarity/terminology cleanup, not a behavior change. Fails 'changes what someone should do'. Crawl-budget mechanics are also off-beat for Conclick (technical crawling, not analytics/privacy/GEO first-hand)."
+    },
+    {
+      "url": "https://www.firefox.com/en-US/firefox/153.0/releasenotes/",
+      "title": "Firefox 153 stable: native Containers preview, cookie settings consolidation, location-access indicator, Jul 21 2026",
+      "at": "2026-07-23",
+      "verdict": "ignored",
+      "reason": "Primary and in-window, but Containers already existed as a Mozilla extension for years — shipping a preview version by default doesn't change what a site owner should do. Cookie settings change is a UI consolidation, not a new tracking-prevention behavior. Fails 'changes what someone should do' and 'creates a query that did not exist before'."
+    },
+    {
+      "url": "https://www.seroundtable.com/recap-07-22-2026-41733.html",
+      "title": "Google Ads limits policy-violation appeals to the past 6 months, effective Jul 21 2026",
+      "at": "2026-07-23",
+      "verdict": "ignored",
+      "reason": "Off-beat: paid-search policy/UX plumbing, not analytics/privacy/SEO organic/GEO. Conclick has no first-hand credibility on Google Ads appeals."
     }
   ]
 }
