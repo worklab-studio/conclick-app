@@ -40,6 +40,7 @@ import glossary_sessions_vs_visitors from './glossary/sessions-vs-visitors';
 import glossary_utm from './glossary/utm';
 import glossary_what_is_llms_txt from './glossary/what-is-llms-txt';
 import guides_add_analytics_to_nextjs from './guides/add-analytics-to-nextjs';
+import guides_conversion_funnel_software_pricing from './guides/conversion-funnel-software-pricing';
 import guides_do_heatmaps_need_cookie_consent from './guides/do-heatmaps-need-cookie-consent';
 import guides_filter_bot_traffic_from_analytics from './guides/filter-bot-traffic-from-analytics';
 import guides_ga4_migration_guide from './guides/ga4-migration-guide';
@@ -102,6 +103,7 @@ const ENTRIES: ContentEntry[] = [
   glossary_utm,
   glossary_what_is_llms_txt,
   guides_add_analytics_to_nextjs,
+  guides_conversion_funnel_software_pricing,
   guides_do_heatmaps_need_cookie_consent,
   guides_filter_bot_traffic_from_analytics,
   guides_ga4_migration_guide,

@@ -1,5 +1,10 @@
 {
   "keywords": {
+    "conversion funnel software pricing": {
+      "status": "published",
+      "slug": "guides/conversion-funnel-software-pricing",
+      "published_at": "2026-07-23T09:03:49.358Z"
+    },
     "cookieless heatmap tool": {
       "status": "published",
       "slug": "cookieless-heatmap-tool",
@@ -13,8 +18,18 @@
       "slug": "do-heatmaps-need-cookie-consent",
       "published_at": "2026-07-21T16:52:27.842Z"
     },
+    "fathom analytics pricing": {
+      "status": "covered",
+      "slug": "comparisons/fathom",
+      "published_at": "2026-07-23T08:53:34.313Z"
+    },
     "gdpr compliant heatmap": {
       "status": "skipped"
+    },
+    "hotjar pricing": {
+      "status": "covered",
+      "slug": "comparisons/hotjar",
+      "published_at": "2026-07-23T08:53:34.909Z"
     },
     "how to a/b test with low traffic": {
       "status": "published",
@@ -46,6 +61,26 @@
       "slug": "how-to-read-a-heatmap",
       "published_at": "2026-07-22T04:06:02.779Z"
     },
+    "matomo pricing": {
+      "status": "covered",
+      "slug": "comparisons/matomo",
+      "published_at": "2026-07-23T08:54:47.768Z"
+    },
+    "mixpanel pricing": {
+      "status": "covered",
+      "slug": "comparisons/mixpanel",
+      "published_at": "2026-07-23T08:54:48.827Z"
+    },
+    "plausible pricing": {
+      "status": "covered",
+      "slug": "comparisons/plausible",
+      "published_at": "2026-07-23T08:54:49.737Z"
+    },
+    "posthog pricing": {
+      "status": "covered",
+      "slug": "comparisons/posthog",
+      "published_at": "2026-07-23T08:54:50.709Z"
+    },
     "privacy friendly heatmap tool": {
       "status": "skipped"
     },
@@ -72,6 +107,11 @@
       "status": "published",
       "slug": "should-i-block-gptbot",
       "published_at": "2026-07-22T04:03:27.119Z"
+    },
+    "simple analytics pricing": {
+      "status": "covered",
+      "slug": "comparisons/simple-analytics",
+      "published_at": "2026-07-23T08:54:51.683Z"
     },
     "what a click map shows that a funnel doesn't": {
       "status": "published",
