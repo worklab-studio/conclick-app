@@ -50,6 +50,7 @@ import guides_how_to_read_a_funnel from './guides/how-to-read-a-funnel';
 import guides_how_to_read_a_heatmap from './guides/how-to-read-a-heatmap';
 import guides_impressions_up_clicks_down from './guides/impressions-up-clicks-down';
 import guides_is_ga4_sampling_your_data from './guides/is-ga4-sampling-your-data';
+import guides_open_source_web_analytics_tools from './guides/open-source-web-analytics-tools';
 import guides_organic_traffic_showing_as_direct from './guides/organic-traffic-showing-as-direct';
 import guides_revenue_attribution_tools from './guides/revenue-attribution-tools';
 import guides_should_i_block_gptbot from './guides/should-i-block-gptbot';
@@ -113,6 +114,7 @@ const ENTRIES: ContentEntry[] = [
   guides_how_to_read_a_heatmap,
   guides_impressions_up_clicks_down,
   guides_is_ga4_sampling_your_data,
+  guides_open_source_web_analytics_tools,
   guides_organic_traffic_showing_as_direct,
   guides_revenue_attribution_tools,
   guides_should_i_block_gptbot,

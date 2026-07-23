@@ -146,6 +146,14 @@
     "free trial pricing saas": {
       "status": "needs-human"
     },
+    "ga4 360 costs": {
+      "status": "skipped"
+    },
+    "ga4 alternatives": {
+      "status": "covered",
+      "slug": "alternatives/google-analytics",
+      "published_at": "2026-07-23T14:06:48.603Z"
+    },
     "gdpr compliant heatmap": {
       "status": "skipped"
     },
@@ -154,6 +162,11 @@
     },
     "high traffic or high-traffic": {
       "status": "needs-human"
+    },
+    "hotjar alternatives": {
+      "status": "covered",
+      "slug": "alternatives/hotjar",
+      "published_at": "2026-07-23T14:06:49.549Z"
     },
     "hotjar pricing": {
       "status": "covered",
@@ -426,6 +439,16 @@
     "measure roi of content marketing": {
       "status": "needs-human"
     },
+    "microsoft clarity alternatives": {
+      "status": "covered",
+      "slug": "vs/clarity",
+      "published_at": "2026-07-23T14:06:50.554Z"
+    },
+    "mixpanel alternatives": {
+      "status": "covered",
+      "slug": "alternatives/mixpanel",
+      "published_at": "2026-07-23T14:07:18.248Z"
+    },
     "mixpanel pricing": {
       "status": "covered",
       "slug": "comparisons/mixpanel",
@@ -449,10 +472,23 @@
     "online paid sources of traffic": {
       "status": "needs-human"
     },
+    "open source web analytics tools": {
+      "status": "published",
+      "slug": "guides/open-source-web-analytics-tools",
+      "published_at": "2026-07-23T14:12:25.914Z"
+    },
     "plausible pricing": {
       "status": "covered",
       "slug": "comparisons/plausible",
       "published_at": "2026-07-23T08:54:49.737Z"
+    },
+    "plausible vs google analytics": {
+      "status": "skipped"
+    },
+    "posthog alternatives": {
+      "status": "covered",
+      "slug": "alternatives/posthog",
+      "published_at": "2026-07-23T14:07:19.272Z"
     },
     "posthog pricing": {
       "status": "covered",
