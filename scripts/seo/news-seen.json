@@ -41,6 +41,41 @@
       "at": "2026-07-22",
       "verdict": "ignored",
       "reason": "Primary source and in-window, but it's a case study reinforcing existing video-schema guidance — no policy change, no new query created. Fails 'changes what someone should do' and 'creates a query that did not exist before'."
+    },
+    {
+      "url": "https://developers.google.com/search/blog/2026/07/search-central-live-deep-dive-europe-2026",
+      "title": "Search Central Deep Dive Europe 2026: Barcelona (talk proposals close Jul 28)",
+      "at": "2026-07-23",
+      "verdict": "ignored",
+      "reason": "Event announcement, not a policy or product change. Fails 'changes what someone should do' and does not create a new evergreen query."
+    },
+    {
+      "url": "https://www.optimixed.com/seo-daily-news-recaps-for-tuesday-july-21-2026/",
+      "title": "Google Ads testing bulk-linking prompt to attach GA4 to multiple Google Ads accounts, Jul 21 2026",
+      "at": "2026-07-23",
+      "verdict": "ignored",
+      "reason": "UI test in Google Ads, not a GA4 feature change; source is a SERP-recap blog, not a primary Google post. Fails 'Real' (no primary confirmation) and off-beat (paid-ads plumbing)."
+    },
+    {
+      "url": "https://platform.claude.com/docs/en/agents-and-tools/tool-use/web-search-tool",
+      "title": "Anthropic Claude web search tool docs, last updated Jul 21 2026",
+      "at": "2026-07-23",
+      "verdict": "ignored",
+      "reason": "Documentation refresh, not a product or policy change; web-search-with-citations shipped in 2025. Fails 'Real' as news and 'changes what someone should do'."
+    },
+    {
+      "url": "https://www.mlex.com/mlex/data-privacy-security/articles/2499910",
+      "title": "US federal judge dismisses Wiretap Act claim against Blue Shield of California over Google Analytics + Meta Pixel, Jul 10 2026",
+      "at": "2026-07-23",
+      "verdict": "ignored",
+      "reason": "Ruling dated Jul 10 2026, outside the last-3-days window (today is Jul 23). Also with-leave-to-amend, so not a settled precedent. Noting here so it isn't re-evaluated next run."
+    },
+    {
+      "url": "https://www.datagrail.io/blog/privacy-trends/privacy-dispatch-july-2026/",
+      "title": "DataGrail Privacy Dispatch July 2026 (state cure periods expiring; Connecticut effective Jul 1)",
+      "at": "2026-07-23",
+      "verdict": "ignored",
+      "reason": "Monthly roundup, not a primary source; underlying state-law events (CT amended DPA, cure-period expirations) were Jul 1, outside the last-3-days window."
     }
   ]
 }
