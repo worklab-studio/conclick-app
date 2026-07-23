@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>io.conclick.seo-weekly</string>
+
+  <!-- Monday 09:47. The daily routine fires at 09:12 and takes ~10-15 minutes;
+       35 minutes of clearance means the shared lock is a backstop rather than
+       the thing that actually schedules these two. Search Console data lags
+       ~2 days so any weekday works, and Monday puts the week's repairs in
+       before the week's writing. -->
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/bash</string>
+    <string>/Users/worklab/Conclick beta/umami/scripts/seo/run-routine.sh</string>
+    <string>weekly-traffic</string>
+  </array>
+
+  <key>StartCalendarInterval</key>
+  <array>
+    <dict>
+      <key>Weekday</key><integer>1</integer>
+      <key>Hour</key><integer>9</integer>
+      <key>Minute</key><integer>47</integer>
+    </dict>
+  </array>
+
+  <!-- launchd fires a missed StartCalendarInterval once on wake, so a laptop
+       closed on Monday runs this on Tuesday rather than skipping the week. -->
+  <key>RunAtLoad</key>
+  <false/>
+
+  <key>StandardOutPath</key>
+  <string>/Users/worklab/.conclick-seo-logs/launchd.out.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/worklab/.conclick-seo-logs/launchd.err.log</string>
+
+  <key>WorkingDirectory</key>
+  <string>/Users/worklab/Conclick beta/umami</string>
+
+  <key>Nice</key>
+  <integer>5</integer>
+  <key>ProcessType</key>
+  <string>Background</string>
+</dict>
+</plist>

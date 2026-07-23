@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>io.conclick.seo-daily</string>
+
+  <!-- Three runs a day, one page each. Off-the-hour minutes on purpose: :00 and
+       :30 are when every scheduler on the planet fires. -->
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/bash</string>
+    <string>/Users/worklab/Conclick beta/umami/scripts/seo/run-routine.sh</string>
+  </array>
+
+  <key>StartCalendarInterval</key>
+  <array>
+    <dict><key>Hour</key><integer>9</integer><key>Minute</key><integer>12</integer></dict>
+    <dict><key>Hour</key><integer>14</integer><key>Minute</key><integer>22</integer></dict>
+    <dict><key>Hour</key><integer>18</integer><key>Minute</key><integer>42</integer></dict>
+  </array>
+
+  <!-- launchd fires a missed StartCalendarInterval once on wake, so a closed
+       laptop delays a run rather than losing it. It does NOT queue multiple
+       missed runs, so a laptop shut for two days yields one catch-up run, not
+       six. The quota in the routine is computed from committed state anyway,
+       which is what actually makes double-firing safe. -->
+  <key>RunAtLoad</key>
+  <false/>
+
+  <key>StandardOutPath</key>
+  <string>/Users/worklab/.conclick-seo-logs/launchd.out.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/worklab/.conclick-seo-logs/launchd.err.log</string>
+
+  <key>WorkingDirectory</key>
+  <string>/Users/worklab/Conclick beta/umami</string>
+
+  <!-- Low priority: this is background content work, not something that should
+       compete with the user's foreground apps for CPU or I/O. -->
+  <key>Nice</key>
+  <integer>5</integer>
+  <key>ProcessType</key>
+  <string>Background</string>
+</dict>
+</plist>

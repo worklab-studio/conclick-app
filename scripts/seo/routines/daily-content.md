@@ -67,6 +67,14 @@ If no grounding exists, write from the product facts instead and say so in the r
 
 Read `scripts/seo/prompts.mjs` for voice + the pinned product facts, and read one existing entry of the same type as a structural reference.
 
+**If the page sells** (type `comparison` / `alternative` / `useCase`, or the
+keyword comes from the `switching-cost-pain` or `revenue-visibility-intent`
+clusters), also apply the `SWITCHING` frame in prompts.mjs: name the reader's
+frustration, answer the three switch-blockers (effort / risk / cost) honestly,
+never trash the incumbent. **If the page is masterclass content**, the
+`MASTERCLASS` rule applies instead and the switching frame is forbidden — an
+authority page that pivots into a pitch fails both jobs.
+
 Write a draft to `scripts/seo/drafts/<slug>.json`:
 
 ```json

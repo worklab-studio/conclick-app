@@ -161,6 +161,66 @@ heatmap tool for webflow
 funnel tracking for shopify
 server side tracking without cookies
 
+# cluster: switching-cost-pain | intent: commercial
+# The moment someone is ready to leave their current tool. This is the highest
+# conversion intent on the entire file: the pain is price or complexity, and
+# the honest answer ("$9/mo flat, 2-minute setup, GA4 import") is Conclick's
+# actual pitch. Never trash the incumbent — the searcher still uses it.
+is hotjar worth it
+hotjar too expensive
+hotjar price increase
+why is hotjar so expensive
+hotjar cost per month
+cheaper alternative to hotjar
+is mixpanel worth it for a small saas
+mixpanel too expensive
+mixpanel pricing confusing
+cheaper alternative to mixpanel
+posthog bill too high
+posthog pricing explained
+is plausible worth it
+plausible price increase
+fathom analytics price increase
+is fathom analytics worth it
+amplitude too expensive for startups
+is google analytics really free
+ga4 hidden costs
+ga4 360 cost
+google analytics too complicated for small business
+ga4 overkill for a small website
+simplest google analytics replacement
+analytics for people who hate ga4
+cheapest website analytics
+cheap heatmap tool
+affordable analytics for startups
+website analytics under 10 dollars a month
+flat rate website analytics pricing
+analytics priced per pageview vs flat rate
+free analytics vs paid analytics
+when to switch from free analytics
+
+# cluster: revenue-visibility-intent | intent: commercial
+# The wedge, phrased the way founders actually type it. Nobody searches
+# "revenue attribution software" until they already know the category exists;
+# they search the question. These are the pages that convert because the
+# answer is literally the product's core feature.
+which pages generate the most revenue
+see revenue by traffic source
+which marketing channel makes the most money
+which traffic converts to paying customers
+do my ads actually drive revenue
+track stripe revenue by utm
+which blog posts drive revenue
+track revenue by campaign
+which traffic source brings paying customers
+revenue per visitor by source
+connect stripe to website analytics
+tie marketing spend to revenue
+which marketing campaign drives sales
+how much revenue does seo bring
+measure roi of content marketing
+which landing page makes the most sales
+
 # cluster: migration-pain | intent: informational
 ga4 data thresholding
 ga4 events not showing
@@ -186,6 +246,13 @@ google analytics schrems ii ruling
 gtag not firing
 google tag manager not working
 tracking code not working on website
+how to switch analytics tools without losing data
+import ga4 data into new analytics tool
+switch from google analytics to something simpler
+easiest analytics to set up
+analytics setup in 5 minutes
+export hotjar data before cancelling
+keep historical analytics data when switching tools
 analytics showing zero visitors
 referral traffic showing as direct
 self referral in google analytics

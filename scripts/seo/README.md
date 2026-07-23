@@ -30,9 +30,13 @@ All three run through the same script:
 ./scripts/seo/run-routine.sh daily-content --dry  # _drafts only, no publish
 ```
 
-launchd agents: `io.conclick.seo-daily`, `io.conclick.seo-weekly`,
-`io.conclick.seo-news` in `~/Library/LaunchAgents/`. Logs land in
-`~/.conclick-seo-logs/<routine>-<stamp>.log`, kept 30 days.
+Scheduling (since 2026-07-23) lives in the **Claude app's Scheduled tasks**
+(`~/.claude/scheduled-tasks/conclick-{daily-content,weekly-traffic,news-watch}`),
+visible in the app's "Scheduled" sidebar. Each task just invokes
+`run-routine.sh` and relays the run report. Tasks fire only while the app is
+open; the retired launchd plists in `deploy/launchd/` are the documented
+fallback for app-closed stretches — never run both schedulers at once. Logs
+land in `~/.conclick-seo-logs/<routine>-<stamp>.log`, kept 30 days.
 
 They share **one** lock (`/tmp/conclick-seo-routine.lock`) because they share one
 git working tree. Schedules are spaced so the lock is a backstop, not a

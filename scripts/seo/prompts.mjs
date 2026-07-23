@@ -21,6 +21,21 @@ STRUCTURE (for Google + AI answer engines):
 - faq: 6 real, People-Also-Ask-style questions a buyer actually types. Each answer 2-4 sentences, and its FIRST sentence must answer the question directly and self-containedly (AI engines quote FAQ answers in isolation).
 ANTI-PENALTY (Google Helpful-Content / scaled-content-abuse): every page must carry one original angle, opinion, or first-hand detail; no boilerplate that could be copy-pasted between pages; no thin restating of the meta description. Demonstrate first-hand experience (E-E-A-T).`;
 
+// The conversion frame for MONEY pages (comparison / alternative / useCase /
+// switching-intent guides). The reader is someone paying for — or drowning in —
+// another analytics tool. The page's business job is to make switching feel
+// SMALL. Bolted on to the sell-side briefs; never to masterclass content.
+export const SWITCHING = `SWITCHING FRAME (this page sells; the reader currently uses another tool):
+- Assume the reader is mid-frustration: a bill that grew, a dashboard they dread, a number they cannot find. Name that feeling specifically in the intro; do not describe the category.
+- Somewhere natural, answer the three switch-blockers in plain words:
+  1) Effort: one script tag, ~2-minute setup, and Search Console + GA4 import so history comes along.
+  2) Risk: the old tool keeps running; nothing is lost by trying it next to what they have during the 14-day trial (no card).
+  3) Cost: $9/month flat ($7/mo yearly). When their current tool's price is public and you are CERTAIN, contrast the models (per-seat, per-event, per-session vs flat); otherwise contrast pricing MODELS only, never invented figures.
+- NEVER trash the incumbent. The reader chose it once; insulting it insults them. Respect what it does well, then show the specific job it is not doing (usually: tying traffic to revenue).
+- The wedge sentence every money page must earn its version of: the moment analytics shows WHICH traffic makes money, it stops being a reporting cost and becomes a decision tool. Phrase it in the page's own context; never paste this sentence.
+- End sections that resolve a pain with the smallest possible next step (look at one report, run the trial next to the old tool), not a hard sell.
+All honesty laws still bind: qualified consent-banner claims, sourced competitor claims, disclosed lineage, no invented numbers. A switching page that overclaims converts once and churns; the honest version compounds.`;
+
 // The masterclass hub changes what a "good" page is for editorial content.
 // Product pages (comparison / alternative / useCase) still sell. Guides, blog
 // posts and glossary entries on general SEO, GEO, measurement, CRO and growth
