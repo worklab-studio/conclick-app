@@ -20,7 +20,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "The people who should leave are mostly founders and small teams who are drowning in GA4's complexity and getting nothing actionable out of it. Specific symptoms: you have never successfully built a funnel report, you do not know your revenue per traffic source, your consent banner is tanking your data quality in the EU, or you just flat-out dread opening the dashboard. Those are real problems, and GA4 is not going to fix them."
+      "text": "The people who should leave are mostly founders and small teams who are drowning in GA4's complexity and getting nothing actionable out of it. Specific symptoms: you have never successfully built a funnel report, you do not know your revenue per traffic source, your consent banner is tanking your data quality in the EU, or you just flat-out dread opening the dashboard. Those are real problems, and GA4 is not going to fix them. If that describes you, [my own story of giving up on GA4](/blog/gave-up-on-ga4) walks through the specific afternoons that finally pushed me off it, in case it saves you a few of yours."
     },
     {
       "type": "h2",
@@ -199,7 +199,7 @@ const entry: ContentEntry = {
     "ctaLabel": "Add My Website"
   },
   "datePublished": "2026-06-18",
-  "dateModified": "2026-07-22"
+  "dateModified": "2026-07-24"
 };
 
 export default entry;

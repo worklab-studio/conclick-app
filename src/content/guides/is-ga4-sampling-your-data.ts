@@ -142,7 +142,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "Sampling is not the only data quality issue in GA4. Cross-device attribution, consent mode data gaps, and the shift from sessions to events all introduce inaccuracies that have nothing to do with sampling thresholds. GA4 is a genuinely complicated tool that requires ongoing maintenance to produce trustworthy numbers. If your team is spending significant time auditing GA4 data quality rather than acting on insights, that is a sign the tool is not a good fit for your current scale and use case."
+      "text": "Sampling is not the only data quality issue in GA4. Cross-device attribution, consent mode data gaps, and the shift from sessions to events all introduce inaccuracies that have nothing to do with sampling thresholds. GA4 is a genuinely complicated tool that requires ongoing maintenance to produce trustworthy numbers. If your team is spending significant time auditing GA4 data quality rather than acting on insights, that is a sign the tool is not a good fit for your current scale and use case. That is the compounding cost I finally wrote up in [why I gave up on GA4](/blog/gave-up-on-ga4), and it is the case where sampling was only one bill in a much longer receipt."
     },
     {
       "type": "p",
@@ -202,7 +202,7 @@ const entry: ContentEntry = {
     "ctaLabel": "Add My Website"
   },
   "datePublished": "2026-06-18",
-  "dateModified": "2026-07-22"
+  "dateModified": "2026-07-24"
 };
 
 export default entry;
