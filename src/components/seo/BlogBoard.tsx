@@ -112,9 +112,13 @@ export function BlogBoard({ featured, rest, tabs }: BlogBoardProps) {
         </a>
       </div>
 
-      {/* Featured */}
+      {/* Featured. Display is controlled by the class, NOT the `hidden`
+          attribute: a Tailwind display utility (here on the grid cards below)
+          beats the UA `[hidden]{display:none}` rule, so `hidden` alone does not
+          reliably hide a flex element. `hidden` class = display:none, applied
+          alone when off, wins cleanly. */}
       {featured && (
-        <article className="mb-12" data-cat={featured.catId} hidden={!featuredVisible}>
+        <article className={featuredVisible ? 'mb-12' : 'hidden'} data-cat={featured.catId}>
           <a href={featured.href} className="group block">
             {featured.hero}
             <div className="mt-6">
@@ -149,8 +153,12 @@ export function BlogBoard({ featured, rest, tabs }: BlogBoardProps) {
       <div className="grid gap-x-6 gap-y-10 sm:grid-cols-2">
         {rest.map(c => {
           const visible = (activeCat === 'all' || c.catId === activeCat) && pageSlugs.has(c.href);
+          // `hidden` class (display:none) when off, `flex flex-col` when on.
+          // NOT the `hidden` attribute: `.flex` overrides `[hidden]` so the
+          // attribute silently fails to hide the card. This was the "shows 11
+          // instead of 8" bug.
           return (
-            <article key={c.href} className="flex flex-col" data-cat={c.catId} hidden={!visible}>
+            <article key={c.href} className={visible ? 'flex flex-col' : 'hidden'} data-cat={c.catId}>
               <a href={c.href} className="group flex flex-col">
                 {c.hero}
                 <div className="mt-4 flex flex-wrap items-center gap-2 text-[11px] font-medium uppercase tracking-[0.14em] text-[#8b88cf]">
