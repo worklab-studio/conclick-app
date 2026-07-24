@@ -47,10 +47,9 @@ export function BlogBoard({ featured, rest, tabs }: BlogBoardProps) {
   const [activeCat, setActiveCat] = useState('all');
   const [page, setPage] = useState(1);
 
-  const featuredVisible = !!featured && (activeCat === 'all' || featured.catId === activeCat);
-
-  // The cards that match the active category, in order. Pagination runs over
-  // this list; the full `rest` is still rendered (hidden) for crawlers.
+  // The small cards that match the active category, in order. Pagination runs
+  // over THIS list (8 per page); the full `rest` is still rendered (hidden) for
+  // crawlers. The featured card is NOT in here — it is a separate hero.
   const filtered = useMemo(
     () => (activeCat === 'all' ? rest : rest.filter(c => c.catId === activeCat)),
     [rest, activeCat],
@@ -60,6 +59,11 @@ export function BlogBoard({ featured, rest, tabs }: BlogBoardProps) {
   const current = Math.min(page, pageCount);
   const start = (current - 1) * PAGE_SIZE;
   const pageSlugs = new Set(filtered.slice(start, start + PAGE_SIZE).map(c => c.href));
+
+  // Featured shows on page ONE only, so pagination is genuinely "8 small cards
+  // per page" and the hero does not re-appear above every page's grid.
+  const featuredVisible =
+    !!featured && (activeCat === 'all' || featured.catId === activeCat) && current === 1;
 
   function selectCat(id: string) {
     setActiveCat(id);

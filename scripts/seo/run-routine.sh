@@ -125,8 +125,41 @@ End with the run report from the playbook's final step."
 # Deliberately NOT bypassPermissions: this run commits to master and deploys to
 # production, so the deny list (fly secrets/ssh/postgres, gh secret, rm -rf,
 # prisma migrate, pnpm run build) has to stay enforced.
-claude -p "$PROMPT" --permission-mode dontAsk
+#
+# HARD TIMEOUT + ONE RETRY. On 2026-07-24 the 09:27 run hit "API Error: Stream
+# idle timeout" and hung until 12:20 — nearly THREE HOURS — because `claude -p`
+# has a very long internal idle timeout and nothing here capped it. A normal
+# write+gate+deploy is ~10-12 min, so a run past ~20 min is wedged, not slow.
+# macOS ships no `timeout`/`gtimeout`, so this is a portable watchdog: run claude
+# in the background, and a sleeper kills it if it overruns. The observed failure
+# is transient, so one fresh retry clears it; quota is computed from committed
+# state, so a retry after a partial first attempt cannot double-publish.
+ATTEMPT_TIMEOUT="${SEO_ATTEMPT_TIMEOUT:-1200}" # 20 min per attempt
+
+run_claude() {
+  claude -p "$PROMPT" --permission-mode dontAsk &
+  local pid=$!
+  ( sleep "$ATTEMPT_TIMEOUT"; kill -TERM "$pid" 2>/dev/null; sleep 8; kill -KILL "$pid" 2>/dev/null ) &
+  local watcher=$!
+  wait "$pid" 2>/dev/null
+  local code=$?
+  # Stop the watchdog so it does not fire into the next attempt.
+  kill "$watcher" 2>/dev/null
+  wait "$watcher" 2>/dev/null
+  # 143 = SIGTERM, 137 = SIGKILL: the watchdog tripped, i.e. a hang.
+  if [ "$code" = "143" ] || [ "$code" = "137" ]; then
+    echo "!!! claude exceeded ${ATTEMPT_TIMEOUT}s and was killed (hang, not a slow run)"
+  fi
+  return "$code"
+}
+
+run_claude
 CODE=$?
+if [ "$CODE" -ne 0 ]; then
+  echo "=== attempt 1 failed (exit $CODE) at $(date) — retrying once ==="
+  run_claude
+  CODE=$?
+fi
 
 echo "=== exit $CODE at $(date) ==="
 if [ $CODE -ne 0 ]; then
