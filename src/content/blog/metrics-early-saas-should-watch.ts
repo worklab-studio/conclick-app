@@ -115,7 +115,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "This is the only place I will mention Conclick specifically: we built revenue attribution as a core feature, not an add-on, specifically because bootstrapped founders need to know which campaigns produce paying customers, not just visitors. It connects Stripe, Paddle, Polar, Lemon Squeezy, and Dodo payments back to their source. That is the loop that matters."
+      "text": "This is the only place I will mention Conclick specifically: we built [revenue attribution for SaaS teams](/for/saas) as a core feature, not an add-on, specifically because bootstrapped founders need to know which campaigns produce paying customers, not just visitors. It connects Stripe, Paddle, Polar, Lemon Squeezy, and Dodo payments back to their source. That is the loop that matters."
     },
     {
       "type": "h2",

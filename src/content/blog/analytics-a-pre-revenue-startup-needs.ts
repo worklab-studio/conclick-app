@@ -105,7 +105,7 @@ const entry: ContentEntry = {
       "items": [
         "Add proper funnels and segments when you have enough traffic for the numbers to hold still. Roughly a few hundred people through each step per month; below that the percentages swing so hard they lie to you.",
         "Add heatmaps and session review when a specific page underperforms and the funnel cannot tell you why. The funnel finds the leaky step; you open a [click map](/guides/how-to-read-a-heatmap) for that one page, only once there is a step worth fixing.",
-        "Add revenue attribution the day money first changes hands. At that moment, where paying customers came from stops being a vanity question and becomes the one that sets your budget. Not a day earlier.",
+        "Add [SaaS revenue attribution](/for/saas) the day money first changes hands. At that moment, where paying customers came from stops being a vanity question and becomes the one that sets your budget. Not a day earlier.",
         "Add event tracking for a feature when you are deciding its future. About to cut something or double down on it? Instrument that one thing to make the call. Do not instrument all forty on the theory that one day you might ask.",
         "Add cohort retention when you genuinely have cohorts: enough signups spread across enough weeks that whether week-two users come back is a question with a real denominator."
       ]
