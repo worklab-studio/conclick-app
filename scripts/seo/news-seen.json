@@ -118,6 +118,13 @@
       "at": "2026-07-24",
       "verdict": "ignored",
       "reason": "Bug fix + a config warning — PostHog explicitly frames both as behavior-preserving cleanups. No action required from operators; fails 'changes what someone should do'."
+    },
+    {
+      "url": "https://digital-markets-act.ec.europa.eu/commission-fines-google-eur890-million-breaches-digital-markets-act-2026-07-23_en",
+      "title": "EU Commission fines Google €890M under DMA for Search self-preferencing + Play steering; 60-day remedy order, Jul 23 2026",
+      "at": "2026-07-24",
+      "verdict": "ignored",
+      "reason": "Primary and in-window and consequential (60-day remedy on EU SERPs). But off-beat for Conclick: this is competition-law SERP mechanics (comparison, travel, Play steering), not analytics/privacy/GEO. Site owners will search for it, but the authoritative voice is Search Engine Land / seroundtable / hospitality-tech shops that already publish first-hand DMA-impact data. Fails 'Conclick can answer it honestly'. Logging so weeks of secondary DMA coverage doesn't re-trigger evaluation."
     }
   ]
 }
