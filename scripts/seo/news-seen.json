@@ -125,6 +125,27 @@
       "at": "2026-07-24",
       "verdict": "ignored",
       "reason": "Primary and in-window and consequential (60-day remedy on EU SERPs). But off-beat for Conclick: this is competition-law SERP mechanics (comparison, travel, Play steering), not analytics/privacy/GEO. Site owners will search for it, but the authoritative voice is Search Engine Land / seroundtable / hospitality-tech shops that already publish first-hand DMA-impact data. Fails 'Conclick can answer it honestly'. Logging so weeks of secondary DMA coverage doesn't re-trigger evaluation."
+    },
+    {
+      "url": "https://www.seroundtable.com/recap-07-23-2026-41744.html",
+      "title": "Google Discover reintroduces 'About this result' menu on Discover cards, Jul 23 2026",
+      "at": "2026-07-24",
+      "verdict": "ignored",
+      "reason": "Small UI restoration bringing Discover into parity with SERP result menus. No behavior change for publishers or site owners, no new evergreen query created. Fails 'changes what someone should do'."
+    },
+    {
+      "url": "https://www.cnil.fr/en/webinar-suppliers-providers-pixels-ecosystem-implement-recommendation",
+      "title": "CNIL webinar Jul 22 2026 on pixels-ecosystem suppliers implementing the email-pixel recommendation",
+      "at": "2026-07-24",
+      "verdict": "ignored",
+      "reason": "Webinar/educational, not a rule change. The underlying CNIL email-pixel recommendation and its Jul 14 2026 consent deadline are already outside the last-3-days window. Also off-beat for Conclick: email marketing pixels, not web analytics/GEO."
+    },
+    {
+      "url": "https://openai.com/index/introducing-health-in-chatgpt/",
+      "title": "OpenAI introduces Health in ChatGPT, Jul 23 2026",
+      "at": "2026-07-24",
+      "verdict": "ignored",
+      "reason": "Off-beat: consumer-health chatbot feature, not analytics/SEO/privacy/GEO. No effect on site owners' analytics, tracking, or retrieval-citation strategy."
     }
   ]
 }
