@@ -11,9 +11,15 @@ import alternatives_plausible from './alternatives/plausible';
 import alternatives_posthog from './alternatives/posthog';
 import alternatives_umami from './alternatives/umami';
 import blog_ab_testing_with_low_traffic from './blog/ab-testing-with-low-traffic';
+import blog_analytics_a_pre_revenue_startup_needs from './blog/analytics-a-pre-revenue-startup-needs';
+import blog_analytics_stack_for_bootstrappers from './blog/analytics-stack-for-bootstrappers';
+import blog_attribution_is_guessing from './blog/attribution-is-guessing';
 import blog_click_map_vs_funnel from './blog/click-map-vs-funnel';
 import blog_cookie_banners_killing_your_data from './blog/cookie-banners-killing-your-data';
+import blog_gave_up_on_ga4 from './blog/gave-up-on-ga4';
 import blog_metrics_early_saas_should_watch from './blog/metrics-early-saas-should-watch';
+import blog_per_event_pricing_trap from './blog/per-event-pricing-trap';
+import blog_switching_analytics_gotchas from './blog/switching-analytics-gotchas';
 import blog_vanity_metrics_are_lying from './blog/vanity-metrics-are-lying';
 import blog_why_revenue_attribution_matters from './blog/why-revenue-attribution-matters';
 import comparisons_clarity from './comparisons/clarity';
@@ -75,9 +81,15 @@ const ENTRIES: ContentEntry[] = [
   alternatives_posthog,
   alternatives_umami,
   blog_ab_testing_with_low_traffic,
+  blog_analytics_a_pre_revenue_startup_needs,
+  blog_analytics_stack_for_bootstrappers,
+  blog_attribution_is_guessing,
   blog_click_map_vs_funnel,
   blog_cookie_banners_killing_your_data,
+  blog_gave_up_on_ga4,
   blog_metrics_early_saas_should_watch,
+  blog_per_event_pricing_trap,
+  blog_switching_analytics_gotchas,
   blog_vanity_metrics_are_lying,
   blog_why_revenue_attribution_matters,
   comparisons_clarity,

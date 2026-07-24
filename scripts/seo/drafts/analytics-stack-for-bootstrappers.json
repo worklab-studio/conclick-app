@@ -1,0 +1,67 @@
+{
+  "type": "blog",
+  "slug": "analytics-stack-for-bootstrappers",
+  "kind": "blog",
+  "keyword": "analytics stack for startups",
+  "draft": {
+    "h1": "The Analytics Stack I'd Choose to Bootstrap in 2026",
+    "metaTitle": "The Analytics Stack for Startups I'd Actually Build",
+    "metaDescription": "The analytics stack for startups almost never needs a warehouse or a CDP. Here is the honest three-part setup I run: traffic, revenue, and Search Console.",
+    "heroWord": "stack",
+    "category": "Growth",
+    "topics": ["analytics stack", "bootstrapping", "growth", "measurement"],
+    "tldr": "The analytics stack for startups is three things, not thirteen: one privacy-first tool for traffic and behavior, your payment data wired in so you know which traffic makes money, and Search Console for free query data. Everything past that, warehouses and CDPs and event pipelines, is a tax you pay before you have the scale to need it.",
+    "intro": "I have watched more bootstrapped founders drown in their own instrumentation than ever drown in a shortage of it. The analytics stack for startups gets sold as a maturity ladder you are supposed to climb, when for the first two years it is really just three tools doing three jobs. Here is what I would run on day one, what I would happily ignore, and the exact question that tells you it is finally time to add something.",
+    "sections": [
+      { "type": "h2", "text": "The whole stack fits on a napkin", "id": "whole-stack" },
+      { "type": "p", "text": "Three tools. One that shows me where traffic comes from and what people do once they arrive. One that tells me which of that traffic actually paid me. One that shows the search queries Google already knows I rank for and I do not. That is the entire setup I would run for the first two years of a bootstrapped product, and I have run leaner versions of it across four of my own projects. Nothing about being small requires you to measure less carefully. It requires you to measure fewer things, carefully." },
+      { "type": "p", "text": "The instinct that quietly kills momentum is treating tooling like a maturity test: real companies have a warehouse, so I should have a warehouse. You should not. A warehouse answers questions you cannot yet afford to ask, at a setup and upkeep cost you pay every single week whether or not you ever ask them." },
+
+      { "type": "h2", "text": "What does an analytics stack for startups actually need?", "id": "what-it-needs" },
+      { "type": "p", "text": "Start with one privacy-first tool that covers both traffic and behavior, because splitting those two jobs across separate products is the first unnecessary bill most founders sign. Traffic tells me the volume and the source: which post, which tweet, which referral sent the 40 people who showed up on Tuesday. Behavior tells me what those 40 did: where they clicked, how far they scrolled, where they hammered something that was never a button." },
+      { "type": "p", "text": "Privacy-first matters here for a boring, practical reason, not a moral one. A [cookieless setup](/glossary/cookieless-analytics) is lighter, it survives ad blockers better, and it usually lets you skip the cookie banner, though it still writes a first-party id to localStorage and whether that needs consent depends on your jurisdiction, so treat that as engineering, not legal advice. You get cleaner numbers and one fewer compliance headache while you are still tiny." },
+      { "type": "p", "text": "For that first layer I build Conclick, which keeps traffic, heatmaps, and revenue in one dashboard, but I am not going to pretend it is the only honest choice. Plausible or Fathom sitting next to your billing dashboard covers the same traffic-and-money job if you would rather wire it together yourself, and plenty of founders happily do exactly that. Pick the one whose dashboard you will actually open on a Monday. The best measurement tool is the one you look at." },
+
+      { "type": "h2", "text": "Why payment data is the number that ends arguments", "id": "payment-data" },
+      { "type": "p", "text": "Traffic counts start fights. Money ends them. The moment I can see that my newsletter sent 30 visitors and two of them became paying customers, while a viral post sent 3,000 and none did, every argument about where to spend next week collapses into an obvious answer. That is the entire reason to connect your payment processor to your traffic in the first place." },
+      { "type": "p", "text": "Most founders eventually discover their [Stripe total and their analytics total flatly disagree](/guides/stripe-revenue-vs-analytics-revenue), and the gap between them is exactly where the truth lives. Without payments joined to source, you are optimizing for visits and signups and other numbers that feel like progress and are sometimes the opposite. This is what [revenue attribution](/glossary/revenue-attribution) really buys you: not a prettier chart, a shorter argument." },
+      { "type": "p", "text": "You do not need a data science function for this. You need your billing tool (Stripe, Paddle, Polar, Lemon Squeezy, whatever you already use) connected to whatever records your visits, so a payment carries its source with it. Some products do that join for you. If yours does not, a monthly spreadsheet mapping your ten biggest customers back to how they first arrived will teach you more than most dashboards ever will." },
+
+      { "type": "h2", "text": "Do I need Google Search Console if I already have an analytics tool?", "id": "search-console" },
+      { "type": "p", "text": "Yes, it is free, and it shows you something your traffic tool structurally cannot: the searches where you appeared but got no click. Your own numbers only see people who already arrived. Search Console sees the ones who spotted your link in Google and chose someone else, which is the single richest list of things to fix that exists for a small site." },
+      { "type": "p", "text": "I check it for one pattern above all others: queries where I rank on page one and my click-through rate is quietly terrible. That is a title and description problem I can fix in ten minutes, and it is usually worth more than a month of writing fresh posts. When [impressions climb but clicks stay flat](/guides/impressions-up-clicks-down), Search Console is the only place that will tell you why, because Google is the one holding that data and no paid product can replace it." },
+
+      { "type": "h2", "text": "When should I add a warehouse, a CDP, or an event pipeline?", "id": "when-to-add" },
+      { "type": "p", "text": "Later than you think, and only when a specific question forces it. A data warehouse, a customer data platform, an event pipeline glued together with something like Segment: these are answers to problems of scale and headcount, not problems of ambition. At 500 or 5,000 visitors a month they add cost, setup, and standing maintenance while returning almost nothing you could not read straight off three simple tools." },
+      { "type": "callout", "text": "The cost of a tool is never its price. It is the hours you spend feeding it, the questions you stop asking because the answer is buried three joins deep, and the false confidence of watching a 12-visitor sample render as a clean, official-looking trend line." },
+      { "type": "p", "text": "I once sat with a founder doing maybe 800 visitors a month who had wired up an event pipeline, a warehouse, and three dashboards, and still could not tell me which of two blog posts had brought his last paying customer. He had bought the instrumentation of a 50-person company and none of its answers. We deleted most of it in an afternoon, and he understood his own funnel better by dinner. Complexity had been hiding his business from him." },
+      { "type": "p", "text": "Premature instrumentation is the growth version of premature optimization. Every event you decide to capture is a schema you now maintain, a thing that breaks silently, a line in a pipeline that someone has to own. Track the handful of events that map to money and skip the rest until a real question actually demands them." },
+
+      { "type": "h2", "text": "How do I know it's time to add a tool?", "id": "when-its-time" },
+      { "type": "p", "text": "The trigger is never a blog post insisting that serious teams use X. The trigger is a real question your current setup cannot answer, that you have genuinely tried to answer, and that is worth money to get right. Not 'it would be nice to know.' A specific, repeated, expensive question you keep bumping into." },
+      { "type": "p", "text": "For most bootstrappers that question shows up with the second product line, the first real paid-acquisition budget, or the first hire whose whole job is growth: someone who needs to slice cohorts in ways a simple dashboard was never built to do. That is when a warehouse earns its keep. Adding it then is prudent. Adding it now is cosplay." },
+      { "type": "quote", "text": "Buy the tool the day a question you are paid to answer outgrows the tool you already have. Not one day sooner.", "cite": "Deepak, founder of Conclick" },
+      { "type": "p", "text": "So my advice is almost embarrassingly plain. Wire up three tools this week: one privacy-first tool for traffic and behavior, your payment data joined to it, and Search Console. Read them until they bore you. Then, and only then, let a question you cannot answer pull the next tool into your setup. Cheap and clear will out-decide comprehensive and confusing every single time." }
+    ],
+    "faq": [
+      { "question": "What is the minimum analytics stack for a startup?", "answer": "One privacy-first tool for traffic and behavior, your payment data connected to it, and Google Search Console: three tools, three jobs. The first shows where visitors come from and what they do, the second shows which of them paid, and the third shows the search queries you rank for. For the first couple of years of a bootstrapped product, that setup answers almost every question you can afford to ask." },
+      { "question": "Do I need a data warehouse for a small startup?", "answer": "No, not until a specific, repeated, money-relevant question forces one. A warehouse solves problems of scale and headcount, and at a few hundred or few thousand visitors a month it adds setup and maintenance cost while returning answers you could read off three simple tools. Add it when a growth hire or a real ad budget needs cohort slicing your dashboard was never built to do." },
+      { "question": "Is Google Analytics enough on its own?", "answer": "Google Analytics measures traffic well, but tying those visits to actual revenue takes setup work most solo founders never finish. The bootstrapper's gap is rarely traffic data itself, it is connecting that traffic to money, so pair whatever traffic tool you use with your payment processor. Search Console then covers the search-query data no traffic product can see on its own." },
+      { "question": "What's the difference between traffic analytics and product analytics?", "answer": "Traffic analytics shows who arrives and from where; product analytics tracks detailed in-app events like feature usage and retention. For a pre-scale bootstrapper, traffic plus behavior plus revenue answers the urgent questions, while heavy event tracking mostly adds maintenance you are not ready to own. Reach for product analytics when a real retention or activation question genuinely blocks a decision." },
+      { "question": "How much should a bootstrapper spend on analytics tools?", "answer": "Close to nothing at the start: Search Console is free, and a solid privacy-first traffic tool runs roughly $9 to $20 a month. The expensive part of measurement was never the subscription, it is the hours lost maintaining tools that answer questions you do not have yet. Spend on the one product you will open every Monday, and skip everything you would have to talk yourself into needing." },
+      { "question": "When is it worth adding a CDP or event pipeline?", "answer": "When a real, repeated, money-relevant question outgrows your current tools, and not one day before. A customer data platform or event pipeline earns its cost at team scale, with a dedicated growth owner and multiple products or channels to reconcile. Below that, it is instrumentation for a company you do not run yet, and it tends to hide your business rather than reveal it." }
+    ],
+    "internalLinks": [
+      { "href": "/blog/metrics-early-saas-should-watch", "label": "Metrics early SaaS should watch", "group": "blog" },
+      { "href": "/blog/vanity-metrics-are-lying", "label": "Why vanity metrics lie to you", "group": "blog" },
+      { "href": "/guides/stripe-revenue-vs-analytics-revenue", "label": "Stripe revenue vs analytics revenue", "group": "guide" },
+      { "href": "/glossary/revenue-attribution", "label": "What revenue attribution means", "group": "glossary" },
+      { "href": "/guides/impressions-up-clicks-down", "label": "Impressions up, clicks down", "group": "guide" },
+      { "href": "/for/indie-hackers", "label": "Conclick for indie hackers", "group": "use-case" }
+    ],
+    "sources": [
+      { "label": "Google Search Console: about", "url": "https://search.google.com/search-console/about" },
+      { "label": "Wikipedia: Customer data platform", "url": "https://en.wikipedia.org/wiki/Customer_data_platform" }
+    ]
+  }
+}

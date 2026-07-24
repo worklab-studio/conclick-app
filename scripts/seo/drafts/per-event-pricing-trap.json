@@ -1,0 +1,66 @@
+{
+  "type": "blog",
+  "slug": "per-event-pricing-trap",
+  "kind": "blog",
+  "keyword": "analytics pricing for startups",
+  "draft": {
+    "h1": "Per-Event Analytics Pricing Punishes Startups for Growing",
+    "metaTitle": "Analytics Pricing for Startups: Why the Meter Hurts",
+    "metaDescription": "Per-event and per-session analytics pricing for startups punishes growth: the bigger your traffic, the scarier the bill. Why flat pricing wins for small teams.",
+    "heroWord": "metered",
+    "category": "Growth",
+    "topics": ["pricing", "growth", "bootstrapping", "budgets"],
+    "tldr": "Per-event and per-session analytics pricing for startups quietly punishes growth: the more traffic you earn, the more you owe, right when a surprise bill hurts most. Worse, a running meter warps behavior, pushing you to under-instrument and dread spikes. For a small team, flat predictable pricing usually beats it.",
+    "intro": "I have watched analytics pricing for startups turn a genuinely good week into a small financial panic. A post lands on the front page of a big aggregator, 40,000 people show up, and instead of celebrating I am doing mental math on what those visitors just cost me. That is backwards. The tool that measures your growth should not be the thing that makes you nervous about growing.",
+    "sections": [
+      { "type": "h2", "text": "The month a traffic spike cost more than the launch made", "id": "traffic-spike-cost-me" },
+      { "type": "p", "text": "Early on I ran a metered plan without thinking hard about the model. It felt cheap. The tier I picked covered a comfortable number of monthly events, and for months I sat well under the cap. Then a single launch went sideways in the best possible way: a newsletter picked us up, the post got shared, and for about ten days my traffic did a clean 6x." },
+      { "type": "p", "text": "The bill did what metered bills do. Every extra pageview, every tracked action, every click I had wired up to measure the launch counted against the cap, and once I blew through it the overage rate was several times the base rate. I made a few hundred dollars in new trials from that spike. I spent a chunk of it paying for the privilege of watching it happen. The cost of measuring scaled with the exact thing I was trying to measure." },
+      { "type": "callout", "text": "A meter charges you the most in the one moment you can afford it least. A spike is when cash is tightest and attention is thinnest, and that is precisely when the usage bar turns red and the upgrade prompt appears." },
+
+      { "type": "h2", "text": "How does per-event and per-session pricing actually work?", "id": "how-metered-pricing-works" },
+      { "type": "p", "text": "Strip away the marketing names and most measurement tools bill on one of a few shapes. Per-event or per-data-point plans charge for each thing your site fires: a pageview, a click, a form field, a custom action. Per-session or per-visitor plans charge for people or visits inside a rolling window. Per-seat plans charge for every teammate who logs in. Flat plans charge one price and stop counting." },
+      { "type": "p", "text": "None of these models is evil. Each one maps to a real cost the vendor carries, mostly the ingestion and storage of your data. The trouble is not that a meter exists. The trouble is which direction it points for a company whose entire job is to make the number on that meter go up." },
+
+      { "type": "h2", "text": "Why metered pricing punishes growth", "id": "why-it-punishes-growth" },
+      { "type": "p", "text": "Here is the structural problem. Your revenue and your event volume do not grow in lockstep. A content site or a freemium product pulls in a flood of anonymous visitors long before those visitors turn into money. So the meter climbs on traffic while the bank account climbs on conversions, and the gap between those two curves is a charge you pay in advance of the revenue that is supposed to justify it." },
+      { "type": "p", "text": "The result is a cost that peaks right when your margins are thinnest. A viral week, a paid campaign that overperforms, a seasonal rush: every one of these is a success that arrives dressed as an invoice. Founders end up half-hoping a spike ends before it tips them into the next tier. I have felt that, and rooting against your own traffic is a genuinely bad feeling to sit with." },
+      { "type": "p", "text": "Flat pricing inverts the whole thing. When the bill is the same whether 5,000 or 500,000 people show up, a spike is pure upside and you get to simply enjoy it. The predictability is worth more than the raw dollars, because it removes an entire category of anxiety from every launch you run." },
+
+      { "type": "h2", "text": "The quieter damage: a meter warps how you measure", "id": "metered-pricing-warps-behavior" },
+      { "type": "p", "text": "The bill is the obvious cost. The hidden one is worse, and almost nobody prices it in. When every event costs money, you start instrumenting less. You skip the custom event you were curious about. You do not track that secondary button because it is not worth the line item. You switch on sampling to hold the volume down, which means you are now making decisions off a fraction of your data and calling it insight." },
+      { "type": "p", "text": "I have caught myself doing all three. A meter trains you to under-measure, which quietly defeats the whole reason you bought the tool in the first place. You end up owning a dashboard you are afraid to fully use, and one you dread checking during a launch is not a growth tool, it is a liability with a login. When measurement gets rationed, the first thing you lose is the small, weird, exploratory tracking that actually teaches you something. [Vanity metrics](/blog/vanity-metrics-are-lying) are cheap to collect; the granular data that changes a real decision is exactly what a meter discourages." },
+      { "type": "p", "text": "There is a second-order version of this too. Bots and scrapers fire events all day. If you pay per hit, you are literally paying to store [traffic you never asked for](/guides/filter-bot-traffic-from-analytics), and cleaning it up turns into a budgeting chore instead of a simple data-quality one." },
+
+      { "type": "h2", "text": "When does usage-based pricing actually make sense?", "id": "when-usage-pricing-makes-sense" },
+      { "type": "p", "text": "I want to be fair here, because usage billing is not a scam and metered tools are not villains. For a genuinely data-heavy operation, paying per event is honest and correct. If you are running a warehouse-native setup, piping billions of events through a pipeline and funding real-time infrastructure, then paying in proportion to what you consume is the fairest arrangement there is. A flat fee at that scale would just mean small customers subsidizing enormous ones." },
+      { "type": "p", "text": "Usage billing also aligns incentives when the customer captures value from each event. A large product-analytics team that ties [sessions and visitors](/glossary/sessions-vs-visitors) back to specific revenue can rationalize a per-user bill, because the people on the meter are the people making them money. The model fits when volume and value move together. It breaks when they do not, which is the normal condition of a bootstrapped company measuring a big pile of anonymous traffic that has not paid it a cent yet." },
+
+      { "type": "h2", "text": "What should a bootstrapped founder actually do about it?", "id": "what-to-do-about-it" },
+      { "type": "p", "text": "You do not have to accept a meter as the cost of knowing your own numbers. A few concrete moves have saved me real money and, more to the point, real stress:" },
+      { "type": "ul", "items": [
+        "Model your bill at 3x your current traffic before you sign, not after. If a good month scares you, the tool is wrong for you, however cheap the entry tier looks today.",
+        "Match the model to your reality. If your traffic is spiky or mostly anonymous, favor a flat plan. If it is linear and every user is identified and monetized, a usage plan can genuinely come out cheaper.",
+        "Read the overage clause out loud. The per-unit rate above your cap is where the real damage lives, and it is rarely buried below the fold by accident.",
+        "Separate the tools that must scale with data from the ones that should not. A simple traffic and behavior dashboard belongs on a flat plan. A heavy event pipeline is a different purchase with a different budget."
+      ] },
+      { "type": "p", "text": "This is the honest reason I settled on a flat price for my own tool. Conclick is a flat $9 a month, and it stays $9 whether you get a hundred visitors or a hundred thousand, because I built it for the exact person I used to be: a founder who wants to watch the numbers climb without a meter running in the background. Treat that as one honest data point, not a pitch. The broader move matters more than any single tool. Pick billing that gets cheaper per visitor as you grow, never more expensive, so your measurement stays something you use freely instead of something you ration." },
+      { "type": "p", "text": "The test is simple. Open your current plan and ask what happens to the bill if tomorrow goes ten times better than today. If the answer makes you flinch, you are paying a growth penalty you did not agree to, and you should not be. The tool that counts your wins should never be the reason you brace for one." }
+    ],
+    "faq": [
+      { "question": "What is per-event pricing in analytics?", "answer": "Per-event pricing charges you for each action your site records: a pageview, a click, a form interaction, or a custom event. Your bill rises with the raw volume of activity, not with your revenue. It suits data-heavy operations but tends to punish small teams whose traffic outpaces their income." },
+      { "question": "Why does usage-based analytics pricing get more expensive as you grow?", "answer": "Because your event or visitor volume climbs faster than your revenue, especially early on. A flood of anonymous visitors from a launch or a campaign fires thousands of billable events long before any of them become paying customers, so the meter outruns the money. Flat pricing sidesteps this by charging the same regardless of volume." },
+      { "question": "Is flat-rate analytics pricing better for startups?", "answer": "For most bootstrapped startups, flat-rate pricing is easier to live with because the bill is predictable and a traffic spike becomes pure upside instead of a surprise cost. It stops making sense only at very high volumes, where paying in proportion to usage can actually be cheaper. Match the model to how spiky and how monetized your traffic really is." },
+      { "question": "Does per-event pricing change how I track my product?", "answer": "Yes, and that is its most underrated cost. When each event has a price, teams instrument less, skip exploratory tracking, and switch on sampling, which means making decisions on only a fraction of the data. A tool you are afraid to fully use quietly stops being worth paying for." },
+      { "question": "When is usage-based pricing the fair choice?", "answer": "Usage-based pricing is fair when volume and value move together: a data-heavy team running billions of events through real infrastructure should pay in proportion to what it consumes. It is also reasonable when every tracked user is identified and tied to revenue. It becomes a poor deal when you are measuring a large pool of anonymous traffic that has not paid you yet." },
+      { "question": "How do I avoid a surprise analytics bill during a traffic spike?", "answer": "Model your bill at three to five times your current traffic before you commit, and read the overage rate that applies above your plan cap. If a great month would push you into an expensive tier, either pick a flat plan or set hard caps and alerts. The goal is that a spike never turns into an invoice you did not expect." }
+    ],
+    "internalLinks": [
+      { "href": "/guides/conversion-funnel-software-pricing", "label": "How the pricing models actually work", "group": "guide" },
+      { "href": "/blog/vanity-metrics-are-lying", "label": "Why vanity metrics lie to you", "group": "blog" },
+      { "href": "/glossary/sessions-vs-visitors", "label": "Sessions vs visitors, explained", "group": "glossary" },
+      { "href": "/guides/filter-bot-traffic-from-analytics", "label": "Filter bot traffic from analytics", "group": "guide" },
+      { "href": "/for/indie-hackers", "label": "Conclick for indie hackers", "group": "use-case" }
+    ]
+  }
+}

@@ -1,0 +1,216 @@
+import type { ContentEntry } from '../schema';
+
+const entry: ContentEntry = {
+  "type": "blog",
+  "slug": "gave-up-on-ga4",
+  "h1": "Why I Gave Up on GA4, and What I Reach For Now",
+  "metaTitle": "Why I Finally Gave Up on GA4 as a Bootstrapped Founder",
+  "metaDescription": "Why I gave up on GA4 after years of sampling, a 14-month data cap, and consent-mode gaps eating conversions. The honest reasons, and what I run now.",
+  "tldr": "I gave up on GA4 because, for a bootstrapped founder who just needs to know which traffic makes money, it is the wrong amount of tool. Sampling on a growing site, a 14-month cap on my own data, and consent-mode gaps quietly eating conversions cost me more hours than the free price saved. GA4 is powerful. I needed less.",
+  "intro": "This is the honest story of why I gave up on GA4, after years of defending it to everyone who asked. No single disaster pushed me off it. It was the slow accumulation: a report that started sampling once traffic grew, an export I could not run because the data had aged out, a conversion count that never matched Stripe. I still think GA4 is the most powerful free analytics on the planet. That turned out to be exactly the problem.",
+  "sections": [
+    {
+      "type": "h2",
+      "text": "What finally made me give up on GA4",
+      "id": "what-finally-made-me-quit"
+    },
+    {
+      "type": "p",
+      "text": "The moment it clicked was mundane. I opened an exploration to answer one question, which blog posts bring visitors who eventually pay, and the report told me it was based on a sample. My property had grown past the point where explorations stop reading every event and start estimating. The number I was about to make a decision on was a guess wearing a precise-looking decimal. I had crossed the line from a free tool that reports my data to a free tool that approximates my data, and I never noticed the day it happened."
+    },
+    {
+      "type": "p",
+      "text": "So I sat there and did the math on what the tool had actually cost me. Not in dollars, it is free. In afternoons. Every clean number I ever pulled out of it, I had earned by wiring, filtering, cross-checking, and second-guessing. For a team of one chasing revenue, that bill had quietly grown larger than the reporting was worth."
+    },
+    {
+      "type": "h2",
+      "text": "Is GA4 sampling my data on a growing site?",
+      "id": "is-ga4-sampling-my-data"
+    },
+    {
+      "type": "p",
+      "text": "Yes, and this is the frustration that compounds fastest as you succeed. Standard aggregated reports run unsampled, but the Explorations you actually reach for when the question gets interesting begin sampling once a query crosses the property's event quota, which is ten million events for a standard property, per Google's own documentation. A small site never trips that wire. A growing one does, right when the stakes rise and you most need the exact figure rather than a modeled one."
+    },
+    {
+      "type": "p",
+      "text": "Sampling has a quieter cousin: thresholding. GA4 withholds rows when a result could be used to identify an individual, especially with Google signals switched on, so demographic and small-segment data disappears behind an (other) bucket without warning. I lost most of an afternoon once, convinced a channel had died, when the rows had simply been thresholded away. If you want the mechanics of when this kicks in, our writeup on [whether GA4 is sampling your reports](/guides/is-ga4-sampling-your-data) walks through the thresholds in plain terms."
+    },
+    {
+      "type": "h2",
+      "text": "How long does GA4 keep your data?",
+      "id": "how-long-does-ga4-keep-data"
+    },
+    {
+      "type": "p",
+      "text": "Shorter than you think, and shorter than a real business needs. On the free tier, user-level and event-level data is retained for a maximum of fourteen months, and the default setting is two. Aggregated standard reports live longer, but the granular exploration data, the stuff you need to answer a real question about last year's cohort, ages out on that clock. I went looking for a year-over-year behavioral view once and the events were simply not there anymore."
+    },
+    {
+      "type": "p",
+      "text": "This one landed harder because of what came before it. Google stopped Universal Analytics from processing new data on July 1, 2023, and removed access to UA properties and their history in July 2024. Years of data I had assumed I owned were gone, and the replacement handed me a fourteen-month window instead. If you are still moving across, plan the [migration from Universal Analytics](/guides/ga4-migration-guide) around that retention ceiling, because nothing warns you until you go hunting for old data and find a blank screen."
+    },
+    {
+      "type": "h2",
+      "text": "Why did consent mode v2 start eating my conversions?",
+      "id": "why-consent-mode-ate-conversions"
+    },
+    {
+      "type": "p",
+      "text": "Because consent and measurement are now the same problem, and a small site sits on the losing side of it. Since March 2024, Google has required Consent Mode v2 for advertisers who want to use EEA audiences, and it changes what you capture the instant a visitor declines. In basic consent mode, the tags do not fire for that visitor at all. In advanced mode, GA4 sends cookieless pings and then models the missing conversions, but the modeling only switches on once you clear Google's traffic thresholds."
+    },
+    {
+      "type": "p",
+      "text": "I run a small site. I never cleared those thresholds. So every visitor who hit reject was not modeled and not counted, and my conversion total drifted further from my payment processor every month. I was making budget calls on a figure that was structurally too low, and I could not tell by how much. A metric you cannot trust is worse than no metric, because it still feels like evidence and you still act on it."
+    },
+    {
+      "type": "callout",
+      "text": "The free price is the most expensive thing about GA4. It costs nothing because you settle up in a different currency: the hours you spend wiring and reconciling it, and the visitor data that funds Google's advertising business. For a solo founder, hours are the scarcest currency there is, and this tool spends them freely."
+    },
+    {
+      "type": "h2",
+      "text": "Why does GA4 reporting eat so much of my time?",
+      "id": "why-reporting-eats-time"
+    },
+    {
+      "type": "p",
+      "text": "The interface is built to answer the questions Google finds interesting, which are not always the one you asked. To get a clean, recurring view of the handful of metrics I cared about, I ended up doing what most teams do: piping the data into Looker Studio and rebuilding my dashboard by hand. That wiring is genuinely capable and genuinely a second job. Every field mapping, every blended source, every filter that breaks the morning Google renames a dimension."
+    },
+    {
+      "type": "p",
+      "text": "I added the hours up across one quarter and it was embarrassing. I was spending more time maintaining the measurement of the business than acting on what it measured. That is the exact inversion a one-person team cannot afford. Analytics is supposed to buy me time so I can ship. Mine had turned reporting itself into the thing I shipped."
+    },
+    {
+      "type": "h2",
+      "text": "GA4 is genuinely good, and still the wrong amount of tool",
+      "id": "ga4-is-good-but-wrong-size"
+    },
+    {
+      "type": "p",
+      "text": "Let me be clear, because this is not a hit piece: GA4 is the most capable free analytics product available, full stop. If you run a large media site, sell ads, live inside Google Ads, and have an analyst whose actual job is to tend it, GA4 repays that investment in a way almost nothing else does at the price. The audiences, the raw BigQuery export, the tie-in with the rest of Google's stack: all real, all valuable, all free."
+    },
+    {
+      "type": "p",
+      "text": "None of that describes me. I am one person who needs to know which traffic makes money and where I am losing it. Handing that job to GA4 is like buying a commercial kitchen to make my own breakfast. The power is not imaginary, it is just aimed at a problem I do not have, and the setup and upkeep are priced for a team I do not employ. The mistake was mine, for assuming the free and famous tool was automatically the right-sized one."
+    },
+    {
+      "type": "quote",
+      "text": "GA4 is not a bad tool. It is a big tool, and I am a small team. Those are different problems, and the free price hid the mismatch from me for a year.",
+      "cite": "Deepak, founder of Conclick"
+    },
+    {
+      "type": "h2",
+      "text": "What does a small team actually need instead?",
+      "id": "what-a-small-team-needs"
+    },
+    {
+      "type": "p",
+      "text": "Start from the only question that pays rent: which traffic makes money. Most founders do not need session-level everything; they need each sale traced back to the source, campaign, and page that earned it, plus the biggest leak on the path to that sale. If your analytics cannot answer which channel produced revenue this month without an export and a spreadsheet, it is measuring the wrong thing accurately. This is the argument I make in [why revenue attribution beats raw traffic counts](/blog/why-revenue-attribution-matters), and it is the lens I now judge every tool by."
+    },
+    {
+      "type": "p",
+      "text": "So I switched to something deliberately smaller. I moved to Conclick, which connects my payment processor and ties each payment back to its source and funnel, and puts heatmaps and drop-off in the same place, for a flat nine dollars a month instead of a free tool that bills me in hours. It is cookieless and first-party by design, though whether you still need a consent banner depends on your jurisdiction, and that is not legal advice. That is the honest reason I made the change; how it lands for you depends on how much of GA4 you actually use."
+    },
+    {
+      "type": "p",
+      "text": "If you are on the fence, do not rip anything out. Run a leaner, revenue-first tool next to GA4 for a month and compare which one answers your real questions faster and with less setup. Keep whichever wins. For me it was not close, and my only regret is the year I spent defending the free tool instead of measuring whether it still fit."
+    }
+  ],
+  "faq": [
+    {
+      "question": "Is GA4 free?",
+      "answer": "Yes, GA4 (Google Analytics 4) is free for standard use, with no charge for the core reporting most sites rely on. The paid tier, Analytics 360, targets enterprises with very high event volume and stricter service terms. For a founder the sticker price is genuinely zero; the real cost shows up as the time you spend wiring and reconciling it."
+    },
+    {
+      "question": "Does GA4 sample data?",
+      "answer": "Yes, GA4 samples data in Explorations once a query exceeds the property's event quota, which is ten million events for a standard property. Standard aggregated reports stay unsampled, but the flexible exploration reports you use for deeper questions estimate from a sample above that threshold. On a growing site you hit this exactly when precise numbers matter most."
+    },
+    {
+      "question": "How long does GA4 store my data?",
+      "answer": "GA4 retains user-level and event-level data for a maximum of fourteen months on the free tier, with two months as the default. Aggregated standard reports persist longer, but the granular data behind Explorations expires on that schedule. If you need multi-year cohort analysis, you have to export the data somewhere else before it ages out."
+    },
+    {
+      "question": "Is my old Universal Analytics data still available?",
+      "answer": "No. Google stopped Universal Analytics from processing new data on July 1, 2023, and removed access to UA properties and their historical data in July 2024. If you did not export it before then, that history is gone. This is one reason the move to GA4 felt like a reset rather than a continuation."
+    },
+    {
+      "question": "Can consent mode v2 cause you to lose conversions?",
+      "answer": "Yes, consent mode v2 can undercount conversions when visitors decline and your traffic is too low for Google's modeling to activate. In basic consent mode the tags do not fire for a declining visitor; in advanced mode GA4 models the gap, but only above certain traffic thresholds. Small sites often fall below those thresholds and simply lose the declined-consent conversions."
+    },
+    {
+      "question": "What should I use instead of GA4 as a bootstrapped founder?",
+      "answer": "Use the simplest tool that ties your traffic to revenue, since that is the question a small team actually needs answered. That might be a lightweight privacy-first analytics tool with built-in revenue attribution, or even Search Console plus your payment processor if your needs are basic. I moved to Conclick for that reason, but the principle matters more than the product: pick the tool sized to the decisions you make, not the one with the most features."
+    }
+  ],
+  "heroWord": "enough",
+  "category": "Metrics",
+  "topics": [
+    "ga4",
+    "web analytics",
+    "metrics",
+    "revenue"
+  ],
+  "sources": [
+    {
+      "label": "Google Analytics Help: Data sampling",
+      "url": "https://support.google.com/analytics/answer/2637192"
+    },
+    {
+      "label": "Google Analytics Help: Data-retention settings",
+      "url": "https://support.google.com/analytics/answer/7667196"
+    },
+    {
+      "label": "Google Analytics Help: Universal Analytics sunset and data access",
+      "url": "https://support.google.com/analytics/answer/11583528"
+    },
+    {
+      "label": "Google Analytics Help: Consent mode and Consent Mode v2",
+      "url": "https://support.google.com/analytics/answer/9976101"
+    },
+    {
+      "label": "Google Analytics Help: About data thresholds",
+      "url": "https://support.google.com/analytics/answer/9383630"
+    }
+  ],
+  "internalLinks": [
+    {
+      "href": "/guides/is-ga4-sampling-your-data",
+      "label": "Is GA4 sampling your data?",
+      "group": "guide"
+    },
+    {
+      "href": "/guides/ga4-migration-guide",
+      "label": "The GA4 migration guide",
+      "group": "guide"
+    },
+    {
+      "href": "/blog/why-revenue-attribution-matters",
+      "label": "Why revenue attribution matters",
+      "group": "blog"
+    },
+    {
+      "href": "/glossary/revenue-attribution",
+      "label": "What revenue attribution means",
+      "group": "glossary"
+    },
+    {
+      "href": "/blog/vanity-metrics-are-lying",
+      "label": "Why vanity metrics lie to you",
+      "group": "blog"
+    },
+    {
+      "href": "/alternatives/google-analytics",
+      "label": "A Google Analytics alternative",
+      "group": "alternative"
+    }
+  ],
+  "relatedTools": [],
+  "leadMagnet": {
+    "kind": "addWebsite",
+    "headline": "Put this into practice",
+    "sub": "Conclick gives you privacy-first analytics, heatmaps, funnels, and revenue attribution in one. Free for 14 days, no card.",
+    "ctaLabel": "Add My Website"
+  },
+  "datePublished": "2026-07-24",
+  "dateModified": "2026-07-24"
+};
+
+export default entry;
