@@ -111,6 +111,13 @@
       "at": "2026-07-23",
       "verdict": "ignored",
       "reason": "Off-beat: paid-search policy/UX plumbing, not analytics/privacy/SEO organic/GEO. Conclick has no first-hand credibility on Google Ads appeals."
+    },
+    {
+      "url": "https://posthog.com/changelog",
+      "title": "PostHog Jul 22 2026: session-scoped survey trigger fix + masking-shadow warning in posthog.init",
+      "at": "2026-07-24",
+      "verdict": "ignored",
+      "reason": "Bug fix + a config warning — PostHog explicitly frames both as behavior-preserving cleanups. No action required from operators; fails 'changes what someone should do'."
     }
   ]
 }
