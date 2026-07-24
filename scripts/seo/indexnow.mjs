@@ -37,7 +37,7 @@ const MAX_BATCH = 10000; // protocol cap per submission
 // Mirrors src/app/sitemap.ts. Kept in sync by hand — both lists are short and
 // change about once a year.
 const CORE = ['', 'pricing', 'about', 'contact'];
-const HUBS = ['compare', 'alternatives', 'glossary', 'for', 'guides', 'blog', 'tools'];
+const HUBS = ['compare', 'alternatives', 'glossary', 'for', 'guides', 'blogs', 'tools'];
 // Directory (from lib.mjs DIR) -> URL prefix. Mirrors pathForType in src/content/schema.ts.
 const PREFIX = {
   comparisons: 'vs',
@@ -46,7 +46,7 @@ const PREFIX = {
   glossary: 'glossary',
   'use-cases': 'for',
   guides: 'guides',
-  blog: 'blog',
+  blog: 'blogs',
 };
 
 // --- key -------------------------------------------------------------------

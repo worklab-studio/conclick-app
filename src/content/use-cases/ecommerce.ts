@@ -114,7 +114,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "Conclick is cookieless. For ecommerce that's practical, not just ethical. [Cookie consent banners](/blog/cookie-banners-killing-your-data) degrade conversion rates. Some studies put the impact at 5-15% depending on banner implementation. If you are running traffic to a product page and a cookie wall is the first thing customers see, you are paying to show people a compliance notice before they see your product. Conclick doesn't need cookies to track sessions, so in most jurisdictions you don't need the banner at all. GDPR and CCPA-friendly without configuration."
+      "text": "Conclick is cookieless. For ecommerce that's practical, not just ethical. [Cookie consent banners](/blogs/cookie-banners-killing-your-data) degrade conversion rates. Some studies put the impact at 5-15% depending on banner implementation. If you are running traffic to a product page and a cookie wall is the first thing customers see, you are paying to show people a compliance notice before they see your product. Conclick doesn't need cookies to track sessions, so in most jurisdictions you don't need the banner at all. GDPR and CCPA-friendly without configuration."
     },
     {
       "type": "p",

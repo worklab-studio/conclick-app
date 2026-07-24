@@ -102,7 +102,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "The hardest part of ditching cookies is [revenue attribution](/blog/why-revenue-attribution-matters): connecting a payment back to the traffic source that generated it. Most cookieless tools punt on this entirely and just show you page stats. That's not enough. You need to know whether that $299 subscription came from your ProductHunt launch or a random Google search. Without that connection, you're still guessing about ROI."
+      "text": "The hardest part of ditching cookies is [revenue attribution](/blogs/why-revenue-attribution-matters): connecting a payment back to the traffic source that generated it. Most cookieless tools punt on this entirely and just show you page stats. That's not enough. You need to know whether that $299 subscription came from your ProductHunt launch or a random Google search. Without that connection, you're still guessing about ROI."
     },
     {
       "type": "p",
@@ -180,7 +180,7 @@ const entry: ContentEntry = {
       "group": "guide"
     },
     {
-      "href": "/blog/why-revenue-attribution-matters",
+      "href": "/blogs/why-revenue-attribution-matters",
       "label": "Why revenue attribution matters",
       "group": "blog"
     }

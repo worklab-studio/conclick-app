@@ -61,7 +61,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "callout",
-      "text": "Traffic that does not convert to revenue is not an asset. It is a cost. Attribution is the difference between [knowing your marketing ROI](/blog/why-revenue-attribution-matters) and guessing it."
+      "text": "Traffic that does not convert to revenue is not an asset. It is a cost. Attribution is the difference between [knowing your marketing ROI](/blogs/why-revenue-attribution-matters) and guessing it."
     },
     {
       "type": "p",
@@ -171,7 +171,7 @@ const entry: ContentEntry = {
       "group": "guide"
     },
     {
-      "href": "/blog/why-revenue-attribution-matters",
+      "href": "/blogs/why-revenue-attribution-matters",
       "label": "Why Revenue Attribution Matters",
       "group": "blog"
     }

@@ -78,7 +78,7 @@
     ],
     "sources": [
       { "label": "Google Analytics Help: Known bot-traffic exclusion", "url": "https://support.google.com/analytics/answer/9888366?hl=en" },
-      { "label": "Plausible: We tested how Google Analytics filters bot traffic", "url": "https://plausible.io/blog/testing-bot-traffic-filtering-google-analytics" },
+      { "label": "Plausible: We tested how Google Analytics filters bot traffic", "url": "https://plausible.io/blogs/testing-bot-traffic-filtering-google-analytics" },
       { "label": "IAB/ABC International Spiders and Bots List", "url": "https://www.iab.com/guidelines/iab-abc-international-spiders-bots-list/" },
       { "label": "MaxMind: GeoLite ASN databases", "url": "https://dev.maxmind.com/geoip/docs/databases/asn/" }
     ]

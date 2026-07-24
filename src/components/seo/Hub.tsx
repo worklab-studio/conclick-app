@@ -22,10 +22,10 @@ export interface HubItem {
   desc: string;
 }
 
-// Per-hub identity so /blog, /guides, /compare, /tools etc. don't render as the
+// Per-hub identity so /blogs, /guides, /compare, /tools etc. don't render as the
 // same page — the icon (matching the Resources dropdown) is the fast visual tell.
 const HUB_ICON: Record<string, LucideIcon> = {
-  '/blog': FileText,
+  '/blogs': FileText,
   '/guides': BookOpen,
   '/compare': BarChart3,
   '/alternatives': Shuffle,

@@ -143,7 +143,7 @@ const entry: ContentEntry = {
     },
     {
       "label": "Optimizely: the story behind the Stats Engine (sequential testing, always-valid inference)",
-      "url": "https://www.optimizely.com/insights/blog/statistics-for-the-internet-age-the-story-behind-optimizelys-new-stats-engine/"
+      "url": "https://www.optimizely.com/insights/blogs/statistics-for-the-internet-age-the-story-behind-optimizelys-new-stats-engine/"
     },
     {
       "label": "VWO: SmartStats, a Bayesian sequential testing engine",
@@ -152,7 +152,7 @@ const entry: ContentEntry = {
   ],
   "internalLinks": [
     {
-      "href": "/blog/vanity-metrics-are-lying",
+      "href": "/blogs/vanity-metrics-are-lying",
       "label": "Why vanity metrics lie",
       "group": "blog"
     },
@@ -167,7 +167,7 @@ const entry: ContentEntry = {
       "group": "glossary"
     },
     {
-      "href": "/blog/metrics-early-saas-should-watch",
+      "href": "/blogs/metrics-early-saas-should-watch",
       "label": "Metrics early SaaS should watch",
       "group": "blog"
     },

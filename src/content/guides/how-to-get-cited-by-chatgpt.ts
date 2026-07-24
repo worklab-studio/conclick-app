@@ -175,7 +175,7 @@ const entry: ContentEntry = {
     },
     {
       "label": "Ahrefs: what is llms.txt, and Anthropic and Perplexity support for it",
-      "url": "https://ahrefs.com/blog/what-is-llms-txt/"
+      "url": "https://ahrefs.com/blogs/what-is-llms-txt/"
     },
     {
       "label": "Conbersa: analysis finding the large majority of ChatGPT citations match Bing organic results",
@@ -194,7 +194,7 @@ const entry: ContentEntry = {
       "group": "glossary"
     },
     {
-      "href": "/blog/vanity-metrics-are-lying",
+      "href": "/blogs/vanity-metrics-are-lying",
       "label": "Why vanity metrics lie to you",
       "group": "blog"
     },

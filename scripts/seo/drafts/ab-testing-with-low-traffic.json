@@ -54,17 +54,17 @@
       { "question": "What should I test instead when I have low traffic?", "answer": "Test changes big enough that the effect is large and obvious: a new offer, a different price, a completely rewritten page. Then judge the trend over a few weeks with your own eyes, and lean hard on qualitative evidence like session recordings and direct replies. Above all, measure the downstream outcome, whether the change produced signups or revenue, not just the surface click." }
     ],
     "internalLinks": [
-      { "href": "/blog/vanity-metrics-are-lying", "label": "Why vanity metrics lie", "group": "blog" },
+      { "href": "/blogs/vanity-metrics-are-lying", "label": "Why vanity metrics lie", "group": "blog" },
       { "href": "/guides/how-to-read-a-funnel", "label": "How to read a funnel", "group": "guide" },
       { "href": "/glossary/conversion-funnel", "label": "Conversion funnel, explained", "group": "glossary" },
-      { "href": "/blog/metrics-early-saas-should-watch", "label": "Metrics early SaaS should watch", "group": "blog" },
+      { "href": "/blogs/metrics-early-saas-should-watch", "label": "Metrics early SaaS should watch", "group": "blog" },
       { "href": "/for/indie-hackers", "label": "Analytics for indie hackers", "group": "useCase" }
     ],
     "sources": [
       { "label": "Evan Miller: How Not To Run An A/B Test (the 26.1% false-positive figure from peeking)", "url": "https://www.evanmiller.org/how-not-to-run-an-ab-test.html" },
       { "label": "Kohavi et al., Online Experimentation at Microsoft (only ~1/3 of ideas improve their target metric)", "url": "https://ai.stanford.edu/~ronnyk/ExPThinkWeek2009Public.pdf" },
       { "label": "37signals / Signal v. Noise: A/B Testing Tech Note on determining sample size (the 16 sigma-squared rule)", "url": "https://signalvnoise.com/posts/3004-ab-testing-tech-note-determining-sample-size" },
-      { "label": "Optimizely: the story behind the Stats Engine (sequential testing, always-valid inference)", "url": "https://www.optimizely.com/insights/blog/statistics-for-the-internet-age-the-story-behind-optimizelys-new-stats-engine/" },
+      { "label": "Optimizely: the story behind the Stats Engine (sequential testing, always-valid inference)", "url": "https://www.optimizely.com/insights/blogs/statistics-for-the-internet-age-the-story-behind-optimizelys-new-stats-engine/" },
       { "label": "VWO: SmartStats, a Bayesian sequential testing engine", "url": "https://vwo.com/why-us/technology/statistics/" }
     ]
   }

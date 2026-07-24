@@ -160,7 +160,7 @@ const entry: ContentEntry = {
     },
     {
       "label": "Ahrefs: AI Overviews Reduce Clicks by 34.5%",
-      "url": "https://ahrefs.com/blog/ai-overviews-reduce-clicks/"
+      "url": "https://ahrefs.com/blogs/ai-overviews-reduce-clicks/"
     },
     {
       "label": "Google Search Console Help: What are impressions, position, and clicks? (AI Overviews and AI Mode counting)",
@@ -173,7 +173,7 @@ const entry: ContentEntry = {
   ],
   "internalLinks": [
     {
-      "href": "/blog/vanity-metrics-are-lying",
+      "href": "/blogs/vanity-metrics-are-lying",
       "label": "Why vanity metrics lie",
       "group": "blog"
     },
@@ -183,7 +183,7 @@ const entry: ContentEntry = {
       "group": "glossary"
     },
     {
-      "href": "/blog/why-revenue-attribution-matters",
+      "href": "/blogs/why-revenue-attribution-matters",
       "label": "Why revenue attribution matters",
       "group": "blog"
     },

@@ -59,7 +59,7 @@
     "internalLinks": [
       { "href": "/glossary/marketing-attribution", "label": "How marketing attribution actually works", "group": "glossary" },
       { "href": "/glossary/sessions-vs-visitors", "label": "Sessions vs visitors, explained", "group": "glossary" },
-      { "href": "/blog/why-revenue-attribution-matters", "label": "Why revenue attribution matters", "group": "blog" },
+      { "href": "/blogs/why-revenue-attribution-matters", "label": "Why revenue attribution matters", "group": "blog" },
       { "href": "/for/indie-hackers", "label": "Analytics for indie hackers", "group": "for" }
     ],
     "sources": [

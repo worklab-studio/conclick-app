@@ -129,6 +129,22 @@ const redirects = [
     destination: '/admin/users',
     permanent: false,
   },
+  // Blog moved /blog -> /blogs (2026-07-24). 301 the index, every post, and the
+  // RSS feed so existing links, the sitemap's old entries, and anything Google
+  // already crawled transfer to the new URLs instead of 404ing. `:slug*` catches
+  // /blog/rss.xml and /blog/<post> alike. Keep these until the old URLs age out
+  // of the index. NOTE: the Cloudflare Worker must also route conclick.io/blogs/*
+  // (wrangler.toml) or the redirect target itself 404s at the edge.
+  {
+    source: '/blog',
+    destination: '/blogs',
+    permanent: true,
+  },
+  {
+    source: '/blog/:slug*',
+    destination: '/blogs/:slug*',
+    permanent: true,
+  },
 ];
 
 // Adding rewrites + headers for all alternative tracker script names.

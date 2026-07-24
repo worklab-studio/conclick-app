@@ -33,7 +33,7 @@ const STATIC_PATHS = [
   '/pricing',
   '/about',
   '/contact',
-  '/blog',
+  '/blogs',
   '/guides',
   '/glossary',
   '/compare',

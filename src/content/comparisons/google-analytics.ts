@@ -63,7 +63,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "GA4 uses cookies and cross-site tracking. Under GDPR and CCPA, that means a consent banner. [Consent banners](/blog/cookie-banners-killing-your-data) reduce your analytics data quality: some estimates put opt-out rates at 30 to 60% depending on region and how aggressive the banner is. You end up making decisions based on a partial picture and you still have to maintain a cookie policy."
+      "text": "GA4 uses cookies and cross-site tracking. Under GDPR and CCPA, that means a consent banner. [Consent banners](/blogs/cookie-banners-killing-your-data) reduce your analytics data quality: some estimates put opt-out rates at 30 to 60% depending on region and how aggressive the banner is. You end up making decisions based on a partial picture and you still have to maintain a cookie policy."
     },
     {
       "type": "p",
@@ -166,7 +166,7 @@ const entry: ContentEntry = {
       "group": "alternative"
     },
     {
-      "href": "/blog/cookie-banners-killing-your-data",
+      "href": "/blogs/cookie-banners-killing-your-data",
       "label": "Cookie banners are killing your data",
       "group": "blog"
     }

@@ -67,7 +67,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "I have caught myself doing all three. A meter trains you to under-measure, which quietly defeats the whole reason you bought the tool in the first place. You end up owning a dashboard you are afraid to fully use, and one you dread checking during a launch is not a growth tool, it is a liability with a login. When measurement gets rationed, the first thing you lose is the small, weird, exploratory tracking that actually teaches you something. [Vanity metrics](/blog/vanity-metrics-are-lying) are cheap to collect; the granular data that changes a real decision is exactly what a meter discourages."
+      "text": "I have caught myself doing all three. A meter trains you to under-measure, which quietly defeats the whole reason you bought the tool in the first place. You end up owning a dashboard you are afraid to fully use, and one you dread checking during a launch is not a growth tool, it is a liability with a login. When measurement gets rationed, the first thing you lose is the small, weird, exploratory tracking that actually teaches you something. [Vanity metrics](/blogs/vanity-metrics-are-lying) are cheap to collect; the granular data that changes a real decision is exactly what a meter discourages."
     },
     {
       "type": "p",
@@ -154,7 +154,7 @@ const entry: ContentEntry = {
       "group": "guide"
     },
     {
-      "href": "/blog/vanity-metrics-are-lying",
+      "href": "/blogs/vanity-metrics-are-lying",
       "label": "Why vanity metrics lie to you",
       "group": "blog"
     },

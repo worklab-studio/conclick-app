@@ -5,7 +5,7 @@ import { siteUrl } from '@/lib/seo';
 // Emitted at /sitemap.xml. Framer rewrites conclick.io/sitemap.xml -> this. All
 // URLs use the conclick.io canonical host. Grows automatically as content entries
 // are added to the registry.
-const HUBS = ['compare', 'alternatives', 'glossary', 'for', 'guides', 'blog', 'tools'];
+const HUBS = ['compare', 'alternatives', 'glossary', 'for', 'guides', 'blogs', 'tools'];
 // Core Framer marketing pages (served from conclick.io) — included so the new
 // domain gives Google every canonical hint while it's still being indexed.
 const CORE: { path: string; priority: number }[] = [

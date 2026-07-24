@@ -201,7 +201,7 @@ const entry: ContentEntry = {
       "group": "guide"
     },
     {
-      "href": "/blog/click-map-vs-funnel",
+      "href": "/blogs/click-map-vs-funnel",
       "label": "Click map vs funnel",
       "group": "blog"
     }

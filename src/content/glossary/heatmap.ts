@@ -78,7 +78,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "The most common misread is treating a hot zone as automatically good. High click activity on an area only matters if that area is supposed to be clicked. If visitors are clicking a section header expecting it to expand but nothing happens, that's a problem, not a win. Always cross-reference the [click map](/blog/click-map-vs-funnel) with your intended user flow."
+      "text": "The most common misread is treating a hot zone as automatically good. High click activity on an area only matters if that area is supposed to be clicked. If visitors are clicking a section header expecting it to expand but nothing happens, that's a problem, not a win. Always cross-reference the [click map](/blogs/click-map-vs-funnel) with your intended user flow."
     },
     {
       "type": "p",
@@ -173,7 +173,7 @@ const entry: ContentEntry = {
       "group": "guide"
     },
     {
-      "href": "/blog/click-map-vs-funnel",
+      "href": "/blogs/click-map-vs-funnel",
       "label": "Click Map vs Funnel",
       "group": "blog"
     }

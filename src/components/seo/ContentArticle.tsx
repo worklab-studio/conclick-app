@@ -36,7 +36,7 @@ const CRUMB: Record<ContentEntry['type'], { name: string; eyebrow: string; hub: 
   glossary: { name: 'Glossary', eyebrow: 'Definition', hub: '/glossary' },
   useCase: { name: 'Use cases', eyebrow: 'Use case', hub: '/for' },
   guide: { name: 'Guides', eyebrow: 'Guide', hub: '/guides' },
-  blog: { name: 'Blog', eyebrow: 'Blog', hub: '/blog' },
+  blog: { name: 'Blog', eyebrow: 'Blog', hub: '/blogs' },
 };
 
 /**

@@ -75,7 +75,7 @@
       { "href": "/guides/is-ga4-sampling-your-data", "label": "Is GA4 sampling your data?", "group": "guide" }
     ],
     "sources": [
-      { "label": "Chrome for Developers: A new default Referrer-Policy, strict-origin-when-cross-origin", "url": "https://developer.chrome.com/blog/referrer-policy-new-chrome-default/" },
+      { "label": "Chrome for Developers: A new default Referrer-Policy, strict-origin-when-cross-origin", "url": "https://developer.chrome.com/blogs/referrer-policy-new-chrome-default/" },
       { "label": "MDN: Referrer-Policy header", "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Referrer-Policy" },
       { "label": "Search Engine Journal: Google Analytics Adds AI Assistant As Default Channel Group", "url": "https://www.searchenginejournal.com/google-analytics-adds-ai-assistant-as-default-channel-group/574974/" },
       { "label": "Google Analytics Help: Default channel group", "url": "https://support.google.com/analytics/answer/9756891" }

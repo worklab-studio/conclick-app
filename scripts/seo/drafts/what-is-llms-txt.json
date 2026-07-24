@@ -57,7 +57,7 @@
       { "question": "Should a small site bother creating one?", "answer": "If you publish developer docs, yes, since users point assistants at them and many platforms generate it for free. For a small blog or marketing site chasing search traffic, it is optional and low priority. It will not hurt, but do not expect a ranking boost from it." }
     ],
     "internalLinks": [
-      { "href": "/blog/vanity-metrics-are-lying", "label": "Why vanity metrics mislead you", "group": "blog" },
+      { "href": "/blogs/vanity-metrics-are-lying", "label": "Why vanity metrics mislead you", "group": "blog" },
       { "href": "/glossary/marketing-attribution", "label": "What marketing attribution means", "group": "glossary" },
       { "href": "/glossary/cookieless-analytics", "label": "What cookieless analytics means", "group": "glossary" },
       { "href": "/for/indie-hackers", "label": "Analytics built for indie hackers", "group": "useCase" }
@@ -66,7 +66,7 @@
       { "label": "llms.txt proposal and specification (llmstxt.org)", "url": "https://llmstxt.org/" },
       { "label": "Search Engine Journal: Google's John Mueller compares llms.txt to the keywords meta tag (April 17, 2025)", "url": "https://www.searchenginejournal.com/google-says-llms-txt-comparable-to-keywords-meta-tag/544804/" },
       { "label": "Search Engine Journal: Google says llms.txt has no current implementation", "url": "https://www.searchenginejournal.com/google-says-llms-txt-is-purely-speculative-for-now/577576/" },
-      { "label": "Mintlify: Simplifying docs for AI with /llms.txt", "url": "https://www.mintlify.com/blog/simplifying-docs-with-llms-txt" },
+      { "label": "Mintlify: Simplifying docs for AI with /llms.txt", "url": "https://www.mintlify.com/blogs/simplifying-docs-with-llms-txt" },
       { "label": "Anthropic developer documentation llms.txt", "url": "https://platform.claude.com/docs/llms.txt" }
     ]
   }

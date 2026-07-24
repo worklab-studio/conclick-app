@@ -52,8 +52,8 @@
       { "question": "When is it worth adding a CDP or event pipeline?", "answer": "When a real, repeated, money-relevant question outgrows your current tools, and not one day before. A customer data platform or event pipeline earns its cost at team scale, with a dedicated growth owner and multiple products or channels to reconcile. Below that, it is instrumentation for a company you do not run yet, and it tends to hide your business rather than reveal it." }
     ],
     "internalLinks": [
-      { "href": "/blog/metrics-early-saas-should-watch", "label": "Metrics early SaaS should watch", "group": "blog" },
-      { "href": "/blog/vanity-metrics-are-lying", "label": "Why vanity metrics lie to you", "group": "blog" },
+      { "href": "/blogs/metrics-early-saas-should-watch", "label": "Metrics early SaaS should watch", "group": "blog" },
+      { "href": "/blogs/vanity-metrics-are-lying", "label": "Why vanity metrics lie to you", "group": "blog" },
       { "href": "/guides/stripe-revenue-vs-analytics-revenue", "label": "Stripe revenue vs analytics revenue", "group": "guide" },
       { "href": "/glossary/revenue-attribution", "label": "What revenue attribution means", "group": "glossary" },
       { "href": "/guides/impressions-up-clicks-down", "label": "Impressions up, clicks down", "group": "guide" },

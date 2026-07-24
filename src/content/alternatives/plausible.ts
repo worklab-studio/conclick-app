@@ -20,7 +20,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "It connects directly to Stripe, Paddle, Polar, Lemon Squeezy, and Dodo. Once wired up, every payment gets [traced back to the source](/blog/why-revenue-attribution-matters) (the specific blog post, the Google ad, the newsletter link) so you can stop guessing what's worth spending on. That's the single biggest differentiator here, and no other tool in this list does it out of the box."
+      "text": "It connects directly to Stripe, Paddle, Polar, Lemon Squeezy, and Dodo. Once wired up, every payment gets [traced back to the source](/blogs/why-revenue-attribution-matters) (the specific blog post, the Google ad, the newsletter link) so you can stop guessing what's worth spending on. That's the single biggest differentiator here, and no other tool in this list does it out of the box."
     },
     {
       "type": "p",
@@ -34,7 +34,7 @@ const entry: ContentEntry = {
         "Live global visitor map so you can watch real traffic in real time",
         "Daily digest delivered to email, Slack, Discord, or Telegram: a hyped summary of the last 24 hours with milestone alerts",
         "GSC and GA4 import so you don't lose historical data on day one",
-        "Cookieless by default, [no consent banner needed](/blog/cookie-banners-killing-your-data) in most jurisdictions, GDPR and CCPA compliant"
+        "Cookieless by default, [no consent banner needed](/blogs/cookie-banners-killing-your-data) in most jurisdictions, GDPR and CCPA compliant"
       ]
     },
     {
@@ -156,12 +156,12 @@ const entry: ContentEntry = {
       "group": "glossary"
     },
     {
-      "href": "/blog/cookie-banners-killing-your-data",
+      "href": "/blogs/cookie-banners-killing-your-data",
       "label": "Cookie banners are killing your data",
       "group": "blog"
     },
     {
-      "href": "/blog/why-revenue-attribution-matters",
+      "href": "/blogs/why-revenue-attribution-matters",
       "label": "Why revenue attribution matters",
       "group": "blog"
     }

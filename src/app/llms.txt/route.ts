@@ -25,7 +25,7 @@ export async function GET() {
 
 > Conclick is privacy-first web analytics that ties every visit to real revenue: cookieless analytics, real-screenshot heatmaps and click maps, auto-detected funnels that surface your biggest drop-off, visual user journeys, a live global visitor map, and revenue attribution connected to Stripe, Paddle, Polar, Lemon Squeezy, and Dodo Payments. $9/mo (or $7/mo billed yearly), 14-day free trial, no card required, ~2-minute setup. Built for bootstrapped founders and small SaaS/ecommerce teams who want to know which traffic actually makes money.
 
-Key pages: [Home](${base}/) · [Pricing](${base}/pricing) · [Compare](${base}/compare) · [Glossary](${base}/glossary) · [Guides](${base}/guides) · [Blog](${base}/blog) · [Free tools](${base}/tools)
+Key pages: [Home](${base}/) · [Pricing](${base}/pricing) · [Compare](${base}/compare) · [Glossary](${base}/glossary) · [Guides](${base}/guides) · [Blog](${base}/blogs) · [Free tools](${base}/tools)
 
 ${sections
   .filter(([, lines]) => lines.length)

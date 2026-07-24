@@ -164,7 +164,7 @@ const entry: ContentEntry = {
     },
     {
       "label": "Mintlify: Simplifying docs for AI with /llms.txt",
-      "url": "https://www.mintlify.com/blog/simplifying-docs-with-llms-txt"
+      "url": "https://www.mintlify.com/blogs/simplifying-docs-with-llms-txt"
     },
     {
       "label": "Anthropic developer documentation llms.txt",
@@ -173,7 +173,7 @@ const entry: ContentEntry = {
   ],
   "internalLinks": [
     {
-      "href": "/blog/vanity-metrics-are-lying",
+      "href": "/blogs/vanity-metrics-are-lying",
       "label": "Why vanity metrics mislead you",
       "group": "blog"
     },

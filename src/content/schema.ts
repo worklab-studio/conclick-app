@@ -11,7 +11,7 @@ export type ContentType =
   | 'glossary' // /glossary/[slug]
   | 'useCase' // /for/[slug]
   | 'guide' // /guides/[slug]
-  | 'blog'; // /blog/[slug]
+  | 'blog'; // /blogs/[slug]
 
 export interface Author {
   name: string;
@@ -138,6 +138,6 @@ export function pathForType(type: ContentType, slug: string): string {
     case 'guide':
       return `guides/${slug}`;
     case 'blog':
-      return `blog/${slug}`;
+      return `blogs/${slug}`;
   }
 }

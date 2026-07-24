@@ -29,7 +29,7 @@
 
       { "type": "h2", "text": "What a full event taxonomy costs you before revenue", "id": "taxonomy-cost" },
       { "type": "p", "text": "Here is the part that makes people defensive. A full event taxonomy at the pre-revenue stage is not free insurance you will be glad you bought later. It carries a real price, and you pay it in the currency you have least of." },
-      { "type": "p", "text": "You pay in time: every event is a naming decision, a piece of code, a thing that breaks quietly when you refactor. You pay in false confidence: a wall of green numbers built on twenty visitors will happily show you a trend that is really three people and a bot. And you pay in attention, the one that actually kills companies. Hours spent perfecting how you would measure a funnel are hours not spent finding the ten users who would make the funnel real. Most of the vanity you later regret starts here, and I have argued before that [early dashboards tend to measure the wrong things](/blog/vanity-metrics-are-lying)." },
+      { "type": "p", "text": "You pay in time: every event is a naming decision, a piece of code, a thing that breaks quietly when you refactor. You pay in false confidence: a wall of green numbers built on twenty visitors will happily show you a trend that is really three people and a bot. And you pay in attention, the one that actually kills companies. Hours spent perfecting how you would measure a funnel are hours not spent finding the ten users who would make the funnel real. Most of the vanity you later regret starts here, and I have argued before that [early dashboards tend to measure the wrong things](/blogs/vanity-metrics-are-lying)." },
       { "type": "p", "text": "There is a version of measurement discipline that is genuinely rigorous, and a version that is procrastination wearing rigor's clothes. The tell is simple. Rigor asks a question you will act on this week. Procrastination builds infrastructure for a question you cannot answer until you are ten times bigger. Before revenue, almost every elaborate tracking plan is the second thing." },
       { "type": "quote", "text": "Instrumentation you cannot act on is not data. It is a to-do list you wrote for a company you do not have yet.", "cite": "Deepak, founder" },
 
@@ -67,11 +67,11 @@
       { "question": "What analytics actually matter for an early-stage startup?", "answer": "Whether people arrive, whether they reach your one key action, and where they fall off before it. Those three numbers are the analytics that matter for an early-stage startup before revenue; nearly everything else is noise at low volume. A traffic count, one funnel, one conversion goal. Scale the measurement up only when traffic and revenue give the extra numbers something real to describe." }
     ],
     "internalLinks": [
-      { "href": "/blog/metrics-early-saas-should-watch", "label": "Metrics early SaaS should watch", "group": "blog" },
-      { "href": "/blog/vanity-metrics-are-lying", "label": "Why vanity metrics lie to you", "group": "blog" },
+      { "href": "/blogs/metrics-early-saas-should-watch", "label": "Metrics early SaaS should watch", "group": "blog" },
+      { "href": "/blogs/vanity-metrics-are-lying", "label": "Why vanity metrics lie to you", "group": "blog" },
       { "href": "/glossary/conversion-funnel", "label": "What a conversion funnel is", "group": "glossary" },
       { "href": "/guides/how-to-read-a-funnel", "label": "How to read a funnel", "group": "guide" },
-      { "href": "/blog/why-revenue-attribution-matters", "label": "Why revenue attribution matters", "group": "blog" },
+      { "href": "/blogs/why-revenue-attribution-matters", "label": "Why revenue attribution matters", "group": "blog" },
       { "href": "/guides/filter-bot-traffic-from-analytics", "label": "Filter bot traffic from your data", "group": "guide" }
     ],
     "sources": [

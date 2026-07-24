@@ -196,7 +196,7 @@ const DEMO_PATHS = [
   '/',
   '/pricing',
   '/features',
-  '/blog/launch-week',
+  '/blogs/launch-week',
   '/docs/getting-started',
   '/integrations',
   '/about',

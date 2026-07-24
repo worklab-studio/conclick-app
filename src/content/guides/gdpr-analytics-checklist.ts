@@ -16,7 +16,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "The early GDPR years were a land-grab for data protection authorities. They went after the obvious targets: adtech, large publishers, Meta. Since 2024, enforcement has moved down-market. Austrian, Dutch, and Irish DPAs have issued findings against mid-sized SaaS companies. The 'we're too small to matter' argument is not a legal defence, and DPAs have made that clear.\n\nThe other shift is consent fatigue. Studies consistently show that users [dismiss consent banners](/blog/cookie-banners-killing-your-data) in under 2 seconds. More relevant to you: the EU's updated ePrivacy enforcement guidance treats dark patterns (pre-ticked boxes, buried reject options, consent walls) as automatic violations regardless of your cookie notice wording. If you're running a standard Google Analytics setup with a Cookiebot banner, you are probably still non-compliant in at least three member states."
+      "text": "The early GDPR years were a land-grab for data protection authorities. They went after the obvious targets: adtech, large publishers, Meta. Since 2024, enforcement has moved down-market. Austrian, Dutch, and Irish DPAs have issued findings against mid-sized SaaS companies. The 'we're too small to matter' argument is not a legal defence, and DPAs have made that clear.\n\nThe other shift is consent fatigue. Studies consistently show that users [dismiss consent banners](/blogs/cookie-banners-killing-your-data) in under 2 seconds. More relevant to you: the EU's updated ePrivacy enforcement guidance treats dark patterns (pre-ticked boxes, buried reject options, consent walls) as automatic violations regardless of your cookie notice wording. If you're running a standard Google Analytics setup with a Cookiebot banner, you are probably still non-compliant in at least three member states."
     },
     {
       "type": "h2",
@@ -166,7 +166,7 @@ const entry: ContentEntry = {
       "group": "guide"
     },
     {
-      "href": "/blog/cookie-banners-killing-your-data",
+      "href": "/blogs/cookie-banners-killing-your-data",
       "label": "Cookie banners are killing your data",
       "group": "blog"
     }

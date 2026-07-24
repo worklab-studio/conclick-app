@@ -69,7 +69,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "If you are running paid ads, content marketing, SEO, newsletter sponsorships, or any combination of them, you are making constant bets about where to spend time and money. Attribution is the scorecard for those bets, and getting to a [good-enough attribution setup that is honest about what it can and cannot see](/blog/attribution-is-guessing) matters more than picking the fanciest model."
+      "text": "If you are running paid ads, content marketing, SEO, newsletter sponsorships, or any combination of them, you are making constant bets about where to spend time and money. Attribution is the scorecard for those bets, and getting to a [good-enough attribution setup that is honest about what it can and cannot see](/blogs/attribution-is-guessing) matters more than picking the fanciest model."
     },
     {
       "type": "p",

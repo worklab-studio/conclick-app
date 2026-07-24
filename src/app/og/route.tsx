@@ -10,7 +10,7 @@ export const runtime = 'nodejs';
 //   ?slug=<meshKey>&word=<word.>   -> the mesh card (the current design)
 //   ?title=...&eyebrow=...         -> the legacy dark card
 //
-// The legacy branch is NOT dead code. The seven hub pages (/blog, /guides,
+// The legacy branch is NOT dead code. The seven hub pages (/blogs, /guides,
 // /compare, ...) have no ContentEntry, so no meshKey and no hero word, and
 // Hub.tsx still calls ogImageUrl(title). Deleting it breaks every hub card at
 // once, plus any already-crawled card URL sitting in a social scraper's cache.

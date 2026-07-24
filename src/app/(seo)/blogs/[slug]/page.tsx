@@ -16,7 +16,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const { slug } = await params;
   const e = getEntry('blog', slug);
   if (!e) return {};
-  const url = canonical(`/blog/${e.slug}`);
+  const url = canonical(`/blogs/${e.slug}`);
   const images = [e.ogImage || ogMeshUrl(meshKeyFor(e), heroWordFor(e))];
   return {
     title: e.metaTitle,

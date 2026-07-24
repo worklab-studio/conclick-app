@@ -40,7 +40,7 @@
       { "type": "quote", "text": "GA4 is not a bad tool. It is a big tool, and I am a small team. Those are different problems, and the free price hid the mismatch from me for a year.", "cite": "Deepak, founder of Conclick" },
 
       { "type": "h2", "text": "What does a small team actually need instead?", "id": "what-a-small-team-needs" },
-      { "type": "p", "text": "Start from the only question that pays rent: which traffic makes money. Most founders do not need session-level everything; they need each sale traced back to the source, campaign, and page that earned it, plus the biggest leak on the path to that sale. If your analytics cannot answer which channel produced revenue this month without an export and a spreadsheet, it is measuring the wrong thing accurately. This is the argument I make in [why revenue attribution beats raw traffic counts](/blog/why-revenue-attribution-matters), and it is the lens I now judge every tool by." },
+      { "type": "p", "text": "Start from the only question that pays rent: which traffic makes money. Most founders do not need session-level everything; they need each sale traced back to the source, campaign, and page that earned it, plus the biggest leak on the path to that sale. If your analytics cannot answer which channel produced revenue this month without an export and a spreadsheet, it is measuring the wrong thing accurately. This is the argument I make in [why revenue attribution beats raw traffic counts](/blogs/why-revenue-attribution-matters), and it is the lens I now judge every tool by." },
       { "type": "p", "text": "So I switched to something deliberately smaller. I moved to Conclick, which connects my payment processor and ties each payment back to its source and funnel, and puts heatmaps and drop-off in the same place, for a flat nine dollars a month instead of a free tool that bills me in hours. It is cookieless and first-party by design, though whether you still need a consent banner depends on your jurisdiction, and that is not legal advice. That is the honest reason I made the change; how it lands for you depends on how much of GA4 you actually use." },
       { "type": "p", "text": "If you are on the fence, do not rip anything out. Run a leaner, revenue-first tool next to GA4 for a month and compare which one answers your real questions faster and with less setup. Keep whichever wins. For me it was not close, and my only regret is the year I spent defending the free tool instead of measuring whether it still fit." }
     ],
@@ -55,9 +55,9 @@
     "internalLinks": [
       { "href": "/guides/is-ga4-sampling-your-data", "label": "Is GA4 sampling your data?", "group": "guide" },
       { "href": "/guides/ga4-migration-guide", "label": "The GA4 migration guide", "group": "guide" },
-      { "href": "/blog/why-revenue-attribution-matters", "label": "Why revenue attribution matters", "group": "blog" },
+      { "href": "/blogs/why-revenue-attribution-matters", "label": "Why revenue attribution matters", "group": "blog" },
       { "href": "/glossary/revenue-attribution", "label": "What revenue attribution means", "group": "glossary" },
-      { "href": "/blog/vanity-metrics-are-lying", "label": "Why vanity metrics lie to you", "group": "blog" },
+      { "href": "/blogs/vanity-metrics-are-lying", "label": "Why vanity metrics lie to you", "group": "blog" },
       { "href": "/alternatives/google-analytics", "label": "A Google Analytics alternative", "group": "alternative" }
     ],
     "sources": [

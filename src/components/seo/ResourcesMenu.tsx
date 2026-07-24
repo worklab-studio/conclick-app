@@ -6,7 +6,7 @@ import { ChevronDown, FileText, BookOpen, BarChart3, Wrench } from 'lucide-react
 const SITE = process.env.NEXT_PUBLIC_SITE_URL || 'https://conclick.io';
 
 const ITEMS = [
-  { href: `${SITE}/blog`, icon: FileText, title: 'Blog', desc: 'Insights, product notes, and updates' },
+  { href: `${SITE}/blogs`, icon: FileText, title: 'Blog', desc: 'Insights, product notes, and updates' },
   { href: `${SITE}/guides`, icon: BookOpen, title: 'Guides', desc: 'Step-by-step walkthroughs and playbooks' },
   { href: `${SITE}/compare`, icon: BarChart3, title: 'Compare', desc: 'Feature and alternative comparisons' },
   { href: `${SITE}/tools`, icon: Wrench, title: 'Tools', desc: 'Free utilities and templates' },

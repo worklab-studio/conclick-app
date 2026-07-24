@@ -81,7 +81,7 @@
       { "href": "/glossary/conversion-funnel", "label": "What is a conversion funnel?", "group": "glossary" },
       { "href": "/guides/how-to-read-a-funnel", "label": "How to read a conversion funnel", "group": "guide" },
       { "href": "/guides/where-users-abandon-checkout", "label": "Where users abandon checkout", "group": "guide" },
-      { "href": "/blog/click-map-vs-funnel", "label": "Click map vs funnel", "group": "blog" }
+      { "href": "/blogs/click-map-vs-funnel", "label": "Click map vs funnel", "group": "blog" }
     ]
   }
 }

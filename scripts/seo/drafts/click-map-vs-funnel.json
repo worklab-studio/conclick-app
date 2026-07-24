@@ -69,14 +69,14 @@
       { "href": "/glossary/conversion-funnel", "label": "What a conversion funnel is", "group": "glossary" },
       { "href": "/glossary/heatmap", "label": "What a website heatmap is", "group": "glossary" },
       { "href": "/guides/how-to-read-a-funnel", "label": "How to read a funnel", "group": "guide" },
-      { "href": "/blog/vanity-metrics-are-lying", "label": "Why vanity metrics lie to you", "group": "blog" },
+      { "href": "/blogs/vanity-metrics-are-lying", "label": "Why vanity metrics lie to you", "group": "blog" },
       { "href": "/for/ecommerce", "label": "Conclick for ecommerce", "group": "use-case" },
       { "href": "/vs/hotjar", "label": "Conclick vs Hotjar", "group": "comparison" }
     ],
     "sources": [
       { "label": "Amplitude: Funnel analysis, find drop-offs and boost conversion", "url": "https://amplitude.com/guides/funnel-analysis" },
       { "label": "Kissmetrics glossary: Rage click", "url": "https://www.kissmetrics.io/glossary/rage-click" },
-      { "label": "FullStory: What is a dead click", "url": "https://www.fullstory.com/blog/dead-clicks/" },
+      { "label": "FullStory: What is a dead click", "url": "https://www.fullstory.com/blogs/dead-clicks/" },
       { "label": "Umami v3.2.0 release notes (heatmaps)", "url": "https://github.com/umami-software/umami/releases/tag/v3.2.0" },
       { "label": "Hotjar (Contentsquare): Funnels", "url": "https://contentsquare.com/guides/funnels/" }
     ]

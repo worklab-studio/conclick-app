@@ -12,22 +12,22 @@ import { BlogBoard } from './BlogBoard';
 import { JsonLd } from './JsonLd';
 import { SectionEyebrow } from './SectionEyebrow';
 
-// The magazine layout for /blog ONLY.
+// The magazine layout for /blogs ONLY.
 //
 // *** WHY THIS IS NOT HubGrid ***
-// HubGrid has seven callers (/blog, /guides, /compare, /alternatives, /glossary,
+// HubGrid has seven callers (/blogs, /guides, /compare, /alternatives, /glossary,
 // /for, /tools). Threading a category rail, per-category counts and mesh art
 // through it would either change the other six pages or bury six `path ===
-// '/blog'` branches inside one component. /glossary and /compare genuinely want
+// '/blogs'` branches inside one component. /glossary and /compare genuinely want
 // the tight uniform grid they have. So this is a sibling, not a fork: HubGrid is
-// untouched, and only /blog points here.
+// untouched, and only /blogs points here.
 //
 // *** WHY THE CATEGORY FILTER IS CSS-ONLY ***
 // Two obvious alternatives are both actively harmful here:
 //   1. `?category=` as a searchParam opts the route into dynamic rendering, which
 //      silently voids `export const revalidate = 86400` — the page stops being
 //      prerendered and every crawl hits the origin.
-//   2. Minting /blog/topic/[slug] creates six index pages holding 1-2 posts each
+//   2. Minting /blogs/topic/[slug] creates six index pages holding 1-2 posts each
 //      on a domain where roughly 1 page in 55 is currently indexed. Thin,
 //      near-duplicate, internally-linked category stubs are the textbook
 //      doorway-page pattern, and it suppresses the whole cluster, not just the
@@ -247,13 +247,13 @@ export function BlogIndex({ eyebrow, titleLead, titleSerif, intro }: BlogIndexPr
 
   return (
     <>
-      {/* Preserved from HubGrid: Google reads /blog as a curated CollectionPage
+      {/* Preserved from HubGrid: Google reads /blogs as a curated CollectionPage
           rather than a thin index. Built from ALL posts, not the visible tab. */}
       <JsonLd
         data={[
           itemListSchema(
             `${titleLead} ${titleSerif}`.trim(),
-            '/blog',
+            '/blogs',
             cards.map(c => ({ url: canonical(c.href), name: c.entry.h1 })),
           ),
         ]}

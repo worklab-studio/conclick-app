@@ -155,7 +155,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "There is no shortcut past this. I have watched founders spend months [A/B testing button colors](/blog/ab-testing-with-low-traffic) while their trial conversion rate sat at 7% and nobody asked why. The metrics do not lie. The question is whether you are watching the right ones."
+      "text": "There is no shortcut past this. I have watched founders spend months [A/B testing button colors](/blogs/ab-testing-with-low-traffic) while their trial conversion rate sat at 7% and nobody asked why. The metrics do not lie. The question is whether you are watching the right ones."
     }
   ],
   "faq": [
@@ -182,7 +182,7 @@ const entry: ContentEntry = {
   ],
   "internalLinks": [
     {
-      "href": "/blog/vanity-metrics-are-lying",
+      "href": "/blogs/vanity-metrics-are-lying",
       "label": "Vanity metrics are lying to you",
       "group": "blog"
     },
@@ -192,7 +192,7 @@ const entry: ContentEntry = {
       "group": "glossary"
     },
     {
-      "href": "/blog/ab-testing-with-low-traffic",
+      "href": "/blogs/ab-testing-with-low-traffic",
       "label": "A/B testing with low traffic",
       "group": "blog"
     },

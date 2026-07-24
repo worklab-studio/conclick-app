@@ -7,10 +7,10 @@ import { BlogIndex } from '@/components/seo/BlogIndex';
 export const revalidate = 86400;
 
 // hubMetadata is still the right helper — it is generic (canonical + OG +
-// Twitter) and has nothing hub-layout-specific in it. Reusing it keeps /blog's
+// Twitter) and has nothing hub-layout-specific in it. Reusing it keeps /blogs's
 // head identical in shape to the other six hubs.
 export const metadata = hubMetadata(
-  '/blog',
+  '/blogs',
   'The Conclick blog',
   'Opinionated writing on analytics, revenue attribution, and growth for bootstrapped founders — from the team building Conclick.',
 );

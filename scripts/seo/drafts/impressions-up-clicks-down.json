@@ -64,15 +64,15 @@
       { "question": "What is the great decoupling in Search Console?", "answer": "It is the pattern where impressions rise while clicks stay flat or fall. Google shows your pages for more searches, but a growing share of those searches get answered on the results page itself, usually by an AI Overview, so fewer of the people who see you click through. The term spread through the SEO community in 2025 as AI Overviews became widespread, and Google has publicly acknowledged the split." }
     ],
     "internalLinks": [
-      { "href": "/blog/vanity-metrics-are-lying", "label": "Why vanity metrics lie", "group": "blog" },
+      { "href": "/blogs/vanity-metrics-are-lying", "label": "Why vanity metrics lie", "group": "blog" },
       { "href": "/glossary/marketing-attribution", "label": "Marketing attribution, explained", "group": "glossary" },
-      { "href": "/blog/why-revenue-attribution-matters", "label": "Why revenue attribution matters", "group": "blog" },
+      { "href": "/blogs/why-revenue-attribution-matters", "label": "Why revenue attribution matters", "group": "blog" },
       { "href": "/tools/utm-builder", "label": "Build clean UTM links", "group": "tool" },
       { "href": "/guides/is-ga4-sampling-your-data", "label": "Is GA4 sampling your data?", "group": "guide" }
     ],
     "sources": [
       { "label": "Pew Research Center: Google users are less likely to click on links when an AI summary appears (22 July 2025)", "url": "https://www.pewresearch.org/short-reads/2025/07/22/google-users-are-less-likely-to-click-on-links-when-an-ai-summary-appears-in-the-results/" },
-      { "label": "Ahrefs: AI Overviews Reduce Clicks by 34.5%", "url": "https://ahrefs.com/blog/ai-overviews-reduce-clicks/" },
+      { "label": "Ahrefs: AI Overviews Reduce Clicks by 34.5%", "url": "https://ahrefs.com/blogs/ai-overviews-reduce-clicks/" },
       { "label": "Google Search Console Help: What are impressions, position, and clicks? (AI Overviews and AI Mode counting)", "url": "https://support.google.com/webmasters/answer/7042828?hl=en" },
       { "label": "Search Engine Land: Google AI Mode traffic data comes to Search Console", "url": "https://searchengineland.com/google-ai-mode-traffic-data-search-console-457076" }
     ]

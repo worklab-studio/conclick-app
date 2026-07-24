@@ -103,7 +103,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "Start from the only question that pays rent: which traffic makes money. Most founders do not need session-level everything; they need each sale traced back to the source, campaign, and page that earned it, plus the biggest leak on the path to that sale. If your analytics cannot answer which channel produced revenue this month without an export and a spreadsheet, it is measuring the wrong thing accurately. This is the argument I make in [why revenue attribution beats raw traffic counts](/blog/why-revenue-attribution-matters), and it is the lens I now judge every tool by."
+      "text": "Start from the only question that pays rent: which traffic makes money. Most founders do not need session-level everything; they need each sale traced back to the source, campaign, and page that earned it, plus the biggest leak on the path to that sale. If your analytics cannot answer which channel produced revenue this month without an export and a spreadsheet, it is measuring the wrong thing accurately. This is the argument I make in [why revenue attribution beats raw traffic counts](/blogs/why-revenue-attribution-matters), and it is the lens I now judge every tool by."
     },
     {
       "type": "p",
@@ -182,7 +182,7 @@ const entry: ContentEntry = {
       "group": "guide"
     },
     {
-      "href": "/blog/why-revenue-attribution-matters",
+      "href": "/blogs/why-revenue-attribution-matters",
       "label": "Why revenue attribution matters",
       "group": "blog"
     },
@@ -192,7 +192,7 @@ const entry: ContentEntry = {
       "group": "glossary"
     },
     {
-      "href": "/blog/vanity-metrics-are-lying",
+      "href": "/blogs/vanity-metrics-are-lying",
       "label": "Why vanity metrics lie to you",
       "group": "blog"
     },

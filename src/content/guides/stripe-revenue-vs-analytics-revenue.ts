@@ -162,11 +162,11 @@ const entry: ContentEntry = {
     },
     {
       "label": "Napkyn: Impact of Consent Mode on Reporting and Transaction Data in GA4",
-      "url": "https://www.napkyn.com/blog/impact-of-consent-mode-on-reporting-and-transaction-data-in-ga4"
+      "url": "https://www.napkyn.com/blogs/impact-of-consent-mode-on-reporting-and-transaction-data-in-ga4"
     },
     {
       "label": "William Chong: Maintaining the GA session across Stripe Checkout",
-      "url": "https://blog.williamchong.cloud/code/2024/04/20/maintaining-ga-session-in-stripe-checkout.html"
+      "url": "https://blogs.williamchong.cloud/code/2024/04/20/maintaining-ga-session-in-stripe-checkout.html"
     },
     {
       "label": "Stripe Docs: Analyze your Checkout conversion funnel (with GA4)",
@@ -180,7 +180,7 @@ const entry: ContentEntry = {
       "group": "glossary"
     },
     {
-      "href": "/blog/why-revenue-attribution-matters",
+      "href": "/blogs/why-revenue-attribution-matters",
       "label": "Why revenue attribution belongs at the centre of your analytics",
       "group": "blog"
     },
@@ -195,7 +195,7 @@ const entry: ContentEntry = {
       "group": "guide"
     },
     {
-      "href": "/blog/vanity-metrics-are-lying",
+      "href": "/blogs/vanity-metrics-are-lying",
       "label": "Why traffic is a vanity metric and money is not",
       "group": "blog"
     },

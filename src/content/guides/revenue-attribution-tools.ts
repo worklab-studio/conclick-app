@@ -219,7 +219,7 @@ const entry: ContentEntry = {
     },
     {
       "label": "June: our founding team is joining Amplitude",
-      "url": "https://www.june.so/blog/a-new-chapter"
+      "url": "https://www.june.so/blogs/a-new-chapter"
     },
     {
       "label": "Paddle: ProfitWell Metrics with Paddle Billing, free",
@@ -256,7 +256,7 @@ const entry: ContentEntry = {
       "group": "comparison"
     },
     {
-      "href": "/blog/why-revenue-attribution-matters",
+      "href": "/blogs/why-revenue-attribution-matters",
       "label": "Why revenue attribution matters",
       "group": "blog"
     },

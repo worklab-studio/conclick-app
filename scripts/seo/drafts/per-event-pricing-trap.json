@@ -29,7 +29,7 @@
 
       { "type": "h2", "text": "The quieter damage: a meter warps how you measure", "id": "metered-pricing-warps-behavior" },
       { "type": "p", "text": "The bill is the obvious cost. The hidden one is worse, and almost nobody prices it in. When every event costs money, you start instrumenting less. You skip the custom event you were curious about. You do not track that secondary button because it is not worth the line item. You switch on sampling to hold the volume down, which means you are now making decisions off a fraction of your data and calling it insight." },
-      { "type": "p", "text": "I have caught myself doing all three. A meter trains you to under-measure, which quietly defeats the whole reason you bought the tool in the first place. You end up owning a dashboard you are afraid to fully use, and one you dread checking during a launch is not a growth tool, it is a liability with a login. When measurement gets rationed, the first thing you lose is the small, weird, exploratory tracking that actually teaches you something. [Vanity metrics](/blog/vanity-metrics-are-lying) are cheap to collect; the granular data that changes a real decision is exactly what a meter discourages." },
+      { "type": "p", "text": "I have caught myself doing all three. A meter trains you to under-measure, which quietly defeats the whole reason you bought the tool in the first place. You end up owning a dashboard you are afraid to fully use, and one you dread checking during a launch is not a growth tool, it is a liability with a login. When measurement gets rationed, the first thing you lose is the small, weird, exploratory tracking that actually teaches you something. [Vanity metrics](/blogs/vanity-metrics-are-lying) are cheap to collect; the granular data that changes a real decision is exactly what a meter discourages." },
       { "type": "p", "text": "There is a second-order version of this too. Bots and scrapers fire events all day. If you pay per hit, you are literally paying to store [traffic you never asked for](/guides/filter-bot-traffic-from-analytics), and cleaning it up turns into a budgeting chore instead of a simple data-quality one." },
 
       { "type": "h2", "text": "When does usage-based pricing actually make sense?", "id": "when-usage-pricing-makes-sense" },
@@ -57,7 +57,7 @@
     ],
     "internalLinks": [
       { "href": "/guides/conversion-funnel-software-pricing", "label": "How the pricing models actually work", "group": "guide" },
-      { "href": "/blog/vanity-metrics-are-lying", "label": "Why vanity metrics lie to you", "group": "blog" },
+      { "href": "/blogs/vanity-metrics-are-lying", "label": "Why vanity metrics lie to you", "group": "blog" },
       { "href": "/glossary/sessions-vs-visitors", "label": "Sessions vs visitors, explained", "group": "glossary" },
       { "href": "/guides/filter-bot-traffic-from-analytics", "label": "Filter bot traffic from analytics", "group": "guide" },
       { "href": "/for/indie-hackers", "label": "Conclick for indie hackers", "group": "use-case" }

@@ -82,7 +82,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "callout",
-      "text": "If your analytics tool can't tell you which traffic source generated the most revenue last month, you're not doing analytics. You're doing scorekeeping. Pageviews without payment context are a [vanity metric](/blog/vanity-metrics-are-lying) in disguise."
+      "text": "If your analytics tool can't tell you which traffic source generated the most revenue last month, you're not doing analytics. You're doing scorekeeping. Pageviews without payment context are a [vanity metric](/blogs/vanity-metrics-are-lying) in disguise."
     },
     {
       "type": "h2",
@@ -199,12 +199,12 @@ const entry: ContentEntry = {
   ],
   "internalLinks": [
     {
-      "href": "/blog/metrics-early-saas-should-watch",
+      "href": "/blogs/metrics-early-saas-should-watch",
       "label": "Metrics early SaaS should watch",
       "group": "blog"
     },
     {
-      "href": "/blog/ab-testing-with-low-traffic",
+      "href": "/blogs/ab-testing-with-low-traffic",
       "label": "A/B testing with low traffic",
       "group": "blog"
     },

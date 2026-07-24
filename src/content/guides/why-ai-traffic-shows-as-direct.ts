@@ -163,7 +163,7 @@ const entry: ContentEntry = {
     },
     {
       "label": "Semrush: GA4 adds AI Assistant channel for referral tracking",
-      "url": "https://www.semrush.com/blog/ga4-adds-ai-assistant-channel/"
+      "url": "https://www.semrush.com/blogs/ga4-adds-ai-assistant-channel/"
     },
     {
       "label": "Seer Interactive: Are AI sites like ChatGPT sending your website traffic?",
@@ -187,7 +187,7 @@ const entry: ContentEntry = {
       "group": "glossary"
     },
     {
-      "href": "/blog/why-revenue-attribution-matters",
+      "href": "/blogs/why-revenue-attribution-matters",
       "label": "Why revenue attribution belongs at the centre of your analytics",
       "group": "blog"
     },

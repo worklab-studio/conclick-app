@@ -53,7 +53,7 @@
       { "href": "/glossary/cookieless-analytics", "label": "What cookieless analytics means", "group": "glossary" },
       { "href": "/guides/filter-bot-traffic-from-analytics", "label": "How to filter bot traffic", "group": "guide" },
       { "href": "/glossary/gdpr-compliant-analytics", "label": "GDPR-friendly analytics, explained", "group": "glossary" },
-      { "href": "/blog/cookie-banners-killing-your-data", "label": "How cookie banners wreck your data", "group": "blog" },
+      { "href": "/blogs/cookie-banners-killing-your-data", "label": "How cookie banners wreck your data", "group": "blog" },
       { "href": "/glossary/sessions-vs-visitors", "label": "Sessions vs visitors, the difference", "group": "glossary" }
     ]
   }

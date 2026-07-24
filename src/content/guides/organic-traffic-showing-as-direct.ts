@@ -159,7 +159,7 @@ const entry: ContentEntry = {
   "sources": [
     {
       "label": "Chrome for Developers: A new default Referrer-Policy, strict-origin-when-cross-origin",
-      "url": "https://developer.chrome.com/blog/referrer-policy-new-chrome-default/"
+      "url": "https://developer.chrome.com/blogs/referrer-policy-new-chrome-default/"
     },
     {
       "label": "MDN: Referrer-Policy header",

@@ -3,7 +3,7 @@
 import { type ReactNode, useMemo, useState } from 'react';
 import { ArrowUpRight, Rss } from 'lucide-react';
 
-// The interactive region of /blog: category filter + featured post + paginated
+// The interactive region of /blogs: category filter + featured post + paginated
 // grid. Extracted from BlogIndex when pagination arrived.
 //
 // *** WHY THIS IS A CLIENT COMPONENT, AND WHY THAT DOES NOT BREAK SEO ***
@@ -104,7 +104,7 @@ export function BlogBoard({ featured, rest, tabs }: BlogBoardProps) {
         })}
 
         <a
-          href="/blog/rss.xml"
+          href="/blogs/rss.xml"
           className="ml-auto inline-flex items-center gap-1.5 text-[13px] font-medium text-zinc-500 transition-colors hover:text-[#8b88cf]"
         >
           <Rss className="h-3.5 w-3.5" />

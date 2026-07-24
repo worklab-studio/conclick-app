@@ -4,11 +4,11 @@ import { siteUrl } from '@/lib/seo';
 
 export const revalidate = 86400;
 
-// rss.xml — the editorial feed for /blog and /guides. Feed readers, Google's
+// rss.xml — the editorial feed for /blogs and /guides. Feed readers, Google's
 // "Follow" surface, and several AI/answer-engine crawlers use RSS as a cheap
 // change-detection channel, so this is the fastest freshness ping we get for
 // free. Generated from the content registry so it always reflects the live page
-// set. Served at conclick.io/blog/rss.xml via the Cloudflare Worker route.
+// set. Served at conclick.io/blogs/rss.xml via the Cloudflare Worker route.
 
 // CDATA is a raw span: the ONLY thing that can terminate it early is a literal
 // `]]>` inside the payload. Split that sequence across two CDATA sections so the
@@ -24,7 +24,7 @@ const rfc822 = (iso: string) => {
 
 export async function GET() {
   const base = siteUrl();
-  const self = `${base}/blog/rss.xml`;
+  const self = `${base}/blogs/rss.xml`;
 
   const items = [...entriesByType('blog'), ...entriesByType('guide')].sort((a, b) =>
     (b.datePublished || b.dateModified).localeCompare(a.datePublished || a.dateModified),
@@ -49,7 +49,7 @@ export async function GET() {
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
     <title>${cdata('Conclick — Blog & Guides')}</title>
-    <link>${base}/blog</link>
+    <link>${base}/blogs</link>
     <atom:link href="${self}" rel="self" type="application/rss+xml" />
     <description>${cdata(
       'Privacy-first analytics, heatmaps, funnels, and revenue attribution — written for bootstrapped founders and small SaaS teams.',

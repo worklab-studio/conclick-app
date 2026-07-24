@@ -16,7 +16,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "Neither product is Google Analytics. Both skip the [vanity-metric dashboard](/blog/vanity-metrics-are-lying) in favor of connecting your analytics to actual revenue. Both integrate with Stripe, Lemon Squeezy, and Polar. Both are cookieless, GDPR-friendly, and come with a 14-day free trial and no card required. Both are built for bootstrapped founders and small teams, not enterprise data teams with a dedicated analyst. If your main frustration with existing tools is that they count pageviews but not dollars, either product is a genuine step up."
+      "text": "Neither product is Google Analytics. Both skip the [vanity-metric dashboard](/blogs/vanity-metrics-are-lying) in favor of connecting your analytics to actual revenue. Both integrate with Stripe, Lemon Squeezy, and Polar. Both are cookieless, GDPR-friendly, and come with a 14-day free trial and no card required. Both are built for bootstrapped founders and small teams, not enterprise data teams with a dedicated analyst. If your main frustration with existing tools is that they count pageviews but not dollars, either product is a genuine step up."
     },
     {
       "type": "h2",
@@ -140,7 +140,7 @@ const entry: ContentEntry = {
       "group": "glossary"
     },
     {
-      "href": "/blog/why-revenue-attribution-matters",
+      "href": "/blogs/why-revenue-attribution-matters",
       "label": "Why revenue attribution matters",
       "group": "blog"
     },

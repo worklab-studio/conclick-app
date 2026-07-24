@@ -33,7 +33,7 @@ export function SeoFooter() {
     {
       title: 'Resources',
       links: [
-        { href: '/blog', label: 'Blogs' },
+        { href: '/blogs', label: 'Blogs' },
         { href: '/guides', label: 'Guide' },
         { href: '/compare', label: 'Compare' },
         { href: '/tools', label: 'Tools' },

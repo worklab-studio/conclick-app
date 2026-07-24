@@ -140,7 +140,7 @@ const entry: ContentEntry = {
   ],
   "internalLinks": [
     {
-      "href": "/blog/why-revenue-attribution-matters",
+      "href": "/blogs/why-revenue-attribution-matters",
       "label": "Why revenue attribution matters",
       "group": "blog"
     },

@@ -58,7 +58,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "You pay in time: every event is a naming decision, a piece of code, a thing that breaks quietly when you refactor. You pay in false confidence: a wall of green numbers built on twenty visitors will happily show you a trend that is really three people and a bot. And you pay in attention, the one that actually kills companies. Hours spent perfecting how you would measure a funnel are hours not spent finding the ten users who would make the funnel real. Most of the vanity you later regret starts here, and I have argued before that [early dashboards tend to measure the wrong things](/blog/vanity-metrics-are-lying)."
+      "text": "You pay in time: every event is a naming decision, a piece of code, a thing that breaks quietly when you refactor. You pay in false confidence: a wall of green numbers built on twenty visitors will happily show you a trend that is really three people and a bot. And you pay in attention, the one that actually kills companies. Hours spent perfecting how you would measure a funnel are hours not spent finding the ten users who would make the funnel real. Most of the vanity you later regret starts here, and I have argued before that [early dashboards tend to measure the wrong things](/blogs/vanity-metrics-are-lying)."
     },
     {
       "type": "p",
@@ -174,12 +174,12 @@ const entry: ContentEntry = {
   ],
   "internalLinks": [
     {
-      "href": "/blog/metrics-early-saas-should-watch",
+      "href": "/blogs/metrics-early-saas-should-watch",
       "label": "Metrics early SaaS should watch",
       "group": "blog"
     },
     {
-      "href": "/blog/vanity-metrics-are-lying",
+      "href": "/blogs/vanity-metrics-are-lying",
       "label": "Why vanity metrics lie to you",
       "group": "blog"
     },
@@ -194,7 +194,7 @@ const entry: ContentEntry = {
       "group": "guide"
     },
     {
-      "href": "/blog/why-revenue-attribution-matters",
+      "href": "/blogs/why-revenue-attribution-matters",
       "label": "Why revenue attribution matters",
       "group": "blog"
     },

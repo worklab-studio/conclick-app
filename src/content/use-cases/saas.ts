@@ -16,7 +16,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "Pageviews are noise. Bounce rate is noise. Even \"conversions\" are noise if your definition of conversion is a free signup that churns in week one. For a SaaS business, the [metrics that move the needle](/blog/metrics-early-saas-should-watch) are: which sources produce paying customers, where in your funnel visitors drop before they pay, and what behavior on your product page predicts purchase versus abandonment."
+      "text": "Pageviews are noise. Bounce rate is noise. Even \"conversions\" are noise if your definition of conversion is a free signup that churns in week one. For a SaaS business, the [metrics that move the needle](/blogs/metrics-early-saas-should-watch) are: which sources produce paying customers, where in your funnel visitors drop before they pay, and what behavior on your product page predicts purchase versus abandonment."
     },
     {
       "type": "p",
@@ -93,7 +93,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "Conclick is cookieless and GDPR/CCPA-friendly. Most SaaS products either serve European users or will eventually, and the consent banner tax is real: a [poorly configured cookie banner](/blog/cookie-banners-killing-your-data) will suppress your conversion data by 30 to 50 percent. Cookieless analytics sidestep this entirely. You still measure accurately. You just do not need the banner."
+      "text": "Conclick is cookieless and GDPR/CCPA-friendly. Most SaaS products either serve European users or will eventually, and the consent banner tax is real: a [poorly configured cookie banner](/blogs/cookie-banners-killing-your-data) will suppress your conversion data by 30 to 50 percent. Cookieless analytics sidestep this entirely. You still measure accurately. You just do not need the banner."
     },
     {
       "type": "p",

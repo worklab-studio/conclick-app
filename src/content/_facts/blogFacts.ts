@@ -1,4 +1,4 @@
-// The numbered "FAST FACTS" list in the /blog right rail.
+// The numbered "FAST FACTS" list in the /blogs right rail.
 //
 // WHY THIS FILE EXISTS AS TYPED DATA RATHER THAN JSX
 // An enumerated list of short, concrete, individually-linked claims sitting on

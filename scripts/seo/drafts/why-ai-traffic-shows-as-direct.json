@@ -81,14 +81,14 @@
       { "href": "/glossary/utm", "label": "UTM parameters, explained", "group": "glossary" },
       { "href": "/glossary/marketing-attribution", "label": "What marketing attribution means", "group": "glossary" },
       { "href": "/glossary/revenue-attribution", "label": "Revenue attribution, defined", "group": "glossary" },
-      { "href": "/blog/why-revenue-attribution-matters", "label": "Why revenue attribution belongs at the centre of your analytics", "group": "blog" },
+      { "href": "/blogs/why-revenue-attribution-matters", "label": "Why revenue attribution belongs at the centre of your analytics", "group": "blog" },
       { "href": "/vs/google-analytics", "label": "Conclick vs Google Analytics", "group": "comparison" },
       { "href": "/tools/utm-builder", "label": "Build consistent UTMs for the links you control", "group": "tool" }
     ],
     "sources": [
       { "label": "Google Analytics Help: [GA4] Default channel group", "url": "https://support.google.com/analytics/answer/9756891" },
       { "label": "Search Engine Journal: Google Analytics Adds AI Assistant As Default Channel Group", "url": "https://www.searchenginejournal.com/google-analytics-adds-ai-assistant-as-default-channel-group/574974/" },
-      { "label": "Semrush: GA4 adds AI Assistant channel for referral tracking", "url": "https://www.semrush.com/blog/ga4-adds-ai-assistant-channel/" },
+      { "label": "Semrush: GA4 adds AI Assistant channel for referral tracking", "url": "https://www.semrush.com/blogs/ga4-adds-ai-assistant-channel/" },
       { "label": "Seer Interactive: Are AI sites like ChatGPT sending your website traffic?", "url": "https://www.seerinteractive.com/insights/are-ai-sites-like-chatgpt-sending-your-website-traffic" }
     ]
   }

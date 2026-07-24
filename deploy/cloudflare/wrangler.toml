@@ -23,6 +23,10 @@ routes = [
   { pattern = "conclick.io/glossary/*",     zone_name = "conclick.io" },
   { pattern = "conclick.io/guides/*",       zone_name = "conclick.io" },
   { pattern = "conclick.io/for/*",          zone_name = "conclick.io" },
+  { pattern = "conclick.io/blogs/*",        zone_name = "conclick.io" },
+  # /blog/* stays routed too, so the app's 301 /blog -> /blogs is reachable at the
+  # edge instead of falling through to the Framer apex. Drop it once the old URLs
+  # have aged out of Google's index.
   { pattern = "conclick.io/blog/*",         zone_name = "conclick.io" },
   # hub / index pages (exact, so they don't greedily match unrelated Framer paths)
   { pattern = "conclick.io/compare",        zone_name = "conclick.io" },
@@ -31,6 +35,7 @@ routes = [
   { pattern = "conclick.io/glossary",       zone_name = "conclick.io" },
   { pattern = "conclick.io/guides",         zone_name = "conclick.io" },
   { pattern = "conclick.io/for",            zone_name = "conclick.io" },
+  { pattern = "conclick.io/blogs",          zone_name = "conclick.io" },
   { pattern = "conclick.io/blog",           zone_name = "conclick.io" },
   # feeds + dynamic OG images + AI answer-engine manifest
   { pattern = "conclick.io/sitemap.xml",    zone_name = "conclick.io" },

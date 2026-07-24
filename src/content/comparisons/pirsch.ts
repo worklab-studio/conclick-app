@@ -16,7 +16,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "Both tools are cookieless, both skip the [consent-banner theater](/blog/cookie-banners-killing-your-data), both are lightweight. That table-stakes stuff is solved. The split happens the moment you ask: \"Which source made me $847 last week, and which one sent 400 visitors who bought nothing?\" Pirsch cannot answer that. Conclick was built specifically to answer that."
+      "text": "Both tools are cookieless, both skip the [consent-banner theater](/blogs/cookie-banners-killing-your-data), both are lightweight. That table-stakes stuff is solved. The split happens the moment you ask: \"Which source made me $847 last week, and which one sent 400 visitors who bought nothing?\" Pirsch cannot answer that. Conclick was built specifically to answer that."
     },
     {
       "type": "p",

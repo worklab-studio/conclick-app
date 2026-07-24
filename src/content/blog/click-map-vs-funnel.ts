@@ -172,7 +172,7 @@ const entry: ContentEntry = {
     },
     {
       "label": "FullStory: What is a dead click",
-      "url": "https://www.fullstory.com/blog/dead-clicks/"
+      "url": "https://www.fullstory.com/blogs/dead-clicks/"
     },
     {
       "label": "Umami v3.2.0 release notes (heatmaps)",
@@ -200,7 +200,7 @@ const entry: ContentEntry = {
       "group": "guide"
     },
     {
-      "href": "/blog/vanity-metrics-are-lying",
+      "href": "/blogs/vanity-metrics-are-lying",
       "label": "Why vanity metrics lie to you",
       "group": "blog"
     },

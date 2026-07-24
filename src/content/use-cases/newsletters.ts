@@ -185,7 +185,7 @@ const entry: ContentEntry = {
       "group": "guide"
     },
     {
-      "href": "/blog/why-revenue-attribution-matters",
+      "href": "/blogs/why-revenue-attribution-matters",
       "label": "The case for revenue attribution",
       "group": "blog"
     }

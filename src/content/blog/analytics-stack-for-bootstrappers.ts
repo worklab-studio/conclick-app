@@ -159,12 +159,12 @@ const entry: ContentEntry = {
   ],
   "internalLinks": [
     {
-      "href": "/blog/metrics-early-saas-should-watch",
+      "href": "/blogs/metrics-early-saas-should-watch",
       "label": "Metrics early SaaS should watch",
       "group": "blog"
     },
     {
-      "href": "/blog/vanity-metrics-are-lying",
+      "href": "/blogs/vanity-metrics-are-lying",
       "label": "Why vanity metrics lie to you",
       "group": "blog"
     },

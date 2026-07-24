@@ -165,7 +165,7 @@ const entry: ContentEntry = {
     },
     {
       "label": "Plausible: We tested how Google Analytics filters bot traffic",
-      "url": "https://plausible.io/blog/testing-bot-traffic-filtering-google-analytics"
+      "url": "https://plausible.io/blogs/testing-bot-traffic-filtering-google-analytics"
     },
     {
       "label": "IAB/ABC International Spiders and Bots List",

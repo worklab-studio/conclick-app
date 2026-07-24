@@ -28,7 +28,7 @@ export const URL_PREFIX = {
   glossary: 'glossary',
   useCase: 'for',
   guide: 'guides',
-  blog: 'blog',
+  blog: 'blogs',
 };
 
 // directory name -> ContentType (inverse of DIR)

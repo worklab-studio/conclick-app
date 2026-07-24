@@ -60,8 +60,8 @@
     ],
     "internalLinks": [
       { "href": "/for/indie-hackers", "label": "Analytics for indie hackers on young domains", "group": "useCase" },
-      { "href": "/blog/vanity-metrics-are-lying", "label": "Why an indexed page with no traffic is a vanity metric", "group": "blog" },
-      { "href": "/blog/why-revenue-attribution-matters", "label": "Why revenue attribution matters", "group": "blog" },
+      { "href": "/blogs/vanity-metrics-are-lying", "label": "Why an indexed page with no traffic is a vanity metric", "group": "blog" },
+      { "href": "/blogs/why-revenue-attribution-matters", "label": "Why revenue attribution matters", "group": "blog" },
       { "href": "/tools/utm-builder", "label": "Tag your links with a UTM builder", "group": "tool" }
     ],
     "sources": [

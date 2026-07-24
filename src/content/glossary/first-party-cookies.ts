@@ -155,7 +155,7 @@ const entry: ContentEntry = {
       "group": "glossary"
     },
     {
-      "href": "/blog/cookie-banners-killing-your-data",
+      "href": "/blogs/cookie-banners-killing-your-data",
       "label": "Cookie Banners Are Killing Your Data",
       "group": "blog"
     }
