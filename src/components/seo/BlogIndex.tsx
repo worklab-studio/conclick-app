@@ -1,5 +1,5 @@
 import type { CSSProperties } from 'react';
-import { ArrowRight, ArrowUpRight, Rss } from 'lucide-react';
+import { ArrowRight, ArrowUpRight } from 'lucide-react';
 import type { ContentEntry } from '@/content/schema';
 import { allEntries, entriesByType, pathFor } from '@/content';
 import { canonical } from '@/lib/seo';
@@ -8,6 +8,7 @@ import { readingTime } from '@/lib/readingTime';
 import { heroWordFor, meshKeyFor } from '@/lib/mesh/word';
 import { blogFacts } from '@/content/_facts/blogFacts';
 import { MeshHero } from './MeshHero';
+import { BlogBoard } from './BlogBoard';
 import { JsonLd } from './JsonLd';
 import { SectionEyebrow } from './SectionEyebrow';
 
@@ -189,34 +190,32 @@ export function BlogIndex({ eyebrow, titleLead, titleSerif, intro }: BlogIndexPr
   }
   const categories = [...counts.values()].sort((a, b) => b.total - a.total || a.label.localeCompare(b.label));
 
-  const tabs = [{ label: 'All', id: 'all', total: cards.length, rest: rest.length }, ...categories];
+  const tabs = [{ label: 'All', id: 'all', total: cards.length }, ...categories.map(c => ({ label: c.label, id: c.id, total: c.total }))];
 
-  // Generated stylesheet for the filter. Every interpolated value is either a
-  // number or an idSafe() token, so nothing author-controlled reaches the CSS.
-  const ACTIVE = 'background:rgba(108,99,201,0.18);border-color:rgba(108,99,201,0.55);color:#fff';
-  const rules: string[] = [
-    // Default state = "All": everything visible.
-    '.cc-post{display:flex}',
-    '.cc-feature{display:block}',
-  ];
-  for (const t of tabs) {
-    rules.push(`#bc-${t.id}:checked~.cc-filters label[for="bc-${t.id}"]{${ACTIVE}}`);
-    // The radio itself is sr-only, so the focus ring has to be forwarded to the
-    // label or the filter is unusable by keyboard.
-    rules.push(
-      `#bc-${t.id}:focus-visible~.cc-filters label[for="bc-${t.id}"]{outline:2px solid #6C63C9;outline-offset:2px}`,
-    );
-  }
-  for (const c of categories) {
-    rules.push(`#bc-${c.id}:checked~.cc-posts .cc-post{display:none}`);
-    rules.push(`#bc-${c.id}:checked~.cc-posts .cc-post[data-cat="${c.id}"]{display:flex}`);
-    rules.push(`#bc-${c.id}:checked~.cc-feature{display:none}`);
-    rules.push(`#bc-${c.id}:checked~.cc-feature[data-cat="${c.id}"]{display:block}`);
-    // Without this, selecting a category whose only post IS the featured one
-    // leaves a "Latest" heading hanging over an empty grid.
-    if (c.rest === 0) rules.push(`#bc-${c.id}:checked~.cc-latest{display:none}`);
-  }
-  const filterCss = rules.join('');
+  // Pre-render each card's mesh hero on the server, then hand the finished nodes
+  // to BlogBoard (a client component) as props. The hero stays a server render;
+  // the client only decides which nodes are visible under the active filter/page.
+  const toBoardCard = (c: (typeof cards)[number], priority = false) => ({
+    href: c.href,
+    category: c.category,
+    catId: c.catId,
+    minutes: c.minutes,
+    date: c.date,
+    h1: c.entry.h1,
+    desc: c.entry.metaDescription,
+    datePublished: c.entry.datePublished,
+    hero: (
+      <MeshHero
+        slug={c.meshKey}
+        word={c.word}
+        priority={priority}
+        className="w-full transition-opacity group-hover:opacity-95"
+      />
+    ),
+  });
+
+  const boardFeatured = featured ? toBoardCard(featured, true) : null;
+  const boardRest = rest.map(c => toBoardCard(c));
 
   // TOPICS pills. Pool = any author-set topics, then every glossary slug. The
   // glossary tail is the point: a pill that resolves to a real /glossary/<slug>
@@ -266,7 +265,10 @@ export function BlogIndex({ eyebrow, titleLead, titleSerif, intro }: BlogIndexPr
           className="pointer-events-none absolute inset-x-0 top-0 h-[360px]"
           style={{ background: 'radial-gradient(50% 100% at 50% 0%, rgba(108,99,201,0.16), rgba(108,99,201,0) 70%)' }}
         />
-        <div className="relative mx-auto max-w-4xl px-6 pb-14 pt-16">
+        {/* Same container as the content grid below (max-w-6xl, px-6 sm:px-8) so
+            the eyebrow/headline left edge lines up with the filter row and cards
+            rather than sitting indented inside a narrower max-w-4xl. */}
+        <div className="relative mx-auto max-w-6xl px-6 pb-14 pt-16 sm:px-8">
           <SectionEyebrow label={eyebrow} />
           <h1 className="mt-6 max-w-[24ch] text-[34px] font-semibold leading-[1.06] tracking-[-0.02em] text-white sm:text-[52px]">
             {titleLead}
@@ -280,115 +282,13 @@ export function BlogIndex({ eyebrow, titleLead, titleSerif, intro }: BlogIndexPr
       </section>
 
       <div className="mx-auto max-w-6xl px-6 py-12 sm:px-8 lg:grid lg:grid-cols-[minmax(0,1fr)_19rem] lg:gap-12">
-        {/*
-          .cc-scope is the sibling scope the generated CSS depends on. The radio
-          inputs MUST stay direct children here and MUST stay before .cc-filters,
-          .cc-feature, .cc-latest and .cc-posts — `~` only reaches later siblings.
-        */}
-        <div className="cc-scope min-w-0">
-          <style dangerouslySetInnerHTML={{ __html: filterCss }} />
-
-          {tabs.map((t, i) => (
-            <input
-              key={t.id}
-              type="radio"
-              name="cc-category"
-              id={`bc-${t.id}`}
-              className="sr-only"
-              defaultChecked={i === 0}
-              aria-label={t.id === 'all' ? 'Show all posts' : `Show ${t.label} posts`}
-            />
-          ))}
-
-          <div className="cc-filters mb-8 flex flex-wrap items-center gap-2 border-b border-white/[0.07] pb-6">
-            {tabs.map(t => (
-              <label
-                key={t.id}
-                htmlFor={`bc-${t.id}`}
-                className="inline-flex cursor-pointer select-none items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-3.5 py-1.5 text-[13px] font-medium text-zinc-400 transition-colors hover:border-white/20 hover:text-zinc-200"
-              >
-                {t.label}
-                <span className="text-[11px] tabular-nums text-zinc-500">{t.total}</span>
-              </label>
-            ))}
-
-            <a
-              href="/blog/rss.xml"
-              className="ml-auto inline-flex items-center gap-1.5 text-[13px] font-medium text-zinc-500 transition-colors hover:text-[#8b88cf]"
-            >
-              <Rss className="h-3.5 w-3.5" />
-              RSS
-            </a>
-          </div>
-
-          {featured && (
-            <article className="cc-feature mb-12" data-cat={featured.catId}>
-              <a href={featured.href} className="group block">
-                <MeshHero
-                  slug={featured.meshKey}
-                  word={featured.word}
-                  priority
-                  className="w-full transition-opacity group-hover:opacity-95"
-                />
-                <div className="mt-6">
-                  <div className="flex flex-wrap items-center gap-2 text-[11px] font-medium uppercase tracking-[0.14em] text-[#8b88cf]">
-                    <span>{featured.category}</span>
-                    <span className="text-zinc-600">·</span>
-                    <span className="text-zinc-500">{featured.minutes} min read</span>
-                  </div>
-                  <h2 className="mt-3 text-[24px] font-semibold leading-[1.15] tracking-[-0.02em] text-white transition-colors group-hover:text-[#c7c5ec] sm:text-[30px]">
-                    {featured.entry.h1}
-                  </h2>
-                  <p className="mt-3 max-w-2xl text-[15px] leading-relaxed text-zinc-400">
-                    {featured.entry.metaDescription}
-                  </p>
-                  <div className="mt-4 flex items-center gap-2 text-[13px] text-zinc-500">
-                    <time dateTime={featured.entry.datePublished}>{featured.date}</time>
-                    <ArrowUpRight className="h-4 w-4 transition-colors group-hover:text-[#8b88cf]" />
-                  </div>
-                </div>
-              </a>
-            </article>
-          )}
-
-          {rest.length > 0 && (
-            <>
-              <h2 className="cc-latest mb-6 text-[13px] font-semibold uppercase tracking-[0.16em] text-zinc-500">
-                Latest
-              </h2>
-
-              <div className="cc-posts grid gap-x-6 gap-y-10 sm:grid-cols-2">
-                {rest.map(c => (
-                  <article key={c.href} className="cc-post flex-col" data-cat={c.catId}>
-                    <a href={c.href} className="group flex flex-col">
-                      <MeshHero
-                        slug={c.meshKey}
-                        word={c.word}
-                        className="w-full transition-opacity group-hover:opacity-95"
-                      />
-                      <div className="mt-4 flex flex-wrap items-center gap-2 text-[11px] font-medium uppercase tracking-[0.14em] text-[#8b88cf]">
-                        <span>{c.category}</span>
-                        <span className="text-zinc-600">·</span>
-                        <span className="text-zinc-500">{c.minutes} min read</span>
-                      </div>
-                      <h3 className="mt-2 text-[17px] font-semibold leading-snug tracking-[-0.01em] text-white transition-colors group-hover:text-[#c7c5ec]">
-                        {c.entry.h1}
-                      </h3>
-                      <p className="mt-2 text-[13px] leading-relaxed text-zinc-400">{c.entry.metaDescription}</p>
-                      <time className="mt-3 text-[12px] text-zinc-500" dateTime={c.entry.datePublished}>
-                        {c.date}
-                      </time>
-                    </a>
-                  </article>
-                ))}
-              </div>
-            </>
-          )}
-        </div>
+        <BlogBoard featured={boardFeatured} rest={boardRest} tabs={tabs} />
 
         {/* ------------------------------- RIGHT RAIL ------------------------------- */}
         <aside className="mt-16 lg:mt-0">
-          <div className="lg:sticky lg:top-24 lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto">
+          {/* Flows with the page: no sticky, no separate scroll container. The
+              rail is just the second column and scrolls with everything else. */}
+          <div>
             <section className="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
               <h2 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-zinc-500">Fast facts</h2>
               <ol className="mt-4 space-y-5">
