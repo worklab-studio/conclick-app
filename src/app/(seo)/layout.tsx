@@ -10,6 +10,18 @@ import { SeoNav } from '@/components/seo/SeoNav';
 import { SeoFooter } from '@/components/seo/SeoFooter';
 import { siteUrl } from '@/lib/seo';
 
+// Conclick tracks itself. This layout wraps ONLY the public SEO routes (/blogs,
+// /vs, /guides, /glossary, /for, /tools, /alternatives), so the tracker lands on
+// exactly those and never on the signed-in dashboard. The Framer homepage
+// already loads this same snippet; the Next-served SEO pages did not, which is
+// why conclick.io showed visitors but /blogs and the rest did not.
+//
+// The website id is the SAME one embedded on the homepage and is public by
+// nature (it sits in that page's HTML). data-domains pins tracking to
+// conclick.io so app-host / preview / localhost hits never pollute the numbers.
+const CONCLICK_APP = process.env.NEXT_PUBLIC_APP_URL || 'https://app.conclick.io';
+const CONCLICK_WEBSITE_ID = '7e14a7ea-b156-4e91-a676-8e3c96a81291';
+
 // The ONLY indexable surface. robots here overrides the app-wide noindex set in
 // the root layout (Next replaces robots at the nearest segment). metadataBase
 // resolves all relative canonical/OG urls to conclick.io.
@@ -36,6 +48,12 @@ const HATCH =
 export default function SeoLayout({ children }: { children: ReactNode }) {
   return (
     <div className="relative min-h-screen bg-black text-white">
+      {/* Conclick's own tracker — public SEO pages only (see note above). A plain
+          deferred script, identical in shape to the homepage embed, so it renders
+          into the HTML and behaves the same. React 19 hoists it to <head> and
+          dedupes by src; umami finds itself via the data-website-id selector, so
+          defer/hoist is fine. */}
+      <script defer src={`${CONCLICK_APP}/script.js`} data-website-id={CONCLICK_WEBSITE_ID} data-domains="conclick.io" />
       {/* Fixed hatched gutters — exactly like the homepage. */}
       <div
         aria-hidden
