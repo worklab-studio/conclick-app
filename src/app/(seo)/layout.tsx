@@ -17,8 +17,10 @@ import { siteUrl } from '@/lib/seo';
 // why conclick.io showed visitors but /blogs and the rest did not.
 //
 // The website id is the SAME one embedded on the homepage and is public by
-// nature (it sits in that page's HTML). data-domains pins tracking to
-// conclick.io so app-host / preview / localhost hits never pollute the numbers.
+// nature (it sits in that page's HTML). Kept byte-identical to the homepage
+// snippet (no data-domains): the tracker reads its config from its own script
+// element via document.currentScript, so it must be a browser-PARSED script,
+// exactly like this one in the served HTML.
 const CONCLICK_APP = process.env.NEXT_PUBLIC_APP_URL || 'https://app.conclick.io';
 const CONCLICK_WEBSITE_ID = '7e14a7ea-b156-4e91-a676-8e3c96a81291';
 
@@ -48,12 +50,9 @@ const HATCH =
 export default function SeoLayout({ children }: { children: ReactNode }) {
   return (
     <div className="relative min-h-screen bg-black text-white">
-      {/* Conclick's own tracker — public SEO pages only (see note above). A plain
-          deferred script, identical in shape to the homepage embed, so it renders
-          into the HTML and behaves the same. React 19 hoists it to <head> and
-          dedupes by src; umami finds itself via the data-website-id selector, so
-          defer/hoist is fine. */}
-      <script defer src={`${CONCLICK_APP}/script.js`} data-website-id={CONCLICK_WEBSITE_ID} data-domains="conclick.io" />
+      {/* Conclick's own tracker — public SEO pages only (see note above). Byte-
+          identical to the homepage embed so it behaves identically. */}
+      <script defer src={`${CONCLICK_APP}/script.js`} data-website-id={CONCLICK_WEBSITE_ID} />
       {/* Fixed hatched gutters — exactly like the homepage. */}
       <div
         aria-hidden
