@@ -298,8 +298,14 @@ export function ContentArticle({ entry: e, children }: { entry: ContentEntry; ch
               the index and the article read as one product. 44px stays below the
               index's 52px on purpose — the index is the cover, this is the
               story. The mobile step stays at 30px: article titles run long and
-              32px costs a whole extra line in a 325px content box. */}
-          <h1 className="mt-6 max-w-[46rem] text-[30px] font-semibold leading-[1.12] tracking-[-0.02em] text-white sm:text-[44px] sm:leading-[1.08]">
+              32px costs a whole extra line in a 325px content box.
+
+              NO max-w. The headline spans the full container, so its right edge
+              lands on the mesh art's right edge (~1195px at 1440) and on the far
+              edge of the index rail below it. It was capped at 46rem, which
+              stopped it ~307px short of the art and made the whole hero read as
+              an indented column beside a full-width image. */}
+          <h1 className="mt-6 text-[30px] font-semibold leading-[1.12] tracking-[-0.02em] text-white sm:text-[44px] sm:leading-[1.08]">
             {e.h1}
           </h1>
 
@@ -309,11 +315,12 @@ export function ContentArticle({ entry: e, children }: { entry: ContentEntry; ch
               extractors. metaDescription is already written to be exactly this —
               one ~155-char summary line.
 
-              Narrowed from max-w-2xl (42rem) to 40rem so the standfirst can
-              never overhang the 46rem headline above it — an inverted hierarchy
-              that was invisible only while both were centred. 40rem also lands
-              within a few px of TrustRow's natural single-line width below. */}
-          <p className="mt-6 max-w-[40rem] text-[15px] leading-relaxed text-zinc-400">{e.metaDescription}</p>
+              Uncapped, like the h1 above it. A ~155-char line at 15px runs to
+              about two lines at the full 952px content width, so the usual
+              long-measure readability objection does not bite on a string this
+              short — and a narrower dek under a full-width headline reads as
+              the indent the operator asked us to remove. */}
+          <p className="mt-6 text-[15px] leading-relaxed text-zinc-400">{e.metaDescription}</p>
 
           {isCommercial && (
             <>
@@ -334,15 +341,14 @@ export function ContentArticle({ entry: e, children }: { entry: ContentEntry; ch
               centred kicker line; folded in here they read as magazine credits
               instead of a fifth ragged line under a left-aligned hero.
 
-              CAPPED AT 46rem, the h1's own measure — NOT the full container.
-              Spanning the full max-w-6xl parked the folio ~350px past the
-              headline's right edge, and since e.category is empty on 44 of the
-              68 pages (all of /vs, /alternatives, /for, /tools, /glossary) the
-              right-hand cell collapsed to a lone "6 min read" floating in
-              whitespace with nothing above or beside it. Sharing the headline's
-              right edge is what makes the rule read as a masthead rather than a
-              full-bleed divider with a stray number on it. */}
-          <div className="mt-8 flex max-w-[46rem] flex-wrap items-center justify-between gap-x-6 gap-y-3 border-t border-white/[0.07] pt-6">
+              FULL CONTAINER WIDTH, matching the uncapped h1 above. The rule now
+              spans the same span as the mesh art and as the article+index row
+              below, so it reads as the divider closing the hero rather than a
+              short line floating mid-page. The folio lands on that same right
+              edge, which is where the index rail ends — the alignment that makes
+              a lone "6 min read" (e.category is empty on 44 of the 68 pages)
+              look placed rather than stranded. */}
+          <div className="mt-8 flex flex-wrap items-center justify-between gap-x-6 gap-y-3 border-t border-white/[0.07] pt-6">
             <AuthorByline datePublished={e.datePublished} dateModified={e.dateModified} />
             <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-zinc-500">
               {e.category && (
