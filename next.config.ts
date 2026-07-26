@@ -23,10 +23,18 @@ const trackerScriptURL = process.env.TRACKER_SCRIPT_URL || '';
 const clerkDomains =
   'https://clerk.conclick.io https://clerk.fluxdesignlab.io https://*.clerk.accounts.dev https://*.clerk.com https://challenges.cloudflare.com';
 
+// Conclick's own tracker is served from the APP host (app.conclick.io/script.js)
+// while the SEO pages are served from conclick.io, so it is cross-origin and the
+// CSP must allow it explicitly. Without this the browser silently blocks the
+// script and no pageviews are recorded — which is exactly why /blogs, /vs,
+// /guides etc. reported zero visitors while the Framer homepage (no CSP) worked.
+// connect-src already allows https:, so the /api/send POST was never the issue.
+const trackerDomain = 'https://app.conclick.io';
+
 const contentSecurityPolicy = `
   default-src 'self';
   img-src 'self' https: data: blob:;
-  script-src 'self' 'unsafe-eval' 'unsafe-inline' ${clerkDomains};
+  script-src 'self' 'unsafe-eval' 'unsafe-inline' ${clerkDomains} ${trackerDomain};
   style-src 'self' 'unsafe-inline';
   connect-src 'self' https:;
   worker-src 'self' blob:;
