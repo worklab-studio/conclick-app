@@ -10,24 +10,14 @@ import { SeoNav } from '@/components/seo/SeoNav';
 import { SeoFooter } from '@/components/seo/SeoFooter';
 import { siteUrl } from '@/lib/seo';
 
-// Conclick tracks its own public SEO surface. Delivered as an INLINE loader
-// (the same dangerouslySetInnerHTML pattern the root layout uses for its theme
-// script), NOT a <script src> or next/script:
-//   - A raw <script src> is hoisted/managed by React 19 and the instance that
-//     runs has document.currentScript === null, which this tracker reads its
-//     config from (if(!currentScript)return), so it silently no-ops.
-//   - next/script beforeInteractive is honoured only in the ROOT layout, and
-//     afterInteractive is client-injected (not in <head>).
-// An inline script is rendered verbatim and parser-executed; it appends the
-// tracker via createElement, and for that classic external script
-// document.currentScript IS the appended element, so the config read works.
-// The hostname guard keeps it to conclick.io, so app-host / preview / localhost
-// renders of these same routes never send events.
-const CONCLICK_APP = process.env.NEXT_PUBLIC_APP_URL || 'https://app.conclick.io';
-const CONCLICK_WEBSITE_ID = '7e14a7ea-b156-4e91-a676-8e3c96a81291';
-const TRACKER_LOADER = `(function(){if(location.hostname!=='conclick.io')return;var s=document.createElement('script');s.defer=true;s.src=${JSON.stringify(
-  `${CONCLICK_APP}/script.js`,
-)};s.setAttribute('data-website-id',${JSON.stringify(CONCLICK_WEBSITE_ID)});(document.head||document.documentElement).appendChild(s);})();`;
+// NOTE: Conclick's tracker is injected at the EDGE by the Cloudflare Worker
+// (deploy/cloudflare/conclick-seo-proxy.worker.js), NOT here. Every app-side
+// approach fails: React 19 hoists a <script src> so its instance runs with
+// document.currentScript === null (which the tracker reads its config from), a
+// dynamic createElement loader hits the same null-currentScript, next/script
+// beforeInteractive is honoured only in the root layout, and afterInteractive
+// lands outside <head>. HTMLRewriter appends a real parser-inserted tag to
+// <head> where currentScript is valid — the only reliable place.
 
 // The ONLY indexable surface. robots here overrides the app-wide noindex set in
 // the root layout (Next replaces robots at the nearest segment). metadataBase
@@ -55,8 +45,6 @@ const HATCH =
 export default function SeoLayout({ children }: { children: ReactNode }) {
   return (
     <div className="relative min-h-screen bg-black text-white">
-      {/* Conclick's own tracker — inline loader (see note above), public SEO pages only. */}
-      <script dangerouslySetInnerHTML={{ __html: TRACKER_LOADER }} />
       {/* Fixed hatched gutters — exactly like the homepage. */}
       <div
         aria-hidden

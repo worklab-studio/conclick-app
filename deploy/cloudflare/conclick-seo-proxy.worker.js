@@ -33,6 +33,13 @@ const APP_ORIGIN = 'https://app.conclick.io';
 // Worker BEFORE the next submission.
 const INDEXNOW_KEY = '67409878d24e964b1928338aac760bc0';
 
+// Conclick tracker, injected into <head> of every proxied SEO page (see the
+// HTMLRewriter in fetch). Byte-identical to the Framer homepage embed, so all
+// of conclick.io reports into one website. The id is public (it is in the
+// homepage HTML). Keep in sync with the homepage snippet if it ever changes.
+const TRACKER_TAG =
+  '<script defer src="https://app.conclick.io/script.js" data-website-id="7e14a7ea-b156-4e91-a676-8e3c96a81291"></script>';
+
 // ---------------------------------------------------------------------------
 // !!! READ THIS BEFORE TRUSTING robots.txt !!!
 //
@@ -144,6 +151,25 @@ export default {
     const target = new URL(url.pathname + url.search, APP_ORIGIN);
     const proxied = new Request(target, request);
     proxied.headers.set('X-Forwarded-Host', url.host);
-    return fetch(proxied);
+    const res = await fetch(proxied);
+
+    // Inject Conclick's own tracker into every proxied HTML page. This is done
+    // at the EDGE, not in the app, on purpose: React 19 hoists/manages any
+    // <script src> the app renders, and the instance that runs ends up with
+    // document.currentScript === null — which this tracker reads its config
+    // from, so an app-rendered tag silently no-ops. HTMLRewriter appends a
+    // real, parser-inserted tag to <head> (identical to the Framer homepage
+    // embed), where currentScript is valid. Only text/html is touched, so
+    // _next assets, sitemap.xml, RSS etc. pass through untouched. The Worker
+    // only handles conclick.io SEO routes, so no data-domains guard is needed.
+    const ct = res.headers.get('content-type') || '';
+    if (!ct.includes('text/html')) return res;
+    return new HTMLRewriter()
+      .on('head', {
+        element(el) {
+          el.append(TRACKER_TAG, { html: true });
+        },
+      })
+      .transform(res);
   },
 };
