@@ -17,7 +17,7 @@ no-op'd for 9 days before anyone noticed, and it was deleted in `37afa019`.)
 
 | Routine | Schedule | Does | Never does |
 |---|---|---|---|
-| [`daily-content`](routines/daily-content.md) | 09:12, 14:22, 18:42 | Writes ONE page, or repairs one | Writes two, backdates, exceeds 3/day |
+| [`daily-content`](routines/daily-content.md) | 09:12, 14:22, 18:42 | Writes ONE page, or repairs one | Writes two, backdates, exceeds 1/day |
 | [`weekly-traffic`](routines/weekly-traffic.md) | Mon 09:47 | Ingests GSC, harvests queries, repairs 3 | Creates a new page |
 | [`news-watch`](routines/news-watch.md) | 07:40, 11:40, 16:40, 21:40 | Queues ONE backlog row when the beat moves | Publishes anything, ever |
 
@@ -59,8 +59,12 @@ gsc.mjs harvest (real)  ──┘                                         JSON) 
    and forum harvesters fill `keywords.sqlite`. `gsc.mjs harvest` adds the best
    rows of all: queries the live site already earns impressions for.
 2. **Pick.** `kwstore.mjs pick <bucket>` returns one row per cluster from four
-   SQL buckets (money / breadth / explore / refresh), excluding clusters a
-   published entry already covers.
+   SQL buckets (money / breadth / explore / refresh), excluding any cluster a
+   published entry already covers **or contains** — "hotjar pricing plans" is
+   the covered "hotjar pricing" plus a modifier, not a second page. Run
+   `kwstore.mjs reconcile` after any hand-written batch: it marks every page on
+   disk as covered, and a page the backlog never heard about is a page it will
+   happily offer you again.
 3. **Ground.** `kwstore.mjs brief "<kw>"` returns cached SERP + People Also Ask.
    The page is the gap the top results underserve. Ungrounded is allowed;
    guessing what competitors say is not.
@@ -100,7 +104,12 @@ gsc.mjs harvest (real)  ──┘                                         JSON) 
 - In-prose links are `[anchor](/path)` inside section `text`/`items` strings,
   rendered by `src/components/seo/RichText.tsx` (p/ul/ol/quote/callout only —
   headings don't render links). Unknown paths silently degrade to plain text.
-  The `internalLinks` array is the end-of-page rail, not a substitute.
+  The `internalLinks` array is a separate "read next" card rail below the
+  article body — this doc called it that for months while `ContentArticle`
+  rendered it nowhere at all, so the field was pure dead weight that
+  `internal-links-min` still gated on; the rail is being wired up in the
+  2026-07-26 fix pass. Either way it is template chrome and never a substitute
+  for an in-prose link.
 - Review mode is **off** (since 2026-07-22). A lint failure therefore has to be
   backed out, not left in the tree, or the next run commits it.
 - `ctr` from Search Console is a **fraction**. 0.02 is 2%.

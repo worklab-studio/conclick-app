@@ -31,8 +31,14 @@ Six things are worth watching. Nothing else is.
 4. **Privacy law** — a specific DPA ruling, a court decision, an enforcement
    action against an analytics vendor. Must have an authority, a date, and a
    document.
-5. **Competitors** — Plausible, Fathom, Matomo, PostHog, Simple Analytics,
-   Clarity, Hotjar: pricing changes, shutdowns, acquisitions, major features.
+5. **Competitors** — Umami, Plausible, Fathom, Matomo, PostHog, Simple
+   Analytics, Clarity, Hotjar: pricing changes, shutdowns, acquisitions, major
+   features. **Umami first**, and it was missing from this list until
+   2026-07-26. It is the vendor whose releases invalidate our corpus fastest:
+   `/vs/umami` and `/alternatives/umami` both assert things Umami does not have,
+   and Conclick is built on the Umami codebase, so an upstream release can make
+   a claim false and land in our own repo in the same week. Watch its GitHub
+   releases and its cloud changelog, not just its blog.
 6. **AI retrieval** — how ChatGPT, Perplexity, Claude and Google AI surfaces
    pick and cite sources; crawler policy changes; llms.txt adoption. This is the
    highest-value beat because it is the one where Conclick is first-hand

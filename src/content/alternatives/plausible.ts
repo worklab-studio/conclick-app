@@ -6,6 +6,7 @@ const entry: ContentEntry = {
   "h1": "The Best Plausible Alternatives in 2026",
   "metaTitle": "Best Plausible Alternatives in 2026 (Honest Picks)",
   "metaDescription": "Tired of Plausible's traffic-only view? Here are the best privacy-first alternatives in 2026, including one that ties every visitor to actual revenue.",
+  "primaryKeyword": "plausible alternatives",
   "tldr": "Conclick is the top pick if you want to know which traffic actually makes money: it connects Stripe, Paddle, and other payment processors directly to your analytics. For pure simplicity with no frills, Fathom and Simple Analytics are both solid. Umami and Matomo work well if you want self-hosted control.",
   "intro": "Plausible is good. It's clean, fast, GDPR-friendly, and a genuine upgrade from Google Analytics for most indie founders. But if you've been using it for six months and you still can't tell which blog post or ad campaign is generating actual paying customers, you've hit its ceiling. That's the gap this roundup addresses. These are real tools I'd consider if I were switching today, ordered by how useful they actually are for small SaaS and ecommerce founders.",
   "sections": [
@@ -82,7 +83,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "There's a hosted cloud version if you don't want to maintain infrastructure. The free tier is fairly generous. The downside: you'll spend time on setup and maintenance if you self-host, and there's no revenue attribution. Best for technically comfortable founders who want full control."
+      "text": "There's a hosted cloud version if you don't want to maintain infrastructure. The free tier is fairly generous. The downside: you'll spend time on setup and maintenance if you self-host, and while Umami does ship revenue and attribution reports, per their docs as of July 2026 there is no payment-processor connector feeding them, so the revenue is whatever you instrument yourself. Best for technically comfortable founders who want full control."
     },
     {
       "type": "h2",
@@ -203,13 +204,13 @@ const entry: ContentEntry = {
         "feature": "Revenue attribution (Stripe / Paddle / etc.)",
         "conclick": true,
         "competitor": false,
-        "note": "Conclick ties every payment back to traffic source and campaign; Plausible has no payment-processor integrations as of July 2026"
+        "note": "Conclick ties every payment back to traffic source and campaign; Plausible has no payment-processor integrations, per their docs as of July 2026"
       },
       {
         "feature": "Real-screenshot heatmaps and click maps",
         "conclick": true,
         "competitor": false,
-        "note": "Conclick includes rage click, dead click, and scroll depth; Plausible has no heatmaps as of July 2026"
+        "note": "Conclick includes rage click, dead click, and scroll depth; Plausible has no heatmaps, per their docs as of July 2026"
       },
       {
         "feature": "Auto-detected funnels",

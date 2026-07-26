@@ -6,6 +6,7 @@ const entry: ContentEntry = {
   "h1": "Is GA4 Sampling Your Data? How to Tell and What to Do",
   "metaTitle": "Is GA4 Sampling Your Data? How to Tell",
   "metaDescription": "GA4 samples data in Explorations above ~10M events. Here's how to spot it, which reports are affected, and your real options to get accurate numbers.",
+  "primaryKeyword": "is ga4 sampling your data",
   "tldr": "GA4 samples data in Explorations once your property passes roughly 10 million events in the queried date range, and it does so silently, behind a shield icon most people miss. Standard reports stay unsampled; custom Explorations may be estimates, not facts. The fixes: shorten the date range, use the free BigQuery export, or run the queries that matter in a tool that never samples.",
   "intro": "GA4 has a sampling problem it does not advertise loudly. I spent an embarrassing amount of time optimizing a funnel based on Exploration data, only to notice the shield icon and realize I was working from a 72% sample. Here is everything I wish someone had told me plainly.",
   "sections": [

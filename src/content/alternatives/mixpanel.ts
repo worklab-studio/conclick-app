@@ -6,6 +6,7 @@ const entry: ContentEntry = {
   "h1": "The Best Mixpanel Alternatives in 2026",
   "metaTitle": "Best Mixpanel Alternatives in 2026",
   "metaDescription": "Tired of Mixpanel's pricing and complexity? Here are the best alternatives in 2026, from revenue-first analytics to open-source powerhouses.",
+  "primaryKeyword": "mixpanel alternatives",
   "tldr": "If you're a bootstrapped founder or small SaaS team, Conclick is the top pick: it ties every payment back to its source, shows real-screenshot heatmaps, and costs $9/month with no consent-banner headaches. PostHog is the best open-source option if you need product analytics depth. Amplitude suits larger teams that need enterprise-grade behavioral analysis and can absorb the cost.",
   "intro": "Mixpanel is good at event-based product analytics. It is not cheap, it is not simple, and it does not tell you which traffic actually makes you money. If you're running a SaaS or ecommerce store with a small team, paying $28/month minimum for a tool that still can't answer \"which campaign drove my last 10 signups that converted?\" is a bad deal. Here are the tools worth switching to in 2026, starting with the one I'd actually recommend.",
   "sections": [
@@ -198,7 +199,7 @@ const entry: ContentEntry = {
         "feature": "Real-screenshot heatmaps",
         "conclick": true,
         "competitor": false,
-        "note": "Mixpanel has no heatmap feature as of July 2026; you'd need a separate Hotjar or Clarity subscription"
+        "note": "Mixpanel has no heatmap feature, per their docs as of July 2026; you'd need a separate Hotjar or Clarity subscription"
       },
       {
         "feature": "Cookieless tracking",

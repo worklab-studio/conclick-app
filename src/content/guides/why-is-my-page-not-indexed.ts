@@ -6,6 +6,7 @@ const entry: ContentEntry = {
   "h1": "Why Your Page Is Not Indexed in Google Search Console",
   "metaTitle": "Why Is My Page Not Indexed in Google Search Console?",
   "metaDescription": "Discovered and Crawled currently not indexed mean different things in Search Console. What each status says about your page, and what actually fixes it.",
+  "primaryKeyword": "why is my page not indexed in google search console",
   "tldr": "The status string tells you which problem you have. 'Discovered - currently not indexed' means Google found the URL but has not fetched it yet, usually a crawl-priority signal. 'Crawled - currently not indexed' means Google read the page and decided it was not worth keeping, usually a quality or duplication verdict. A young domain with few links often just has to wait.",
   "intro": "I have watched this exact panic play out on my own projects. You publish a page, you submit it, you refresh Search Console for a week, and the report keeps saying the same thing. The good news is that the status string is not vague. Google is telling you which of two very different problems you have, and the fix depends entirely on which one it is. So before you change anything, read the exact words.",
   "sections": [

@@ -6,6 +6,7 @@ const entry: ContentEntry = {
   "h1": "Migrating off Google Analytics 4: a practical guide",
   "metaTitle": "Migrating off Google Analytics 4: a practical guide",
   "metaDescription": "Step-by-step guide to exporting your GA4 data, picking a replacement, and getting back to answers faster than GA4 ever gave them.",
+  "primaryKeyword": "ga4 migration guide",
   "tldr": "You can migrate off GA4 in an afternoon: export your history via BigQuery or the Data API, install the replacement tracker, verify parity on your top pages and conversion events, then delete the property once you are confident. The hard part is deciding what you actually need. Most founders want revenue attribution and real conversion data, not 500 dimensions they will never open.",
   "intro": "I spent three years trying to make GA4 answer one question: which traffic source actually makes me money? It never gave me a straight answer. The interface buries conversion revenue behind four report customizations, sampling kicks in the moment your data gets interesting, and the consent banner requirements in Europe meant I was losing 30 to 40% of my data anyway. If you are reading this, you have probably hit the same wall.",
   "sections": [

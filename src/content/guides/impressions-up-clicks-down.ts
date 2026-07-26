@@ -6,6 +6,7 @@ const entry: ContentEntry = {
   "h1": "Search Console Impressions Up but Clicks Down: How to Read It",
   "metaTitle": "Impressions Up but Clicks Down in Search Console",
   "metaDescription": "Rising impressions with falling clicks usually means an AI Overview is answering the query for you. How to read it in Search Console and what to fix.",
+  "primaryKeyword": "search console impressions up but clicks down",
   "tldr": "Rising impressions with flat or falling clicks is usually the great decoupling: Google shows your page more often, often inside an AI Overview that answers the query so nobody clicks through. Read it in Search Console by checking that average position held steady, segmenting by query, and separating a title problem from a SERP-feature problem.",
   "intro": "I watch this pattern hit almost every small site I help, and it scares people more than it should. Your Search Console graph shows the impressions line climbing while the clicks line flattens or dips, and the natural read is that something broke. Usually nothing broke. Google is showing your page to more people and answering more of them before they ever reach you. That gap has a name now, and once you can read it you stop panicking and start fixing the part you actually control.",
   "sections": [

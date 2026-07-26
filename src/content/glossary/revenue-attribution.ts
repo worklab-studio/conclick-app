@@ -6,6 +6,7 @@ const entry: ContentEntry = {
   "h1": "Revenue Attribution: What It Is and Why Most Analytics Gets It Wrong",
   "metaTitle": "Revenue Attribution: Definition, Models & How to Do It Right",
   "metaDescription": "Revenue attribution connects your actual payments back to the traffic source, campaign, or funnel that earned them. What it means and how to measure it right.",
+  "primaryKeyword": "what is revenue attribution",
   "tldr": "Revenue attribution is the practice of crediting a specific marketing source, channel, or touchpoint with the revenue it generated, not just the clicks or signups. It answers the one question pageviews and conversion rates cannot: which traffic actually makes money?",
   "intro": "Pageviews are vanity. Signups are vanity. The only number that tells you whether your marketing is working is revenue, and specifically which source, campaign, or channel produced it. Revenue attribution is how you connect those dots. Without it, you are spending money on channels that feel productive but cannot prove they pay.",
   "sections": [

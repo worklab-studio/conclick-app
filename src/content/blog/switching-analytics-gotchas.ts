@@ -6,6 +6,7 @@ const entry: ContentEntry = {
   "h1": "4 Things Nobody Tells You Before Switching Analytics Tools",
   "metaTitle": "Switching Analytics Tools: 4 Things Nobody Tells You",
   "metaDescription": "Switching analytics tools is a 2-minute script swap. The hard part is the data: your numbers shift, history stays put, and consent rules change. Stay calm.",
+  "primaryKeyword": "switching analytics tools",
   "tldr": "Switching analytics tools is a two-minute script swap; the anxiety is about the data story, not the code. Expect your new numbers to run lower than the old ones (usually bot filtering and no cookie inflation, not a bug), plan for history that will not move itself, run both tools side by side for two weeks, then re-check what consent lets you collect.",
   "intro": "I have changed the analytics tool behind three products, and every time the panic was identical: the fresh dashboard showed fewer visitors than the old one, and for a day I was sure I had broken something. I had not. Switching analytics tools is mostly painless mechanically, but nobody warns you about the four things that actually rattle you, so here they are from someone who has sat through all of them.",
   "sections": [
@@ -97,8 +98,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "quote",
-      "text": "The code change takes two minutes. The trust change takes two weeks. Budget for the second one and switching stops being scary.",
-      "cite": "Deepak, founder of Conclick"
+      "text": "The code change takes two minutes. The trust change takes two weeks. Budget for the second one and switching stops being scary."
     }
   ],
   "faq": [

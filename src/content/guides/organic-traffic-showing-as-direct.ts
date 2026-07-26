@@ -6,6 +6,7 @@ const entry: ContentEntry = {
   "h1": "Why Is Organic Traffic Showing as Direct? The Dark Traffic Problem",
   "metaTitle": "Why Is Organic Traffic Showing as Direct? Dark Traffic Fix",
   "metaDescription": "Organic clicks land in Direct when the referrer gets stripped: HTTPS-to-HTTP hops, in-app browsers, email, and AI answers. Here is how to shrink that bucket.",
+  "primaryKeyword": "why is organic traffic showing as direct",
   "tldr": "Organic visits get filed as Direct when your analytics never receives a referrer, so it cannot see where the click came from. The usual culprits are HTTPS-to-HTTP downgrades, in-app browsers, email clients, mobile apps, and AI answer engines that strip the header. Tag the links you control with UTMs, fix the referrer chain on your own pages, and the Direct bucket shrinks.",
   "intro": "I get asked this more than almost any other analytics question, and the honest answer is that your dashboard is not lying to you: it genuinely does not know where those people came from. When a browser loads your page with no referrer and no campaign tag attached, most tools have exactly one honest place to file the visit, and that place is called Direct. Organic search clicks normally carry a referrer, so when they land in the Direct bucket instead, something snapped the chain between the search result and your page. That is the dark traffic problem, and it is almost always fixable once you find the broken link.",
   "sections": [

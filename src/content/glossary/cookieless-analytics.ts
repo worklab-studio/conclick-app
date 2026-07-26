@@ -6,6 +6,7 @@ const entry: ContentEntry = {
   "h1": "Cookieless Analytics: What It Is, Why It Matters, and How to Do It Right",
   "metaTitle": "Cookieless Analytics: The Complete Guide",
   "metaDescription": "Cookieless analytics tracks website visitors without storing cookies. Learn how it works, why it's replacing GA4 for many teams, and what you actually lose.",
+  "primaryKeyword": "what is cookieless analytics",
   "tldr": "Cookieless analytics measures traffic and user behavior without storing persistent identifiers (cookies) in the visitor's browser. Instead of assigning each visitor a cookie ID, it relies on aggregated fingerprints, server-side signals, or privacy-preserving hashing to count sessions, sources, and conversions, without requiring a consent banner in most jurisdictions.",
   "intro": "For most of web analytics history, a tiny file dropped in your visitor's browser was the whole game. Cookies made individual tracking easy. They also made compliance a nightmare, drove banner fatigue, and handed your visitor data to ad networks you didn't ask to involve. Cookieless analytics is the direct answer to that problem, and understanding it properly means knowing both what you gain and what you genuinely give up.",
   "sections": [

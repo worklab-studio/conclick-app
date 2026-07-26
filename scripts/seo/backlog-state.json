@@ -1,5 +1,17 @@
 {
   "keywords": {
+    "ab testing with low traffic": {
+      "status": "covered",
+      "slug": "ab-testing-with-low-traffic",
+      "reason": "live page /blogs/ab-testing-with-low-traffic",
+      "published_at": "2026-07-26T08:40:17.156Z"
+    },
+    "add analytics to nextjs": {
+      "status": "covered",
+      "slug": "add-analytics-to-nextjs",
+      "reason": "live page /guides/add-analytics-to-nextjs",
+      "published_at": "2026-07-26T08:40:17.163Z"
+    },
     "adding products to shopify store tutorial": {
       "status": "needs-human"
     },
@@ -42,8 +54,56 @@
     "all free traffic sources": {
       "status": "needs-human"
     },
+    "analytics a pre revenue startup needs": {
+      "status": "covered",
+      "slug": "analytics-a-pre-revenue-startup-needs",
+      "reason": "live page /blogs/analytics-a-pre-revenue-startup-needs",
+      "published_at": "2026-07-26T08:39:45.420Z"
+    },
+    "analytics for agencies": {
+      "status": "covered",
+      "slug": "agencies",
+      "reason": "live page /for/agencies",
+      "published_at": "2026-07-26T08:39:45.428Z"
+    },
+    "analytics for ecommerce": {
+      "status": "covered",
+      "slug": "ecommerce",
+      "reason": "live page /for/ecommerce",
+      "published_at": "2026-07-26T08:39:45.429Z"
+    },
+    "analytics for indie hackers": {
+      "status": "covered",
+      "slug": "indie-hackers",
+      "reason": "live page /for/indie-hackers",
+      "published_at": "2026-07-26T08:39:45.429Z"
+    },
+    "analytics for newsletters": {
+      "status": "covered",
+      "slug": "newsletters",
+      "reason": "live page /for/newsletters",
+      "published_at": "2026-07-26T08:39:45.430Z"
+    },
+    "analytics for saas": {
+      "status": "covered",
+      "slug": "saas",
+      "reason": "live page /for/saas",
+      "published_at": "2026-07-26T08:39:45.430Z"
+    },
+    "analytics stack for bootstrappers": {
+      "status": "covered",
+      "slug": "analytics-stack-for-bootstrappers",
+      "reason": "live page /blogs/analytics-stack-for-bootstrappers",
+      "published_at": "2026-07-26T08:39:45.420Z"
+    },
     "astro.com": {
       "status": "needs-human"
+    },
+    "attribution is guessing": {
+      "status": "covered",
+      "slug": "attribution-is-guessing",
+      "reason": "live page /blogs/attribution-is-guessing",
+      "published_at": "2026-07-26T08:40:17.156Z"
     },
     "best ai tool for data analyst": {
       "status": "needs-human"
@@ -69,18 +129,98 @@
     "cheap targeted traffic sources": {
       "status": "needs-human"
     },
+    "click map vs funnel": {
+      "status": "covered",
+      "slug": "click-map-vs-funnel",
+      "reason": "live page /blogs/click-map-vs-funnel",
+      "published_at": "2026-07-26T08:40:17.157Z"
+    },
+    "conclick vs clarity": {
+      "status": "covered",
+      "slug": "clarity",
+      "reason": "live page /vs/clarity",
+      "published_at": "2026-07-26T08:40:17.158Z"
+    },
+    "conclick vs datafast": {
+      "status": "covered",
+      "slug": "datafast",
+      "reason": "live page /vs/datafast",
+      "published_at": "2026-07-26T08:39:45.423Z"
+    },
+    "conclick vs fathom": {
+      "status": "covered",
+      "slug": "fathom",
+      "reason": "live page /vs/fathom",
+      "published_at": "2026-07-26T08:40:17.159Z"
+    },
+    "conclick vs google analytics": {
+      "status": "covered",
+      "slug": "google-analytics",
+      "reason": "live page /vs/google-analytics",
+      "published_at": "2026-07-26T08:40:17.160Z"
+    },
+    "conclick vs hotjar": {
+      "status": "covered",
+      "slug": "hotjar",
+      "reason": "live page /vs/hotjar",
+      "published_at": "2026-07-26T08:40:17.160Z"
+    },
+    "conclick vs matomo": {
+      "status": "covered",
+      "slug": "matomo",
+      "reason": "live page /vs/matomo",
+      "published_at": "2026-07-26T08:40:17.160Z"
+    },
+    "conclick vs mixpanel": {
+      "status": "covered",
+      "slug": "mixpanel",
+      "reason": "live page /vs/mixpanel",
+      "published_at": "2026-07-26T08:40:17.161Z"
+    },
+    "conclick vs pirsch": {
+      "status": "covered",
+      "slug": "pirsch",
+      "reason": "live page /vs/pirsch",
+      "published_at": "2026-07-26T08:39:45.423Z"
+    },
+    "conclick vs plausible": {
+      "status": "covered",
+      "slug": "plausible",
+      "reason": "live page /vs/plausible",
+      "published_at": "2026-07-26T08:40:17.161Z"
+    },
+    "conclick vs posthog": {
+      "status": "covered",
+      "slug": "posthog",
+      "reason": "live page /vs/posthog",
+      "published_at": "2026-07-26T08:40:17.161Z"
+    },
+    "conclick vs simple analytics": {
+      "status": "covered",
+      "slug": "simple-analytics",
+      "reason": "live page /vs/simple-analytics",
+      "published_at": "2026-07-26T08:40:17.161Z"
+    },
+    "conclick vs umami": {
+      "status": "covered",
+      "slug": "umami",
+      "reason": "live page /vs/umami",
+      "published_at": "2026-07-26T08:39:45.424Z"
+    },
     "conversion funnel software pricing": {
       "status": "published",
       "slug": "guides/conversion-funnel-software-pricing",
       "published_at": "2026-07-23T09:03:49.358Z"
     },
-    "cookieless heatmap tool": {
-      "status": "published",
-      "slug": "cookieless-heatmap-tool",
-      "published_at": "2026-07-22T03:50:58.060Z"
+    "cookie banners killing your data": {
+      "status": "covered",
+      "slug": "cookie-banners-killing-your-data",
+      "reason": "live page /blogs/cookie-banners-killing-your-data",
+      "published_at": "2026-07-26T08:39:45.421Z"
     },
     "cookieless session replay": {
-      "status": "skipped"
+      "status": "skipped",
+      "reason": "needs-human: Conclick does not offer session replay as a product feature; writing category page as Deepak who built the thing about a capability we do not ship would be dishonest."
     },
     "cost or pricing data": {
       "status": "needs-human"
@@ -135,6 +275,12 @@
     "easy way to make website with webflow": {
       "status": "needs-human"
     },
+    "fathom alternatives": {
+      "status": "covered",
+      "slug": "fathom",
+      "reason": "live page /alternatives/fathom",
+      "published_at": "2026-07-26T08:40:17.153Z"
+    },
     "fathom analytics pricing": {
       "status": "covered",
       "slug": "comparisons/fathom",
@@ -143,19 +289,51 @@
     "fdot traffic level b": {
       "status": "needs-human"
     },
+    "filter bot traffic from analytics": {
+      "status": "covered",
+      "slug": "filter-bot-traffic-from-analytics",
+      "reason": "live page /guides/filter-bot-traffic-from-analytics",
+      "published_at": "2026-07-26T08:40:17.164Z"
+    },
     "free trial pricing saas": {
       "status": "needs-human"
     },
     "ga4 360 costs": {
-      "status": "skipped"
+      "status": "skipped",
+      "reason": "needs actual GA4 360 pricing data, cannot fabricate figures"
     },
     "ga4 alternatives": {
       "status": "covered",
       "slug": "alternatives/google-analytics",
       "published_at": "2026-07-23T14:06:48.603Z"
     },
+    "ga4 migration guide": {
+      "status": "covered",
+      "slug": "ga4-migration-guide",
+      "reason": "live page /guides/ga4-migration-guide",
+      "published_at": "2026-07-26T08:39:45.427Z"
+    },
+    "gave up on ga4": {
+      "status": "covered",
+      "slug": "gave-up-on-ga4",
+      "reason": "live page /blogs/gave-up-on-ga4",
+      "published_at": "2026-07-26T08:39:45.421Z"
+    },
+    "gdpr analytics checklist": {
+      "status": "covered",
+      "slug": "gdpr-analytics-checklist",
+      "reason": "live page /guides/gdpr-analytics-checklist",
+      "published_at": "2026-07-26T08:39:45.427Z"
+    },
     "gdpr compliant heatmap": {
-      "status": "skipped"
+      "status": "skipped",
+      "reason": "cannibalises existing /guides/do-heatmaps-need-cookie-consent (legal analysis of heatmap consent) and /guides/gdpr-analytics-checklist (compliance checklist). Not enough new angle."
+    },
+    "google analytics alternatives": {
+      "status": "covered",
+      "slug": "google-analytics",
+      "reason": "live page /alternatives/google-analytics",
+      "published_at": "2026-07-26T08:40:17.154Z"
     },
     "google ecommerce check out": {
       "status": "needs-human"
@@ -345,6 +523,12 @@
     "how to measure roi in marketing": {
       "status": "needs-human"
     },
+    "how to read a funnel": {
+      "status": "covered",
+      "slug": "how-to-read-a-funnel",
+      "reason": "live page /guides/how-to-read-a-funnel",
+      "published_at": "2026-07-26T08:39:45.427Z"
+    },
     "how to read a heatmap": {
       "status": "published",
       "slug": "how-to-read-a-heatmap",
@@ -410,6 +594,18 @@
     "i cant understand framer": {
       "status": "needs-human"
     },
+    "impressions up clicks down": {
+      "status": "covered",
+      "slug": "impressions-up-clicks-down",
+      "reason": "live page /guides/impressions-up-clicks-down",
+      "published_at": "2026-07-26T08:40:17.165Z"
+    },
+    "is ga4 sampling your data": {
+      "status": "covered",
+      "slug": "is-ga4-sampling-your-data",
+      "reason": "live page /guides/is-ga4-sampling-your-data",
+      "published_at": "2026-07-26T08:39:45.428Z"
+    },
     "is traffic lights ai": {
       "status": "needs-human"
     },
@@ -425,7 +621,8 @@
       "published_at": "2026-07-24T08:10:28.114Z"
     },
     "marketing funnel software price in bangladesh": {
-      "status": "skipped"
+      "status": "skipped",
+      "reason": "geo/language-modified query — not servable in English for a global product"
     },
     "marketing roi measurement formula": {
       "status": "needs-human"
@@ -436,13 +633,26 @@
     "marketing tie ups for sale of products": {
       "status": "needs-human"
     },
+    "matomo alternatives": {
+      "status": "covered",
+      "slug": "matomo",
+      "reason": "live page /alternatives/matomo",
+      "published_at": "2026-07-26T08:40:17.155Z"
+    },
     "matomo pricing": {
       "status": "covered",
       "slug": "comparisons/matomo",
       "published_at": "2026-07-23T08:54:47.768Z"
     },
     "measure roi of content marketing": {
-      "status": "needs-human"
+      "status": "needs-human",
+      "reason": "gates.relevant=needs-human"
+    },
+    "metrics early saas should watch": {
+      "status": "covered",
+      "slug": "metrics-early-saas-should-watch",
+      "reason": "live page /blogs/metrics-early-saas-should-watch",
+      "published_at": "2026-07-26T08:39:45.421Z"
     },
     "microsoft clarity alternatives": {
       "status": "covered",
@@ -482,13 +692,32 @@
       "slug": "guides/open-source-web-analytics-tools",
       "published_at": "2026-07-23T14:12:25.914Z"
     },
+    "organic traffic showing as direct": {
+      "status": "covered",
+      "slug": "organic-traffic-showing-as-direct",
+      "reason": "live page /guides/organic-traffic-showing-as-direct",
+      "published_at": "2026-07-26T08:40:17.165Z"
+    },
+    "per event pricing trap": {
+      "status": "covered",
+      "slug": "per-event-pricing-trap",
+      "reason": "live page /blogs/per-event-pricing-trap",
+      "published_at": "2026-07-26T08:39:45.422Z"
+    },
+    "plausible alternatives": {
+      "status": "covered",
+      "slug": "plausible",
+      "reason": "live page /alternatives/plausible",
+      "published_at": "2026-07-26T08:40:17.155Z"
+    },
     "plausible pricing": {
       "status": "covered",
       "slug": "comparisons/plausible",
       "published_at": "2026-07-23T08:54:49.737Z"
     },
     "plausible vs google analytics": {
-      "status": "skipped"
+      "status": "skipped",
+      "reason": "off-brand (two competitors, no Conclick angle)"
     },
     "posthog alternatives": {
       "status": "covered",
@@ -504,10 +733,18 @@
       "status": "skipped"
     },
     "privacy friendly session recording": {
-      "status": "skipped"
+      "status": "skipped",
+      "reason": "needs-human: Conclick does not offer session recording/replay — writing a category page as the maker would be dishonest."
     },
     "revenue attribution tool": {
-      "status": "skipped"
+      "status": "skipped",
+      "reason": "cannibalises with existing draft revenue-attribution-tools"
+    },
+    "revenue attribution tools": {
+      "status": "covered",
+      "slug": "revenue-attribution-tools",
+      "reason": "live page /guides/revenue-attribution-tools",
+      "published_at": "2026-07-26T08:40:17.166Z"
     },
     "revenue attribution tools compared": {
       "status": "published",
@@ -536,7 +773,8 @@
       "status": "needs-human"
     },
     "saas revenue attribution software": {
-      "status": "skipped"
+      "status": "skipped",
+      "reason": "cannibalises with existing draft revenue-attribution-tools"
     },
     "saas what is this": {
       "status": "needs-human"
@@ -580,8 +818,20 @@
     "stack overflow traffic down": {
       "status": "needs-human"
     },
+    "stripe revenue vs analytics revenue": {
+      "status": "covered",
+      "slug": "stripe-revenue-vs-analytics-revenue",
+      "reason": "live page /guides/stripe-revenue-vs-analytics-revenue",
+      "published_at": "2026-07-26T08:40:17.166Z"
+    },
     "sveltekit remote functions static adapter": {
       "status": "needs-human"
+    },
+    "switching analytics gotchas": {
+      "status": "covered",
+      "slug": "switching-analytics-gotchas",
+      "reason": "live page /blogs/switching-analytics-gotchas",
+      "published_at": "2026-07-26T08:39:45.422Z"
     },
     "threshold meaning in data": {
       "status": "needs-human"
@@ -607,8 +857,26 @@
     "types of raster data": {
       "status": "needs-human"
     },
+    "umami alternatives": {
+      "status": "covered",
+      "slug": "umami",
+      "reason": "live page /alternatives/umami",
+      "published_at": "2026-07-26T08:39:45.419Z"
+    },
     "us based saas companies": {
       "status": "needs-human"
+    },
+    "utm builder": {
+      "status": "covered",
+      "slug": "utm-builder",
+      "reason": "live page /tools/utm-builder",
+      "published_at": "2026-07-26T08:39:45.428Z"
+    },
+    "vanity metrics are lying": {
+      "status": "covered",
+      "slug": "vanity-metrics-are-lying",
+      "reason": "live page /blogs/vanity-metrics-are-lying",
+      "published_at": "2026-07-26T08:39:45.422Z"
     },
     "website free traffic sources": {
       "status": "needs-human"
@@ -624,16 +892,64 @@
     "what is astro web": {
       "status": "needs-human"
     },
+    "what is bounce rate": {
+      "status": "covered",
+      "slug": "bounce-rate",
+      "reason": "live page /glossary/bounce-rate",
+      "published_at": "2026-07-26T08:39:45.424Z"
+    },
     "what is cardinality in data": {
       "status": "needs-human"
     },
+    "what is conversion funnel": {
+      "status": "covered",
+      "slug": "conversion-funnel",
+      "reason": "live page /glossary/conversion-funnel",
+      "published_at": "2026-07-26T08:39:45.424Z"
+    },
+    "what is cookieless analytics": {
+      "status": "covered",
+      "slug": "cookieless-analytics",
+      "reason": "live page /glossary/cookieless-analytics",
+      "published_at": "2026-07-26T08:39:45.425Z"
+    },
+    "what is first party cookies": {
+      "status": "covered",
+      "slug": "first-party-cookies",
+      "reason": "live page /glossary/first-party-cookies",
+      "published_at": "2026-07-26T08:39:45.425Z"
+    },
     "what is framer website": {
       "status": "needs-human"
+    },
+    "what is gdpr compliant analytics": {
+      "status": "covered",
+      "slug": "gdpr-compliant-analytics",
+      "reason": "live page /glossary/gdpr-compliant-analytics",
+      "published_at": "2026-07-26T08:39:45.425Z"
+    },
+    "what is heatmap": {
+      "status": "covered",
+      "slug": "heatmap",
+      "reason": "live page /glossary/heatmap",
+      "published_at": "2026-07-26T08:39:45.425Z"
     },
     "what is llms.txt": {
       "status": "published",
       "slug": "what-is-llms-txt",
       "published_at": "2026-07-22T04:03:27.027Z"
+    },
+    "what is marketing attribution": {
+      "status": "covered",
+      "slug": "marketing-attribution",
+      "reason": "live page /glossary/marketing-attribution",
+      "published_at": "2026-07-26T08:39:45.426Z"
+    },
+    "what is revenue attribution": {
+      "status": "covered",
+      "slug": "revenue-attribution",
+      "reason": "live page /glossary/revenue-attribution",
+      "published_at": "2026-07-26T08:39:45.426Z"
     },
     "what is saas ai": {
       "status": "needs-human"
@@ -641,8 +957,26 @@
     "what is saas and on premise": {
       "status": "needs-human"
     },
+    "what is sessions vs visitors": {
+      "status": "covered",
+      "slug": "sessions-vs-visitors",
+      "reason": "live page /glossary/sessions-vs-visitors",
+      "published_at": "2026-07-26T08:39:45.426Z"
+    },
     "what is the roi of marketing": {
       "status": "needs-human"
+    },
+    "what is utm": {
+      "status": "covered",
+      "slug": "utm",
+      "reason": "live page /glossary/utm",
+      "published_at": "2026-07-26T08:39:45.426Z"
+    },
+    "what is what is llms txt": {
+      "status": "covered",
+      "slug": "what-is-llms-txt",
+      "reason": "live page /glossary/what-is-llms-txt",
+      "published_at": "2026-07-26T08:40:17.163Z"
     },
     "what percent of internet traffic is bots": {
       "status": "needs-human"
@@ -650,8 +984,21 @@
     "what percentage of internet traffic is bots": {
       "status": "needs-human"
     },
+    "where users abandon checkout": {
+      "status": "covered",
+      "slug": "where-users-abandon-checkout",
+      "reason": "live page /guides/where-users-abandon-checkout",
+      "published_at": "2026-07-26T08:40:17.166Z"
+    },
     "which traffic converts to paying customers": {
-      "status": "needs-human"
+      "status": "needs-human",
+      "reason": "gates.relevant=needs-human"
+    },
+    "why ai traffic shows as direct": {
+      "status": "covered",
+      "slug": "why-ai-traffic-shows-as-direct",
+      "reason": "live page /guides/why-ai-traffic-shows-as-direct",
+      "published_at": "2026-07-26T08:40:17.167Z"
     },
     "why does traffic happen": {
       "status": "needs-human"
@@ -660,6 +1007,12 @@
       "status": "published",
       "slug": "why-ai-traffic-shows-as-direct",
       "published_at": "2026-07-22T04:06:02.773Z"
+    },
+    "why is my page not indexed": {
+      "status": "covered",
+      "slug": "why-is-my-page-not-indexed",
+      "reason": "live page /guides/why-is-my-page-not-indexed",
+      "published_at": "2026-07-26T08:40:17.167Z"
     },
     "why is my page not indexed in google search console": {
       "status": "published",
@@ -690,6 +1043,12 @@
     },
     "why must you increase the traffic": {
       "status": "needs-human"
+    },
+    "why revenue attribution matters": {
+      "status": "covered",
+      "slug": "why-revenue-attribution-matters",
+      "reason": "live page /blogs/why-revenue-attribution-matters",
+      "published_at": "2026-07-26T08:39:45.423Z"
     }
   }
 }

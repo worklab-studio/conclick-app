@@ -49,10 +49,24 @@ These change the plan. Each was confirmed by reading the repo.
 4. **Anti-cannibalization is SQL, not prose.** A `cluster` column + `ROW_NUMBER() OVER
    (PARTITION BY cluster)` + four named pick buckets (money/breadth/explore/refresh). Hard
    exemption: `/vs/X` and `/alternatives/X` are *supposed* to overlap — 8 such pairs exist.
-5. **Throttle to indexation, not to a quota.** At ~1 of 55 indexed, publishing 2/day into an
-   unindexed corpus manufactures a crawl-budget problem *and* a thin-content signal. Below
-   ~60% indexed, the daily slot repairs orphans instead. **A run that publishes nothing is a
-   successful run.**
+5. **Throttle to indexation, not to a quota. Below 40% indexed, the daily slot repairs instead
+   of writing** — the same 40% `routines/daily-content.md` enforces. (This line said ~60% until
+   2026-07-26 and the routine said 40%, which meant the engine had two thresholds and obeyed
+   whichever doc was open. One number, and the operational doc owns it.)
+
+   **The reason is not crawl budget.** Google scopes crawl budget to sites of 1M+ pages;
+   conclick.io has 79 URLs, and `routines/weekly-traffic.md` already says the opposite in the
+   other direction (repair edits carry "no crawl-budget or velocity cost"). Repeating the
+   folklore made the throttle sound like a technical constraint we could engineer around.
+
+   The honest reason: **we cannot yet tell whether what we publish is any good.** Nothing in the
+   corpus has been measured against traffic, and the 2026-07-25 audit found a real factual
+   defect rate in what shipped — 42 competitor claims whose only citation was a date, 46 of 68
+   pages with no `sources[]`, including every comparison and every alternative. A low indexation
+   ratio is Google reading the corpus and declining to keep it: that is a verdict on quality,
+   and adding volume is the one response that cannot improve it. The ceiling is **1 page/day**,
+   and it rises on evidence — a measured ratio, GSC impressions, a clean lint gate — not on
+   confidence. **A run that publishes nothing is a successful run.**
 6. **One deterministic mesh module** serves both the in-page hero and the OG card — but the
    **word is never inside the shared SVG** (see §4).
 
@@ -94,15 +108,22 @@ These change the plan. Each was confirmed by reading the repo.
 - Harvesters, each independently non-fatal: `suggest.mjs` (Google/Bing/DDG/YouTube
   autocomplete), `harvest.mjs` (StackOverflow API, HN Algolia — free, keyless, no WAF, and
   where the GA4-exodus discourse actually happens), `wiki.mjs` (Wikipedia pageviews).
-- **SERP grounding ladder:** Brave Search API → DDG html scrape (local only) → autocomplete
-  question reconstruction → none. Record which rung produced the data, because computing
-  hardness from a CAPTCHA page silently poisons the opportunity factor.
+- **SERP grounding ladder — NOT BUILT (verified 2026-07-26).** Designed as Brave Search API →
+  DDG html scrape (local only) → autocomplete question reconstruction → none, recording which
+  rung produced the data because computing hardness from a CAPTCHA page silently poisons the
+  opportunity factor. None of it exists: `kwstore.recordSerp()` is written and has **zero
+  callers**, `serp_data` holds 0 rows, and `kwstore.mjs brief` therefore always prints "no
+  cached SERP". Every page written so far is ungrounded — which the daily routine permits, but
+  it means the "find the angle the top results underserve" step has never once had top results
+  to look at.
 - **Stable CLI** is the only interface SKILL.md uses: `kwstore.mjs report | pick <bucket> [n] |
   brief | published | covered | skip | prioritize`. (commenti's routine calls named commands
   and is a third the length of notchbay's inlined-heredoc version. Copy commenti's shape.)
 
 ### P2 — The three routines + indexing surfaces (week 2–3)
-- **`conclick-daily-content`** (10:05 + 17:05 IST, quota 2/day clamped at 6): QUOTA → LOCK →
+- **`conclick-daily-content`** (planned 10:05 + 17:05 IST, quota 2/day clamped at 6; **shipped
+  as three slots — 09:12 / 14:22 / 18:42 — with a hard ceiling of 1 page/day**, see §1.5):
+  QUOTA → LOCK →
   DRAIN actions → REFRESH sources → PICK (buckets + servability) → GROUND → WRITE drafts →
   GATE → RECORD → SHIP + IndexNow → REPORT (≤15 lines). Two slots is cheap insurance against a
   sleeping laptop, safe only because quota is computed from committed state.

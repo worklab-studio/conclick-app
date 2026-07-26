@@ -6,6 +6,7 @@ const entry: ContentEntry = {
   "h1": "How to Add Analytics to a Next.js Site",
   "metaTitle": "How to Add Analytics to a Next.js Site (2026 Guide)",
   "metaDescription": "Where the tracking snippet goes in the App Router and Pages Router, script tag vs next/script, and how to fix the SPA route-change gotcha that breaks pageviews.",
+  "primaryKeyword": "how to add analytics to a next.js site",
   "tldr": "Add analytics to a Next.js site by loading the tracker once in your root layout with next/script (strategy afterInteractive), or with @next/third-parties for Google Analytics. The gotcha: client-side route changes never reload the page, so a naive snippet counts only the first pageview. Umami-based trackers handle that automatically. A raw Google Analytics snippet does not.",
   "intro": "I have shipped this on more Next.js apps than I can count, and the same two things break every time. People paste a vendor snippet into the wrong file, and their numbers stop making sense the moment a visitor clicks a link inside the app. Neither problem is hard once you know why it happens. So here is the whole thing: where the tag goes in the App Router, where it goes in the Pages Router, and why single page navigation quietly eats your data unless the tracker is built for it.",
   "sections": [

@@ -13,6 +13,9 @@ run that does nothing: when publishing is off the table, go to step 7 and
 repair. Idling was the 2026-07-22 failure — two of three slots reported "quota
 met" and stopped, spending an agent's full context to print a sentence.
 
+At 1 page/day, **two of the three slots are supposed to repair.** That is the
+normal shape of a day now, not a degraded one.
+
 ---
 
 ## 0. QUOTA
@@ -24,15 +27,19 @@ node scripts/seo/gsc.mjs ratio
 
 `ENGINE_START = 2026-02-01`.
 
-**Write exactly ONE page per run.** Three scheduled runs a day (09:12, 14:22, 18:42 local) = three posts a day. Never write two in one run: quality degrades across a single context, one failure would lose the whole batch, and three pages committed in the same minute reads as a burst rather than a cadence.
+**Write exactly ONE page per run.** Never write two in one run: quality degrades across a single context, one failure would lose the whole batch, and pages committed in the same minute read as a burst rather than a cadence.
 
-**Hard ceiling: 3 non-draft pages per calendar day.** Count entries whose `datePublished` is today. If three already exist, print `quota met` and **go to step 7 (REPAIR)** — do not stop, and do not write a fourth. Never compute `days_since_START × 3` and try to settle a debt — from a February start that arithmetic claims ~500 pages owed, and publishing into that is precisely the velocity fingerprint that gets a site classified as scaled content. The start date is for reporting, not a backlog to repay.
+**Hard ceiling: 1 non-draft page per calendar day.** Three runs are scheduled (09:12, 14:22, 18:42 local); at most one of them writes. Count entries whose `datePublished` is today. If one already exists, print `quota met` and **go to step 7 (REPAIR)** — do not stop, and do not write a second.
 
-**A hand-written batch counts against the ceiling.** If a human committed pages today, the quota is consumed by them. That is correct and not a bug to route around.
+**Why 1 and not 3.** Not crawl budget: Google scopes that to sites of 1M+ pages and conclick.io has 79 URLs, and `weekly-traffic.md` says the same thing in the other direction (edits to existing pages carry no crawl-budget or velocity cost). The real reason is that **we cannot yet tell whether what we publish is any good.** The corpus has never been measured against traffic, and the 2026-07-25 audit found a demonstrated factual defect rate in what already shipped: 42 competitor claims sourced to nothing but a date, 46 of 68 pages with no `sources[]` at all, including every comparison and every alternative page. Publishing three pages a day into that is three times the volume of an output whose quality is unknown and whose known defects are unfixed. Rate goes back up when there is evidence to raise it on: a measured indexation ratio, GSC impressions on the existing corpus, and a lint gate that no longer has a standing violation count.
+
+Never compute `days_since_START × 1` and try to settle a debt — from a February start that arithmetic claims ~175 pages owed, and publishing into that is precisely the velocity fingerprint that gets a site classified as scaled content. The start date is for reporting, not a backlog to repay.
+
+**A hand-written batch counts against the ceiling.** If a human committed a page today, the quota is consumed by it. That is correct and not a bug to route around.
 
 **Never backdate `datePublished`.** A page's date is the day it was written. Fabricating a publication history is trivially detectable (sitemap lastmod, first-crawl date, and the Wayback record all contradict it) and it is the one lie that costs the whole domain its credibility.
 
-**Indexation signal — report it, never silently skip.** `gsc.mjs ratio` prints `ratio=` as its last line; put that number in every run report. A low ratio means Google is not keeping up with what already exists, so new pages spread crawl budget thinner rather than adding reach. The operator chose 3/day knowingly, so this is a number to surface, not a veto: publish anyway, but **if the ratio is under 40%, skip writing and go to step 7 (REPAIR)** instead, and say why.
+**Indexation signal — report it, never silently skip.** `gsc.mjs ratio` prints `ratio=` as its last line; put that number in every run report. A low ratio means Google is looking at what already exists and declining to keep it, which is a verdict on the corpus, not a capacity problem — adding to it is the one response that cannot help. **If the ratio is under 40%, skip writing and go to step 7 (REPAIR)** instead, and say why. 40% is the single threshold; `PLAYBOOK.md` agrees with this number, and if the two ever disagree again this file wins.
 
 If `gsc.mjs ratio` fails because the credential is missing, print its error verbatim in the report and continue — an unmeasurable ratio is a reason to flag, not a reason to skip the day's page.
 
@@ -80,8 +87,11 @@ Write a draft to `scripts/seo/drafts/<slug>.json`:
 ```json
 { "type": "guide", "slug": "…", "kind": "guide", "keyword": "…",
   "draft": { "h1": "…", "metaTitle": "…", "metaDescription": "…",
-             "tldr": "…", "intro": "…", "sections": [], "faq": [] } }
+             "tldr": "…", "intro": "…", "sections": [], "faq": [],
+             "sources": [{ "label": "…", "url": "https://…" }] } }
 ```
+
+**`sources` is 3-6 PRIMARY sources and is not optional on any page that makes a claim about someone else.** Primary means the thing itself: the vendor's own docs, the vendor's own pricing page, their changelog, the regulation's own text, the published research. A blog post *about* a vendor's pricing is not the source, it is a pointer to the source — follow it and cite what it points at. This field was absent from the template until 2026-07-26, which is why most pages still carry no sources at all, the comparisons and alternatives worst of all — exactly the pages whose claims are falsifiable by a third party.
 
 **Structure** — lede answers the query in the first 40–60 words (this is what AI engines quote) → `tldr` → ≥4 descriptive H2s → at least one data table where it genuinely helps → 3+ FAQ.
 
@@ -96,7 +106,7 @@ Write a draft to `scripts/seo/drafts/<slug>.json`:
 
 - **Never** write "no consent banner needed" unqualified. The tracker writes a persistent localStorage id. Qualify it or omit it.
 - **Never** write "GA4 is illegal in the EU." Not accurate in 2026 — the Data Privacy Framework addressed the transfer defect. Attribute every regulatory claim to a specific authority + ruling + date.
-- **Never** claim a competitor lacks a feature without checking. Matomo *does* have heatmaps. Getting this wrong on a page titled "honest comparison" is fatal.
+- **Never** claim a competitor lacks a feature without checking, and cite what you checked. Matomo *does* have heatmaps. Getting this wrong on a page titled "honest comparison" is fatal. **"as of July 2026" is not a citation** — it only says when we believed it, which an unsourced claim already said. The lint gate accepted a bare date until 2026-07-26 and 42 claims took that door. Write the URL, "per their docs", or their pricing page/changelog, and put it in `sources` too.
 - **Disclose the Umami lineage** on any Umami-adjacent page.
 - Never invent benchmarks, user counts, testimonials, or pricing.
 - Describe pricing *models*, not figures, unless certain.
@@ -200,11 +210,15 @@ node scripts/seo/lint.mjs --all          # grandfathered violations, worst first
 
    **In-prose means inside a section's `text` or `items` string.** Adding
    entries to the `internalLinks` array does NOT count and does not fix an
-   orphan: that field renders as a card rail at the end of the page, which is
-   template chrome, the class search engines discount most. The 2026-07-22
-   repair run satisfied `internal-links-min` with four `internalLinks` entries
-   and zero in-prose links, which is the letter of the law and none of the
-   point.
+   orphan. That array is a "read next" card rail below the article body,
+   identical in shape on every page that has one — template chrome, the class
+   search engines discount most. (For a long stretch it was not even that: the
+   field was populated, gated on by `internal-links-min`, and then dropped on
+   the floor by `ContentArticle`, so the rail this doc kept describing did not
+   render anywhere. It is being wired up in the 2026-07-26 fix pass. A rendered
+   rail is still not contextual linking.) The 2026-07-22 repair run satisfied
+   `internal-links-min` with four `internalLinks` entries and zero in-prose
+   links, which is the letter of the law and none of the point.
 
    Both are worth having. Only one of them is contextual linking.
 
@@ -215,6 +229,22 @@ node scripts/seo/lint.mjs --all          # grandfathered violations, worst first
    the link rather than shipping a 404. Verify the anchor survived by checking
    the built page, not by trusting the draft.
 4. **Grandfathered lint** — clear violations off the baseline, oldest first.
+5. **Unsourced competitor claims** — run `node scripts/seo/lint.mjs --all` and
+   take the top entry reporting `competitor-feature-claim-needs-source`. No
+   count is written here on purpose: any number in this file goes stale on the
+   first repair run that succeeds, and a stale number sends the next run
+   hunting for violations that no longer exist. The law fires wherever a claim
+   lives, so do not assume it is confined to `comparisons/` and `alternatives/`
+   — `use-cases/` has carried it too. Fix one entry per repair run: check the
+   claim against the vendor's own docs or pricing page, cite that in the
+   sentence, add it to `sources`, and **delete the claim if it turns out to be
+   false** rather than sourcing your way around it. A date is not a source and
+   no longer passes; neither does citing ourselves — "per our docs" and a
+   conclick.io link are both rejected, because the reader has to be able to
+   check the claim against the vendor.
+
+   **Do not make these go away with `--baseline-init`.** Grandfathering them is
+   the exact failure this law was tightened to prevent.
 
 Then gate exactly as step 4 does (`lint.mjs --entry`, `pnpm run build-app`) and
 ship as step 6 does.

@@ -6,8 +6,9 @@ const entry: ContentEntry = {
   "h1": "The Best Umami Alternatives in 2026",
   "metaTitle": "Best Umami Alternatives in 2026 (Ranked)",
   "metaDescription": "Tired of self-hosting Umami? Here are the best alternatives in 2026: privacy-first, no-cookie, and actually useful for bootstrapped SaaS founders.",
+  "primaryKeyword": "umami alternatives",
   "tldr": "The best Umami alternatives in 2026 are Conclick (best for revenue attribution and heatmaps), Plausible (best simple hosted option), and Fathom (best for compliance-heavy teams). If you want to know which traffic actually makes you money, not just which pages get clicks, Conclick is the one to start with.",
-  "intro": "I've been self-hosting Umami for the better part of two years. It's fine. Cookieless, fast, open source. But somewhere around month six I realized I had a beautiful dashboard telling me my blog post got 3,400 pageviews, and absolutely no idea whether any of those visitors ever paid me anything. That's the gap Umami doesn't close. Full disclosure before we start: Conclick, the first pick below, is my product, and it started as a fork of Umami, so I know its codebase from the inside. If all you need is \"how many people visited my site,\" Umami is perfectly adequate. But if you're a bootstrapped founder trying to figure out which ad, which SEO article, or which cold email sequence is actually generating revenue, you need something different. Here's an honest look at what's worth switching to in 2026.",
+  "intro": "I've been self-hosting Umami for the better part of two years. It's fine. Cookieless, fast, open source. But somewhere around month six I realized I had a beautiful dashboard telling me my blog post got 3,400 pageviews, and absolutely no idea whether any of those visitors ever paid me anything. Umami does have revenue and attribution reports, but they only know the revenue you instrument and send in yourself, so the number was never going to appear on its own. That's the gap: not the report, the plumbing behind it. Full disclosure before we start: Conclick, the first pick below, is my product, and it started as a fork of Umami, so I know its codebase from the inside. If all you need is \"how many people visited my site,\" Umami is perfectly adequate. But if you're a bootstrapped founder trying to figure out which ad, which SEO article, or which cold email sequence is actually generating revenue, you need something different. Here's an honest look at what's worth switching to in 2026.",
   "sections": [
     {
       "type": "h2",
@@ -20,7 +21,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "The heatmaps are the other thing that surprised me. Not placeholder heatmaps overlaid on a generic wireframe. Real screenshots of your actual page, with click density, rage clicks, dead clicks, and scroll depth mapped on top. If you've ever stared at your pricing page wondering why people aren't clicking the CTA, this answers it quickly."
+      "text": "The heatmaps are the other thing that surprised me. Click density, rage clicks, dead clicks, and scroll depth mapped onto a screenshot of the real page, with rage and dead clicks broken out as their own layers rather than left for you to infer from a hot patch. Umami has drawn click and scroll maps since 3.2.0, so this is a sharper version of a thing that now exists in both tools, not a feature only one of them has. If you've ever stared at your pricing page wondering why people aren't clicking the CTA, it answers that quickly."
     },
     {
       "type": "p",
@@ -61,7 +62,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "Pricing starts at $9/month for up to 10,000 monthly pageviews, scaling from there. It's EU-hosted, open source (AGPL), and cookieless. Where it falls short: no revenue attribution, no heatmaps, no funnel detection. It's a traffic tool, not a revenue tool. That's a deliberate product choice, not a flaw, but know what you're buying."
+      "text": "Pricing starts at $9/month for up to 10,000 monthly pageviews, scaling from there. It's EU-hosted, open source (AGPL), and cookieless. Where it falls short: no heatmaps, and per their docs as of July 2026 both funnel analysis and ecommerce revenue tracking are Business-plan features where you define every step and attach the monetary value yourself. There is no processor connection behind either, so the revenue Plausible reports is the revenue you remembered to instrument. That's a deliberate product choice, not a flaw, but know what you're buying."
     },
     {
       "type": "p",
@@ -139,7 +140,7 @@ const entry: ContentEntry = {
   "faq": [
     {
       "question": "Is Conclick a good replacement for Umami?",
-      "answer": "Yes, especially if you want revenue attribution and heatmaps. Umami gives you traffic data; Conclick connects that traffic to actual payments via Stripe, Paddle, Polar, Lemon Squeezy, and Dodo. Setup is about 2 minutes and there's a 14-day free trial with no card required."
+      "answer": "Yes, especially if you want revenue attribution without running the server yourself and without instrumenting the revenue by hand. Umami gives you traffic data, its own click and scroll maps since version 3.2.0, and genuine revenue and attribution reports. What it does not do is pull that money in for you: per their docs as of July 2026 there is no payment-processor integration, so Umami's revenue reporting only knows what you hand it as event data. Conclick ties traffic to actual payments via Stripe, Paddle, Polar, Lemon Squeezy, and Dodo. Setup is about 2 minutes and there's a 14-day free trial with no card required."
     },
     {
       "question": "Do any of these alternatives require a cookie consent banner?",
@@ -160,6 +161,40 @@ const entry: ContentEntry = {
     {
       "question": "Do these tools work without self-hosting?",
       "answer": "Conclick, Plausible, Fathom, Pirsch, and GoatCounter (hosted tier) are all fully managed, so you never touch a server. Umami and GoatCounter are also self-hostable if you prefer to own your infrastructure. Conclick does not offer a self-hosted option."
+    }
+  ],
+  "sources": [
+    {
+      "label": "Umami, v3.2.0 release notes (click and scroll heatmaps)",
+      "url": "https://github.com/umami-software/umami/releases/tag/v3.2.0"
+    },
+    {
+      "label": "Umami docs, Revenue (revenue arrives as tracked event data)",
+      "url": "https://umami.is/docs/revenue"
+    },
+    {
+      "label": "Umami docs, Attribution (first-click and last-click models)",
+      "url": "https://umami.is/docs/attribution"
+    },
+    {
+      "label": "Umami docs, Integrations (framework plugins only, no payment processors)",
+      "url": "https://umami.is/docs/integrations"
+    },
+    {
+      "label": "Plausible docs, Funnel analysis (Business plan)",
+      "url": "https://plausible.io/docs/funnel-analysis"
+    },
+    {
+      "label": "Plausible docs, Ecommerce revenue and attribution tracking (Business plan)",
+      "url": "https://plausible.io/docs/ecommerce-revenue-tracking"
+    },
+    {
+      "label": "Pirsch pricing",
+      "url": "https://pirsch.io/pricing"
+    },
+    {
+      "label": "Fathom pricing",
+      "url": "https://usefathom.com/pricing"
     }
   ],
   "internalLinks": [
@@ -189,8 +224,8 @@ const entry: ContentEntry = {
   ],
   "leadMagnet": {
     "kind": "addWebsite",
-    "headline": "See what Umami can't show you",
-    "sub": "Add your site and Conclick shows which traffic actually makes money: heatmaps, funnels, and revenue in one dashboard. Free for 14 days, no card.",
+    "headline": "See which traffic actually pays you",
+    "sub": "Connect Stripe, Paddle, Polar, Lemon Squeezy or Dodo and Conclick shows revenue by source, campaign and funnel step. Free for 14 days, no card.",
     "ctaLabel": "Add My Website"
   },
   "datePublished": "2026-06-22",
@@ -212,28 +247,28 @@ const entry: ContentEntry = {
         "note": "Umami is self-hosted; Conclick is fully managed"
       },
       {
-        "feature": "Revenue attribution (Stripe, Paddle, etc.)",
+        "feature": "Payment-processor connection (Stripe, Paddle, etc.)",
         "conclick": true,
         "competitor": false,
-        "note": "Conclick connects payments to traffic sources; Umami has no payment integrations as of July 2026"
+        "note": "Conclick pulls payments from the processor; Umami attributes only the revenue you send it as event data, per their docs as of July 2026"
       },
       {
-        "feature": "Real-screenshot heatmaps + click maps",
+        "feature": "Heatmaps with rage/dead clicks, filterable to buyers",
         "conclick": true,
-        "competitor": false,
-        "note": "Conclick shows actual page screenshots with rage/dead click overlays; Umami has none"
+        "competitor": "Click + scroll maps since 3.2.0",
+        "note": "Both map the real page; Conclick breaks out rage and dead clicks and filters the map to visitors who paid"
       },
       {
         "feature": "Auto-detected funnels",
         "conclick": true,
         "competitor": false,
-        "note": "Conclick surfaces revenue drop-off automatically; Umami requires manual funnel setup"
+        "note": "Conclick surfaces revenue drop-off automatically; Umami has manual funnels in the open-source build"
       },
       {
         "feature": "Daily digest (email + Slack/Discord/Telegram)",
         "conclick": true,
         "competitor": false,
-        "note": "Conclick sends proactive summaries; Umami is dashboard-only"
+        "note": "Conclick sends proactive summaries; Umami is dashboard-only, per their docs as of July 2026"
       },
       {
         "feature": "Open source / self-hostable",
@@ -245,7 +280,7 @@ const entry: ContentEntry = {
         "feature": "GSC + GA4 import",
         "conclick": true,
         "competitor": false,
-        "note": "Conclick imports historical data from Google tools; Umami does not"
+        "note": "Conclick imports historical data from Google tools; Umami has no importer for either, per their docs as of July 2026"
       },
       {
         "feature": "Pricing (starting)",

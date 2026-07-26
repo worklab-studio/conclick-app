@@ -7,6 +7,7 @@ const entry: ContentEntry = {
   metaTitle: 'Free UTM Builder (2026): Campaign URL Generator',
   metaDescription:
     'A free, no-signup UTM builder. Add source, medium, and campaign tags to any URL and copy a clean, trackable campaign link. Built by Conclick.',
+  primaryKeyword: 'utm builder',
   tldr: 'Paste your URL, fill in the source, medium, and campaign, and copy a tagged link. UTM parameters tell your analytics exactly where a visit (and any revenue) came from. This tool is free, runs in your browser, and needs no signup.',
   intro:
     'UTM tags are the simplest way to know which campaign, email, or post actually drove a visit and, if you track revenue, which one made money. Build a clean tagged link below, then drop it in your ad, email, or social post.',

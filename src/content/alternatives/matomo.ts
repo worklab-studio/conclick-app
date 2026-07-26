@@ -6,6 +6,7 @@ const entry: ContentEntry = {
   "h1": "The Best Matomo Alternatives in 2026",
   "metaTitle": "Best Matomo Alternatives in 2026",
   "metaDescription": "Tired of Matomo's self-hosting complexity? Here are the best alternatives in 2026, from revenue-attributing Conclick to lean tools like Plausible and Umami.",
+  "primaryKeyword": "matomo alternatives",
   "tldr": "If you want to know which traffic actually makes money, Conclick is the pick: it ties every Stripe/Paddle payment back to a source, campaign, and funnel step without cookies or a consent banner. For pure simplicity, Plausible is excellent. If you need self-hosted, open-source event analytics with product depth, PostHog is worth the setup cost.",
   "intro": "Matomo has been around forever. It was the default answer when Google Analytics felt too invasive. But \"privacy-first\" doesn't mean much if you're spending an afternoon configuring a server, wrestling with plugin pricing, and still can't answer the one question that matters: which traffic actually turns into revenue? That's the gap most of these tools aim to fill. Some do it better than others. Here's an honest look at what to use instead.",
   "sections": [
@@ -89,7 +90,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "The cost is the cost of your own server, your own uptime, and your own database backups. If you're a developer who's comfortable with that, Umami is an excellent choice, especially if data sovereignty is a hard requirement. There's also a cloud version starting at $9/month. Like Plausible, it has no revenue attribution layer as of July 2026, so it's a traffic analytics tool, not a revenue analytics tool."
+      "text": "The cost is the cost of your own server, your own uptime, and your own database backups. If you're a developer who's comfortable with that, Umami is an excellent choice, especially if data sovereignty is a hard requirement. There's also a cloud version starting at $9/month. Umami does ship revenue and attribution reports, but per their docs as of July 2026 nothing connects them to a payment processor, so the only revenue they know about is revenue you instrument and send in yourself."
     },
     {
       "type": "h2",
@@ -127,7 +128,7 @@ const entry: ContentEntry = {
   "faq": [
     {
       "question": "Is Conclick a good replacement for Matomo?",
-      "answer": "Yes, especially if you're a SaaS or ecommerce founder. Conclick skips the self-hosting complexity, is cookieless by default, and adds revenue attribution that Matomo doesn't offer natively as of July 2026. Setup is about two minutes versus an afternoon with Matomo."
+      "answer": "Yes, especially if you're a SaaS or ecommerce founder. Conclick skips the self-hosting complexity, is cookieless by default, and adds revenue attribution that Matomo doesn't offer natively, per their docs as of July 2026. Setup is about two minutes versus an afternoon with Matomo."
     },
     {
       "question": "Do I need a consent banner if I switch to Conclick?",
@@ -198,7 +199,7 @@ const entry: ContentEntry = {
         "feature": "Revenue attribution (Stripe/Paddle/etc.)",
         "conclick": true,
         "competitor": false,
-        "note": "Conclick connects to Stripe, Paddle, Polar, Lemon Squeezy, and Dodo natively. Matomo has no equivalent as of July 2026."
+        "note": "Conclick connects to Stripe, Paddle, Polar, Lemon Squeezy, and Dodo natively. Matomo has no equivalent, per their docs as of July 2026."
       },
       {
         "feature": "Real-screenshot heatmaps",

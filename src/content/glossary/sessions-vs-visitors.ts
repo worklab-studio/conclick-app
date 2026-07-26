@@ -6,6 +6,7 @@ const entry: ContentEntry = {
   "h1": "Sessions vs Visitors: What They Actually Mean (and Why Getting It Wrong Costs You Money)",
   "metaTitle": "Sessions vs Visitors in Web Analytics Explained",
   "metaDescription": "Sessions count visits; visitors count people. Learn exactly what each metric means, how they're calculated, and which one you should actually optimize for.",
+  "primaryKeyword": "sessions vs visitors",
   "tldr": "A visitor (also called a unique visitor or user) is a person who comes to your site. A session is a single continuous visit; one person can create multiple sessions. If 100 people each visit your site twice in a month, you have 100 visitors and 200 sessions. Neither number alone tells you much; the ratio between them tells you a lot.",
   "intro": "Every analytics tool shows you sessions and visitors. Most founders look at them, feel vaguely informed, and move on. That is a mistake. These two numbers have a specific relationship that, when you understand it, tells you something concrete about whether your marketing is working and whether your product is sticky enough to bring people back.",
   "sections": [
@@ -118,7 +119,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "I built Conclick because I kept staring at visitor and session counts in Google Analytics and having no idea which of those visitors were worth anything. Conclick is cookieless, so it approximates unique visitors without storing personal data, which means no consent banner in most jurisdictions. It tracks sessions and visitors the way you would expect, but the metrics I care about are downstream: which source, campaign, and funnel step produced a payment. If you connect your payment processor (Stripe, Paddle, Polar, Lemon Squeezy, or Dodo), every session that leads to revenue gets attributed back to where it came from. Sessions and visitors become context for conversion, not the final answer."
+      "text": "Visitor and session counts in Google Analytics never told me which of those visitors were worth anything, and closing that gap is why Conclick exists. Conclick is cookieless, so it approximates unique visitors without storing personal data, which means no consent banner in most jurisdictions. It tracks sessions and visitors the way you would expect, but the metrics I care about are downstream: which source, campaign, and funnel step produced a payment. If you connect your payment processor (Stripe, Paddle, Polar, Lemon Squeezy, or Dodo), every session that leads to revenue gets attributed back to where it came from. Sessions and visitors become context for conversion, not the final answer."
     },
     {
       "type": "p",

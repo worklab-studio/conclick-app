@@ -6,6 +6,7 @@ const entry: ContentEntry = {
   "h1": "Why AI Traffic Shows as Direct in Your Analytics (and What It Hides)",
   "metaTitle": "Why AI Traffic Shows as Direct in Analytics",
   "metaDescription": "AI apps open links with no referrer, so ChatGPT and Perplexity visits land in your Direct bucket. Why it happens, and how to build an AI channel that helps.",
+  "primaryKeyword": "why is ai traffic showing as direct in analytics",
   "tldr": "AI apps like ChatGPT and Perplexity open links without a referrer header, and any visit with no referrer lands in your Direct bucket. GA4 added a native AI Assistant channel in May 2026, but it only catches visits that still carry a referrer, so a large share of AI visits stay hidden in Direct. Tagging and revenue attribution close the rest of the gap.",
   "intro": "I kept seeing the same thing in my own dashboard and in every founder screenshot that landed in my inbox: a fat Direct number that made no sense. Nobody types a 40-character blog URL by hand. When I dug in, most of that Direct was AI. People were asking ChatGPT or Perplexity a question, clicking through, and arriving with no fingerprint at all. This is why that happens, what the fix does, and where the fix quietly runs out.",
   "sections": [

@@ -6,6 +6,7 @@ const entry: ContentEntry = {
   "h1": "Why I Gave Up on GA4, and What I Reach For Now",
   "metaTitle": "Why I Finally Gave Up on GA4 as a Bootstrapped Founder",
   "metaDescription": "Why I gave up on GA4 after years of sampling, a 14-month data cap, and consent-mode gaps eating conversions. The honest reasons, and what I run now.",
+  "primaryKeyword": "why i gave up on ga4",
   "tldr": "I gave up on GA4 because, for a bootstrapped founder who just needs to know which traffic makes money, it is the wrong amount of tool. Sampling on a growing site, a 14-month cap on my own data, and consent-mode gaps quietly eating conversions cost me more hours than the free price saved. GA4 is powerful. I needed less.",
   "intro": "This is the honest story of why I gave up on GA4, after years of defending it to everyone who asked. No single disaster pushed me off it. It was the slow accumulation: a report that started sampling once traffic grew, an export I could not run because the data had aged out, a conversion count that never matched Stripe. I still think GA4 is the most powerful free analytics on the planet. That turned out to be exactly the problem.",
   "sections": [
@@ -93,8 +94,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "quote",
-      "text": "GA4 is not a bad tool. It is a big tool, and I am a small team. Those are different problems, and the free price hid the mismatch from me for a year.",
-      "cite": "Deepak, founder of Conclick"
+      "text": "GA4 is not a bad tool. It is a big tool, and I am a small team. Those are different problems, and the free price hid the mismatch from me for a year."
     },
     {
       "type": "h2",

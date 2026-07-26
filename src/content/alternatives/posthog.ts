@@ -6,6 +6,7 @@ const entry: ContentEntry = {
   "h1": "The Best PostHog Alternatives in 2026",
   "metaTitle": "Best PostHog Alternatives in 2026 (Ranked)",
   "metaDescription": "Tired of PostHog's complexity and cost? Here are the best PostHog alternatives in 2026, ranked for bootstrapped founders and small SaaS teams.",
+  "primaryKeyword": "posthog alternatives",
   "tldr": "If you want revenue attribution that ties every payment to its source without a data engineering degree, Conclick is the sharpest PostHog alternative in 2026. Mixpanel wins on deep behavioral analytics for product teams with engineering support. Plausible and Matomo are solid if you just need lightweight, privacy-first traffic numbers.",
   "intro": "PostHog is impressive. It's also a lot. Session replay, feature flags, A/B testing, a data warehouse, an entire event pipeline. If you're running a five-person SaaS, you probably don't need all of that. You need to know which traffic converts to paying customers and where people drop out of your funnel. These are different problems. I spent time with the real PostHog alternatives available right now, and here's what I found.",
   "sections": [

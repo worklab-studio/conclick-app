@@ -344,9 +344,48 @@ const RULING_AUTHORITY =
 const RULING_WORD = /(ruling|ruled|decision|decided|judgment|judgement|found|order|verdict|case|complaint|opinion)/i;
 const YEAR = /\b(19|20)\d{2}\b/;
 
-// "as of mid-2026", "as of June 2026", "as of 2026" all count as attribution.
-const SOURCE_MARKERS =
-  /(https?:\/\/|according to|per their|their (own )?(docs|documentation|site|pricing|changelog|blog))|(\bdocs\b|documentation|pricing page|changelog|release notes|source:|\[source|as of (?:[\w-]+[ -])?(?:19|20)\d{2})/i;
+// What counts as attribution for a claim about somebody else's product.
+//
+// A DATE IS NOT ATTRIBUTION. "as of June 2026" asserts only that we believed it
+// in June, which is exactly what an unsourced claim already asserts. The old
+// pattern accepted a bare date, so writing the date became the way to walk an
+// unchecked claim past this law — the shape now appears 42 times in the corpus,
+// and it is what let a false claim ship. Attribution has to be something a
+// reader can go and check: a link, or a named artefact that belongs to the
+// vendor (their docs, their pricing page, their changelog). A date is welcome
+// NEXT TO one, because capability claims go stale; it just cannot stand in for
+// one.
+//
+// AND THE ARTEFACT HAS TO BE THEIRS. Ownership is the whole point: "per our
+// docs" or a conclick.io link says a competitor lacks a feature on our own
+// say-so, which is the bare-date loophole moved one step over. The negative
+// lookaheads below refuse our own brand as the possessor and refuse our own
+// host as the link, so laundering a claim needs a real vendor artefact. (Only
+// `competitor-feature-claim-needs-source` reads this, so it is tightened here
+// rather than duplicated inside the law.)
+const VENDOR_ARTEFACT =
+  '(?:docs|documentation|pricing(?: page)?|plans page|changelog|release notes|' +
+  'help c(?:enter|entre)|knowledge base|status page|repo(?:sitory)?|github|readme)';
+
+const SOURCE_MARKERS = new RegExp(
+  [
+    // a link the reader can follow — anywhere but back to us
+    'https?://(?!(?:www\\.)?conclick\\.io\\b)',
+    // "per their docs", "according to the Matomo pricing page" — but not "our docs"
+    `\\b(?:according to|per)\\s+(?:the\\s+|their\\s+|its\\s+)?(?:own\\s+)?(?:(?!our\\b)[\\w.-]+\\s+)?${VENDOR_ARTEFACT}\\b`,
+    // "their changelog", "Plausible's pricing page" — but not "Conclick's docs"
+    `\\b(?:their|its|(?!(?:our|conclick)\\b)[\\w.-]+'s)\\s+(?:own\\s+)?${VENDOR_ARTEFACT}\\b`,
+    '\\bsource:',
+    '\\[source',
+  ].join('|'),
+  'i',
+);
+
+// Nouns that follow a negation in an English idiom rather than in a claim about
+// a product. Kept deliberately short and concrete: nothing here is ever the name
+// of a shipped feature, so no real competitor claim can hide behind it.
+const NOT_A_FEATURE =
+  /^\s+(idea|clue|room|patience|interest|business|intention|appetite|way of knowing|choice but)\b/i;
 
 const honesty = [
   {
@@ -401,6 +440,12 @@ const honesty = [
       const nameRe = new RegExp(`\\b(${COMPETITORS.map(esc).join('|')}|Conclick)\\b`, 'gi');
       const bad = [];
       for (const h of hits(text, negRe)) {
+        // "I have no idea", "no room to be vague" — idioms, not feature denials.
+        // The nearest-preceding-subject heuristic below cannot tell that the real
+        // subject is the writer rather than the vendor named earlier in the same
+        // sentence, so exclude the handful of nouns no product ships as a feature.
+        // Without this the law flags first-person narration in two entries.
+        if (NOT_A_FEATURE.test(text.slice(h.index + h.match.length))) continue;
         // Whose feature is being denied? Take the nearest preceding subject.
         const left = text.slice(Math.max(0, h.index - 110), h.index);
         const subjects = hits(left, nameRe);
@@ -415,7 +460,8 @@ const honesty = [
       return {
         message:
           `competitor-lacks-a-feature claim with no source (Matomo DOES have heatmaps — getting this wrong on a ` +
-          `page titled "honest comparison" is fatal): ${bad.slice(0, 3).join(' | ')}${bad.length > 3 ? ` (+${bad.length - 3} more)` : ''}`,
+          `page titled "honest comparison" is fatal). A date is not a source: cite a URL, "per their docs", or ` +
+          `their pricing page/changelog: ${bad.slice(0, 3).join(' | ')}${bad.length > 3 ? ` (+${bad.length - 3} more)` : ''}`,
         count: bad.length,
       };
     },

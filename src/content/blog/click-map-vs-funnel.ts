@@ -6,6 +6,7 @@ const entry: ContentEntry = {
   "h1": "What a Click Map Shows That a Funnel Doesn't",
   "metaTitle": "What a Click Map Shows That a Funnel Doesn't",
   "metaDescription": "A funnel tells you which step loses people. A click map tells you why they left that page. What each one sees, what it misses, and when to use which.",
+  "primaryKeyword": "click map vs funnel",
   "tldr": "A funnel tells you where people drop: which step in a signup or checkout leaks the most, and what it cost. A click map tells you why on that page: where visitors clicked, how far they scrolled, where they hammered something that did nothing. Reach for the funnel to find the leaky step, the click map to fix it. Real optimisation uses both, in that order.",
   "intro": "A funnel and a click map answer two different questions, and most people bouncing between them are really asking one: my checkout is leaking, so what do I change. The funnel points at the step. The map points at the reason. I run both on Conclick every week, and I have watched founders rebuild a page the funnel never accused, because they read a drop number as a verdict when it was only an address. Here is how I keep the two straight, and when I reach for each.",
   "sections": [
@@ -75,8 +76,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "quote",
-      "text": "The funnel is the smoke alarm. The click map is walking into the room to see what is on fire.",
-      "cite": "Deepak, founder of Conclick"
+      "text": "The funnel is the smoke alarm. The click map is walking into the room to see what is on fire."
     },
     {
       "type": "h2",
@@ -207,7 +207,7 @@ const entry: ContentEntry = {
     {
       "href": "/for/ecommerce",
       "label": "Conclick for ecommerce",
-      "group": "use-case"
+      "group": "useCase"
     },
     {
       "href": "/vs/hotjar",

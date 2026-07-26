@@ -6,8 +6,9 @@ const entry: ContentEntry = {
   "h1": "Conversion Funnel Software Pricing: What You Actually Pay For",
   "metaTitle": "Conversion Funnel Software Pricing: A Buyer's Guide",
   "metaDescription": "Conversion funnel software pricing hides in event caps, seat fees, and volume tiers. Here is how the three main models actually work and how to pick one.",
+  "primaryKeyword": "conversion funnel software pricing",
   "tldr": "Conversion funnel software pricing usually falls into one of three models: flat monthly fee, per-tracked-user, or per-event billing. The sticker price is rarely what you actually pay once event caps, seat fees, and integration add-ons kick in.",
-  "intro": "I built Conclick because I kept confusing 'cheap' with 'affordable' when buying analytics. A tool at $19 a month can cost you three times more than a tool at $99 a month once your traffic doubles. Conversion funnel software pricing is where founders overspend more than anywhere else in their growth stack, because the sticker price is only the first bill.",
+  "intro": "For years I confused 'cheap' with 'affordable' every time I bought analytics, and it cost me more than the tools did. A tool at $19 a month can cost you three times more than a tool at $99 a month once your traffic doubles. Conversion funnel software pricing is where founders overspend more than anywhere else in their growth stack, because the sticker price is only the first bill.",
   "sections": [
     {
       "type": "h2",
@@ -161,7 +162,7 @@ const entry: ContentEntry = {
     },
     {
       "question": "Are there free conversion funnel tools worth using?",
-      "answer": "Google Analytics 4 is free and supports multi-step funnels once you configure the events. Its interface is dense and there is a 24 to 48 hour delay on report data, but for a bootstrapped team it works. Self-hosted Umami and Plausible give you cookieless traffic analytics for the cost of a small VPS. None of these free options bundle heatmaps or session replay, which is where paid tools start earning their keep."
+      "answer": "Google Analytics 4 is free and supports multi-step funnels once you configure the events. Its interface is dense and there is a 24 to 48 hour delay on report data, but for a bootstrapped team it works. Self-hosted Umami and Plausible give you cookieless traffic analytics for the cost of a small VPS. None of them bundle session replay, and only Umami ships heatmaps, which is where paid tools start earning their keep."
     },
     {
       "question": "What is a Monthly Tracked User (MTU) and why does it matter for pricing?",

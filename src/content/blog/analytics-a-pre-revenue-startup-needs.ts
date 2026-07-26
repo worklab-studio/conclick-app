@@ -6,6 +6,7 @@ const entry: ContentEntry = {
   "h1": "How Much Analytics Does an Early-Stage Startup Actually Need?",
   "metaTitle": "Analytics for an Early-Stage Startup: Do Less of It",
   "metaDescription": "How much analytics does an early-stage startup need before revenue? Almost none: track arrivals, the one key action, and where people fall off. The minimal setup.",
+  "primaryKeyword": "analytics for early stage startups",
   "tldr": "The analytics an early-stage startup actually needs before revenue is almost none: enough to see whether people arrive, whether they reach the one action that matters, and where they fall off before it. That is three numbers, not a full event taxonomy. Everything past that is procrastination dressed as rigor.",
   "intro": "I have watched more pre-launch founders build a forty-event tracking plan than build the one screen people are supposed to use. The honest answer to how much analytics an early-stage startup needs is: barely any, and none of it is a taxonomy. Before you have paying customers, three plain numbers tell you what a dashboard of forty could, and they take an afternoon to wire up.",
   "sections": [
@@ -67,7 +68,7 @@ const entry: ContentEntry = {
     {
       "type": "quote",
       "text": "Instrumentation you cannot act on is not data. It is a to-do list you wrote for a company you do not have yet.",
-      "cite": "Deepak, founder"
+      "cite": "the rule I give every pre-revenue founder who asks"
     },
     {
       "type": "h2",

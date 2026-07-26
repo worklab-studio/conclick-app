@@ -1,7 +1,8 @@
 import type { CSSProperties, ReactNode } from 'react';
 import { HelpCircle } from 'lucide-react';
-import type { ContentEntry } from '@/content/schema';
+import type { ContentEntry, InternalLink } from '@/content/schema';
 import { pathForType } from '@/content/schema';
+import { allEntries, pathFor } from '@/content';
 import { siteUrl } from '@/lib/seo';
 import { founderAuthor } from '@/content/author';
 import { heroWordFor, meshKeyFor } from '@/lib/mesh/word';
@@ -14,6 +15,9 @@ import {
   softwareAppSchema,
   webApplicationSchema,
   definedTermSchema,
+  organizationSchema,
+  websiteSchema,
+  personSchema,
 } from '@/lib/jsonld';
 import { AuthorByline } from './AuthorByline';
 import { Sections } from './prose';
@@ -202,6 +206,154 @@ function ShortVersion({ tldr }: { tldr: string }) {
 }
 
 /**
+ * Every path an internalLinks href may legally point at.
+ *
+ * Same guarantee RichText.tsx gives in-prose links, for the same reason: the
+ * routines write internalLinks unattended, so an unvalidated href reaches
+ * production as a 404 and sits there until someone crawls the site. A miss here
+ * renders the label as plain text — the words survive, the broken link does not.
+ * Built once per process; the registry is static at build time.
+ */
+let entryByPath: Map<string, ContentEntry> | null = null;
+function registry(): Map<string, ContentEntry> {
+  if (!entryByPath) entryByPath = new Map(allEntries().map(e => [`/${pathFor(e)}`, e]));
+  return entryByPath;
+}
+
+const GROUP_HEADING: Record<ContentEntry['type'], string> = {
+  comparison: 'Comparisons',
+  alternative: 'Alternatives',
+  tool: 'Free tools',
+  glossary: 'Definitions',
+  useCase: 'Use cases',
+  guide: 'Guides',
+  blog: 'From the blog',
+};
+
+// Heading order, so a page with four buckets always renders them in the same
+// sequence rather than in whatever order the pipeline happened to emit.
+const GROUP_ORDER: ContentEntry['type'][] = [
+  'guide',
+  'comparison',
+  'alternative',
+  'useCase',
+  'tool',
+  'glossary',
+  'blog',
+];
+
+/**
+ * Which bucket a link belongs in.
+ *
+ * The RESOLVED entry's type wins over the link's own `group`. `group` is typed
+ * `ContentType | 'integration'` but the pipeline has written URL segments into
+ * it too — 'useCase', 'use-case' and 'for' are all in the corpus for one type —
+ * so trusting it would split a single bucket across three headings. `group` is
+ * only consulted for a link the registry cannot resolve, where it is the sole
+ * clue left.
+ */
+const GROUP_ALIAS: Record<string, ContentEntry['type']> = {
+  comparison: 'comparison',
+  vs: 'comparison',
+  alternative: 'alternative',
+  alternatives: 'alternative',
+  tool: 'tool',
+  tools: 'tool',
+  glossary: 'glossary',
+  useCase: 'useCase',
+  'use-case': 'useCase',
+  for: 'useCase',
+  guide: 'guide',
+  guides: 'guide',
+  blog: 'blog',
+  blogs: 'blog',
+};
+
+/**
+ * CURATED CROSS-LINKS — entry.internalLinks, rendered.
+ *
+ * This field carried 277 hand-picked links across the corpus and no component
+ * read a single one of them: the data shipped in the bundle and produced zero
+ * anchors. The loss was concentrated exactly where it hurts most — every
+ * /vs/X <-> /alternatives/X pair is cross-linked here and NOWHERE in prose, so
+ * the two pages about the same vendor had no path between them.
+ *
+ * A rail rather than a card grid on purpose: RelatedLinks sits directly below
+ * with mesh-art cards, and two card grids stacked read as one padded footer
+ * nobody scans. Curated first, auto-derived second.
+ */
+function CuratedLinks({ links, self }: { links: InternalLink[]; self: string }) {
+  // The field is required by the type, but next.config.ts sets
+  // typescript.ignoreBuildErrors — an entry that omits it ships as undefined and
+  // would throw at prerender, not at compile.
+  if (!links?.length) return null;
+
+  const seen = new Set<string>([self]); // never link a page to itself
+  const buckets = new Map<ContentEntry['type'], { href: string; label: string; live: boolean }[]>();
+
+  for (const l of links) {
+    // Trailing slashes are a common authoring slip and would otherwise miss.
+    const href = l.href.length > 1 ? l.href.replace(/\/$/, '') : l.href;
+    if (seen.has(href)) continue;
+    seen.add(href);
+
+    const target = registry().get(href);
+    const group = target?.type ?? GROUP_ALIAS[l.group];
+    if (!group) continue; // 'integration' and friends have no bucket to sit in
+
+    const list = buckets.get(group) ?? [];
+    list.push({ href, label: l.label, live: Boolean(target) });
+    buckets.set(group, list);
+  }
+  if (!buckets.size) return null;
+
+  return (
+    <section
+      // A <section> with no accessible name is not exposed as a region at all,
+      // and the label below is a div, so it cannot be referenced with
+      // aria-labelledby the way ShortVersion does it.
+      aria-label="More on this"
+      className="mt-16 rounded-2xl border border-white/10 bg-white/[0.03] p-5 sm:p-6"
+    >
+      {/* div, not a heading — template chrome shouldn't pollute the content
+          outline, same call RelatedLinks makes for "Read next". */}
+      <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#8b88cf]">
+        More on this
+      </div>
+      <div className="mt-5 grid gap-x-8 gap-y-6 sm:grid-cols-2">
+        {GROUP_ORDER.filter(g => buckets.has(g)).map(g => (
+          <div key={g}>
+            <div className="text-[11px] uppercase tracking-[0.1em] text-zinc-500">
+              {GROUP_HEADING[g]}
+            </div>
+            <ul className="mt-2.5 space-y-2">
+              {buckets.get(g)!.map(l => (
+                <li key={l.href} className="relative pl-4 text-[14px] leading-snug">
+                  <span
+                    aria-hidden
+                    className="absolute left-0 top-[0.6em] h-1 w-1 -translate-y-1/2 rounded-full bg-[#6C63C9]"
+                  />
+                  {l.live ? (
+                    <a
+                      href={l.href}
+                      className="text-zinc-300 underline decoration-white/15 underline-offset-2 transition-colors hover:text-white hover:decoration-white/50"
+                    >
+                      {l.label}
+                    </a>
+                  ) : (
+                    <span className="text-zinc-400">{l.label}</span>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+/**
  * The lede, with an optional drop cap.
  *
  * The cap is a real <span> rather than a `first-letter:` variant so it cannot
@@ -247,6 +399,12 @@ export function ContentArticle({ entry: e, children }: { entry: ContentEntry; ch
     .map(s => ({ id: (s as { id: string }).id, text: (s as { text: string }).text }));
 
   const schemas: unknown[] = [
+    // The three site-wide entities come FIRST and unconditionally: articleSchema
+    // now references its author and publisher by @id, so omitting these would
+    // leave every Article pointing at nodes that appear nowhere on the page.
+    organizationSchema(),
+    websiteSchema(),
+    personSchema(),
     articleSchema(e, path),
     faqSchema(e),
     breadcrumbSchema([
@@ -436,6 +594,8 @@ export function ContentArticle({ entry: e, children }: { entry: ContentEntry; ch
                 <p className="mt-2 text-[13px] leading-relaxed text-zinc-400">{founderAuthor.bio}</p>
               </div>
             </div>
+
+            <CuratedLinks links={e.internalLinks} self={path} />
 
             <RelatedLinks entry={e} />
           </article>

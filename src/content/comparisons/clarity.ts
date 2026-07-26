@@ -6,8 +6,9 @@ const entry: ContentEntry = {
   "h1": "Conclick vs Microsoft Clarity: Which One Actually Tells You What Makes Money?",
   "metaTitle": "Conclick vs Microsoft Clarity: Honest Comparison",
   "metaDescription": "Microsoft Clarity is free and good at heatmaps. Conclick adds revenue attribution, funnels, and a daily digest for $9/mo. Here's an honest breakdown.",
+  "primaryKeyword": "conclick vs clarity",
   "tldr": "Microsoft Clarity is a genuinely solid free tool for session recordings and heatmaps, if watching user behavior is all you need. Conclick is built for founders who need to know which traffic channels, campaigns, and funnels are producing revenue, not just clicks. If you run a paid product, Clarity cannot tell you which acquisition sources actually convert to money.",
-  "intro": "I built Conclick because I kept staring at heatmaps and session replays and still couldn't answer the one question that matters: which traffic source made me money this week? Clarity showed me where people clicked. It couldn't tell me whether any of them paid. That gap is the entire reason Conclick exists.",
+  "intro": "Microsoft Clarity is free, and for about eight months that was enough for me. I watched the session replays, I read the heatmaps, and I still could not answer the one question that matters: which traffic source made me money this week? Clarity showed me where people clicked. It couldn't tell me whether any of them paid. That gap is the entire reason Conclick exists.",
   "sections": [
     {
       "type": "h2",

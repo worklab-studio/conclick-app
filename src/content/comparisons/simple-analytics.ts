@@ -6,8 +6,9 @@ const entry: ContentEntry = {
   "h1": "Conclick vs Simple Analytics: Which Privacy-First Tool Actually Tells You Where Your Money Comes From?",
   "metaTitle": "Conclick vs Simple Analytics (2026 Comparison)",
   "metaDescription": "Both are cookieless and privacy-first. Simple Analytics stops at pageviews; Conclick adds revenue attribution, heatmaps, and funnels. An honest comparison.",
+  "primaryKeyword": "conclick vs simple analytics",
   "tldr": "Simple Analytics is a clean, privacy-first tool that does pageviews and referrers beautifully; pick it if that is all you need. Conclick is built for founders who need traffic tied to revenue: payment-processor attribution, real-screenshot heatmaps, and auto-detected funnels with revenue lost per drop-off. If you sell a paid product, Conclick tells you which campaign made money.",
-  "intro": "I built Conclick because I kept staring at a Simple Analytics dashboard that told me I had 1,200 visitors from Product Hunt and no idea whether any of them paid. The pageview graph looked great. My bank account was indifferent. It is honestly one of the better privacy-first tools out there, but it was built to answer \"how many people came,\" not \"which ones converted and how much did they spend.\" Those are different products solving different problems.",
+  "intro": "One launch morning my Simple Analytics dashboard told me 1,200 people had arrived from Product Hunt, and I had no way to find out whether a single one of them paid. The pageview graph looked great. My bank account was indifferent. It is honestly one of the better privacy-first tools out there, but it was built to answer \"how many people came,\" not \"which ones converted and how much did they spend.\" Those are different products solving different problems.",
   "sections": [
     {
       "type": "h2",
@@ -46,7 +47,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "Simple Analytics does not have heatmaps or funnels as of July 2026. Conclick does, and the implementation is worth describing specifically because it is different from most heatmap tools."
+      "text": "Simple Analytics does not have heatmaps or funnels, per their docs as of July 2026. Conclick does, and the implementation is worth describing specifically because it is different from most heatmap tools."
     },
     {
       "type": "p",
@@ -63,7 +64,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "Conclick sends a daily summary to email, Slack, Discord, or Telegram. It calls out spikes, milestones, and anomalies in plain language rather than a data dump. Simple Analytics has no equivalent as of July 2026. This is a small feature but a meaningful one for solo founders who are not opening their dashboard every day; the digest brings the signal to you."
+      "text": "Conclick sends a daily summary to email, Slack, Discord, or Telegram. It calls out spikes, milestones, and anomalies in plain language rather than a data dump. Simple Analytics has no equivalent, per their docs as of July 2026. This is a small feature but a meaningful one for solo founders who are not opening their dashboard every day; the digest brings the signal to you."
     },
     {
       "type": "h2",

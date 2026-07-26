@@ -6,8 +6,9 @@ const entry: ContentEntry = {
   "h1": "Conclick vs DataFast: Which Analytics Tool Actually Shows You Where You're Losing Money?",
   "metaTitle": "Conclick vs DataFast: Honest Comparison 2026",
   "metaDescription": "Both tools do revenue attribution. Here is where they diverge: heatmaps, funnel drop-off, behavioral data, and pricing. Compared honestly by the founder of one.",
+  "primaryKeyword": "conclick vs datafast",
   "tldr": "Both Conclick and DataFast attribute revenue to marketing channels, and both do that core job well. DataFast is a strong pick if attribution and social mention tracking are your main needs. Conclick goes further into behavior: real-screenshot heatmaps, funnel drop-offs with the revenue lost to them, and visual user journeys, so you also see why visitors are not converting.",
-  "intro": "I built Conclick because I was tired of dashboards that told me how many people visited but not why they left without buying. DataFast is a legitimate tool solving a real problem: revenue attribution for founders. But depending on what you actually need to know, the two products point in different directions. Here's how they stack up, as honestly as I can write it.",
+  "intro": "The frustration that produced Conclick was a dashboard that told me how many people visited and nothing about why they left without buying. DataFast is a legitimate tool solving a real problem: revenue attribution for founders. But depending on what you actually need to know, the two products point in different directions. Here's how they stack up, as honestly as I can write it.",
   "sections": [
     {
       "type": "h2",
@@ -51,7 +52,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "DataFast does not have heatmaps. This is not a minor gap. Knowing that 60% of your paid traffic left your pricing page does not tell you whether they scrolled past the price and balked, or never made it there at all because the page loaded slowly and they rage-clicked the CTA. Conclick renders your actual live page as the background and overlays click data, scroll depth, rage clicks, and dead clicks on top of it. You can see precisely where fingers stopped moving and where frustration built up. That changes the conversation from \"our conversion rate is 2%\" to \"nobody is clicking the buy button because it is buried below the fold on mobile.\""
+      "text": "DataFast does not have heatmaps, per their docs as of July 2026. This is not a minor gap. Knowing that 60% of your paid traffic left your pricing page does not tell you whether they scrolled past the price and balked, or never made it there at all because the page loaded slowly and they rage-clicked the CTA. Conclick renders your actual live page as the background and overlays click data, scroll depth, rage clicks, and dead clicks on top of it. You can see precisely where fingers stopped moving and where frustration built up. That changes the conversation from \"our conversion rate is 2%\" to \"nobody is clicking the buy button because it is buried below the fold on mobile.\""
     },
     {
       "type": "h3",

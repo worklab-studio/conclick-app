@@ -6,6 +6,7 @@ const entry: ContentEntry = {
   "h1": "How to Filter Bot Traffic From Analytics (and Why GA4 Misses Most of It)",
   "metaTitle": "How to Filter Bot Traffic From Analytics: 2026 Guide",
   "metaDescription": "GA4 only filters bots that identify themselves, so headless browsers and datacenter traffic slip through. Here is how bot filtering works, layer by layer.",
+  "primaryKeyword": "how to filter bot traffic from analytics",
   "tldr": "Filter automated hits in three buckets: ones that name themselves, headless browsers that look like real Chrome, and clean-looking hits from datacenter IPs. GA4 only removes the first bucket using the IAB known-bots list, which it cannot disable or customize. To catch the rest you need user-agent pattern matching plus a datacenter-IP (ASN) check at the point of ingest.",
   "intro": "I built Conclick's bot filtering after watching a customer's real traffic get buried under junk that Google Analytics happily counted as visitors. The honest version of this problem is uncomfortable: most tools, GA4 included, only remove the automated hits polite enough to announce themselves. The interesting ones lie about being machines. This is how I think about catching them, and exactly where each layer breaks.",
   "sections": [

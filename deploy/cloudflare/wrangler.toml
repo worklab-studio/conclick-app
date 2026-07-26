@@ -1,4 +1,4 @@
-# Deploys the Conclick SEO reverse-proxy Worker AND all nine routes in one shot.
+# Deploys the Conclick SEO reverse-proxy Worker AND every route below in one shot.
 #
 #   cd "umami/deploy/cloudflare"
 #   npx wrangler login     # one-time: opens a browser to authorize YOUR Cloudflare account
@@ -37,11 +37,40 @@ routes = [
   { pattern = "conclick.io/for",            zone_name = "conclick.io" },
   { pattern = "conclick.io/blogs",          zone_name = "conclick.io" },
   { pattern = "conclick.io/blog",           zone_name = "conclick.io" },
+  # /compare/ (with the trailing slash) was 404ing live while /compare returned
+  # 200. An exact pattern matches the exact path and nothing else, so the hub
+  # route above never sees "/compare/" — it fell through to the Framer apex.
+  # The other six hubs are already covered because a trailing "*" matches ZERO
+  # or more characters, so their own detail route ("/tools/*", "/guides/*", ...)
+  # also matches the bare "/tools/". /compare has no such sibling: comparison
+  # detail pages live under /vs/*, not /compare/*. Hence this one extra line —
+  # the app then 308s /compare/ -> /compare like every other hub.
+  { pattern = "conclick.io/compare/*",      zone_name = "conclick.io" },
   # feeds + dynamic OG images + AI answer-engine manifest
   { pattern = "conclick.io/sitemap.xml",    zone_name = "conclick.io" },
   { pattern = "conclick.io/robots.txt",     zone_name = "conclick.io" },
+  # /og* keeps its trailing wildcard on purpose. It does also match any path
+  # beginning "og", but it cannot be narrowed: Cloudflare matches route patterns
+  # against the ENTIRE URL including the query string, and patterns may not
+  # themselves contain query parameters — so terminating in "*" is the only way
+  # to match a URL that has a query string at all. Every card we emit is
+  # /og?slug=...&word=... (src/lib/seo.ts), so an exact "conclick.io/og" would
+  # send all 68 social cards to the Framer apex instead.
   { pattern = "conclick.io/og*",            zone_name = "conclick.io" },
   { pattern = "conclick.io/llms.txt",       zone_name = "conclick.io" },
+  # <head> assets, unrouted until now. src/app/layout.tsx links /images/* icons
+  # and /site.webmanifest on EVERY page and browsers request /favicon.ico
+  # unprompted, so on all 68 SEO pages the whole icon set plus the manifest were
+  # 404ing off the Framer apex — no tab icon, no apple-touch-icon, dead manifest.
+  { pattern = "conclick.io/images/*",       zone_name = "conclick.io" },
+  { pattern = "conclick.io/favicon.ico",    zone_name = "conclick.io" },
+  { pattern = "conclick.io/site.webmanifest", zone_name = "conclick.io" },
+  # ...and the two icons site.webmanifest itself references. They sit at the
+  # public/ root rather than under /images/, so routing the manifest alone would
+  # have left it parsing correctly and then failing to load a single icon —
+  # which is still an uninstallable PWA. Keep in sync with public/site.webmanifest.
+  { pattern = "conclick.io/android-chrome-192x192.png", zone_name = "conclick.io" },
+  { pattern = "conclick.io/android-chrome-512x512.png", zone_name = "conclick.io" },
   # IndexNow key verification file. Served INLINE by the Worker (see INDEXNOW_KEY
   # in the worker) — never proxied to Next, because a 404 during any Fly cold
   # start or deploy window permanently invalidates the key with Bing/Yandex.
@@ -51,3 +80,12 @@ routes = [
 
 # Note: conclick.io/blog/rss.xml needs no route of its own — the existing
 # conclick.io/blog/* pattern already proxies it to the Next.js app.
+#
+# Known gap, deliberately left alone: because pattern matching includes the query
+# string (see the /og* comment), an exact hub route does not match a hub URL that
+# carries one. https://conclick.io/compare?utm_source=... falls through to Framer
+# even though https://conclick.io/compare works. Closing it means widening each
+# hub to "conclick.io/compare*", which would also swallow any Framer path that
+# merely starts with those words — not worth it until we actually ship tagged
+# links to a bare hub URL. Detail pages are unaffected: /vs/*, /guides/* etc.
+# already end in a wildcard and so match their query strings fine.

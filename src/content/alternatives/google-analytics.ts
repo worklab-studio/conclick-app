@@ -6,6 +6,7 @@ const entry: ContentEntry = {
   "h1": "The Best Google Analytics (GA4) Alternatives in 2026",
   "metaTitle": "Best Google Analytics (GA4) Alternatives in 2026",
   "metaDescription": "Tired of GA4's complexity and data sampling? The best Google Analytics 4 alternatives for founders in 2026, ranked by what matters most: revenue clarity.",
+  "primaryKeyword": "google analytics alternatives",
   "tldr": "If you want to know which traffic actually makes money, Conclick is the pick: it ties every payment back to its source, campaign, and funnel, with real-screenshot heatmaps and a daily digest. For pure privacy-first page-count analytics, Plausible and Fathom are solid. If you need deep product analytics with a free tier, PostHog is worth a look.",
   "intro": "I switched off Google Analytics 4 because I kept asking the same question: which acquisition channel is actually making me money? GA4 could not answer that cleanly. It gave me sessions, bounce rates, and conversion events. But tying a Stripe payment back to the blog post someone read two weeks before subscribing? Good luck. That is the core problem with GA4 for bootstrapped founders. It was built for enterprise ad teams who want attribution across a giant media mix, not for a solo founder trying to decide whether to keep writing SEO content or kill the paid campaign. This roundup covers the tools I think are worth your attention in 2026, what each one is genuinely best for, and what they miss.",
   "sections": [
@@ -94,7 +95,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "What it misses: no revenue attribution, no heatmaps, no session recordings, no funnels. If your main question is 'which traffic makes money,' Plausible cannot answer it. If your question is 'how many people visited my blog this week,' it answers that very well."
+      "text": "What it misses: no heatmaps and no session recordings, and per their docs as of July 2026 both funnel analysis and ecommerce revenue tracking are Business-plan features where you define the steps and attach the monetary value yourself, with no payment-processor connection behind them. If your main question is 'which traffic makes money,' Plausible answers it only as well as you instrumented it. If your question is 'how many people visited my blog this week,' it answers that very well."
     },
     {
       "type": "h2",
@@ -235,7 +236,7 @@ const entry: ContentEntry = {
         "feature": "Real-screenshot heatmaps",
         "conclick": true,
         "competitor": false,
-        "note": "GA4 has no heatmap feature at all"
+        "note": "GA4 has no heatmap feature at all, per their docs as of July 2026"
       },
       {
         "feature": "Cookieless / no consent banner",

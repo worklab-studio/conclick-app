@@ -248,6 +248,23 @@ export const DRAFT_SCHEMA = {
         properties: { question: { type: 'string' }, answer: { type: 'string' } },
       },
     },
+    // Optional pass-throughs that lib.mjs assembleEntry already consumes. They
+    // have to be declared even though nothing validates against this schema
+    // today: with additionalProperties:false, the first consumer to pick it up
+    // would silently strip a draft's citation list, which is the one field the
+    // content laws treat as non-negotiable for competitor claims.
+    heroWord: { type: 'string' },
+    category: { type: 'string' },
+    topics: { type: 'array', items: { type: 'string' } },
+    sources: {
+      type: 'array',
+      items: {
+        type: 'object',
+        additionalProperties: false,
+        required: ['label', 'url'],
+        properties: { label: { type: 'string' }, url: { type: 'string' } },
+      },
+    },
     comparisonRows: {
       type: 'array',
       items: {

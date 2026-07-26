@@ -40,8 +40,10 @@ const STATIC_PATHS = [
   '/alternatives',
   '/for',
   '/tools',
-  '/privacy',
-  '/terms',
+  // The legal routes are /privacy-policy and /terms-of-service; the short forms
+  // are not routes at all, so allowlisting them would hand an author a 404.
+  '/privacy-policy',
+  '/terms-of-service',
 ];
 
 let cache: Set<string> | null = null;

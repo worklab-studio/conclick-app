@@ -7,9 +7,10 @@ const entry: ContentEntry = {
   metaTitle: 'Conclick vs Plausible (2026): Honest Comparison',
   metaDescription:
     'Plausible is great for simple, privacy-first traffic. But it can’t tie a visit to a dollar. Here’s an honest, founder-written Conclick vs Plausible comparison.',
+  primaryKeyword: 'conclick vs plausible',
   tldr: 'Plausible is the better pick if all you want is a clean, lightweight, privacy-first pageview counter. Conclick is the better pick if you also want heatmaps, funnels, and revenue attribution, so you know which traffic actually makes money instead of just how many people visited. Both are cookieless and EU-friendly, both land near $9/mo, but funnels and ecommerce cost extra over there.',
   intro:
-    'I built Conclick because I was tired of analytics that told me everything except the one thing I cared about: which traffic was making money. Plausible is a genuinely good product, and I’ll say so plainly below, but it answers a narrower question than Conclick does. Here’s the honest breakdown, including where it wins.',
+    'Analytics kept telling me everything except the one thing I cared about: which traffic was making money. That omission is what Conclick was built to fix. Plausible is a genuinely good product, and I’ll say so plainly below, but it answers a narrower question than Conclick does. Here’s the honest breakdown, including where it wins.',
   sections: [
     { type: 'h2', text: 'The short version', id: 'short-version' },
     {
@@ -42,8 +43,8 @@ const entry: ContentEntry = {
     {
       type: 'ul',
       items: [
-        'Revenue attribution: connect Stripe, Paddle, Polar, Lemon Squeezy, or Dodo and Conclick shows revenue by source, by campaign, and the exact dollars you are losing to each funnel drop-off. Plausible has no revenue attribution per their public docs as of July 2026.',
-        'Heatmaps + click maps: see where people actually click, scroll, and rage-click. Plausible has no heatmaps as of July 2026.',
+        'Revenue attribution: connect Stripe, Paddle, Polar, Lemon Squeezy, or Dodo and Conclick shows revenue by source, by campaign, and the exact dollars you are losing to each funnel drop-off. Plausible does have ecommerce revenue and attribution tracking per their public docs as of July 2026, but it is a Business-plan feature where you attach the monetary value to each event yourself, with no payment-processor connection behind it.',
+        'Heatmaps + click maps: see where people actually click, scroll, and rage-click. Plausible has no heatmaps per their public docs as of July 2026.',
         'Funnels that find their own leaks: Conclick auto-detects your conversion funnel and surfaces the single biggest drop-off. Plausible’s funnels are basic and manual by comparison.',
         'Behavior in one place: visual user journeys and a live global visitor map sit next to the numbers.',
       ],
@@ -81,7 +82,7 @@ const entry: ContentEntry = {
     },
     {
       type: 'p',
-      text: 'You are an agency reporting to clients, or a privacy purist who self-hosts on principle. Agencies: either tool works until the client asks what the traffic was worth, and the first time that question lands you will want [revenue attribution](/glossary/revenue-attribution) in the report instead of a polite shrug. Purists: self-host Plausible or Umami and accept the tradeoff. You own the stack, and you give up heatmaps and payment matching. Legitimate choice. It is just not the one I optimized for.',
+      text: 'You are an agency reporting to clients, or a privacy purist who self-hosts on principle. Agencies: either tool works until the client asks what the traffic was worth, and the first time that question lands you will want [revenue attribution](/glossary/revenue-attribution) in the report instead of a polite shrug. Purists: self-host Plausible or Umami and accept the tradeoff. You own the stack, and you give up payment matching (and on Plausible, heatmaps too; Umami has shipped its own since 3.2.0). Legitimate choice. It is just not the one I optimized for.',
     },
     { type: 'h2', text: 'Migrating from Plausible', id: 'migrating' },
     {
@@ -113,7 +114,7 @@ const entry: ContentEntry = {
     {
       question: 'Does Plausible have heatmaps or revenue tracking?',
       answer:
-        'No. Plausible is focused on simple traffic analytics; it has no heatmaps and no revenue attribution per their public docs as of July 2026. Those are core reasons people move to Conclick.',
+        'Partly. Plausible has no heatmaps per their public docs as of July 2026, and while it does offer funnels and ecommerce revenue tracking, both sit on the Business plan and both need you to define the steps and attach the revenue by hand: there is no payment-processor connection. Conclick pulls the revenue from the processor and detects the funnel for you, which is the reason most people move.',
     },
     {
       question: 'How much does Conclick cost vs Plausible?',

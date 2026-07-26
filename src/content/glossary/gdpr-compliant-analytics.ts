@@ -6,6 +6,7 @@ const entry: ContentEntry = {
   "h1": "GDPR-Compliant Analytics: What It Actually Means for Your Website",
   "metaTitle": "GDPR-Compliant Analytics: A Plain-English Guide",
   "metaDescription": "GDPR-compliant analytics means measuring your website without illegally tracking personal data. Here's what the law actually requires, and what it doesn't.",
+  "primaryKeyword": "what is gdpr compliant analytics",
   "tldr": "GDPR-compliant analytics means collecting website data in a way that does not process personal data without a lawful basis, most commonly by avoiding persistent identifiers, cross-site tracking, and third-party cookies that require user consent. Done right, you can still understand traffic, conversions, and revenue without a consent banner or a legal team.",
   "intro": "If you've ever pasted Google Analytics onto a site and immediately wondered whether you need a cookie banner, you've already run into this problem. GDPR compliance for analytics is not a checkbox. It is a decision about what data you actually collect and why. The good news is that you almost certainly need less data than you think to make good product decisions.",
   "sections": [

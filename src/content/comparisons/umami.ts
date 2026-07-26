@@ -5,9 +5,10 @@ const entry: ContentEntry = {
   "slug": "umami",
   "h1": "Conclick vs Umami: An Honest Comparison",
   "metaTitle": "Conclick vs Umami: Which Analytics Tool Fits?",
-  "metaDescription": "Umami is great open-source analytics. Conclick adds revenue attribution, heatmaps, and auto-detected funnels. Here is an honest side-by-side for founders.",
-  "tldr": "Umami is a solid, open-source, privacy-first analytics tool, especially if you are comfortable self-hosting something free and simple. Conclick is built for founders who need to know which traffic makes money: revenue attribution from Stripe, Paddle, Polar, Lemon Squeezy, or Dodo, real-screenshot heatmaps, and auto-detected funnels with revenue lost per drop-off, all hosted for $9/month.",
-  "intro": "I built Conclick because pageview counts were not telling me which traffic was actually converting to paying customers, and I was tired of stitching together three tools to get a single answer. Umami is the tool I know best: Conclick is built on Umami's open-source codebase, so I know exactly what it shares with the original and where it diverges. This comparison is my honest read of where each tool wins.",
+  "metaDescription": "Umami is great open-source analytics. Conclick adds revenue attribution and funnels with the money attached. An honest side-by-side for founders.",
+  "primaryKeyword": "conclick vs umami",
+  "tldr": "Umami is a solid, open-source, privacy-first analytics tool if you are comfortable self-hosting. Conclick is built for founders who need to know which traffic makes money: revenue pulled straight from Stripe, Paddle, Polar, Lemon Squeezy, or Dodo and attributed back to its source, heatmaps filterable to paying visitors, and auto-detected funnels with revenue lost per drop-off, hosted for $9/month.",
+  "intro": "Conclick began as a fork of Umami, which makes this the one comparison I have no room to be vague about. Pageview counts were not telling me which traffic converted to paying customers, and I was tired of stitching three tools together to get a single answer, so I built the missing half onto a codebase I already trusted. That means I know exactly what the two share and where they diverge. This comparison is my honest read of where each tool wins.",
   "sections": [
     {
       "type": "h2",
@@ -40,7 +41,7 @@ const entry: ContentEntry = {
         "Cost: Umami is free if you self-host. If your traffic is low and your time is cheap, that matters.",
         "Open source: You own the code. You can audit it, fork it, extend it. For regulated industries or privacy-obsessed teams, that transparency is real.",
         "Self-hosting control: If you already run infrastructure and want analytics data stored entirely on your own servers, Umami delivers that. Conclick is a hosted SaaS; your data lives on Conclick's servers.",
-        "Simplicity: Umami's dashboard is clean and uncrowded. If you do not need revenue attribution or heatmaps, Conclick's additional depth might feel like noise.",
+        "Simplicity: Umami's dashboard is clean and uncrowded. If you do not need revenue attribution, Conclick's additional depth might feel like noise.",
         "No vendor lock-in: You can move your Umami data anywhere. With any hosted SaaS, including Conclick, there is a dependency on continued service."
       ]
     },
@@ -55,7 +56,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "Umami tracks events. Per their docs as of July 2026, it does not have a concept of payment processors, so there is no way to tie a Stripe charge back to the UTM campaign that drove it, the page the user landed on, or the funnel step where they almost churned. You can technically build this yourself with custom event tracking and external tooling, but you are writing integration code, not running your business."
+      "text": "Umami has its own Revenue and Attribution reports, so it can already tie revenue back to a UTM campaign or referrer under a first-click or last-click model. The gap is upstream of the report: per their docs as of July 2026 there is no payment-processor connector, so the only money Umami knows about is money you send it yourself as event data. Nothing reconciles against Stripe, which means refunds, failed charges, disputes, and off-session renewals never arrive at all, and the number in the report drifts away from the number in your bank account."
     },
     {
       "type": "p",
@@ -68,11 +69,11 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "Umami has no heatmaps as of July 2026. Basic funnels exist in the cloud version but they are manual: you define the steps, it counts completions. There is no automatic detection of [where users are dropping](/guides/where-users-abandon-checkout) and no revenue attached to those drop-offs."
+      "text": "Umami shipped click and scroll heatmap reports in version 3.2.0 in June 2026, so the honest gap here is narrower than most comparison pages will tell you: both tools draw heatmaps. Funnels are where the difference is real. Umami's are manual: you define the steps, it counts completions. There is no automatic detection of [where users are dropping](/guides/where-users-abandon-checkout) and no revenue attached to those drop-offs."
     },
     {
       "type": "p",
-      "text": "Conclick takes real screenshots of your actual pages and overlays clicks, scroll depth, rage clicks, and dead clicks on top. Not approximations, but actual captures of what your users see. The funnel feature auto-detects your biggest single drop-off and calculates the revenue lost to it based on your real conversion value. That last part matters: knowing that 62% of users abandon step 3 of your checkout is useful. Knowing that step costs you an estimated $4,200/month in lost MRR is actionable."
+      "text": "Both tools draw their maps over the real page rather than a wireframe, so that is not the line either. Umami's own docs frame dead clicks as something you go and spot by reading the click map; Conclick classifies rage clicks and dead clicks as their own layers, and lets you narrow the whole map to the visitors who actually paid, which is only possible because the revenue arrived from the processor in the first place. That is a difference of degree over Umami's maps, not of kind, and I would rather say so than pretend the feature does not exist upstream. The funnel feature auto-detects your biggest single drop-off and calculates the revenue lost to it based on your real conversion value. That last part matters: knowing that 62% of users abandon step 3 of your checkout is useful. Knowing that step costs you an estimated $4,200/month in lost MRR is actionable."
     },
     {
       "type": "h2",
@@ -102,7 +103,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "callout",
-      "text": "The real cost comparison is not $9/month vs $0/month. It is $9/month vs the time you spend maintaining a self-hosted stack, plus the revenue you cannot see because your analytics have no concept of money."
+      "text": "The real cost comparison is not $9/month vs $0/month. It is $9/month vs the time you spend maintaining a self-hosted stack, plus the revenue you cannot see because nothing in that stack is wired to the processor the money actually lands in."
     },
     {
       "type": "h2",
@@ -115,7 +116,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "Pick Conclick if: you run a SaaS or ecommerce product and want to know which traffic is actually converting to revenue; you want heatmaps and click maps without integrating a separate tool; you want a daily digest of spikes and milestones without building it yourself; or you just want analytics that are running and useful in under ten minutes."
+      "text": "Pick Conclick if: you run a SaaS or ecommerce product and want to know which traffic is actually converting to revenue; you want click maps sitting in the same dashboard as the revenue they produced, without integrating a separate tool; you want a daily digest of spikes and milestones without building it yourself; or you just want analytics that are running and useful in under ten minutes."
     }
   ],
   "faq": [
@@ -129,11 +130,11 @@ const entry: ContentEntry = {
     },
     {
       "question": "Does Umami have revenue attribution or payment processor integrations?",
-      "answer": "No. Umami tracks web events but has no native integration with Stripe, Paddle, Polar, Lemon Squeezy, Dodo, or any other payment processor as of July 2026. You could theoretically build this with custom event tracking and your own data pipeline, but it is not a built-in feature and it requires ongoing engineering work to maintain."
+      "answer": "Those are two different questions and they get different answers. Umami does have revenue attribution: it ships Revenue and Attribution reports that credit revenue to a UTM source, medium, or referrer under first-click or last-click. What it has, per their docs as of July 2026, is no native integration with Stripe, Paddle, Polar, Lemon Squeezy, Dodo, or any other payment processor, so the revenue those reports work from is revenue you instrument and send in yourself. Conclick connects to the processor directly, which is what makes refunds, failed charges, and off-session renewals show up without you maintaining a pipeline."
     },
     {
       "question": "Is Conclick suitable if I am not running a paid product yet?",
-      "answer": "Yes, but you will only be using a subset of the tool. Without a payment processor connected, you get privacy-first pageview analytics, heatmaps, click maps, user journeys, the live visitor map, and the daily digest, which is still more than Umami offers on the tracking side. The revenue attribution features simply have nothing to pull from until you connect a processor."
+      "answer": "Yes, but you will only be using a subset of the tool. Without a payment processor connected, you get privacy-first pageview analytics, heatmaps, click maps, user journeys, the live visitor map, and the daily digest. The revenue features simply have nothing to pull from until you connect a processor, and at that point the honest comparison is much closer: this is the case where Umami being free matters most."
     },
     {
       "question": "What is the actual performance impact of the Conclick tracking script?",
@@ -141,7 +142,37 @@ const entry: ContentEntry = {
     },
     {
       "question": "Why would I pay for Conclick instead of just running Umami for free?",
-      "answer": "The short answer is revenue attribution and heatmaps. If knowing which UTM campaign drove $3,400 in MRR last month, or that your pricing page has a 78% rage-click rate on the FAQ toggle, changes how you spend your time and budget, Conclick earns back $9/month quickly. If you genuinely only need to know pageviews and referrers and you are comfortable managing hosting, Umami is the sensible free alternative and there is no shame in using it."
+      "answer": "The short answer is revenue attribution, and not running the server yourself. It is not heatmaps: Umami added its own in 3.2.0, so that stopped being the dividing line. If knowing which UTM campaign drove $3,400 in MRR last month, or which funnel step is quietly costing you the most, changes how you spend your time and budget, Conclick earns back $9/month quickly. If you genuinely only need to know pageviews and referrers and you are comfortable managing hosting, Umami is the sensible free alternative and there is no shame in using it."
+    }
+  ],
+  "sources": [
+    {
+      "label": "Umami, v3.2.0 release notes (click and scroll heatmaps)",
+      "url": "https://github.com/umami-software/umami/releases/tag/v3.2.0"
+    },
+    {
+      "label": "Umami docs, Heatmaps",
+      "url": "https://umami.is/docs/heatmaps"
+    },
+    {
+      "label": "Umami docs, Revenue (revenue arrives as tracked event data)",
+      "url": "https://umami.is/docs/revenue"
+    },
+    {
+      "label": "Umami docs, Attribution (first-click and last-click models)",
+      "url": "https://umami.is/docs/attribution"
+    },
+    {
+      "label": "Umami docs, Funnel",
+      "url": "https://umami.is/docs/funnel"
+    },
+    {
+      "label": "Umami docs, Integrations (framework plugins only, no payment processors)",
+      "url": "https://umami.is/docs/integrations"
+    },
+    {
+      "label": "Umami Cloud pricing",
+      "url": "https://umami.is/pricing"
     }
   ],
   "internalLinks": [
@@ -166,8 +197,8 @@ const entry: ContentEntry = {
   ],
   "leadMagnet": {
     "kind": "addWebsite",
-    "headline": "See what Umami can't show you",
-    "sub": "Add your site and Conclick shows which traffic actually makes money: heatmaps, funnels, and revenue in one dashboard. Free for 14 days, no card.",
+    "headline": "See which traffic actually pays you",
+    "sub": "Connect Stripe, Paddle, Polar, Lemon Squeezy or Dodo and Conclick shows revenue by source, campaign and funnel step. Free for 14 days, no card.",
     "ctaLabel": "Add My Website"
   },
   "datePublished": "2026-06-18",
@@ -183,22 +214,22 @@ const entry: ContentEntry = {
         "note": "Umami wins here: full code ownership, no vendor dependency"
       },
       {
-        "feature": "Revenue attribution (Stripe, Paddle, etc.)",
+        "feature": "Payment-processor connection (Stripe, Paddle, etc.)",
         "conclick": true,
         "competitor": false,
-        "note": "Conclick connects 5 processors; Umami has no payment integration as of July 2026"
+        "note": "Conclick connects 5 processors; Umami attributes revenue but only revenue you send it as event data, per their docs as of July 2026"
       },
       {
-        "feature": "Real-screenshot heatmaps & click maps",
+        "feature": "Heatmaps with rage/dead clicks, filterable to buyers",
         "conclick": true,
-        "competitor": false,
-        "note": "Umami has no heatmap feature as of July 2026"
+        "competitor": "Click + scroll maps since 3.2.0",
+        "note": "Both draw heatmaps over real page content; Conclick adds rage- and dead-click classification and filters the map to visitors who paid"
       },
       {
         "feature": "Auto-detected funnels with revenue lost",
         "conclick": true,
         "competitor": "Basic manual funnels",
-        "note": "Umami Cloud has simple funnels; no revenue attached"
+        "note": "Umami has manual funnels in the open-source build; no revenue attached"
       },
       {
         "feature": "Cookieless, usually no consent banner (jurisdiction-dependent)",
@@ -210,7 +241,7 @@ const entry: ContentEntry = {
         "feature": "Daily digest (email + Slack/Discord)",
         "conclick": true,
         "competitor": false,
-        "note": "Umami has no built-in notification digest as of July 2026"
+        "note": "Umami has no built-in notification digest, per their docs as of July 2026"
       },
       {
         "feature": "Setup time",

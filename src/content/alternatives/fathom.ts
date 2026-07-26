@@ -6,7 +6,8 @@ const entry: ContentEntry = {
   "h1": "The Best Fathom Analytics Alternatives in 2026",
   "metaTitle": "Best Fathom Analytics Alternatives in 2026",
   "metaDescription": "Fathom Analytics is solid but limited. Here are the best privacy-first alternatives in 2026, including one that ties your traffic directly to revenue.",
-  "tldr": "Conclick is the top pick if you want to know which traffic actually earns money: it adds revenue attribution, heatmaps, and funnels that Fathom simply doesn't have as of July 2026. Plausible is the best pure pageview swap if you want near-identical simplicity at a lower price. Simple Analytics and Pirsch round out the field for specific use cases.",
+  "primaryKeyword": "fathom alternatives",
+  "tldr": "Conclick is the top pick if you want to know which traffic actually earns money: it adds revenue attribution, heatmaps, and funnels that Fathom simply doesn't have, per their docs as of July 2026. Plausible is the best pure pageview swap if you want near-identical simplicity at a lower price. Simple Analytics and Pirsch round out the field for specific use cases.",
   "intro": "Fathom Analytics is a fine product. It's fast, private, GDPR-friendly, and the dashboard is clean enough to look at every morning without wanting to close the tab. But if you're a bootstrapped founder trying to grow a SaaS or a small ecommerce shop, \"clean dashboard\" isn't the goal. Knowing which blog post drove your last five paying customers is. Fathom doesn't tell you that. Neither does most of what you'll find in listicles that recycle the same five tools. This post surveys the real alternatives: what each one actually does well, what it skips, and who should pick it.",
   "sections": [
     {
@@ -20,7 +21,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "The [revenue attribution](/glossary/revenue-attribution) layer connects your payment processor (Stripe, Paddle, Polar, Lemon Squeezy, or Dodo) to every visitor session. So instead of knowing '300 people came from that ProductHunt post,' you know '300 people came from that ProductHunt post and 8 converted, totalling $720 MRR.' That's the number that matters. Fathom has no version of this as of July 2026."
+      "text": "The [revenue attribution](/glossary/revenue-attribution) layer connects your payment processor (Stripe, Paddle, Polar, Lemon Squeezy, or Dodo) to every visitor session. So instead of knowing '300 people came from that ProductHunt post,' you know '300 people came from that ProductHunt post and 8 converted, totalling $720 MRR.' That's the number that matters. Fathom has no version of this: their docs list no payment-processor integration as of July 2026."
     },
     {
       "type": "h3",
@@ -102,7 +103,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "The dashboard is less polished than Fathom or Plausible, and there's no revenue attribution or heatmaps as of July 2026. But if you're a developer-first team that wants full control and a clean API to build on top of, Pirsch punches above its weight. The cloud version starts at around $5/month."
+      "text": "The dashboard is less polished than Fathom or Plausible, and per their docs as of July 2026 there's no revenue attribution or heatmaps. But if you're a developer-first team that wants full control and a clean API to build on top of, Pirsch punches above its weight. The cloud version starts at around $5/month."
     },
     {
       "type": "h2",
@@ -203,19 +204,19 @@ const entry: ContentEntry = {
         "feature": "Revenue attribution",
         "conclick": true,
         "competitor": false,
-        "note": "Conclick connects Stripe/Paddle/Polar/LemonSqueezy/Dodo to traffic; Fathom has no equivalent as of July 2026"
+        "note": "Conclick connects Stripe/Paddle/Polar/LemonSqueezy/Dodo to traffic; Fathom has no equivalent, per their docs as of July 2026"
       },
       {
         "feature": "Real-screenshot heatmaps",
         "conclick": true,
         "competitor": false,
-        "note": "Conclick overlays clicks on actual page screenshots; Fathom has no heatmap feature as of July 2026"
+        "note": "Conclick overlays clicks on actual page screenshots; their docs list no heatmap feature as of July 2026"
       },
       {
         "feature": "Auto-detected funnels",
         "conclick": true,
         "competitor": false,
-        "note": "Conclick surfaces revenue drop-offs automatically; Fathom has no funnel analysis as of July 2026"
+        "note": "Conclick surfaces revenue drop-offs automatically; Fathom has no funnel analysis, per their docs as of July 2026"
       },
       {
         "feature": "Daily digest (email + Slack/Discord)",

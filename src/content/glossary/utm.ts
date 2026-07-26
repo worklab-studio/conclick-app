@@ -6,6 +6,7 @@ const entry: ContentEntry = {
   "h1": "UTM Parameters: What They Are, Why They Matter, and How to Use Them Right",
   "metaTitle": "UTM Parameters Explained: The Complete Guide",
   "metaDescription": "UTM parameters are URL tags that tell your analytics exactly which campaign drove a visit. How to build them right and avoid mistakes that corrupt data.",
+  "primaryKeyword": "what are utm parameters",
   "tldr": "UTM parameters are short tags you append to a URL that tell your analytics tool exactly where a visitor came from and which campaign sent them. Without them, traffic from your email, ads, and social posts collapses into one undifferentiated blob, and you have no idea what is actually working.",
   "intro": "Every time you share a link and have no idea whether it drove revenue or just tire-kickers, you are flying blind. UTM parameters are the fix. They are the simplest, most reliable way to answer the question every founder eventually asks: which of my marketing channels is actually making me money?",
   "sections": [

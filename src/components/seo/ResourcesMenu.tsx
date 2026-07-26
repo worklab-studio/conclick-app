@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef, useState } from 'react';
-import { ChevronDown, FileText, BookOpen, BarChart3, Wrench } from 'lucide-react';
+import { ChevronDown, FileText, BookOpen, BarChart3, Wrench, Shuffle, BookMarked, Users } from 'lucide-react';
 
 const SITE = process.env.NEXT_PUBLIC_SITE_URL || 'https://conclick.io';
 
@@ -10,6 +10,12 @@ const ITEMS = [
   { href: `${SITE}/guides`, icon: BookOpen, title: 'Guides', desc: 'Step-by-step walkthroughs and playbooks' },
   { href: `${SITE}/compare`, icon: BarChart3, title: 'Compare', desc: 'Feature and alternative comparisons' },
   { href: `${SITE}/tools`, icon: Wrench, title: 'Tools', desc: 'Free utilities and templates' },
+  // The last three hubs were reachable only from the footer, which left ~24
+  // pages at click depth 3. Listing them here puts every cluster one hop from
+  // the nav on every page.
+  { href: `${SITE}/alternatives`, icon: Shuffle, title: 'Alternatives', desc: 'Swap the tool you outgrew' },
+  { href: `${SITE}/glossary`, icon: BookMarked, title: 'Glossary', desc: 'Analytics terms in plain English' },
+  { href: `${SITE}/for`, icon: Users, title: 'Use cases', desc: 'How teams like yours use Conclick' },
 ];
 
 // Matches the conclick.io homepage "Resources" nav dropdown exactly. The panel is

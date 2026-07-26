@@ -6,8 +6,9 @@ const entry: ContentEntry = {
   "h1": "Conclick vs PostHog: Honest Comparison for Founders (2025)",
   "metaTitle": "Conclick vs PostHog: Which Is Right for You?",
   "metaDescription": "Side-by-side breakdown of Conclick and PostHog: pricing, privacy, revenue attribution, and who each tool actually serves best.",
+  "primaryKeyword": "conclick vs posthog",
   "tldr": "PostHog is the stronger choice if you need product analytics, feature flags, or A/B testing inside a complex app. Conclick wins if you are a bootstrapped founder who needs to know which traffic channel actually makes you money, with cookieless GDPR-friendly tracking, real-screenshot heatmaps, and revenue attribution built in. At $9/month versus PostHog's usage pricing, the cost gap compounds fast.",
-  "intro": "I built Conclick because I kept staring at pageview graphs trying to reverse-engineer whether the traffic I was paying for was turning into revenue. PostHog is a genuinely impressive product; I use parts of it. But for solo founders and small SaaS teams who want a direct line from \"visitor landed\" to \"payment received,\" it is more tool than you need, and it is not built privacy-first. Here is an honest look at both.",
+  "intro": "For a year I reverse-engineered pageview graphs, trying to work out whether the traffic I was paying for was turning into revenue. Deleting that guesswork is the whole job Conclick was built for. PostHog is a genuinely impressive product; I use parts of it. But for solo founders and small SaaS teams who want a direct line from \"visitor landed\" to \"payment received,\" it is more tool than you need, and it is not built privacy-first. Here is an honest look at both.",
   "sections": [
     {
       "type": "h2",

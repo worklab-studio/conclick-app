@@ -6,6 +6,7 @@ const entry: ContentEntry = {
   "h1": "Vanity metrics are lying to you about what is working",
   "metaTitle": "Vanity Metrics Are Lying to Your Face",
   "metaDescription": "Pageviews, social likes, and newsletter open rates feel like progress. They are not. Here is how to find the numbers that actually move revenue.",
+  "primaryKeyword": "vanity metrics",
   "tldr": "Vanity metrics are the analytics equivalent of applause: they feel great and prove nothing. Most founders are optimizing for numbers that have zero relationship to revenue, and the actual signals are buried three clicks deep in a tool they barely open. Stop tracking what flatters you. Start tracking what pays you.",
   "intro": "Last year I watched a founder celebrate 40,000 monthly visitors. He had a t-shirt made. He told his accelerator cohort. He wrote a tweet thread. He also had $600 in MRR after 14 months of building. The visitors were real. The business was not. Vanity metrics do not just fail to help you. They actively steer you wrong, because they create the feeling of momentum where none exists. I have been guilty of this. You probably have too. Here is what I know now that I wish I had known earlier.",
   "sections": [

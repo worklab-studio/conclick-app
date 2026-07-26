@@ -6,8 +6,9 @@ const entry: ContentEntry = {
   "h1": "Conclick vs Google Analytics 4: An Honest Comparison",
   "metaTitle": "Conclick vs Google Analytics 4: Honest Comparison",
   "metaDescription": "GA4 is free and powerful. Conclick costs $9/mo and tells you which traffic makes money. Here's when each one is the right tool.",
+  "primaryKeyword": "conclick vs google analytics",
   "tldr": "Google Analytics 4 is the right choice if you run Google Ads, need free enterprise-grade reporting, or have a dedicated analyst. Conclick is the better choice if you are a solo founder or small SaaS team who needs to know which traffic and campaigns generate actual revenue, not just sessions. GA4 is free; Conclick starts at $9/month with a 14-day free trial, no credit card required.",
-  "intro": "I built Conclick because I kept staring at GA4 dashboards trying to answer one question: which of these traffic sources is actually making me money? The answer was never in there without a lot of configuration I never had time to set up right. This comparison is my honest take on when GA4 is the better tool, and when it is not.",
+  "intro": "Every GA4 session of mine ended the same way: twenty minutes of clicking between reports to answer one question, which of these traffic sources is actually making me money? The answer was never in there without a lot of configuration I never had time to set up right, and eventually I built the tool that just shows it. This comparison is my honest take on when GA4 is the better tool, and when it is not.",
   "sections": [
     {
       "type": "h2",
@@ -50,7 +51,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "GA4 does not have heatmaps. If you want them, you are paying for Hotjar, Microsoft Clarity, or something similar on top of your analytics stack. Conclick includes real-screenshot click maps, scroll depth, rage clicks, and dead clicks in the same subscription. The heatmaps render on an actual screenshot of your page, not a wireframe reconstruction."
+      "text": "GA4 does not have heatmaps, per their docs as of July 2026. If you want them, you are paying for Hotjar, Microsoft Clarity, or something similar on top of your analytics stack. Conclick includes real-screenshot click maps, scroll depth, rage clicks, and dead clicks in the same subscription. The heatmaps render on an actual screenshot of your page, not a wireframe reconstruction."
     },
     {
       "type": "p",

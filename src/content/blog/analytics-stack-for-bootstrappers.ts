@@ -6,6 +6,7 @@ const entry: ContentEntry = {
   "h1": "The Analytics Stack I'd Choose to Bootstrap in 2026",
   "metaTitle": "The Analytics Stack for Startups I'd Actually Build",
   "metaDescription": "The analytics stack for startups almost never needs a warehouse or a CDP. Here is the honest three-part setup I run: traffic, revenue, and Search Console.",
+  "primaryKeyword": "analytics stack for startups",
   "tldr": "The analytics stack for startups is three things, not thirteen: one privacy-first tool for traffic and behavior, your payment data wired in so you know which traffic makes money, and Search Console for free query data. Everything past that, warehouses and CDPs and event pipelines, is a tax you pay before you have the scale to need it.",
   "intro": "I have watched more bootstrapped founders drown in their own instrumentation than ever drown in a shortage of it. The analytics stack for startups gets sold as a maturity ladder you are supposed to climb, when for the first two years it is really just three tools doing three jobs. Here is what I would run on day one, what I would happily ignore, and the exact question that tells you it is finally time to add something.",
   "sections": [
@@ -105,8 +106,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "quote",
-      "text": "Buy the tool the day a question you are paid to answer outgrows the tool you already have. Not one day sooner.",
-      "cite": "Deepak, founder of Conclick"
+      "text": "Buy the tool the day a question you are paid to answer outgrows the tool you already have. Not one day sooner."
     },
     {
       "type": "p",
@@ -186,7 +186,7 @@ const entry: ContentEntry = {
     {
       "href": "/for/indie-hackers",
       "label": "Conclick for indie hackers",
-      "group": "use-case"
+      "group": "useCase"
     }
   ],
   "relatedTools": [],

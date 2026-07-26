@@ -6,8 +6,9 @@ const entry: ContentEntry = {
   "h1": "Analytics for SaaS: What You Actually Need to Know",
   "metaTitle": "SaaS Analytics: See Which Traffic Becomes Revenue",
   "metaDescription": "SaaS founders need to know which traffic converts to paying customers, not just page views. Here's what matters, and where most analytics tools fall short.",
+  "primaryKeyword": "analytics for saas",
   "tldr": "SaaS analytics should answer one question above all: which traffic source, campaign, or page actually generated revenue, not just signups. Most tools stop at pageviews or conversions without closing the loop to payment. Conclick ties every Stripe, Paddle, Polar, Lemon Squeezy, or Dodo charge back to the source that earned it, so you know where to double down and where you are bleeding.",
-  "intro": "I built Conclick because I kept opening Google Analytics, seeing a traffic graph go up, and having no idea whether that meant money was coming in. Pageviews felt like applause in an empty theater. SaaS founders have a specific problem: traffic, trials, and revenue are three different things, and the gap between each one is where most growth budgets quietly disappear.",
+  "intro": "I would open Google Analytics, watch the traffic graph climb, and still have no idea whether that meant money was coming in. Pageviews felt like applause in an empty theater. SaaS founders have a specific problem: traffic, trials, and revenue are three different things, and the gap between each one is where most growth budgets quietly disappear.",
   "sections": [
     {
       "type": "h2",

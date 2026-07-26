@@ -6,6 +6,7 @@ const entry: ContentEntry = {
   "h1": "Why Is Stripe Revenue Higher Than My Analytics Revenue?",
   "metaTitle": "Why Is Stripe Revenue Higher Than My Analytics?",
   "metaDescription": "Stripe records every payment that settled; your analytics only counts checkouts that survive ad blockers, consent banners, and the redirect. Here is the fix.",
+  "primaryKeyword": "why is stripe revenue higher than my analytics revenue",
   "tldr": "Stripe is higher because it records every payment that actually cleared, on its own servers. Your analytics tool only counts checkouts where its script survived the ad blocker, the consent banner, and the redirect to the payment page. Renewals and dunning retries never load a browser at all, so analytics never sees them. Treat Stripe as the money ledger.",
   "intro": "A founder messaged me last month in a mild panic. His Stripe dashboard said he had made about nine thousand dollars that month. His analytics tool, the one with the tidy funnel chart, insisted the figure was closer to five. He wanted to know which one was lying. Neither is. They measure two different things on two different machines, and once you see why, the gap stops being frightening and starts being useful. I have chased this exact discrepancy across dozens of small SaaS and store setups, so here is the honest anatomy of it.",
   "sections": [

@@ -6,6 +6,7 @@ const entry: ContentEntry = {
   "h1": "Open Source Web Analytics Tools I Trust in 2026: An Honest List",
   "metaTitle": "Open Source Web Analytics Tools: The Honest 2026 List",
   "metaDescription": "I ship on the Umami engine and rely on the others daily. Here are the open source web analytics tools worth self-hosting in 2026, with real trade-offs.",
+  "primaryKeyword": "open source web analytics tools",
   "tldr": "The open source web analytics tools worth adopting in 2026 are Matomo, Plausible Community Edition, Umami, and PostHog, each fitting a different team shape. I ship on the Umami engine and use two of the others weekly. Pick by what you need to run, not by star count.",
   "intro": "I have spent two years building on top of an open source web analytics engine, and the year before that I compared every serious option from a spreadsheet at 3am. So this is not neutral, and I will not pretend it is. It is my honest read on the open source web analytics tools worth adopting in 2026, when to reach for each, and where the free download stops being free.",
   "sections": [
@@ -56,7 +57,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "Umami is MIT-licensed, Postgres or MySQL-backed, ships as a single Next.js app, and installs in about ten minutes on any modern host. It is fast, cookieless by default with a first-party identifier, and its schema is clean enough to extend. Full disclosure: Conclick is built on the Umami codebase, so I have opinions about its trade-offs that are worth stating rather than hiding. The upside is a small, auditable core with an active maintainer and a real community. The downside is that out of the box Umami is a traffic tool. It does not do heatmaps, funnels beyond simple event chains, or revenue attribution. If your job is counting visits and events cleanly and you want the software to stay small, install it today. If you need behaviour or money in the same view, you will either extend it or reach for something bigger. My side-by-side is at [Conclick vs Umami](/vs/umami)."
+      "text": "Umami is MIT-licensed, Postgres or MySQL-backed, ships as a single Next.js app, and installs in about ten minutes on any modern host. It is fast, cookieless by default with a first-party identifier, and its schema is clean enough to extend. Full disclosure: Conclick is built on the Umami codebase, so I have opinions about its trade-offs that are worth stating rather than hiding. The upside is a small, auditable core with an active maintainer and a real community. The downside is that out of the box Umami is a traffic tool. Version 3.2.0 added click and scroll heatmaps, which is more behaviour data than most tools on this list ship, but funnels stop at simple event chains and there is no revenue attribution at all. If your job is counting visits and events cleanly and you want the software to stay small, install it today. If you need behaviour or money in the same view, you will either extend it or reach for something bigger. My side-by-side is at [Conclick vs Umami](/vs/umami)."
     },
     {
       "type": "h3",
@@ -121,8 +122,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "quote",
-      "text": "The best open source analytics tool is the one you will still be running in eighteen months. Software that quietly stops collecting data is worse than software that costs money.",
-      "cite": "Deepak, founder of Conclick"
+      "text": "The best open source analytics tool is the one you will still be running in eighteen months. Software that quietly stops collecting data is worse than software that costs money."
     }
   ],
   "faq": [

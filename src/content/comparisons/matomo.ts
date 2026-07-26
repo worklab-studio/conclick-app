@@ -6,8 +6,9 @@ const entry: ContentEntry = {
   "h1": "Conclick vs Matomo: Which Analytics Tool Is Right for You?",
   "metaTitle": "Conclick vs Matomo: Honest Head-to-Head Comparison",
   "metaDescription": "Conclick vs Matomo compared honestly: pricing, heatmaps, revenue attribution, and setup complexity. Find out which fits bootstrapped SaaS founders best.",
+  "primaryKeyword": "conclick vs matomo",
   "tldr": "Matomo is the right choice if you need a self-hosted analytics platform you fully control. Conclick is the better fit if you want to know which traffic actually makes money: built-in revenue attribution across Stripe, Paddle, and others, real-screenshot heatmaps, and a two-minute setup with no server to manage. For founders who want answers about revenue, Conclick is built for that job.",
-  "intro": "I built Conclick because I kept staring at Google Analytics dashboards that told me my traffic was up while I had no idea which campaigns were actually generating revenue. Matomo is a genuinely solid tool, and I want to be honest about that upfront. But after years of building for founders who care about money, not metrics, I think the two tools are solving meaningfully different problems.",
+  "intro": "For two years my analytics cheerfully told me traffic was up while I had no idea which campaigns were actually generating revenue, and eventually I got tired enough of that to build my own. Matomo is a genuinely solid tool, and I want to be honest about that upfront. But after years of building for founders who care about money, not metrics, I think the two tools are solving meaningfully different problems.",
   "sections": [
     {
       "type": "h2",
@@ -142,7 +143,7 @@ const entry: ContentEntry = {
     },
     {
       "question": "What payment processors does Conclick integrate with?",
-      "answer": "Conclick integrates with Stripe, Paddle, Polar, Lemon Squeezy, and Dodo Payments. These cover the most common payment stacks used by bootstrapped SaaS and indie product founders. If you are using one of these processors, you can connect it during the initial setup and start seeing revenue attribution within the first session. Matomo does not have native integrations with these processors as of July 2026; you would need to build custom event tracking to replicate this behavior."
+      "answer": "Conclick integrates with Stripe, Paddle, Polar, Lemon Squeezy, and Dodo Payments. These cover the most common payment stacks used by bootstrapped SaaS and indie product founders. If you are using one of these processors, you can connect it during the initial setup and start seeing revenue attribution within the first session. Matomo does not have native integrations with these processors, per their docs as of July 2026; you would need to build custom event tracking to replicate this behavior."
     },
     {
       "question": "Does Conclick replace Google Analytics entirely?",

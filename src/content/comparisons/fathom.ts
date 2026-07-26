@@ -6,8 +6,9 @@ const entry: ContentEntry = {
   "h1": "Conclick vs Fathom Analytics: An Honest Head-to-Head",
   "metaTitle": "Conclick vs Fathom Analytics: Feature Comparison",
   "metaDescription": "Conclick adds revenue attribution, heatmaps, and funnels; Fathom keeps it simple. An honest breakdown of who should use which, with a direct feature comparison.",
+  "primaryKeyword": "conclick vs fathom",
   "tldr": "Fathom is a genuinely good tool for simple, private, cookieless page analytics. Conclick is built for founders who need to know which traffic actually makes money: it adds revenue attribution, real-screenshot heatmaps, auto-detected funnels, and a daily digest. If you run paid campaigns or a Stripe-connected SaaS, Conclick closes the loop between a visitor and a dollar.",
-  "intro": "I built Conclick because pageview counts never told me which blog post actually drove a sale, or which ad campaign was burning cash on visitors who never converted. I needed analytics that spoke money, not vanity. That said, I want to give Fathom a fair hearing: it's a well-made tool, and it might be exactly what you need. Here's the honest breakdown.",
+  "intro": "Pageview counts never told me which blog post actually drove a sale, or which ad campaign was burning cash on visitors who never converted. I wanted analytics that spoke money rather than vanity, so I ended up building them. That said, I want to give Fathom a fair hearing: it's a well-made tool, and it might be exactly what you need. Here's the honest breakdown.",
   "sections": [
     {
       "type": "h2",
@@ -68,7 +69,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "Conclick captures click maps, scroll depth, rage clicks, and dead clicks against real screenshots of your actual pages. Not a recreated DOM, but an actual screenshot of what the page looks like. When you see a cluster of rage clicks on a button that opens a modal, you know the modal is broken before a single user emails you about it. Fathom has no equivalent of this as of July 2026."
+      "text": "Conclick captures click maps, scroll depth, rage clicks, and dead clicks against real screenshots of your actual pages. Not a recreated DOM, but an actual screenshot of what the page looks like. When you see a cluster of rage clicks on a button that opens a modal, you know the modal is broken before a single user emails you about it. Fathom has no equivalent of this, per their docs as of July 2026."
     },
     {
       "type": "h3",

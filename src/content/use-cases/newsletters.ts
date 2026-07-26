@@ -6,8 +6,9 @@ const entry: ContentEntry = {
   "h1": "Analytics for Newsletters and Creators",
   "metaTitle": "Analytics for Newsletters & Creators That Track Revenue",
   "metaDescription": "Newsletters and creators need analytics that ties traffic to paid subscribers, not pageviews. Here's what actually matters and how to measure it.",
+  "primaryKeyword": "analytics for newsletters",
   "tldr": "Newsletters and creators need to know which content or campaign converts readers into paying subscribers, not just which posts got traffic. Conclick ties traffic sources to revenue from Stripe, Paddle, Lemon Squeezy, Polar, or Dodo, shows where your upgrade funnel breaks, and flags the content that earns money. Setup takes about two minutes; in most cases no cookie banner is required.",
-  "intro": "I built Conclick because I was tired of analytics tools that told me my \"engagement was up\" while my revenue was flat. Newsletters and creators are a specific kind of business: you live and die by conversion rates, not impressions. The metric that matters is simple: which piece of content, which referral, which email sequence turns a free reader into someone who pays you.",
+  "intro": "Analytics tools kept congratulating me on \"engagement\" while my revenue sat perfectly flat, and resolving that contradiction is what Conclick was built for. Newsletters and creators are a specific kind of business: you live and die by conversion rates, not impressions. The metric that matters is simple: which piece of content, which referral, which email sequence turns a free reader into someone who pays you.",
   "sections": [
     {
       "type": "h2",
@@ -166,7 +167,7 @@ const entry: ContentEntry = {
     },
     {
       "question": "How is Conclick different from Google Analytics for a creator business?",
-      "answer": "Google Analytics gives you traffic data but requires significant configuration to connect that traffic to revenue, and even then the data model is complex to work with for solo operators. Conclick is built around the question 'which traffic made me money' rather than 'how many sessions did I have.' The revenue attribution, auto-detected funnels, and real-screenshot heatmaps are things GA4, as of July 2026, either does not have or requires substantial setup and a Google Ads account to approximate. GA4 is also not cookieless by default, so it typically requires a consent banner."
+      "answer": "Google Analytics gives you traffic data but requires significant configuration to connect that traffic to revenue, and even then the data model is complex to work with for solo operators. Conclick is built around the question 'which traffic made me money' rather than 'how many sessions did I have.' The revenue attribution, auto-detected funnels, and real-screenshot heatmaps are things GA4, per their docs as of July 2026, either does not have or requires substantial setup and a Google Ads account to approximate. GA4 is also not cookieless by default, so it typically requires a consent banner."
     },
     {
       "question": "Do I need a developer to set up Conclick?",

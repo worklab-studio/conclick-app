@@ -98,8 +98,10 @@ For each target:
   **In-prose means inside a section's `text` or `items` string**, rendered by
   `RichText` (`src/components/seo/RichText.tsx`) in `p`, `ul`, `ol`, `quote` and
   `callout`. Headings do not render links. Adding to the `internalLinks` array
-  is not a substitute: that renders as an end-of-page card rail, which is the
-  template chrome search engines discount most. An unresolvable path degrades to
+  is not a substitute: that is a "read next" card rail below the article body,
+  the template chrome search engines discount most — and it rendered nowhere at
+  all until the 2026-07-26 fix pass wired it up, so entries repaired by adding
+  to that array before then gained no link anywhere. An unresolvable path degrades to
   plain text rather than shipping a 404, so confirm the anchor actually survived
   into the built page.
 

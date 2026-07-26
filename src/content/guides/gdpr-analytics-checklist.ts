@@ -6,6 +6,7 @@ const entry: ContentEntry = {
   "h1": "The GDPR-Compliant Analytics Checklist for 2026",
   "metaTitle": "GDPR-Compliant Analytics Checklist for 2026",
   "metaDescription": "A founder's blunt, step-by-step checklist for running legal, useful analytics in 2026: no legal jargon, no cookie-banner theatre, just what actually works.",
+  "primaryKeyword": "gdpr analytics checklist",
   "tldr": "In 2026, most small teams are either over-collecting (and need expensive consent infrastructure) or so paranoid they have no useful data left. The fix is to default to cookieless, session-scoped analytics for most of your measurement needs, add consent only where you truly need cookies, and document your lawful basis. This checklist walks through exactly that in the order that matters.",
   "intro": "I spent more time than I'd like to admit reading DPA guidance documents, enforcement decisions, and noyb complaint filings so you don't have to. Here is what I actually learned: GDPR compliance for analytics is mostly about data minimisation, not banner design. Get the architecture right and the compliance largely follows.",
   "sections": [

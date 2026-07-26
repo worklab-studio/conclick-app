@@ -6,8 +6,9 @@ const entry: ContentEntry = {
   "h1": "Conclick vs Mixpanel: Which Analytics Tool Actually Tells You What Makes Money?",
   "metaTitle": "Conclick vs Mixpanel: Honest Comparison 2025",
   "metaDescription": "Conclick and Mixpanel solve different problems. Here's an honest, feature-by-feature breakdown to help you pick the right tool for your stage and goals.",
+  "primaryKeyword": "conclick vs mixpanel",
   "tldr": "Mixpanel is the better choice if you have a product team doing deep event-based retention and cohort analysis. Conclick is the better choice if you're a bootstrapped founder who needs to know which traffic, campaign, and funnel actually generates revenue, with real heatmaps, privacy compliance, and a $9/mo price tag. They overlap on funnels but solve different problems at different price points.",
-  "intro": "I built Conclick because I was tired of knowing how many pageviews I had and having no idea which ones turned into money. Mixpanel is genuinely good software. I'm not here to trash it. But for most solo founders and small SaaS teams, it's the wrong tool at the wrong price for the wrong job. Here's the honest breakdown.",
+  "intro": "Knowing my pageview count to the decimal while having no idea which of those pageviews turned into money is the specific problem Conclick was built to fix. Mixpanel is genuinely good software. I'm not here to trash it. But for most solo founders and small SaaS teams, it's the wrong tool at the wrong price for the wrong job. Here's the honest breakdown.",
   "sections": [
     {
       "type": "h2",
@@ -79,7 +80,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "Mixpanel has no heatmaps. If you want to see where visitors click on your pricing page, or which section they scroll to before bouncing, you need a separate tool: Hotjar, Microsoft Clarity, or similar. That is another subscription, another script on your page, and another login."
+      "text": "Mixpanel has no heatmaps, per their docs as of July 2026. If you want to see where visitors click on your pricing page, or which section they scroll to before bouncing, you need a separate tool: Hotjar, Microsoft Clarity, or similar. That is another subscription, another script on your page, and another login."
     },
     {
       "type": "p",
@@ -209,7 +210,7 @@ const entry: ContentEntry = {
         "feature": "Heatmaps and click maps",
         "conclick": true,
         "competitor": false,
-        "note": "Conclick includes real-screenshot heatmaps. Mixpanel has no heatmap feature."
+        "note": "Conclick includes real-screenshot heatmaps. Mixpanel has no heatmap feature, per their docs as of July 2026."
       },
       {
         "feature": "In-app event analytics and cohort retention",

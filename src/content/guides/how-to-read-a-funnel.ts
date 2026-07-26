@@ -6,6 +6,7 @@ const entry: ContentEntry = {
   "h1": "How to Read a Conversion Funnel and Fix the Biggest Leak",
   "metaTitle": "How to Read a Conversion Funnel and Fix the Leak",
   "metaDescription": "Most conversion funnels bleed money at one step. Here is how to find that step, understand why people leave, and fix it without guessing.",
+  "primaryKeyword": "how to read a funnel",
   "tldr": "Your conversion funnel almost always has one step that accounts for the majority of lost revenue. Find it by measuring drop-off rates at each step, then diagnose it with behavioral data (session recordings, heatmaps, and exit surveys) before you change anything. Fix the biggest leak first. Everything else is a rounding error until you do.",
   "intro": "I have watched founders spend months A/B testing button colors while their pricing page was hemorrhaging 80% of visitors. The problem is not that they did not care. It is that they were looking at the wrong number. A conversion funnel is not a marketing diagram. It is a map of where your revenue leaks. Here is how to read it honestly and fix what actually matters.",
   "sections": [
@@ -142,7 +143,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "Most tools give you the funnel visualization. Fewer give you revenue attribution that actually connects pageviews to payments. I built Conclick because I kept needing to stitch together three separate tools to answer one question: which traffic source, campaign, or funnel step is producing paid customers? The revenue attribution in Conclick connects directly to Stripe, Paddle, Polar, Lemon Squeezy, and Dodo, so every payment traces back to the source and funnel step that earned it. The heatmaps and click maps are real-screenshot overlays, not wireframe approximations, and the auto-detected funnels surface your single biggest drop-off with the revenue blocked by it. It is cookieless and in most cases needs no consent banner; Conclick stores a first-party identifier in localStorage, and whether that requires consent depends on your jurisdiction, so check with your own counsel. Setup takes about two minutes, and there is a 14-day free trial, no card required."
+      "text": "Most tools give you the funnel visualization. Fewer give you revenue attribution that actually connects pageviews to payments. That gap is why Conclick exists: I was stitching together three separate tools to answer one question, which traffic source, campaign, or funnel step is producing paid customers. The revenue attribution in Conclick connects directly to Stripe, Paddle, Polar, Lemon Squeezy, and Dodo, so every payment traces back to the source and funnel step that earned it. The heatmaps and click maps are real-screenshot overlays, not wireframe approximations, and the auto-detected funnels surface your single biggest drop-off with the revenue blocked by it. It is cookieless and in most cases needs no consent banner; Conclick stores a first-party identifier in localStorage, and whether that requires consent depends on your jurisdiction, so check with your own counsel. Setup takes about two minutes, and there is a 14-day free trial, no card required."
     },
     {
       "type": "p",

@@ -6,8 +6,9 @@ const entry: ContentEntry = {
   "h1": "Conclick vs Hotjar: Which One Actually Tells You What's Making Money?",
   "metaTitle": "Conclick vs Hotjar: Honest Head-to-Head",
   "metaDescription": "Conclick and Hotjar both show where users click. Only one ties those clicks to revenue. An honest comparison for founders who need more than heatmaps.",
+  "primaryKeyword": "conclick vs hotjar",
   "tldr": "Hotjar is a genuinely good user-research tool that excels at session recordings and in-app surveys. Conclick is privacy-first analytics for small SaaS and ecommerce founders who want to connect visitor behavior directly to revenue. If you need to know which campaign or funnel step is costing you money, pick Conclick; for session recordings and surveys, Hotjar keeps the edge.",
-  "intro": "I built Conclick because I kept staring at heatmaps wondering whether the people clicking my CTA were paying customers or just curious. Hotjar told me where users clicked. It never told me whether those clicks turned into dollars. That one gap cost me months of optimizing the wrong things.",
+  "intro": "For a long stretch I had beautiful heatmaps and no way to know whether the people clicking my CTA were paying customers or just curious. Hotjar told me where users clicked. It never told me whether those clicks turned into dollars. That one gap cost me months of optimizing the wrong things, and closing it is why Conclick exists.",
   "sections": [
     {
       "type": "h2",
@@ -16,7 +17,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "Hotjar is a behavior analytics tool. It answers questions like: where do people click, where do they drop off in a session, what do they say when you ask them. Those are useful questions. But Hotjar is not a revenue analytics platform. It has no concept of your payment processor, your MRR, or which UTM campaign actually converted; that was true when I used it and still is as of July 2026. You need a separate tool for that (usually Google Analytics plus your Stripe dashboard plus a spreadsheet), and the connections between them are always manual and always stale."
+      "text": "Hotjar is a behavior analytics tool. It answers questions like: where do people click, where do they drop off in a session, what do they say when you ask them. Those are useful questions. But Hotjar is not a revenue analytics platform. It has no concept of your payment processor, your MRR, or which UTM campaign actually converted; that was true when I used it and their docs still list no payment integration as of July 2026. You need a separate tool for that (usually Google Analytics plus your Stripe dashboard plus a spreadsheet), and the connections between them are always manual and always stale."
     },
     {
       "type": "p",
@@ -111,7 +112,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "Conclick sends a daily digest by email, Slack, Discord, or Telegram. It is not a raw data dump; it surfaces spikes, milestones, and what changed overnight in plain language. Hotjar does not have anything like this as of July 2026. You have to log in and look. That is fine when you remember to. Most founders do not."
+      "text": "Conclick sends a daily digest by email, Slack, Discord, or Telegram. It is not a raw data dump; it surfaces spikes, milestones, and what changed overnight in plain language. Hotjar does not have anything like this, per their docs as of July 2026. You have to log in and look. That is fine when you remember to. Most founders do not."
     },
     {
       "type": "h2",
@@ -198,7 +199,7 @@ const entry: ContentEntry = {
         "feature": "Revenue attribution",
         "conclick": "Full (Stripe, Paddle, Polar, LS, Dodo)",
         "competitor": false,
-        "note": "Hotjar has no payment integration"
+        "note": "Hotjar has no payment integration, per their docs as of July 2026"
       },
       {
         "feature": "Heatmaps & click maps",

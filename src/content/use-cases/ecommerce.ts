@@ -6,8 +6,9 @@ const entry: ContentEntry = {
   "h1": "Analytics for Ecommerce: Know Which Traffic Actually Makes Money",
   "metaTitle": "Analytics for Ecommerce: Revenue-First Insights",
   "metaDescription": "Ecommerce analytics that ties traffic sources to real revenue, surfaces your costliest funnel drop-off, and shows where customers leave. No cookies, 2-min setup.",
+  "primaryKeyword": "analytics for ecommerce",
   "tldr": "Ecommerce stores need analytics that ties every visitor to a payment, not just pageviews. Generic tools show traffic and bounce rate but can't tell you which ad campaign or blog post actually produced orders. Conclick connects your payment processor (Stripe, Paddle, Dodo, Lemon Squeezy, Polar) to traffic sources so you know which channels earn revenue, not just clicks.",
-  "intro": "I built Conclick because I was tired of looking at a dashboard full of sessions and bounce rates that told me nothing about whether my business was growing. Pageviews don't pay salaries. For ecommerce especially, you need to know which traffic converts to money, and where the people who never bought actually dropped off. That's what this page is about.",
+  "intro": "A dashboard full of sessions and bounce rates told me nothing about whether the business was actually growing, and after a year of squinting at it I built something that would. Pageviews don't pay salaries. For ecommerce especially, you need to know which traffic converts to money, and where the people who never bought actually dropped off. That's what this page is about.",
   "sections": [
     {
       "type": "h2",

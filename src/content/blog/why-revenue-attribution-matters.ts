@@ -6,6 +6,7 @@ const entry: ContentEntry = {
   "h1": "Why Revenue Attribution Belongs at the Center of Your Analytics",
   "metaTitle": "Revenue Attribution Is Your Most Valuable Metric",
   "metaDescription": "Most analytics tools tell you who visited. Revenue attribution tells you who paid. Here's why that distinction is the difference between growing and guessing.",
+  "primaryKeyword": "why revenue attribution matters",
   "tldr": "Pageviews and sessions are vanity metrics dressed up as strategy. The only number that actually tells you whether your marketing is working is revenue per source, and most founders are flying blind because their analytics tool stops before the checkout. Fix that, and everything downstream gets sharper.",
   "intro": "I spent eight months obsessing over our traffic numbers. Organic was up 40%. Newsletter clicks were solid. A couple of blog posts were pulling in thousands of visits a month. I felt like I was building something real. Then I looked at where our paying customers were actually coming from, and I wanted to delete every dashboard I'd ever made. Three channels accounted for 90% of our revenue. None of them were the ones I'd been pouring time into.",
   "sections": [

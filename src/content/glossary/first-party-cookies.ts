@@ -6,6 +6,7 @@ const entry: ContentEntry = {
   "h1": "First-Party Cookies: What They Are and Why They Matter for Web Analytics",
   "metaTitle": "First-Party Cookies Explained: Web Analytics Guide",
   "metaDescription": "First-party cookies are set by your own domain and are the backbone of accurate web analytics. Learn what they track, why they survive, and how to use them.",
+  "primaryKeyword": "what are first-party cookies",
   "tldr": "A first-party cookie is a small text file that your own website sets on a visitor's browser, not a third party like an ad network. Because it comes from the domain the user is visiting, browsers treat it as legitimate, and it survives the privacy restrictions that killed third-party tracking. In analytics, it is how you recognize returning visitors and measure attribution.",
   "intro": "Every time someone tells you \"cookies are dead,\" they mean third-party cookies. First-party cookies are a different thing entirely: they are set by your domain, read by your domain, and browsers have no plans to kill them. If you are trying to understand your traffic and measure what actually converts, first-party cookies are still the most reliable tool most analytics stacks have.",
   "sections": [

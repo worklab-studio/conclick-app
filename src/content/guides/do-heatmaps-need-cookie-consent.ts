@@ -6,6 +6,7 @@ const entry: ContentEntry = {
   "h1": "Do Heatmaps Need Cookie Consent? What Each Tool Actually Sets",
   "metaTitle": "Do Heatmaps Need Cookie Consent? A Per-Tool Answer",
   "metaDescription": "Most heatmap tools set cookies and need consent in the EU and UK. Here is what each one stores, and why a consent-gated heatmap is biased, not just smaller.",
+  "primaryKeyword": "do heatmaps need cookie consent",
   "tldr": "It depends on what the tool stores, not what its marketing says. Hotjar and Microsoft Clarity set cookies and need consent in the EEA, UK and Switzerland, which Microsoft has enforced since 31 October 2025. Aggregate heatmaps are a lighter case than session replay. And the real cost is not legal: a heatmap that fires only after someone accepts a banner shows you accept-clickers, not visitors.",
   "intro": "I spent a while trying to get a straight answer to this question and could not find one, so I went and checked the cookie tables myself. Almost every article about privacy-friendly heatmaps lists tools and repeats each vendor's own compliance claim. Nobody looks at what the script actually stores in the browser. That is the only thing that decides whether you need a banner, so this page starts there and stays specific.",
   "sections": [

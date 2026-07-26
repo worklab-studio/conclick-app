@@ -6,6 +6,7 @@ const entry: ContentEntry = {
   "h1": "The Honest Truth About Marketing Attribution for Small Business",
   "metaTitle": "Marketing Attribution for Small Business Is Guessing",
   "metaDescription": "Marketing attribution for small business is mostly guessing. Here is how to guess well with first-touch, last-touch, self-reported sources, and real revenue.",
+  "primaryKeyword": "marketing attribution for small business",
   "tldr": "Marketing attribution for small business is mostly educated guessing, and tools that promise certainty sell you a decimal point on a coin flip. Perfect credit is impossible: dark social, direct traffic, and multi-touch journeys erase the trail. Be usefully approximate, not falsely precise, and tie payments to source so the revenue is real.",
   "intro": "Every founder I know wants a dashboard that says this dollar came from that tweet. I wanted it too. After a few years of staring at real numbers, I will say the quiet part out loud: marketing attribution for small business is mostly guessing, and the tools that promise otherwise are selling you a decimal point on a coin flip. The skill worth building is not perfect tracking. It is guessing honestly, and knowing which of your guesses to trust.",
   "sections": [
@@ -115,8 +116,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "quote",
-      "text": "Attribution is not a truth machine. It is a compass. Stop demanding GPS coordinates from a compass and it starts being useful.",
-      "cite": "Deepak, founder of Conclick"
+      "text": "Attribution is not a truth machine. It is a compass. Stop demanding GPS coordinates from a compass and it starts being useful."
     },
     {
       "type": "p",

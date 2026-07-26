@@ -6,6 +6,7 @@ const entry: ContentEntry = {
   "h1": "Bounce Rate: What It Actually Means and When to Care",
   "metaTitle": "Bounce Rate Explained: Definition, Benchmarks & What to Do",
   "metaDescription": "Bounce rate measures the share of sessions where visitors leave without interacting further. Here's what it actually tells you, and what it doesn't.",
+  "primaryKeyword": "what is bounce rate",
   "tldr": "Bounce rate is the percentage of sessions where a visitor lands on a page and leaves without triggering any further interaction: no click, no scroll event (depending on your tool), no second page. A high number is not inherently bad; it depends entirely on what the page is supposed to do.",
   "intro": "Most founders obsess over bounce rate the moment they install analytics. Then they spend weeks trying to lower a number that may not mean what they think. The metric is genuinely useful, but only when you understand exactly what your tool is measuring and what your page is actually for.",
   "sections": [

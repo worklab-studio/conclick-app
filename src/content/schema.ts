@@ -108,6 +108,17 @@ export interface ContentEntry {
   /** Display category for the blog index filter row, e.g. "Analytics". */
   category?: string;
 
+  /**
+   * The one query this page is written to win, e.g. "ga4 alternative".
+   *
+   * MEASUREMENT METADATA — it renders nowhere. It exists so a Search Console
+   * join has something to join ON: without a declared target, "is this page
+   * working?" can only be answered by eyeballing whatever queries happen to land
+   * on it, which flatters every page that ranks for something incidental. One
+   * keyword per page, lowercase, exactly as a human would type it.
+   */
+  primaryKeyword?: string;
+
   /** 2-5 lowercase tags for the TOPICS pill cloud, e.g. ["ga4", "privacy"]. */
   topics?: string[];
 

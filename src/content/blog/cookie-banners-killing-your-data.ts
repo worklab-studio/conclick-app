@@ -6,6 +6,7 @@ const entry: ContentEntry = {
   "h1": "Cookie Banners Are Quietly Destroying Your Analytics Data",
   "metaTitle": "Cookie Banners Are Killing Your Analytics Data",
   "metaDescription": "Cookie consent banners block 40 to 60% of your visitors from ever being tracked. Here's what that does to your data and what to do about it.",
+  "primaryKeyword": "cookie banner data loss",
   "tldr": "Cookie consent banners are not just a legal inconvenience; they are actively corrupting your analytics. When 40 to 60 percent of visitors decline or ignore consent prompts, your conversion rates look wrong, your funnel data is fiction, and your ad spend decisions are based on a partial picture. Most founders have no idea how bad the damage already is.",
   "intro": "You built a product. You put up Google Analytics. You installed a cookie consent banner because your lawyer (or a blog post) told you to. And now you think you know how your site is performing. You don't. You're flying with instruments that only work for half the passengers. The banner you added to stay compliant is quietly making your most important business decisions (where to invest, what's converting, which campaigns are actually paying off) significantly dumber.",
   "sections": [

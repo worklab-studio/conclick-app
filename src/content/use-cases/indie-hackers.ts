@@ -6,8 +6,9 @@ const entry: ContentEntry = {
   "h1": "Analytics for Indie Hackers: What Actually Matters (and What Doesn't)",
   "metaTitle": "Analytics for Indie Hackers: What Actually Matters",
   "metaDescription": "Indie hackers don't need more pageview dashboards. They need to know which traffic converts to revenue. Here's the analytics setup that actually helps you grow.",
+  "primaryKeyword": "analytics for indie hackers",
   "tldr": "Indie hackers need analytics that answer one question: which traffic is making me money? Generic tools like GA4 drown you in pageviews and sessions. What you actually need is revenue attribution tied to your payment processor, funnel drop-off visibility, and enough behavioral data to fix the leaks, without burning hours on setup or worrying about GDPR consent banners.",
-  "intro": "I built Conclick because I kept running into the same wall: a Stripe dashboard showing revenue, a Google Analytics tab showing traffic, and no clean way to connect the two. Every bootstrap founder I talked to had the same problem. You're not running a media company optimizing for time-on-site. You're building something people pay for, and you need to know why they do or don't.",
+  "intro": "The wall I kept hitting was two browser tabs: a Stripe dashboard showing revenue, a Google Analytics tab showing traffic, and no clean way to connect the two. Every bootstrap founder I talked to had the same problem. You're not running a media company optimizing for time-on-site. You're building something people pay for, and you need to know why they do or don't.",
   "sections": [
     {
       "type": "h2",
@@ -178,7 +179,7 @@ const entry: ContentEntry = {
     },
     {
       "question": "How is Conclick different from Google Analytics for a small SaaS?",
-      "answer": "GA4 tracks visits and events but, as of July 2026, has no native concept of your payment processor. Conclick connects directly to Stripe, Paddle, Polar, Lemon Squeezy, or Dodo so every payment is attributed to its source traffic and funnel step. GA4 is also significantly more complex to configure and interpret. For a solo founder, the setup overhead for GA4 is high enough that most people stop using it after a few weeks. Conclick also doesn't require cookies or a consent banner, which means your European traffic isn't excluded from the count."
+      "answer": "GA4 tracks visits and events but, per their docs as of July 2026, has no native concept of your payment processor. Conclick connects directly to Stripe, Paddle, Polar, Lemon Squeezy, or Dodo so every payment is attributed to its source traffic and funnel step. GA4 is also significantly more complex to configure and interpret. For a solo founder, the setup overhead for GA4 is high enough that most people stop using it after a few weeks. Conclick also doesn't require cookies or a consent banner, which means your European traffic isn't excluded from the count."
     },
     {
       "question": "What does \"cookieless\" mean in practice? Does it affect data accuracy?",

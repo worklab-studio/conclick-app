@@ -6,8 +6,9 @@ const entry: ContentEntry = {
   "h1": "Conclick vs Pirsch: Which Analytics Tool Actually Shows You the Money?",
   "metaTitle": "Conclick vs Pirsch: Analytics That Shows Revenue",
   "metaDescription": "Pirsch is clean and privacy-first. Conclick adds revenue attribution, heatmaps, and funnels. Here's an honest breakdown of when each tool wins.",
+  "primaryKeyword": "conclick vs pirsch",
   "tldr": "Pirsch is a solid, privacy-first analytics tool that does pageviews and basic traffic well. Conclick does all of that and adds revenue attribution, real-screenshot heatmaps, and auto-detected funnels, which makes it the better choice if you need to know which traffic actually converts to money. If you just need clean traffic stats without the revenue layer, Pirsch is genuinely fine.",
-  "intro": "I built Conclick because pageview counts stopped meaning anything to me. I had traffic. I had signups. I had no idea which campaign actually made me money last Tuesday, and I had zero clue where in the funnel I was hemorrhaging it. Pirsch is a tool I respect: it is honest, fast, and private. But it answers a different question than the one that keeps founders up at night.",
+  "intro": "Pageview counts stopped meaning anything to me somewhere in year two. I had traffic. I had signups. I had no idea which campaign actually made me money last Tuesday, and I had zero clue where in the funnel I was hemorrhaging it, so I built the thing that answers both. Pirsch is a tool I respect: it is honest, fast, and private. But it answers a different question than the one that keeps founders up at night.",
   "sections": [
     {
       "type": "h2",
@@ -67,7 +68,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "Pirsch has no heatmaps as of July 2026. Conclick uses real-page screenshots as the base layer, not a wireframe approximation. You see clicks, scroll depth, rage clicks, and dead clicks overlaid on how your page actually looks. Rage clicks tell you where users are frustrated. Dead clicks tell you what they think is clickable but isn't. Scroll depth tells you whether anyone reads below the fold."
+      "text": "Pirsch has no heatmaps, per their docs as of July 2026. Conclick uses real-page screenshots as the base layer, not a wireframe approximation. You see clicks, scroll depth, rage clicks, and dead clicks overlaid on how your page actually looks. Rage clicks tell you where users are frustrated. Dead clicks tell you what they think is clickable but isn't. Scroll depth tells you whether anyone reads below the fold."
     },
     {
       "type": "p",
@@ -97,7 +98,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "Conclick sends a daily digest by email and to Slack, Discord, or Telegram. It is written in plain language: spikes, milestones, the biggest mover. It is the kind of update you'd read over coffee without opening a dashboard. Pirsch does not offer an equivalent digest as of July 2026."
+      "text": "Conclick sends a daily digest by email and to Slack, Discord, or Telegram. It is written in plain language: spikes, milestones, the biggest mover. It is the kind of update you'd read over coffee without opening a dashboard. Pirsch does not offer an equivalent digest, per their docs as of July 2026."
     },
     {
       "type": "h2",

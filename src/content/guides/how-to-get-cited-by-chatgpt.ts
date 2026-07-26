@@ -6,6 +6,7 @@ const entry: ContentEntry = {
   "h1": "How to Get Cited by ChatGPT: What Actually Moves the Needle",
   "metaTitle": "How to Get Cited by ChatGPT: A Founder's Playbook",
   "metaDescription": "Get cited by ChatGPT: rank in Bing's index, let OAI-SearchBot crawl you, and answer the question up top. First-hand field notes from a founder.",
+  "primaryKeyword": "how to get cited by chatgpt",
   "tldr": "To get cited by ChatGPT, get your pages into Bing's index (ChatGPT search leans heavily on Bing), let OpenAI's OAI-SearchBot crawl you, and answer the question in the first two sentences of every page. llms.txt is cheap to ship and Anthropic and Perplexity read it, but Google ignores it and it shows no proven citation lift yet. Then watch your referrers for chatgpt.com.",
   "intro": "I shipped an llms.txt file, an IndexNow feed, and an explicit AI-crawler policy on Conclick's own site, then watched the analytics to see what actually happened. Some of it worked, some of it was folklore, and the reasons were not the ones most posts repeat. So this is the first-hand version rather than the theory: what I did, what showed up in our referrer data, and what I would skip if I were starting over with 500 visitors a month and no time to burn. I build analytics for a living, so measuring the result was the one part I could not fake.",
   "sections": [

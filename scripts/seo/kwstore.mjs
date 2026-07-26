@@ -19,6 +19,7 @@
 //   node scripts/seo/kwstore.mjs prioritize "<keyword>"
 //   node scripts/seo/kwstore.mjs stats
 //   node scripts/seo/kwstore.mjs rebuild
+//   node scripts/seo/kwstore.mjs reconcile
 
 import fs from 'node:fs';
 import path from 'node:path';
@@ -387,10 +388,63 @@ const BUCKETS = {
 };
 
 /**
+ * Every cluster a live page already serves, plus every cluster that CONTAINS
+ * one.
+ *
+ * `cluster` is a sorted token signature, so equality only ever catches an exact
+ * rephrasing. "hotjar pricing plans" signs as hotjar+plans+pricing, which is not
+ * equal to the already-covered hotjar+pricing, so the row kept being offered
+ * even though the page answering it is live — 113 queued rows were strict
+ * supersets of a covered cluster by that test. Containment is the honest
+ * relation: if everything the covered page is about is also in this keyword,
+ * the keyword is that page plus a modifier, not a second page.
+ *
+ * Computed in JS, not SQL: a token-set subset test over a delimiter-joined
+ * signature has no honest SQL expression, and the whole table is ~550 rows.
+ */
+export function blockedClusters(db) {
+  // gates.clusterOf joins with '+', the fallback with '-', and the empty-token
+  // fallback returns the raw phrase with spaces. Split on all three.
+  const toks = c => String(c || '').split(/[+\-\s]+/).filter(Boolean);
+
+  const done = db
+    .prepare(
+      `SELECT DISTINCT cluster FROM keywords
+       WHERE status IN (${DONE.map(() => '?').join(',')}) AND cluster <> ''`
+    )
+    .all(...DONE)
+    .map(r => r.cluster);
+
+  const exact = new Set(done);
+  // Containment only applies from TWO tokens up. A one-token cluster is a topic,
+  // not a page: /glossary/heatmap signs as {heatmap}, and letting that contain
+  // its way outward would retire every heatmap keyword in the backlog on the
+  // strength of one definition page. Single-token clusters still block their own
+  // exact rephrasings, which is all they ever legitimately covered.
+  const multi = done.map(toks).filter(t => t.length >= 2);
+
+  const open = db
+    .prepare(`SELECT DISTINCT cluster FROM keywords WHERE status = 'discovered' AND cluster <> ''`)
+    .all()
+    .map(r => r.cluster);
+
+  const blocked = [];
+  for (const c of open) {
+    if (exact.has(c)) {
+      blocked.push(c);
+      continue;
+    }
+    const have = new Set(toks(c));
+    if (multi.some(d => d.every(t => have.has(t)))) blocked.push(c);
+  }
+  return blocked;
+}
+
+/**
  * Next keywords to write. status='discovered' only, one row per cluster, and any
- * cluster already served by a published/covered page is excluded outright.
- * `refresh` is the documented exception: it returns already-published rows,
- * oldest first, for a content refresh pass.
+ * cluster already served by a published/covered page — or containing one — is
+ * excluded outright. `refresh` is the documented exception: it returns
+ * already-published rows, oldest first, for a content refresh pass.
  */
 export function pickNext(db, { bucket = 'money', n = 2 } = {}) {
   const limit = Math.max(1, Number(n) || 1);
@@ -409,6 +463,15 @@ export function pickNext(db, { bucket = 'money', n = 2 } = {}) {
   const b = BUCKETS[bucket];
   if (!b) throw new Error(`pickNext: unknown bucket "${bucket}" (expected ${Object.keys(BUCKETS).join('|')}|refresh)`);
 
+  // Materialized into a temp table rather than bound into a NOT IN list: the
+  // blocked set runs to a few hundred clusters and would collide with SQLite's
+  // bound-parameter ceiling. TEMP is per-connection, so this never touches the
+  // committed DB file.
+  db.exec('CREATE TEMP TABLE IF NOT EXISTS blocked_cluster (cluster TEXT PRIMARY KEY)');
+  db.exec('DELETE FROM blocked_cluster');
+  const ins = db.prepare('INSERT OR IGNORE INTO blocked_cluster (cluster) VALUES (?)');
+  for (const c of blockedClusters(db)) ins.run(c);
+
   return db
     .prepare(
       `WITH cand AS (
@@ -417,17 +480,13 @@ export function pickNext(db, { bucket = 'money', n = 2 } = {}) {
          FROM keywords k
          WHERE status = 'discovered'
            AND (${b.where})
-           AND NOT EXISTS (
-                 SELECT 1 FROM keywords d
-                 WHERE d.cluster = k.cluster
-                   AND d.status IN (${DONE.map(() => '?').join(',')})
-               )
+           AND NOT EXISTS (SELECT 1 FROM blocked_cluster x WHERE x.cluster = k.cluster)
        )
        SELECT ${SEL} FROM cand WHERE rn = 1
        ORDER BY ${b.order}
        LIMIT ?`
     )
-    .all(...DONE, limit);
+    .all(limit);
 }
 
 const WHERE_COLS = ['status', 'cluster', 'content_type', 'format', 'intent', 'source', 'seed', 'slug'];
@@ -501,9 +560,12 @@ export function stats(db) {
  * so a git diff shows exactly what changed about which keyword.
  */
 export function exportState(db, file = STATE_PATH) {
+  // `reason` has to be SELECTed to be exported. It used to select `notes`
+  // instead and read `r.reason` off the row, so every skip/covered reason was
+  // silently dropped on the way to git — the one field the diff exists to show.
   const rows = db
     .prepare(
-      `SELECT keyword, status, slug, notes, published_at
+      `SELECT keyword, status, slug, reason, published_at
        FROM keywords
        WHERE status <> 'discovered'
        ORDER BY keyword ASC`
@@ -550,6 +612,63 @@ export function recluster(db) {
   return moved;
 }
 
+/**
+ * Upsert a `covered` row for every page that exists on disk.
+ *
+ * The backlog only learns a page exists when a routine remembers to call
+ * `published`. Anything written before the backlog existed, by a human, or by a
+ * run that died between write.mjs and the RECORD step is invisible to it — 36 of
+ * the 68 live pages were in exactly that state, which left pickNext free to
+ * offer keywords the site already answers. Disk is the only source of truth
+ * about what is published, so this closes the loop from disk.
+ *
+ * The keyword is reconstructed from the slug plus the type, because entries
+ * carry no primaryKeyword field and the slug alone is not the query:
+ * /alternatives/hotjar answers "hotjar alternatives", not the bare head term
+ * "hotjar". Recording the head term would mark a one-word cluster covered and
+ * quietly retire every hotjar keyword in the backlog.
+ *
+ * Rows already published or covered are left untouched — a real `published` row
+ * must never be downgraded to `covered`.
+ */
+const KEYWORD_SHAPE = {
+  comparison: s => `conclick vs ${s}`,
+  alternative: s => `${s} alternatives`,
+  glossary: s => `what is ${s}`,
+  useCase: s => `analytics for ${s}`,
+};
+
+export async function reconcileFromDisk(db) {
+  // Lazy: entry-load pulls in lib.mjs and reads the whole content tree, which
+  // every other kwstore command would pay for and none of them needs.
+  const { loadAll } = await import('./entry-load.mjs');
+  const entries = loadAll();
+
+  // Deliberately keyed on the derived KEYWORD, not on the stored slug. Stored
+  // slugs are inconsistent ("alternatives/hotjar", "vs/clarity", bare
+  // "cookieless-heatmap-tool"), and matching them loosely collapses
+  // /vs/google-analytics into /alternatives/google-analytics — two real pages,
+  // one skipped. A second covered row for a page that already has one is
+  // harmless; a page the backlog never learns about is the bug this fixes.
+  const added = [];
+  let alreadyTracked = 0;
+  withBatch(db, () => {
+    for (const e of entries) {
+      const words = e.slug.replace(/-/g, ' ');
+      const kw = normalize((KEYWORD_SHAPE[e.type] ?? (s => s))(words));
+      const row = getKeyword(db, kw);
+      if (row && DONE.includes(row.status)) {
+        alreadyTracked++;
+        continue;
+      }
+      if (!row) upsertKeyword(db, kw, { content_type: e.type, source: 'reconcile' });
+      setStatus(db, kw, 'covered', e.slug, `live page ${e.path}`);
+      added.push({ key: e.key, keyword: kw, path: e.path, created: !row });
+    }
+  });
+  return { scanned: entries.length, added, alreadyTracked };
+}
+
 /** Replay backlog-state.json into the DB — recovers decisions after a DB wipe. */
 export function importState(db, file = STATE_PATH) {
   if (!fs.existsSync(file)) return { restored: 0, created: 0 };
@@ -562,8 +681,11 @@ export function importState(db, file = STATE_PATH) {
         upsertKeyword(db, kw, { source: 'backlog-state.json' });
         created++;
       }
+      // reason -> the `reason` column. Replaying it into `notes` (which is what
+      // this did) overwrites the harvest evidence JSON score.mjs reads, so a
+      // rebuild used to destroy the demand input for every decided keyword.
       db.prepare(
-        `UPDATE keywords SET status = ?, slug = COALESCE(?, slug), notes = COALESCE(?, notes),
+        `UPDATE keywords SET status = ?, slug = COALESCE(?, slug), reason = COALESCE(?, reason),
            published_at = COALESCE(?, published_at), updated_at = ?
          WHERE keyword = ?`
       ).run(d.status, str(d.slug), str(d.reason), str(d.published_at), nowISO(), normalize(kw));
@@ -670,6 +792,7 @@ const USAGE = `kwstore — keyword backlog
   stats                       counts
   rebuild                     replay backlog-state.json into the DB
   recluster                   recompute clusters after a gates.clusterOf change
+  reconcile                   mark every page on disk as covered (backlog <- reality)
 `;
 
 async function main(argv) {
@@ -728,6 +851,14 @@ async function main(argv) {
         const moved = recluster(db);
         for (const m of moved) console.log(`  "${m.keyword}"  ${m.from} -> ${m.to}`);
         return console.log(`recluster: ${moved.length} cluster(s) changed`);
+      }
+      case 'reconcile': {
+        const r = await reconcileFromDisk(db);
+        for (const a of r.added) console.log(`  covered "${a.keyword}" -> ${a.path}${a.created ? ' (new row)' : ''}`);
+        return console.log(
+          `reconcile: ${r.scanned} live page(s), ${r.alreadyTracked} already tracked, ${r.added.length} marked covered ` +
+            `(${r.added.filter(a => a.created).length} new row(s))`
+        );
       }
       default:
         console.error(`Unknown command "${cmd}"\n\n${USAGE}`);

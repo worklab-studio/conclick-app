@@ -6,6 +6,7 @@ const entry: ContentEntry = {
   "h1": "Revenue Attribution Tools Compared: A Founder's 2026 Buyer's Guide",
   "metaTitle": "Revenue Attribution Tools Compared: 2026 Guide",
   "metaDescription": "I compare the revenue attribution tools worth buying in 2026: DataFast, PostHog, Matomo, Dreamdata, ProfitWell, GA4 and Conclick, sorted by who they fit.",
+  "primaryKeyword": "revenue attribution tools",
   "tldr": "The right revenue attribution tool depends on how many payment processors you run and whether you also need on-page behaviour. I compared the honest 2026 options: DataFast, PostHog, Matomo, Dreamdata, ProfitWell and GA4, plus my own tool Conclick. For a bootstrapped SaaS on Stripe, a payment-first tool beats stitching GA4 to a spreadsheet.",
   "intro": "I have spent two years building one of the tools on this list, and the year before that I tried to reconstruct which channels actually paid me from a GA4 property, a Stripe export, and a spreadsheet that broke every time somebody upgraded mid-cycle. So this comparison is not neutral, and I will not pretend it is. It is my honest read on which tool fits which team, with no affiliate links and no paid placements. Where the right answer for your setup is a competitor, or even a spreadsheet, I say so plainly.",
   "sections": [
@@ -154,8 +155,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "quote",
-      "text": "The best attribution tool is the one whose report you will actually open on a Monday and act on. A flawless model that nobody reads changes nothing.",
-      "cite": "Deepak, founder of Conclick"
+      "text": "The best attribution tool is the one whose report you will actually open on a Monday and act on. A flawless model that nobody reads changes nothing."
     }
   ],
   "faq": [

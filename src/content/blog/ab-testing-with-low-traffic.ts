@@ -6,6 +6,7 @@ const entry: ContentEntry = {
   "h1": "How to A/B Test With Low Traffic Without Fooling Yourself",
   "metaTitle": "How to A/B Test With Low Traffic (Honestly)",
   "metaDescription": "At 500 visitors a month, most A/B tests are noise. Here is the honest math on sample size, why small-site winners vanish, and what to test instead.",
+  "primaryKeyword": "how to a/b test with low traffic",
   "tldr": "At 500 visitors a month you usually cannot run a valid A/B test: the sample-size math needs tens of thousands of visitors per variation to catch the small lifts most tests chase, so detecting a 20 percent lift on a 3 percent rate takes years. Test bigger swings, judge the trend sequentially, and treat qualitative signals as real evidence instead of chasing significance.",
   "intro": "I build analytics for founders, and the most common way I watch a small site waste a quarter is a hopeful A/B test on traffic that could never settle it. You read the enterprise conversion playbooks, you split your homepage into two, you wait, and one day the tool flashes a winner. The trouble is that at your volume that winner is usually a coin flip dressed up as a result. So let me show you the honest math first, then what actually moves the needle when you have a few hundred visitors instead of a few hundred thousand.",
   "sections": [

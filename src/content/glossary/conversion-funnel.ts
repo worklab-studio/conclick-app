@@ -6,6 +6,7 @@ const entry: ContentEntry = {
   "h1": "Conversion Funnel: What It Is and Why Most People Measure It Wrong",
   "metaTitle": "Conversion Funnel: Definition, Stages & How to Fix It",
   "metaDescription": "A conversion funnel is the sequence of steps users take before completing a goal. Learn what it is, how to measure it, and where most teams go wrong.",
+  "primaryKeyword": "what is a conversion funnel",
   "tldr": "A conversion funnel is the ordered sequence of steps a visitor must complete to reach a goal: signing up, purchasing, or upgrading. Most drop-off happens silently at one specific step, and finding that step is the entire job of the analysis. Fix that one step and revenue goes up without acquiring a single new visitor.",
   "intro": "Every visitor who lands on your site either does the thing you want or disappears. The conversion funnel is the map between those two outcomes. It shows you exactly where people fall off, not just that they do. That distinction is worth real money.",
   "sections": [

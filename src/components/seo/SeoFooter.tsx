@@ -52,8 +52,11 @@ export function SeoFooter() {
     {
       title: 'Legal',
       links: [
-        { href: `${site}/privacy`, label: 'Privacy policy' },
-        { href: `${site}/terms`, label: 'Terms of service' },
+        // Full paths, not /privacy and /terms — those 404. Wrong here is worse
+        // than elsewhere: it is the footer, so it repeats on every page, and
+        // these pages make GDPR claims that the policy link is meant to back.
+        { href: `${site}/privacy-policy`, label: 'Privacy policy' },
+        { href: `${site}/terms-of-service`, label: 'Terms of service' },
       ],
     },
   ];

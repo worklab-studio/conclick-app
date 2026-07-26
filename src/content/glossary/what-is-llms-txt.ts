@@ -6,6 +6,7 @@ const entry: ContentEntry = {
   "h1": "What Is llms.txt, Really? A Straight Answer",
   "metaTitle": "What Is llms.txt? The Honest 2026 Definition",
   "metaDescription": "llms.txt is a proposed Markdown file that hands AI models a clean map of your site. Here is what it is, who actually reads it, and whether it helps SEO.",
+  "primaryKeyword": "what is llms.txt",
   "tldr": "llms.txt is a proposed convention: a Markdown file at yoursite.com/llms.txt that lists your key pages so a language model can read a clean version of your site instead of crawling everything. Jeremy Howard proposed it in September 2024. It is real and documented, but as of 2026 no major AI crawler has committed to reading it, and Google says its Search systems do not.",
   "intro": "I keep getting asked whether we should ship one of these files for Conclick, so I read the actual proposal instead of the marketing around it. Here is the honest version. The idea is a small Markdown file, sitting at the root of your site, that hands a language model a curated map of your best pages. The concept is sound. The adoption is not settled, and anyone selling it to you as a ranking trick is running ahead of the evidence.",
   "sections": [

@@ -6,6 +6,7 @@ const entry: ContentEntry = {
   "h1": "Per-Event Analytics Pricing Punishes Startups for Growing",
   "metaTitle": "Analytics Pricing for Startups: Why the Meter Hurts",
   "metaDescription": "Per-event and per-session analytics pricing for startups punishes growth: the bigger your traffic, the scarier the bill. Why flat pricing wins for small teams.",
+  "primaryKeyword": "analytics pricing for startups",
   "tldr": "Per-event and per-session analytics pricing for startups quietly punishes growth: the more traffic you earn, the more you owe, right when a surprise bill hurts most. Worse, a running meter warps behavior, pushing you to under-instrument and dread spikes. For a small team, flat predictable pricing usually beats it.",
   "intro": "I have watched analytics pricing for startups turn a genuinely good week into a small financial panic. A post lands on the front page of a big aggregator, 40,000 people show up, and instead of celebrating I am doing mental math on what those visitors just cost me. That is backwards. The tool that measures your growth should not be the thing that makes you nervous about growing.",
   "sections": [
@@ -171,7 +172,7 @@ const entry: ContentEntry = {
     {
       "href": "/for/indie-hackers",
       "label": "Conclick for indie hackers",
-      "group": "use-case"
+      "group": "useCase"
     }
   ],
   "relatedTools": [],

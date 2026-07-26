@@ -6,6 +6,7 @@ const entry: ContentEntry = {
   "h1": "The four metrics a pre-$10k MRR SaaS should actually watch",
   "metaTitle": "4 Metrics Pre-$10k MRR SaaS Should Track",
   "metaDescription": "Most early SaaS founders track too many metrics and act on none. Here are the four numbers that actually tell you whether your business is working.",
+  "primaryKeyword": "saas metrics to track early stage",
   "tldr": "Before $10k MRR, dashboards full of vanity metrics are a distraction you cannot afford. The four numbers that matter are trial-to-paid conversion rate, time-to-first-value, revenue churn, and the single acquisition channel that is paying for itself. Everything else is noise you optimize after you have real money coming in.",
   "intro": "I talked to a founder last month who had a $1,800 MRR SaaS and could tell me his DAU/MAU ratio, his bounce rate, his average session duration, and the open rate on his onboarding sequence. He could not tell me what percentage of his trials converted to paid. He did not know. That is not a data problem. That is a focus problem, and it is killing more early-stage SaaS companies than competition ever will.",
   "sections": [

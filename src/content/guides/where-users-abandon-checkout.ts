@@ -6,6 +6,7 @@ const entry: ContentEntry = {
   "h1": "How to Find Where Users Abandon Your Checkout",
   "metaTitle": "Find Where Users Abandon Your Checkout (Funnel + Maps)",
   "metaDescription": "Find the exact checkout step users abandon: build the funnel, rank drop-off by lost revenue, then read a click and scroll map to see why they leave.",
+  "primaryKeyword": "how to find where users abandon your checkout",
   "tldr": "Find where users abandon your checkout by turning it into discrete steps, measuring the drop-off between each one, and ranking those drops by the revenue they cost rather than by percentage. Then put a click and scroll map on the single worst step to see why people leave. The funnel tells you which step. The heatmap tells you why.",
   "intro": "I have lost count of the founders who tell me their checkout is broken and then cannot tell me which part. They know the end-to-end number: a thousand people started, forty finished. That number is useless for fixing anything, because it never says where the money left. The good news is that finding the exact leak is a mechanical process, not a talent. You build the funnel, you find the biggest drop, then you point a heatmap at that one step and watch what people actually do. I run this on my own pricing and checkout pages every month.",
   "sections": [

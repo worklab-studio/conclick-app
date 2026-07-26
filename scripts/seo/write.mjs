@@ -20,8 +20,16 @@
 //   "comp": { "name": "Plausible", "url": "https://plausible.io" },   // comparison/alternative only
 //   "title": "…",                    // used by the useCase lead magnet
 //   "keyword": "is ga4 sampling my data",   // the backlog row this satisfies
-//   "draft": { h1, metaTitle, metaDescription, tldr, intro, sections[], faq[], comparisonRows[] }
+//   "draft": { h1, metaTitle, metaDescription, tldr, intro, sections[], faq[], comparisonRows[],
+//              sources[], internalLinks[], heroWord, category, topics[] }
 // }
+//
+// `sources` is [{label, url}] and is 3-6 PRIMARY sources: vendor docs, the
+// vendor's own pricing page, the regulation's own text. Never secondary
+// commentary. It is optional in the schema and was absent from the routine's
+// draft template until 2026-07-26, which is how 46 of 68 live pages ended up
+// with no citation list at all — including every comparison and alternative,
+// the pages whose claims a third party can actually falsify.
 
 import fs from 'node:fs';
 import path from 'node:path';
@@ -76,6 +84,18 @@ for (const k of ['h1', 'metaTitle', 'metaDescription', 'tldr', 'intro']) {
 if (!Array.isArray(rec.draft.sections) || !rec.draft.sections.length) {
   console.error('draft.sections must be a non-empty array.');
   process.exit(1);
+}
+
+// Warn, don't fail: `sources` is optional in the schema and 46 of the 68 live
+// entries predate the template that asks for it, so failing here would break
+// every legitimate re-run of an old draft. But a comparison or alternative with
+// no citation list is a page of falsifiable claims about somebody else's product
+// backed by nothing, and that is worth saying out loud at the moment it is made.
+if (['comparison', 'alternative'].includes(rec.type) && !rec.draft.sources?.length) {
+  console.warn(
+    `WARN   ${rec.type}/${rec.slug} has no draft.sources — this page makes third-party claims. ` +
+      `Add 3-6 PRIMARY sources (their docs, their pricing page, their changelog).`,
+  );
 }
 
 rec.kind = rec.kind || rec.type;

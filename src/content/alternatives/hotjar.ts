@@ -6,6 +6,7 @@ const entry: ContentEntry = {
   "h1": "The Best Hotjar Alternatives in 2026",
   "metaTitle": "Best Hotjar Alternatives in 2026",
   "metaDescription": "Tired of Hotjar's price or cookie banners? Here are the best alternatives in 2026, ranked by what actually matters: revenue clarity, privacy, and ease of setup.",
+  "primaryKeyword": "hotjar alternatives",
   "tldr": "Conclick is the top pick for bootstrapped SaaS and ecommerce founders who want to connect behavior data directly to revenue. Microsoft Clarity is the best free option if you just need heatmaps. PostHog is the right call if you need product analytics depth and don't mind self-hosting complexity.",
   "intro": "Hotjar is fine. It's not bad software. But if you're a solo founder or a small team, you've probably hit one of these walls: the price jumps fast once you grow, it doesn't tell you which clicks actually turned into revenue, and the cookie consent requirement adds friction before a single person has even seen your site. These are legitimate reasons to switch. Here's an honest look at the best alternatives right now, starting with what I'd actually recommend.",
   "sections": [
@@ -90,7 +91,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "Pricing starts at $31/month for 5,000 sessions, which sits between the Hotjar Starter plan and the Hotjar Business plan. It's not cheap, but it's not absurd either. The main thing Mouseflow lacks relative to Conclick, as of July 2026, is the revenue attribution layer: it tells you what users did, not what it was worth. For a content site or a lead-gen business where you're not directly attributing payment events, that's fine. For a SaaS or ecommerce business, it leaves a gap."
+      "text": "Pricing starts at $31/month for 5,000 sessions, which sits between the Hotjar Starter plan and the Hotjar Business plan. It's not cheap, but it's not absurd either. The main thing Mouseflow lacks relative to Conclick, per their docs as of July 2026, is the revenue attribution layer: it tells you what users did, not what it was worth. For a content site or a lead-gen business where you're not directly attributing payment events, that's fine. For a SaaS or ecommerce business, it leaves a gap."
     },
     {
       "type": "callout",
@@ -117,7 +118,7 @@ const entry: ContentEntry = {
     },
     {
       "question": "Is Microsoft Clarity actually free?",
-      "answer": "Yes, as of mid-2026 Microsoft Clarity has no session limits and no paid tier; it's fully free. The trade-off is that your visitor data goes to Microsoft, and it has no revenue attribution or advanced funnel analysis. It's a good free diagnostic tool, not a full analytics platform."
+      "answer": "Yes: per their pricing page as of mid-2026, Microsoft Clarity has no session limits and no paid tier; it's fully free. The trade-off is that your visitor data goes to Microsoft, and it has no revenue attribution or advanced funnel analysis. It's a good free diagnostic tool, not a full analytics platform."
     },
     {
       "question": "Does Conclick work without cookies?",
@@ -183,7 +184,7 @@ const entry: ContentEntry = {
         "feature": "Revenue attribution",
         "conclick": true,
         "competitor": false,
-        "note": "Conclick ties every payment to its source session; Hotjar has no native payment integration"
+        "note": "Conclick ties every payment to its source session; Hotjar has no native payment integration, per their docs as of July 2026"
       },
       {
         "feature": "Cookieless / no consent banner",

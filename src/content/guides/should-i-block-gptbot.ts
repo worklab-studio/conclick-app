@@ -6,8 +6,9 @@ const entry: ContentEntry = {
   "h1": "Should I Block GPTBot? The Real Decision Behind the Robots.txt Line",
   "metaTitle": "Should I Block GPTBot? Training vs Retrieval Crawlers",
   "metaDescription": "Blocking GPTBot only opts you out of OpenAI model training. It does not remove you from ChatGPT search, which uses a separate crawler. Here is the real call.",
-  "tldr": "For most sites, no. Blocking GPTBot only tells OpenAI not to train on your pages. It does not remove you from ChatGPT search, which runs on a separate crawler, OAI-SearchBot. The real split is training crawlers, which give nothing back, versus retrieval crawlers, which send citations and clicks. Block training if you want. Keep retrieval open.",
-  "intro": "I block GPTBot on my own sites, and I still show up in ChatGPT. That surprises people, so let me explain the mechanism instead of the marketing. The question hides two very different decisions inside one robots.txt line, and once you separate them the answer gets easy. Most of the panic about AI crawlers comes from treating them as one thing. They are not.",
+  "primaryKeyword": "should i block gptbot",
+  "tldr": "For most sites, no. Blocking GPTBot only tells OpenAI not to train on your pages. It does not remove you from ChatGPT search, which uses a separate crawler, OAI-SearchBot. The real split: training crawlers give nothing back, retrieval crawlers send citations and clicks. Block training if you want, or declare that preference with Content-Signal. Keep retrieval open either way.",
+  "intro": "I allow GPTBot on my own site, and I still tell OpenAI not to train on it. That sounds like a contradiction, so let me explain the mechanism instead of the marketing. The question hides two very different decisions inside one robots.txt line, and once you separate them the answer gets easy. Most of the panic about AI crawlers comes from treating them as one thing. They are not.",
   "sections": [
     {
       "type": "h2",
@@ -89,11 +90,15 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "I run Conclick, so here is exactly what I do rather than a generic recommendation. My robots.txt allows the retrieval crawlers: OAI-SearchBot, PerplexityBot, Claude-SearchBot, and the user-triggered fetchers. It disallows the training crawlers: GPTBot, CCBot, ClaudeBot, and Google-Extended. Retrieval open, training closed."
+      "text": "I run Conclick, so here is exactly what conclick.io serves rather than a generic recommendation. Every crawler in this article is allowed, GPTBot and ClaudeBot included. Nine of them (the OpenAI, Anthropic, Perplexity and Google agents) get their own named groups instead of leaning on the wildcard, because those are the ones that stop inheriting the User-agent: * rules the moment any named group exists. CCBot is not one of them, so it reads the wildcard group, which allows it too. The only Disallow in the file is on /api. Then a single extra line does the job a block would have done: Content-Signal: search=yes, ai-input=yes, ai-train=no, use=reference."
     },
     {
       "type": "p",
-      "text": "That is a values call, not a growth hack. I would rather my writing help answer a real question and send me the reader than sit silently inside a training corpus I get nothing back from. If your view on training is different, flip those lines without guilt. The retrieval lines are the ones I would never touch, because those are the ones that show up in the numbers."
+      "text": "That is deliberate, not an oversight. I could put a Disallow under GPTBot and be finished in one line. I do not, for two reasons. A Disallow says do not fetch, when the thing I actually mean is fetch me, quote me, do not train on me, and the bot names blur enough at the edges that broad blocks have a habit of taking retrieval down with them. Content-Signal states that exact preference in a form a machine can read without touching access at all. The tradeoff worth naming: a Disallow is a rule a crawler obeys, while a content signal is a preference a crawler chooses to respect. I accept the weaker guarantee to keep the stronger signal."
+    },
+    {
+      "type": "p",
+      "text": "It is still a values call, not a growth hack. I would rather my writing help answer a real question and send me the reader than sit silently inside a training corpus I get nothing back from. If you want the harder version of that preference, add the Disallow under GPTBot; it is honoured, and it costs you nothing you can measure. The retrieval lines are the ones I would never touch, because those are the ones that show up in the numbers."
     },
     {
       "type": "h2",
@@ -184,7 +189,7 @@ const entry: ContentEntry = {
     {
       "href": "/for/indie-hackers",
       "label": "Analytics for indie hackers",
-      "group": "for"
+      "group": "useCase"
     }
   ],
   "relatedTools": [

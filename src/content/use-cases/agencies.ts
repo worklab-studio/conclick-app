@@ -6,6 +6,7 @@ const entry: ContentEntry = {
   "h1": "Analytics for Agencies: What Client Work Actually Demands",
   "metaTitle": "Analytics for Agencies: Prove Client ROI, Not Pageviews",
   "metaDescription": "Agencies need to show clients which traffic made money, where the funnel breaks, and why. Here's how Conclick's revenue attribution and heatmaps do that.",
+  "primaryKeyword": "analytics for agencies",
   "tldr": "Agencies need to prove that their work generated revenue, not just traffic. Conclick connects client payments directly to campaigns, funnels, and pages, so you can show up to a review meeting with a number, not a chart. It installs in about two minutes per client site, generally needs no consent banner (jurisdiction-dependent), and starts at $9/month.",
   "intro": "I built Conclick for founders who were tired of explaining to themselves why traffic was up but revenue wasn't. Turns out agencies have the same problem, just with an audience: a client sitting across the table who wants to know what they actually got for the retainer. Pageviews don't answer that question. Revenue attribution does.",
   "sections": [

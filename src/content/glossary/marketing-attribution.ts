@@ -6,6 +6,7 @@ const entry: ContentEntry = {
   "h1": "Marketing Attribution: What It Is and Why It Actually Matters",
   "metaTitle": "Marketing Attribution Explained: Models, Mistakes & Metrics",
   "metaDescription": "Marketing attribution tells you which channels and touchpoints actually caused a sale. How it works, where teams go wrong, and how to do it right.",
+  "primaryKeyword": "what is marketing attribution",
   "tldr": "Marketing attribution is the practice of assigning credit for a conversion (a sale, signup, or lead) to the specific marketing touchpoints that influenced it. Get it right and you stop guessing which spend earns its keep; get it wrong and you fund the wrong channels while the real winners starve.",
   "intro": "Most analytics dashboards will tell you how many people visited your site. Very few will tell you which of those visitors paid you money, and why. That gap is exactly what marketing attribution is supposed to close. It is the discipline of connecting revenue outcomes back to the campaigns, channels, and moments that caused them.",
   "sections": [
@@ -137,7 +138,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "I built Conclick specifically because I kept staring at analytics dashboards full of traffic numbers that could not tell me which channels made money. The tool connects directly to Stripe, Paddle, Polar, Lemon Squeezy, or Dodo and ties every payment back to the source, UTM campaign, and funnel step that preceded it. So instead of 'SEO drove 400 visits,' you see 'SEO drove $1,840 in MRR from 12 customers this month.' That is the number that actually informs a decision."
+      "text": "Conclick exists for exactly this problem: dashboards full of traffic numbers that could never tell me which channels made money. The tool connects directly to Stripe, Paddle, Polar, Lemon Squeezy, or Dodo and ties every payment back to the source, UTM campaign, and funnel step that preceded it. So instead of 'SEO drove 400 visits,' you see 'SEO drove $1,840 in MRR from 12 customers this month.' That is the number that actually informs a decision."
     },
     {
       "type": "p",

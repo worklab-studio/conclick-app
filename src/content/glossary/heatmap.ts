@@ -6,6 +6,7 @@ const entry: ContentEntry = {
   "h1": "Website Heatmap: What It Is and How to Use It to Grow",
   "metaTitle": "Website Heatmap: Definition, Types & How to Use One",
   "metaDescription": "A website heatmap shows where visitors click, scroll, and stop, visualized as color gradients. Learn what the data means and how to act on it.",
+  "primaryKeyword": "what is a heatmap",
   "tldr": "A website heatmap is a visual overlay on your actual web page that aggregates visitor behavior (clicks, scroll depth, mouse movement) into color-coded zones, where hot colors (red, orange) show high activity and cool colors (blue, green) show low activity. It turns anonymous traffic into a spatial picture of what people actually do on a page, not just whether they converted.",
   "intro": "Most analytics tell you a page has a 70% bounce rate. A heatmap tells you why: nobody scrolled past the hero image, and the button they kept clicking wasn't even a link. That's the difference between a number and a diagnosis. If you're trying to improve a landing page, a pricing page, or a checkout flow, a heatmap is one of the fastest ways to find the problem without running a user study.",
   "sections": [
