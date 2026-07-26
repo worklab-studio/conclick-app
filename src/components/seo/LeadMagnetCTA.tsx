@@ -2,24 +2,21 @@
 
 import { useState } from 'react';
 import type { LeadMagnet } from '@/content/schema';
+import { registerUrl } from '@/lib/signup';
 
-function cleanDomain(raw: string): string | null {
-  let v = (raw || '').trim().toLowerCase().replace(/^https?:\/\//, '').replace(/^www\./, '');
-  v = v.split('/')[0].split('?')[0].split('#')[0];
-  return /^([a-z0-9-]+\.)+[a-z]{2,}$/.test(v) ? v : null;
-}
-
-const SITE = process.env.NEXT_PUBLIC_SITE_URL || 'https://conclick.io';
-
-// The embedded "Add My Website" lead magnet — mirrors the hero/AuthShell flow and
-// sends the visitor to conclick.io/register?site=<domain> (the register page
-// already personalizes from ?site=).
+// The embedded "Add My Website" lead magnet — mirrors the hero flow and sends
+// the visitor to the register page, which personalises from ?site=.
+//
+// The domain parser and URL builder now come from @/lib/signup. They used to be
+// copy-pasted here and in HeroWebsiteInput, and BOTH copies pointed at
+// NEXT_PUBLIC_SITE_URL (conclick.io) instead of the app host — so this CTA, at
+// the foot of all 68 article pages, navigated to a 404. Verified live and fixed
+// 2026-07-26.
 export function LeadMagnetCTA({ leadMagnet }: { leadMagnet: LeadMagnet }) {
   const [value, setValue] = useState('');
 
   function go() {
-    const d = cleanDomain(value);
-    window.location.href = d ? `${SITE}/register?site=${encodeURIComponent(d)}` : `${SITE}/register`;
+    window.location.href = registerUrl(value);
   }
 
   return (
