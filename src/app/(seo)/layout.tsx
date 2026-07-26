@@ -10,19 +10,24 @@ import { SeoNav } from '@/components/seo/SeoNav';
 import { SeoFooter } from '@/components/seo/SeoFooter';
 import { siteUrl } from '@/lib/seo';
 
-// Conclick tracks itself. This layout wraps ONLY the public SEO routes (/blogs,
-// /vs, /guides, /glossary, /for, /tools, /alternatives), so the tracker lands on
-// exactly those and never on the signed-in dashboard. The Framer homepage
-// already loads this same snippet; the Next-served SEO pages did not, which is
-// why conclick.io showed visitors but /blogs and the rest did not.
-//
-// The website id is the SAME one embedded on the homepage and is public by
-// nature (it sits in that page's HTML). Kept byte-identical to the homepage
-// snippet (no data-domains): the tracker reads its config from its own script
-// element via document.currentScript, so it must be a browser-PARSED script,
-// exactly like this one in the served HTML.
+// Conclick tracks its own public SEO surface. Delivered as an INLINE loader
+// (the same dangerouslySetInnerHTML pattern the root layout uses for its theme
+// script), NOT a <script src> or next/script:
+//   - A raw <script src> is hoisted/managed by React 19 and the instance that
+//     runs has document.currentScript === null, which this tracker reads its
+//     config from (if(!currentScript)return), so it silently no-ops.
+//   - next/script beforeInteractive is honoured only in the ROOT layout, and
+//     afterInteractive is client-injected (not in <head>).
+// An inline script is rendered verbatim and parser-executed; it appends the
+// tracker via createElement, and for that classic external script
+// document.currentScript IS the appended element, so the config read works.
+// The hostname guard keeps it to conclick.io, so app-host / preview / localhost
+// renders of these same routes never send events.
 const CONCLICK_APP = process.env.NEXT_PUBLIC_APP_URL || 'https://app.conclick.io';
 const CONCLICK_WEBSITE_ID = '7e14a7ea-b156-4e91-a676-8e3c96a81291';
+const TRACKER_LOADER = `(function(){if(location.hostname!=='conclick.io')return;var s=document.createElement('script');s.defer=true;s.src=${JSON.stringify(
+  `${CONCLICK_APP}/script.js`,
+)};s.setAttribute('data-website-id',${JSON.stringify(CONCLICK_WEBSITE_ID)});(document.head||document.documentElement).appendChild(s);})();`;
 
 // The ONLY indexable surface. robots here overrides the app-wide noindex set in
 // the root layout (Next replaces robots at the nearest segment). metadataBase
@@ -50,9 +55,8 @@ const HATCH =
 export default function SeoLayout({ children }: { children: ReactNode }) {
   return (
     <div className="relative min-h-screen bg-black text-white">
-      {/* Conclick's own tracker — public SEO pages only (see note above). Byte-
-          identical to the homepage embed so it behaves identically. */}
-      <script defer src={`${CONCLICK_APP}/script.js`} data-website-id={CONCLICK_WEBSITE_ID} />
+      {/* Conclick's own tracker — inline loader (see note above), public SEO pages only. */}
+      <script dangerouslySetInnerHTML={{ __html: TRACKER_LOADER }} />
       {/* Fixed hatched gutters — exactly like the homepage. */}
       <div
         aria-hidden
