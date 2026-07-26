@@ -37,7 +37,13 @@ export function HeroWebsiteInput({
           onKeyDown={e => e.key === 'Enter' && go()}
           placeholder={placeholder}
           aria-label="Your website URL"
-          className="h-full w-full bg-transparent text-sm text-white placeholder:text-zinc-500 focus:outline-none"
+          // text-left is explicit rather than inherited: the article hero used
+          // to be text-center, which leaked into this field and centred the
+          // placeholder and everything the visitor typed. Pinning it here keeps
+          // the hero field and the SeoFooter field (still inside a centred
+          // band) rendering identically, and stops the value shifting under the
+          // caret as it is typed.
+          className="h-full w-full bg-transparent text-left text-sm text-white placeholder:text-zinc-500 focus:outline-none"
         />
       </div>
       <button

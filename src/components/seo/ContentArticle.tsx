@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
 import { HelpCircle } from 'lucide-react';
 import type { ContentEntry } from '@/content/schema';
 import { pathForType } from '@/content/schema';
@@ -55,6 +55,20 @@ const COMMERCIAL: ReadonlySet<ContentEntry['type']> = new Set<ContentEntry['type
   'useCase',
   'tool',
 ]);
+
+/**
+ * The same fallback chain and faux-italic accent the /blogs index uses
+ * (BlogIndex.tsx SERIF). `@fontsource/instrument-serif/latin-400.css` is
+ * imported once in src/app/(seo)/layout.tsx, so nothing new is loaded here —
+ * and the italic is synthesized from the upright face, exactly as it already is
+ * on the index headline and the Fast-facts numerals. Do not "fix" that by
+ * adding an italic webfont; the whole system is deliberately on one file.
+ */
+const SERIF: CSSProperties = {
+  fontFamily: "'Instrument Serif', Georgia, 'Times New Roman', serif",
+  fontWeight: 400,
+  fontStyle: 'italic',
+};
 
 const titleCase = (s: string) => s.replace(/[-_]+/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
 
@@ -256,10 +270,18 @@ export function ContentArticle({ entry: e, children }: { entry: ContentEntry; ch
           className="pointer-events-none absolute inset-x-0 top-0 h-[480px]"
           style={{ background: 'radial-gradient(50% 100% at 50% 0%, rgba(108,99,201,0.18), rgba(108,99,201,0) 70%)' }}
         />
-        <div className="relative mx-auto w-full max-w-3xl px-6 pb-14 pt-14 text-center">
+        {/* Same width+padding ramp as the mesh wrapper and the body container
+            below (max-w-3xl / lg:max-w-6xl, px-6 sm:px-8) so the eyebrow,
+            headline, standfirst and byline all sit on the prose column's left
+            edge. The three used to disagree on BOTH max-width (3xl/5xl/6xl) and
+            padding (the hero alone had no sm:px-8) — invisible only while every
+            hero child centred itself independently. Keeping the max-w-3xl floor
+            rather than a flat max-w-6xl is deliberate: dropping it would stretch
+            the tablet reading measure from 704px to ~957px. */}
+        <div className="relative mx-auto w-full max-w-3xl px-6 pb-14 pt-16 sm:px-8 lg:max-w-6xl">
           <nav
             aria-label="Breadcrumb"
-            className="mb-5 flex flex-wrap items-center justify-center gap-x-1.5 gap-y-1 text-xs text-zinc-500"
+            className="mb-5 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-xs text-zinc-500"
           >
             <a href={siteUrl()} className="transition-colors hover:text-zinc-300">
               Home
@@ -272,7 +294,12 @@ export function ContentArticle({ entry: e, children }: { entry: ContentEntry; ch
             <span className="text-zinc-400">{leafName}</span>
           </nav>
           <SectionEyebrow label={crumb.eyebrow} />
-          <h1 className="mx-auto mt-5 max-w-[40rem] text-[30px] font-semibold leading-[1.12] tracking-[-0.02em] text-white sm:text-[40px] sm:leading-[1.1]">
+          {/* mt-6 (not mt-5) and sm:text-[44px] match the /blogs index rhythm so
+              the index and the article read as one product. 44px stays below the
+              index's 52px on purpose — the index is the cover, this is the
+              story. The mobile step stays at 30px: article titles run long and
+              32px costs a whole extra line in a 325px content box. */}
+          <h1 className="mt-6 max-w-[46rem] text-[30px] font-semibold leading-[1.12] tracking-[-0.02em] text-white sm:text-[44px] sm:leading-[1.08]">
             {e.h1}
           </h1>
 
@@ -280,41 +307,69 @@ export function ContentArticle({ entry: e, children }: { entry: ContentEntry; ch
               VERSION box below, and running the same sentences twice on one page
               is the kind of duplication that reads as filler to both humans and
               extractors. metaDescription is already written to be exactly this —
-              one ~155-char summary line. */}
-          <p className="mx-auto mt-5 max-w-2xl text-[15px] leading-relaxed text-zinc-400">{e.metaDescription}</p>
+              one ~155-char summary line.
 
-          {/* Kicker: category (when authored) + read time. The date lives in the
-              byline directly below, so it is deliberately not repeated here. */}
-          <div className="mt-5 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-xs text-zinc-500">
-            {e.category && (
-              <>
-                <span className="text-[#8b88cf]">{e.category}</span>
-                <span aria-hidden className="text-zinc-600">
-                  ·
-                </span>
-              </>
-            )}
-            <span>{mins} min read</span>
-          </div>
+              Narrowed from max-w-2xl (42rem) to 40rem so the standfirst can
+              never overhang the 46rem headline above it — an inverted hierarchy
+              that was invisible only while both were centred. 40rem also lands
+              within a few px of TrustRow's natural single-line width below. */}
+          <p className="mt-6 max-w-[40rem] text-[15px] leading-relaxed text-zinc-400">{e.metaDescription}</p>
 
           {isCommercial && (
             <>
-              <div className="mt-8">
+              {/* Capping the wrapper at exactly the child's own max-w-[30rem]
+                  leaves HeroWebsiteInput's internal mx-auto no slack to
+                  distribute, so the field renders flush left with no component
+                  edit. That matters: the same component is the pre-footer
+                  conversion band (SeoFooter), where the mx-auto must survive. */}
+              <div className="mt-8 max-w-[30rem]">
                 <HeroWebsiteInput ctaLabel={e.leadMagnet.ctaLabel} />
               </div>
               <TrustRow />
             </>
           )}
 
-          <div className="mt-8 flex justify-center">
+          {/* Masthead: byline left, folio (category · read time) right, on a
+              hairline rule. The category and read time used to be their own
+              centred kicker line; folded in here they read as magazine credits
+              instead of a fifth ragged line under a left-aligned hero.
+
+              CAPPED AT 46rem, the h1's own measure — NOT the full container.
+              Spanning the full max-w-6xl parked the folio ~350px past the
+              headline's right edge, and since e.category is empty on 44 of the
+              68 pages (all of /vs, /alternatives, /for, /tools, /glossary) the
+              right-hand cell collapsed to a lone "6 min read" floating in
+              whitespace with nothing above or beside it. Sharing the headline's
+              right edge is what makes the rule read as a masthead rather than a
+              full-bleed divider with a stray number on it. */}
+          <div className="mt-8 flex max-w-[46rem] flex-wrap items-center justify-between gap-x-6 gap-y-3 border-t border-white/[0.07] pt-6">
             <AuthorByline datePublished={e.datePublished} dateModified={e.dateModified} />
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-zinc-500">
+              {e.category && (
+                <>
+                  <span className="text-[#8b88cf]">{e.category}</span>
+                  <span aria-hidden className="text-zinc-600">
+                    ·
+                  </span>
+                </>
+              )}
+              <span>
+                {/* #c7c5ec, not #8b88cf: the category sits immediately to the
+                    left and is already #8b88cf, and #c7c5ec is the token this
+                    folder reserves for serif italic accents. */}
+                <span className="tabular-nums text-[#c7c5ec]" style={SERIF}>
+                  {mins}
+                </span>{' '}
+                min read
+              </span>
+            </div>
           </div>
         </div>
       </section>
 
       {/* Mesh hero — byte-for-byte the art on this page's OG card, so the link
           preview and the page a reader lands on are visibly the same object. */}
-      <div className="mx-auto w-full max-w-3xl px-6 pt-10 sm:px-8 lg:max-w-5xl">
+      <div className="mx-auto w-full max-w-3xl px-6 pt-10 sm:px-8 lg:max-w-6xl">
         <MeshHero slug={meshKeyFor(e)} word={heroWordFor(e)} priority />
       </div>
 
@@ -322,13 +377,6 @@ export function ContentArticle({ entry: e, children }: { entry: ContentEntry; ch
           instead of leaving large empty gutters left and right. */}
       <div className="mx-auto w-full max-w-3xl px-6 py-14 sm:px-8 lg:max-w-6xl">
         <div className="lg:flex lg:gap-14">
-          {toc.length >= 3 && (
-            <aside className="mb-10 hidden lg:block lg:w-56 lg:shrink-0">
-              <div className="sticky top-24">
-                <TableOfContents items={toc} />
-              </div>
-            </aside>
-          )}
           <article className="min-w-0 lg:max-w-[52rem] lg:flex-1">
             <ShortVersion tldr={e.tldr} />
 
@@ -342,7 +390,12 @@ export function ContentArticle({ entry: e, children }: { entry: ContentEntry; ch
 
             {e.faq.length > 0 && (
               <section className="mt-16">
-                <div className="text-center">
+                {/* Left-aligned with the rest of the page now the hero is: a
+                    centred FAQ heading would be the only centred block left on
+                    an otherwise flush-left article. LeadMagnetCTA below keeps
+                    its own text-center on purpose — it is a self-contained card
+                    and is also rendered from prose.tsx. */}
+                <div>
                   <SectionEyebrow icon={HelpCircle} label="FAQ" />
                   <h2 className="mt-4 text-2xl font-semibold tracking-[-0.02em] text-white sm:text-[30px]">
                     Frequently asked questions
@@ -380,6 +433,29 @@ export function ContentArticle({ entry: e, children }: { entry: ContentEntry; ch
 
             <RelatedLinks entry={e} />
           </article>
+
+          {/* On-page index, right-hand rail. Rendered AFTER <article> in the DOM
+              rather than flipped with an order utility or flex-row-reverse. A
+              CSS-only flip
+              screenshots identically but is a WCAG 2.4.3 focus-order failure
+              (keyboard users would tab through up to 10 TOC links before the
+              prose) and leaves 10 duplicated heading anchors ahead of the body
+              for crawlers and AI extractors. A plain lg:flex puts it on the
+              right for free.
+
+              Do NOT add lg:items-start here or self-start to the aside: either
+              collapses it to content height and `sticky top-24` silently stops
+              working after ~500px of scroll. Same for any overflow-hidden on an
+              ancestor. The `>= 3` guard stays even though every current page has
+              4+ h2s — it is what stops an empty 224px column plus a 56px gap
+              from eating horizontal space on some future short page. */}
+          {toc.length >= 3 && (
+            <aside className="hidden lg:block lg:w-56 lg:shrink-0">
+              <div className="sticky top-24">
+                <TableOfContents items={toc} />
+              </div>
+            </aside>
+          )}
         </div>
       </div>
     </>

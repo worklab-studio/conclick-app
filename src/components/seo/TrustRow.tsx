@@ -10,7 +10,12 @@ const ITEMS = [
 
 export function TrustRow() {
   return (
-    <div className="mt-7 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs font-medium text-zinc-400">
+    // Left-packed (flex-start is the initial value, so no justify-* utility is
+    // needed) to sit under the left-aligned article hero — ContentArticle is the
+    // only consumer. Deliberately uncapped: the four labels measure ~40rem on
+    // one line, which agrees with the 40rem standfirst above and the 46rem
+    // headline, instead of forcing a cramped wrap at the field's 30rem.
+    <div className="mt-7 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs font-medium text-zinc-400">
       {ITEMS.map((it, i) => (
         <span key={i} className="inline-flex items-center gap-1.5">
           <it.icon className="h-3.5 w-3.5 text-[#8b88cf]" />

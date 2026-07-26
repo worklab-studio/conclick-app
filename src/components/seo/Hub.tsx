@@ -80,15 +80,21 @@ export function HubGrid({
           className="pointer-events-none absolute inset-x-0 top-0 h-[360px]"
           style={{ background: 'radial-gradient(50% 100% at 50% 0%, rgba(108,99,201,0.16), rgba(108,99,201,0) 70%)' }}
         />
-        <div className="relative mx-auto max-w-3xl px-6 pb-12 pt-14 text-center">
-          <div className="mx-auto mb-6 flex h-12 w-12 items-center justify-center rounded-xl border border-white/10 bg-white/[0.04] text-[#8b88cf]">
+        {/* Left-aligned on the SAME container string as the card grid below
+            (max-w-6xl px-6 sm:px-8), so the eyebrow/h1 left edge lands exactly
+            on the first card's left edge. The old hero was max-w-3xl over a
+            max-w-6xl grid — invisible while it was centred, an obvious step the
+            moment it is not. Matches ContentArticle and BlogIndex, so every
+            public surface now shares one left edge. */}
+        <div className="relative mx-auto max-w-6xl px-6 pb-12 pt-14 sm:px-8">
+          <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-xl border border-white/10 bg-white/[0.04] text-[#8b88cf]">
             <Icon className="h-5 w-5" />
           </div>
           <SectionEyebrow label={eyebrow} />
-          <h1 className="mx-auto mt-5 max-w-[40rem] text-[30px] font-semibold leading-[1.1] tracking-[-0.02em] text-white sm:text-[40px]">
+          <h1 className="mt-5 max-w-[40rem] text-[30px] font-semibold leading-[1.1] tracking-[-0.02em] text-white sm:text-[40px]">
             {title}
           </h1>
-          <p className="mx-auto mt-5 max-w-2xl text-[15px] leading-relaxed text-zinc-400">{intro}</p>
+          <p className="mt-5 max-w-[40rem] text-[15px] leading-relaxed text-zinc-400">{intro}</p>
         </div>
       </section>
 
