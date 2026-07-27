@@ -56,7 +56,30 @@ const DEFAULT_RANGE: CardRange = {
   compare: 'previous 24h',
 };
 
-export function WebsiteCard({ website, range }: { website: any; range?: CardRange }) {
+/**
+ * A per-site slice of the fleet batch (/api/websites/overview) — when the
+ * parent page fetched everything in one request, the card renders from this
+ * and makes ZERO requests of its own.
+ */
+export interface CardPreload {
+  stats: any;
+  sessions: any[];
+  window: { startAt: number; endAt: number; unit: string };
+}
+
+export function WebsiteCard({
+  website,
+  range,
+  batched,
+  preloaded,
+}: {
+  website: any;
+  range?: CardRange;
+  /** True when the parent page batch-fetches — the card never self-fetches,
+      even while the batch is still in flight (undefined preloaded). */
+  batched?: boolean;
+  preloaded?: CardPreload;
+}) {
   const { renderUrl, router } = useNavigation();
   const { toast } = useToast();
   const { get, useQuery } = useApi();
@@ -69,12 +92,10 @@ export function WebsiteCard({ website, range }: { website: any; range?: CardRang
   const startAt = r.startAt || Date.now() - DAY_MS;
   const endAt = r.endAt || Date.now();
 
-  // staleTime: hopping back to a range viewed in the last minute costs zero
-  // requests. keepPreviousData: a range switch keeps the previous numbers on
-  // screen and morphs them when fresh data lands — no skeleton flash. The
-  // stats key/params match the page's useQueries exactly, so this card and
-  // the overview strip share one fetch per site.
-  const { data: stats } = useQuery({
+  // Standalone fallback (no batching parent): the card fetches for itself.
+  // staleTime: hopping back to a recently viewed range costs zero requests.
+  // keepPreviousData: a range switch morphs numbers in place, no skeleton.
+  const { data: ownStats } = useQuery({
     queryKey: ['card:stats', website.id, timezone, r.value],
     queryFn: () =>
       get(`/websites/${website.id}/stats`, {
@@ -83,7 +104,7 @@ export function WebsiteCard({ website, range }: { website: any; range?: CardRang
         unit: r.unit,
         timezone,
       }),
-    enabled: !!website.id,
+    enabled: !!website.id && !batched,
     staleTime: 60_000,
     placeholderData: keepPreviousData,
   });
@@ -92,7 +113,7 @@ export function WebsiteCard({ website, range }: { website: any; range?: CardRang
   // buckets data against the window it was fetched for — while the previous
   // range's series is showing as placeholder, it keeps its own window instead
   // of being smeared into the new range's buckets.
-  const { data: pv } = useQuery({
+  const { data: ownPv } = useQuery({
     queryKey: ['card:pageviews', website.id, timezone, r.value],
     queryFn: async () => {
       const res = await get(`/websites/${website.id}/pageviews`, {
@@ -103,10 +124,17 @@ export function WebsiteCard({ website, range }: { website: any; range?: CardRang
       });
       return { sessions: res?.sessions || [], window: { startAt, endAt, unit: r.unit } };
     },
-    enabled: !!website.id,
+    enabled: !!website.id && !batched,
     staleTime: 60_000,
     placeholderData: keepPreviousData,
   });
+
+  const stats = batched ? preloaded?.stats : ownStats;
+  const pv = batched
+    ? preloaded
+      ? { sessions: preloaded.sessions || [], window: preloaded.window }
+      : undefined
+    : ownPv;
 
   // "Connected" = has the site ever received data? The all-time check is the
   // expensive query, so only run it for sites that look idle in the selected

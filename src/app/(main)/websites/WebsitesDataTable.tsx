@@ -4,8 +4,8 @@ import { useLoginQuery, useUserWebsitesQuery } from '@/components/hooks';
 import { useApi } from '@/components/hooks/useApi';
 import { useDateParameters } from '@/components/hooks/useDateParameters';
 import { WebsitesOverview, type OverviewSums } from './WebsitesOverview';
-import { useMemo, useRef, useState } from 'react';
-import { useQueries, keepPreviousData } from '@tanstack/react-query';
+import { useMemo, useState } from 'react';
+import { keepPreviousData } from '@tanstack/react-query';
 import { WebsiteAddButton } from './WebsiteAddButton';
 import { DateFilter } from '@/components/input/DateFilter';
 import { parseDateRange } from '@/lib/date';
@@ -91,7 +91,7 @@ export function WebsitesDataTable({ userId, teamId }: { userId?: string; teamId?
 
   const range = useMemo(() => buildRange(rangeValue, timezone), [rangeValue, timezone]);
 
-  const { get } = useApi();
+  const { get, useQuery } = useApi();
 
   // Safely extract website IDs for stats fetching
   const websiteIds = useMemo(() => {
@@ -102,53 +102,52 @@ export function WebsitesDataTable({ userId, teamId }: { userId?: string; teamId?
     return [];
   }, [queryResult.data]);
 
-  // One stats query per website, on EXACTLY the cards' query keys and params —
-  // so each site is fetched once per range and the strip aggregates the same
-  // cache entries the cards render from. (The previous version ran its own
-  // aggregate fetch: 11 duplicate /stats requests on every range change.)
-  // staleTime keeps range-hopping instant for a minute; keepPreviousData means
-  // a range switch morphs the numbers in place instead of blanking the page.
-  const statsResults = useQueries({
-    queries: websiteIds.map((id: string) => ({
-      queryKey: ['card:stats', id, timezone, range.value],
-      queryFn: () =>
-        get(`/websites/${id}/stats`, {
-          startAt: range.startAt,
-          endAt: range.endAt,
-          unit: range.unit,
-          timezone,
-        }),
-      staleTime: 60_000,
-      placeholderData: keepPreviousData,
-    })),
+  // ONE request for the whole fleet: stats + comparison + visitors series for
+  // every site, from /api/websites/overview. The old shape (2 HTTP calls per
+  // site) paid the auth/permission tax 22 times and stampeded the connection
+  // pool — the fleet took 9-15s to settle. staleTime keeps range-hopping
+  // instant for a minute; keepPreviousData means a range switch morphs the
+  // numbers in place instead of blanking to skeletons, and because the whole
+  // fleet arrives in one response, the strip swap is atomic by construction.
+  const { data: batch } = useQuery<{
+    data: { websiteId: string; stats: any; sessions: any[] }[];
+    window: { startAt: number; endAt: number; unit: string };
+  }>({
+    queryKey: ['websites:overview-batch', websiteIds.join(','), range.value, timezone],
+    queryFn: async () => {
+      const res = await get('/websites/overview', {
+        websiteIds: websiteIds.join(','),
+        startAt: range.startAt,
+        endAt: range.endAt,
+        unit: range.unit,
+        timezone,
+      });
+      // The window rides along so card sparklines bucket a placeholder series
+      // against the window it was fetched for, not the newly selected one.
+      return { ...res, window: { startAt: range.startAt, endAt: range.endAt, unit: range.unit } };
+    },
+    enabled: websiteIds.length > 0,
+    staleTime: 60_000,
+    placeholderData: keepPreviousData,
   });
 
-  // Atomic swap for the strip: keep showing the previous range's totals until
-  // EVERY site has fresh numbers, so the tiles never sum a mix of two ranges
-  // mid-transition. Errored sites count as settled (contributing zero) so one
-  // failing site can't pin the strip on stale totals forever.
-  const freshSums = useMemo<OverviewSums | null>(() => {
-    if (statsResults.length === 0) return null;
-    const settled = statsResults.every(
-      r => !r.isPlaceholderData && (r.data !== undefined || r.isError),
-    );
-    if (!settled) return null;
-
-    return statsResults.reduce(
-      (acc: OverviewSums, r: any) => {
-        const stat = r.data;
+  const overview = useMemo<OverviewSums | null>(() => {
+    if (!batch?.data) return null;
+    return batch.data.reduce(
+      (acc: OverviewSums, row: any) => {
+        const stat = row.stats;
         if (!stat) return acc;
         const c = stat.comparison || {};
-        acc.pageviews += stat.pageviews || 0;
-        acc.visitors += stat.visitors || 0;
-        acc.visits += stat.visits || 0;
-        acc.bounces += stat.bounces || 0;
-        acc.totaltime += stat.totaltime || 0;
-        acc.prev.pageviews += c.pageviews || 0;
-        acc.prev.visitors += c.visitors || 0;
-        acc.prev.visits += c.visits || 0;
-        acc.prev.bounces += c.bounces || 0;
-        acc.prev.totaltime += c.totaltime || 0;
+        acc.pageviews += Number(stat.pageviews) || 0;
+        acc.visitors += Number(stat.visitors) || 0;
+        acc.visits += Number(stat.visits) || 0;
+        acc.bounces += Number(stat.bounces) || 0;
+        acc.totaltime += Number(stat.totaltime) || 0;
+        acc.prev.pageviews += Number(c.pageviews) || 0;
+        acc.prev.visitors += Number(c.visitors) || 0;
+        acc.prev.visits += Number(c.visits) || 0;
+        acc.prev.bounces += Number(c.bounces) || 0;
+        acc.prev.totaltime += Number(c.totaltime) || 0;
         return acc;
       },
       {
@@ -160,14 +159,18 @@ export function WebsitesDataTable({ userId, teamId }: { userId?: string; teamId?
         prev: { pageviews: 0, visitors: 0, visits: 0, bounces: 0, totaltime: 0 },
       },
     );
-  }, [statsResults]);
-
-  // Hold the last complete totals across transitions (render-time "previous
-  // value" ref — the strip shows these until the new range fully settles).
-  const lastSumsRef = useRef<OverviewSums | null>(null);
-  if (freshSums) lastSumsRef.current = freshSums;
-  const overview = freshSums ?? lastSumsRef.current;
+  }, [batch]);
   const overviewLoading = !overview;
+
+  // Per-site slices for the cards (they render from the batch — zero requests
+  // of their own).
+  const preloadedById = useMemo(() => {
+    const map: Record<string, { stats: any; sessions: any[]; window: any }> = {};
+    for (const row of batch?.data || []) {
+      map[row.websiteId] = { stats: row.stats, sessions: row.sessions, window: batch.window };
+    }
+    return map;
+  }, [batch]);
 
   const username = user?.displayName || user?.username || 'User';
 
@@ -230,7 +233,13 @@ export function WebsitesDataTable({ userId, teamId }: { userId?: string; teamId?
               style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))' }}
             >
               {data.map((website: any) => (
-                <WebsiteCard key={website.id} website={website} range={range} />
+                <WebsiteCard
+                  key={website.id}
+                  website={website}
+                  range={range}
+                  batched
+                  preloaded={preloadedById[website.id]}
+                />
               ))}
             </div>
           </div>
