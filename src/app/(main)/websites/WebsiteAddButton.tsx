@@ -45,7 +45,7 @@ export function WebsiteAddButton({ teamId, onSave }: { teamId: string; onSave?: 
         </Button>
       </DialogTrigger>
       <DialogContent
-        className="sm:max-w-[500px] dark:bg-[hsl(0,0%,8%)] border-0 focus:ring-0 focus:outline-none ring-0 outline-none"
+        className="sm:max-w-[560px] dark:bg-[hsl(0,0%,8%)] border-0 focus:ring-0 focus:outline-none ring-0 outline-none"
         onInteractOutside={e => e.preventDefault()}
         onEscapeKeyDown={e => e.preventDefault()}
       >

@@ -13,7 +13,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { AlertTriangle, ArrowRight, Check, Copy, ExternalLink, Globe, Loader2 } from 'lucide-react';
+import { ArrowRight, Check, Copy, ExternalLink, Globe, Loader2 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { DOMAIN_REGEX } from '@/lib/constants';
 import { SiteIcon } from './SiteIcon';
@@ -124,6 +124,7 @@ export function WebsiteAddModalContent({
   const [copiedId, setCopiedId] = useState(false);
   const [copiedScript, setCopiedScript] = useState(false);
   const [copiedTool, setCopiedTool] = useState<string | null>(null);
+  const [liveStats, setLiveStats] = useState<{ pageviews: number; visitors: number } | null>(null);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -141,6 +142,8 @@ export function WebsiteAddModalContent({
     try {
       const data = await createWebsite(values);
       successFired.current = false;
+      setLiveStats(null);
+      setVerifyOutcome(null);
       setCreatedWebsite(data);
       setStep(Step.VERIFY);
       onSave?.(); // We call onSave to trigger list refresh, but don't close modal yet
@@ -219,10 +222,10 @@ export function WebsiteAddModalContent({
   succeedRef.current = succeed;
 
   // The install step LISTENS: poll stats every 5s and flip to success the
-  // moment the first event lands — no button press required. This is what
-  // makes the step feel live instead of a static instruction sheet.
+  // moment the first event lands — no button press required. Polling stays on
+  // through the success screen so the pageview counter keeps ticking live.
   useEffect(() => {
-    if (step !== Step.VERIFY || !createdWebsite?.id) return;
+    if ((step !== Step.VERIFY && step !== Step.SUCCESS) || !createdWebsite?.id) return;
 
     let cancelled = false;
     const createdAt = Date.parse(createdWebsite.createdAt) || Date.now() - 24 * 60 * 60 * 1000;
@@ -236,7 +239,11 @@ export function WebsiteAddModalContent({
         const res = await fetch(`/api/websites/${createdWebsite.id}/stats?${params}`);
         if (!res.ok) return;
         const data = await res.json();
-        if (!cancelled && (Number(data?.pageviews) > 0 || Number(data?.visitors) > 0)) {
+        if (cancelled) return;
+        const pageviews = Number(data?.pageviews) || 0;
+        const visitors = Number(data?.visitors) || 0;
+        if (pageviews > 0 || visitors > 0) {
+          setLiveStats({ pageviews, visitors });
           succeedRef.current();
         }
       } catch {
@@ -403,24 +410,27 @@ export function WebsiteAddModalContent({
       : `${window?.location?.origin || ''}${process.env.basePath || ''}/script.js`;
 
     return (
-      <div className="space-y-4">
+      <div className="space-y-5">
         <StepBar step={Step.VERIFY} />
 
-        <div className="flex items-center gap-3 rounded-lg border border-zinc-800 bg-[#18181b]/60 p-3">
+        {/* Slim identity line — the reassurance, not a hero card. */}
+        <div className="flex items-center gap-2.5">
           <SiteIcon
             domain={createdWebsite?.domain}
             name={createdWebsite?.name}
-            size={36}
-            className="rounded-lg"
+            size={28}
+            className="rounded-md"
           />
-          <div className="min-w-0">
-            <div className="truncate text-sm font-medium text-foreground">
+          <div className="flex min-w-0 items-baseline gap-2">
+            <span className="truncate text-sm font-medium text-foreground">
               {createdWebsite?.name || createdWebsite?.domain}
-            </div>
-            <div className="truncate text-xs text-muted-foreground">{createdWebsite?.domain}</div>
+            </span>
+            <span className="hidden truncate text-xs text-muted-foreground sm:inline">
+              {createdWebsite?.domain}
+            </span>
           </div>
-          <span className="ml-auto inline-flex shrink-0 items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-medium text-emerald-400">
-            <Check className="h-3 w-3" />
+          <span className="ml-auto inline-flex shrink-0 items-center gap-1 text-xs font-medium text-emerald-400">
+            <Check className="h-3.5 w-3.5" />
             Created
           </span>
         </div>
@@ -428,76 +438,16 @@ export function WebsiteAddModalContent({
         <div className="space-y-1">
           <h3 className="text-base font-semibold text-foreground">Install your tracking code</h3>
           <p className="text-sm text-muted-foreground">
-            Paste this into the <code className="text-foreground">&lt;head&gt;</code> of your site —
-            or hand it to your AI below.
+            Paste this into your site&apos;s <code className="text-foreground">&lt;head&gt;</code> —
+            or hand it to your AI.
           </p>
         </div>
 
-        {/* Live status: this panel IS the verification. It polls on its own and
-            flips the whole modal to success the moment the first event lands. */}
-        <div
-          className={`rounded-lg border p-3 transition-colors ${
-            verifyOutcome === 'error'
-              ? 'border-red-500/20 bg-red-500/[0.05]'
-              : 'border-zinc-800 bg-[#18181b]/60'
-          }`}
-        >
-          <div className="flex items-center gap-3">
-            <span className="relative flex h-8 w-8 shrink-0 items-center justify-center">
-              {verifyOutcome === 'error' ? (
-                <AlertTriangle className="h-4 w-4 text-red-400" />
-              ) : (
-                <>
-                  <span className="absolute inline-flex h-6 w-6 animate-ping rounded-full bg-[#5e5ba4]/30" />
-                  <span className="absolute inline-flex h-4 w-4 animate-pulse rounded-full bg-[#5e5ba4]/40" />
-                  <span className="relative inline-flex h-2 w-2 rounded-full bg-[#8b88d8]" />
-                </>
-              )}
-            </span>
-            <div className="min-w-0 flex-1">
-              {verifyOutcome === 'error' ? (
-                <>
-                  <p className="text-sm font-medium text-red-200">
-                    Couldn&apos;t reach {createdWebsite?.domain}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    Make sure the domain is correct and publicly reachable, then try again.
-                  </p>
-                </>
-              ) : verifyOutcome === 'notFound' ? (
-                <>
-                  <p className="text-sm font-medium text-foreground">
-                    Snippet not found yet — still listening
-                  </p>
-                  <p className="text-xs leading-relaxed text-muted-foreground">
-                    Quick checks: pasted before <code className="text-zinc-300">&lt;/head&gt;</code>{' '}
-                    · deployed live · page opened once · ad-blocker off
-                  </p>
-                </>
-              ) : (
-                <>
-                  <p className="text-sm font-medium text-foreground">
-                    Listening for your first visit
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    This updates by itself — the moment a pageview arrives, you&apos;re done.
-                  </p>
-                </>
-              )}
-            </div>
-            {verifyOutcome !== 'error' && (
-              <span className="shrink-0 rounded-full bg-zinc-800/70 px-2 py-0.5 text-[10px] font-medium text-zinc-400">
-                auto-checking
-              </span>
-            )}
-          </div>
-        </div>
-
-        <div className="space-y-2">
+        <div className="space-y-2.5">
           <label className="text-sm font-medium leading-none">Tracking Code</label>
           <div className="group relative">
-            <div className="flex min-h-[72px] w-full overflow-x-auto rounded-md border border-zinc-800 bg-[#18181b] py-3 pl-3 pr-11 font-mono text-sm">
-              <code className="text-sm">
+            <div className="flex w-full overflow-x-auto rounded-lg border border-zinc-800 bg-[#18181b] p-4 pr-12 font-mono">
+              <code className="text-[13px] leading-relaxed">
                 <span style={{ color: '#89ddff' }}>&lt;script</span>{' '}
                 <span style={{ color: '#c792ea' }}>defer</span>{' '}
                 <span style={{ color: '#c792ea' }}>src</span>
@@ -570,27 +520,58 @@ export function WebsiteAddModalContent({
             ))}
           </div>
           <p className="text-xs text-muted-foreground">
-            Copies a ready-to-paste prompt with your exact snippet, placement rules and a verify
-            step.
+            One click copies a ready-made prompt for your coding agent.
           </p>
         </div>
 
-        {isVerifying && (
-          <div className="space-y-2">
+        {isVerifying ? (
+          <div className="space-y-2 border-t border-zinc-800/70 pt-4">
             <div className="flex justify-between text-xs text-muted-foreground">
               <span>Checking {createdWebsite?.domain}…</span>
               <span>{Math.round(progress)}%</span>
             </div>
-            <div className="h-2 w-full overflow-hidden rounded-full bg-secondary">
+            <div className="h-1.5 w-full overflow-hidden rounded-full bg-secondary">
               <div
                 className="h-full transition-all duration-100 ease-linear"
                 style={{ width: `${progress}%`, backgroundColor: '#5e5ba4' }}
               />
             </div>
           </div>
+        ) : (
+          /* The live line: one quiet sentence, not a panel. It IS the
+             verification — polling flips the modal to success on its own. */
+          <div className="flex items-center gap-3 border-t border-zinc-800/70 pt-4">
+            <span className="relative flex h-3 w-3 shrink-0 items-center justify-center">
+              {verifyOutcome === 'error' ? (
+                <span className="h-2 w-2 rounded-full bg-red-400" />
+              ) : (
+                <>
+                  <span className="absolute inline-flex h-3 w-3 animate-ping rounded-full bg-[#5e5ba4]/50" />
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-[#8b88d8]" />
+                </>
+              )}
+            </span>
+            <p className="min-w-0 text-xs leading-relaxed text-muted-foreground">
+              {verifyOutcome === 'error' ? (
+                <>
+                  Couldn&apos;t reach{' '}
+                  <span className="text-zinc-300">{createdWebsite?.domain}</span> — check it&apos;s
+                  public, then try again.
+                </>
+              ) : verifyOutcome === 'notFound' ? (
+                <>
+                  Not seeing the snippet yet — make sure it&apos;s before{' '}
+                  <code className="text-zinc-300">&lt;/head&gt;</code>, deployed, and a page was
+                  opened once.
+                </>
+              ) : (
+                <>Listening for your first visit — this updates by itself.</>
+              )}
+            </p>
+          </div>
         )}
 
-        <div className="flex items-center justify-between pt-1">
+        <div className="flex items-center justify-between">
           <Button
             type="button"
             variant="ghost"
@@ -672,6 +653,16 @@ export function WebsiteAddModalContent({
           <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
         </span>
         Receiving data
+        {liveStats && liveStats.pageviews > 0 && (
+          <span className="text-emerald-300/90">
+            · {liveStats.pageviews.toLocaleString()}{' '}
+            {liveStats.pageviews === 1 ? 'pageview' : 'pageviews'}
+            {liveStats.visitors > 0 &&
+              ` · ${liveStats.visitors.toLocaleString()} ${
+                liveStats.visitors === 1 ? 'visitor' : 'visitors'
+              }`}
+          </span>
+        )}
       </div>
 
       {/* Action */}
