@@ -321,13 +321,16 @@ export function WebsiteChart({
                   }}
                 />
                 <Legend formatter={v => <span style={{ color: '#a1a1aa' }}>{v}</span>} />
+                {/* Only the TOPMOST segment of the stack gets rounded top
+                    corners — inner seams stay square so the stack reads as
+                    one solid bar, not stacked pills. */}
                 <Bar
                   yAxisId="left"
                   dataKey="visitors"
                   name="Visitors"
                   stackId="a"
                   fill="#5e5ba4"
-                  radius={[4, 4, 0, 0]}
+                  radius={[0, 0, 0, 0]}
                   barSize={20}
                 />
                 <Bar
@@ -336,7 +339,7 @@ export function WebsiteChart({
                   name="Pageviews"
                   stackId="a"
                   fill="#43415F"
-                  radius={[4, 4, 0, 0]}
+                  radius={hasImported ? [0, 0, 0, 0] : [4, 4, 0, 0]}
                   barSize={20}
                 />
                 {hasImported && (

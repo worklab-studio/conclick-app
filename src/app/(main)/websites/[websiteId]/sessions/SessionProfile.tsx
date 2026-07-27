@@ -18,9 +18,18 @@ import {
 import { Avatar } from '@/components/common/Avatar';
 import { TypeIcon } from '@/components/common/TypeIcon';
 import { LoadingPanel } from '@/components/common/LoadingPanel';
-import { useFormat, useLocale, useRegionNames, useWebsiteSessionQuery } from '@/components/hooks';
+import {
+  useFormat,
+  useLocale,
+  useRegionNames,
+  useSessionActivityQuery,
+  useSessionDataQuery,
+  useWebsiteSessionQuery,
+} from '@/components/hooks';
 import { friendlyName } from '@/lib/friendly-name';
 import { formatShortTime } from '@/lib/format';
+import { computeIntentScore } from '@/lib/intent-score';
+import { IntentBadge } from '@/components/metrics/IntentBadge';
 import { SessionActivity } from './SessionActivity';
 import { SessionData } from './SessionData';
 
@@ -53,6 +62,34 @@ export function SessionProfile({ websiteId, sessionId }: { websiteId: string; se
   const source = data?.utmSource
     ? [data.utmSource, data.utmMedium].filter(Boolean).join(' / ')
     : data?.referrerDomain || 'Direct';
+
+  // Same queries the tabs use — shared cache, so the tabs cost nothing extra.
+  // Activity feeds the intent score its page paths; properties decide whether
+  // the Properties tab exists at all.
+  const { data: activity } = useSessionActivityQuery(
+    websiteId,
+    sessionId,
+    data?.firstAt,
+    data?.lastAt,
+  );
+  const { data: sessionProps } = useSessionDataQuery(websiteId, sessionId);
+  const hasProps = (sessionProps?.length ?? 0) > 0;
+
+  const intent = data
+    ? computeIntentScore({
+        visits: Number(data.visits) || 0,
+        views: Number(data.views) || 0,
+        events: Number(data.events) || 0,
+        totalSeconds: Math.abs(Number(data.totaltime) || 0),
+        maxScrollPct: data.maxScroll,
+        clicks: data.clicks,
+        lastAt: data.lastAt,
+        referrerDomain: data.referrerDomain ?? null,
+        utmSource: data.utmSource ?? null,
+        utmCampaign: data.utmCampaign ?? null,
+        paths: activity ? activity.map((r: any) => r.urlPath).filter(Boolean) : undefined,
+      })
+    : null;
 
   return (
     <LoadingPanel
@@ -117,6 +154,14 @@ export function SessionProfile({ websiteId, sessionId }: { websiteId: string; se
                 )}
               </button>
             </div>
+            {intent && (
+              <div className="mr-7 shrink-0 self-start text-right">
+                <div className="mb-1.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground/70">
+                  Buying intent
+                </div>
+                <IntentBadge result={intent} size="md" />
+              </div>
+            )}
           </div>
 
           {/* Stats strip */}
@@ -179,17 +224,26 @@ export function SessionProfile({ websiteId, sessionId }: { websiteId: string; se
             ) : null}
           </div>
 
-          {/* Tabs */}
+          {/* Tabs. Properties only exists when this session actually HAS
+              custom properties (set via conclick.identify()) — an always-on
+              tab that's almost always empty just reads as broken. */}
           <div className="flex gap-6 border-b border-[hsl(0,0%,12%)] px-6">
-            <TabButton active={tab === 'activity'} onClick={() => setTab('activity')}>
+            <TabButton active={tab === 'activity' || !hasProps} onClick={() => setTab('activity')}>
               Activity
             </TabButton>
-            <TabButton active={tab === 'properties'} onClick={() => setTab('properties')}>
-              Properties
-            </TabButton>
+            {hasProps && (
+              <TabButton active={tab === 'properties'} onClick={() => setTab('properties')}>
+                Properties
+                <span className="ml-1.5 rounded-full bg-zinc-800 px-1.5 py-0.5 text-[10px] font-medium text-zinc-400">
+                  {sessionProps.length}
+                </span>
+              </TabButton>
+            )}
           </div>
-          <div className="p-6">
-            {tab === 'activity' ? (
+          {/* The tab body scrolls by itself so a long activity trail never
+              drags the profile header and stats along with it. */}
+          <div className="max-h-[44vh] min-h-[160px] overflow-y-auto p-6">
+            {tab === 'activity' || !hasProps ? (
               <SessionActivity
                 websiteId={websiteId}
                 sessionId={sessionId}

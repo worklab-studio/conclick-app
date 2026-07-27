@@ -2,6 +2,8 @@
 
 import { useEffect, useState, useRef, useMemo, useCallback } from 'react';
 import { useWebsiteQuery, useRealtimeQuery } from '@/components/hooks';
+import { computeIntentScore } from '@/lib/intent-score';
+import { IntentBadge } from '@/components/metrics/IntentBadge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Button } from '@/components/ui/button';
@@ -44,7 +46,12 @@ const ACTIVE_MS = 5 * 60_000;
 
 const flagEmoji = (code?: string) =>
   code && /^[A-Za-z]{2}$/.test(code)
-    ? String.fromCodePoint(...code.toUpperCase().split('').map(c => 127397 + c.charCodeAt(0)))
+    ? String.fromCodePoint(
+        ...code
+          .toUpperCase()
+          .split('')
+          .map(c => 127397 + c.charCodeAt(0)),
+      )
     : '🌐';
 
 const countryName = (code?: string) => {
@@ -202,7 +209,14 @@ const DEMO_PATHS = [
   '/about',
   '/changelog',
 ];
-const DEMO_REFERRERS = ['google.com', 'x.com', 'producthunt.com', 'Direct', 'linkedin.com', 'news.ycombinator.com'];
+const DEMO_REFERRERS = [
+  'google.com',
+  'x.com',
+  'producthunt.com',
+  'Direct',
+  'linkedin.com',
+  'news.ycombinator.com',
+];
 const DEMO_BASES: Array<[string, string, number, number, string, string, string]> = [
   // country, city, lat, lng, browser, os, device
   ['US', 'New York', 40.7128, -74.006, 'chrome', 'Mac OS', 'laptop'],
@@ -243,7 +257,12 @@ function demoRevenueFrom(v: Visitor, counter: number, at: number): RevenueRow {
   };
 }
 
-function seedDemo(): { visitors: Visitor[]; feed: FeedEvent[]; counter: number; revenue: RevenueRow[] } {
+function seedDemo(): {
+  visitors: Visitor[];
+  feed: FeedEvent[];
+  counter: number;
+  revenue: RevenueRow[];
+} {
   const now = Date.now();
   const visitors: Visitor[] = DEMO_BASES.slice(0, 12).map((b, i) => {
     const [country, city, lat, lng, browser, os, device] = b;
@@ -279,7 +298,12 @@ function seedDemo(): { visitors: Visitor[]; feed: FeedEvent[]; counter: number; 
   return { visitors, feed, counter: 0, revenue };
 }
 
-function advanceDemo(s: { visitors: Visitor[]; feed: FeedEvent[]; counter: number; revenue: RevenueRow[] }) {
+function advanceDemo(s: {
+  visitors: Visitor[];
+  feed: FeedEvent[];
+  counter: number;
+  revenue: RevenueRow[];
+}) {
   const now = Date.now();
   const counter = s.counter + 1;
   let visitors = [...s.visitors];
@@ -489,9 +513,7 @@ export function LiveVisitorsPage({ websiteId }: { websiteId: string }) {
 
   /* ------------------------------- revenue -------------------------------- */
 
-  const revenueRows: RevenueRow[] = isDemo
-    ? demoState?.revenue || []
-    : realtimeData?.revenue || [];
+  const revenueRows: RevenueRow[] = isDemo ? demoState?.revenue || [] : realtimeData?.revenue || [];
   const botsBlocked: number = isDemo ? 7 : realtimeData?.botsBlocked || 0;
 
   // Net revenue in the window, headline in the dominant currency ("+" when mixed).
@@ -708,7 +730,10 @@ export function LiveVisitorsPage({ websiteId }: { websiteId: string }) {
         .filter(
           ([lng, lat]) => (lng || lat) && angularDistDeg(center.lng, center.lat, lng, lat) > 90,
         ) as [number, number][];
-      setHidden({ count: behind.length, centroid: behind.length ? sphericalCentroid(behind) : null });
+      setHidden({
+        count: behind.length,
+        centroid: behind.length ? sphericalCentroid(behind) : null,
+      });
     }, 1000);
     return () => clearInterval(id);
   }, [visitors, getCoordinates]);
@@ -959,7 +984,10 @@ export function LiveVisitorsPage({ websiteId }: { websiteId: string }) {
   // 30-point sparkline of pageviews. Demo uses a fixed gentle wave.
   const sparkline = useMemo(() => {
     if (isDemo) {
-      return Array.from({ length: 30 }, (_, i) => 3 + Math.round(2 * Math.sin(i / 3) + (i % 5 === 0 ? 2 : 0)));
+      return Array.from(
+        { length: 30 },
+        (_, i) => 3 + Math.round(2 * Math.sin(i / 3) + (i % 5 === 0 ? 2 : 0)),
+      );
     }
     const pts = realtimeData?.series?.views;
     if (Array.isArray(pts) && pts.length) {
@@ -1122,7 +1150,11 @@ export function LiveVisitorsPage({ websiteId }: { websiteId: string }) {
       )}
 
       {/* Details */}
-      <Collapsible open={isDetailsOpen} onOpenChange={setIsDetailsOpen} className="pt-3 border-t border-white/5">
+      <Collapsible
+        open={isDetailsOpen}
+        onOpenChange={setIsDetailsOpen}
+        className="pt-3 border-t border-white/5"
+      >
         <CollapsibleTrigger className="flex items-center justify-between w-full text-sm text-zinc-400 hover:text-white transition-colors group">
           <span className="font-medium">Details</span>
           <ChevronDown
@@ -1190,7 +1222,11 @@ export function LiveVisitorsPage({ websiteId }: { websiteId: string }) {
           background-image:
             radial-gradient(1px 1px at 25px 5px, white, rgba(255, 255, 255, 0)),
             radial-gradient(1px 1px at 50px 25px, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0)),
-            radial-gradient(1.5px 1.5px at 125px 20px, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0)),
+            radial-gradient(
+              1.5px 1.5px at 125px 20px,
+              rgba(255, 255, 255, 0.6),
+              rgba(255, 255, 255, 0)
+            ),
             radial-gradient(2px 2px at 250px 80px, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0));
           background-size: 350px 350px;
           opacity: 0.5;
@@ -1257,7 +1293,9 @@ export function LiveVisitorsPage({ websiteId }: { websiteId: string }) {
           <div className="h-5 w-px bg-white/20"></div>
           <span className="text-white/80 text-sm font-medium">Live</span>
           <span className="text-[11px] text-zinc-500 ml-auto flex items-center gap-1.5">
-            <span className={`inline-block h-1.5 w-1.5 rounded-full ${lastSync && Date.now() - lastSync < 25000 ? 'bg-emerald-400' : 'bg-zinc-600'}`} />
+            <span
+              className={`inline-block h-1.5 w-1.5 rounded-full ${lastSync && Date.now() - lastSync < 25000 ? 'bg-emerald-400' : 'bg-zinc-600'}`}
+            />
             updated {timeAgo(lastSync)}
           </span>
         </div>
@@ -1281,7 +1319,9 @@ export function LiveVisitorsPage({ websiteId }: { websiteId: string }) {
         >
           <Logo className="h-5 w-auto" />
           <div className="min-w-0">
-            <p className="text-white text-sm font-semibold leading-tight truncate">{websiteName || 'Live visitors'}</p>
+            <p className="text-white text-sm font-semibold leading-tight truncate">
+              {websiteName || 'Live visitors'}
+            </p>
             <p className="text-[11px] text-zinc-500">updated {timeAgo(lastSync)}</p>
           </div>
           <div className="ml-auto flex items-center gap-2">
@@ -1310,7 +1350,11 @@ export function LiveVisitorsPage({ websiteId }: { websiteId: string }) {
       {/* ------------------------- Mobile bottom sheet ------------------- */}
       {sheetOpen && (
         <div className="fixed inset-0 z-[1200] lg:hidden">
-          <button className="absolute inset-0 bg-black/60" aria-label="Close" onClick={() => setSheetOpen(false)} />
+          <button
+            className="absolute inset-0 bg-black/60"
+            aria-label="Close"
+            onClick={() => setSheetOpen(false)}
+          />
           <div className="absolute inset-x-0 bottom-0 max-h-[75vh] overflow-y-auto rounded-t-2xl border-t border-white/10 bg-[#0b0b0e]/95 backdrop-blur-md p-5 pb-8">
             <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-white/20" />
             <div className="flex items-center justify-between mb-3">
@@ -1318,7 +1362,10 @@ export function LiveVisitorsPage({ websiteId }: { websiteId: string }) {
                 <Activity className="h-5 w-5 text-indigo-400" />
                 <span className="text-lg font-semibold text-white">Live Visitors</span>
               </div>
-              <button onClick={() => setSheetOpen(false)} className="p-1.5 rounded-md text-zinc-400 hover:text-white hover:bg-white/10">
+              <button
+                onClick={() => setSheetOpen(false)}
+                className="p-1.5 rounded-md text-zinc-400 hover:text-white hover:bg-white/10"
+              >
                 <X className="h-4 w-4" />
               </button>
             </div>
@@ -1360,7 +1407,7 @@ export function LiveVisitorsPage({ websiteId }: { websiteId: string }) {
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-500 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-3 w-3 bg-indigo-500"></span>
             </div>
-            <p className="text-white font-semibold text-lg">It's quiet right now</p>
+            <p className="text-white font-semibold text-lg">It&apos;s quiet right now</p>
             <p className="text-sm text-zinc-400 mt-1.5">
               No visitors in the last hour. This view updates live — leave it open and watch them
               land.
@@ -1371,7 +1418,11 @@ export function LiveVisitorsPage({ websiteId }: { websiteId: string }) {
               onClick={handleShare}
               className="mt-4 border border-white/10 bg-white/5 text-zinc-200 hover:bg-white/10 hover:text-white"
             >
-              {copied ? <Check className="h-3.5 w-3.5 mr-1.5 text-green-400" /> : <Share2 className="h-3.5 w-3.5 mr-1.5" />}
+              {copied ? (
+                <Check className="h-3.5 w-3.5 mr-1.5 text-green-400" />
+              ) : (
+                <Share2 className="h-3.5 w-3.5 mr-1.5" />
+              )}
               {copied ? 'Link copied' : 'Share this view'}
             </Button>
           </div>
@@ -1479,7 +1530,11 @@ export function LiveVisitorsPage({ websiteId }: { websiteId: string }) {
             offset={16}
           >
             <div className="pointer-events-none">
-              <VisitorCard v={hoveredVisitor} compact paid={revenueBySession.get(hoveredVisitor.id)} />
+              <VisitorCard
+                v={hoveredVisitor}
+                compact
+                paid={revenueBySession.get(hoveredVisitor.id)}
+              />
             </div>
           </Popup>
         )}
@@ -1495,11 +1550,11 @@ export function LiveVisitorsPage({ websiteId }: { websiteId: string }) {
             offset={20}
           >
             <VisitorCard
-            v={selectedVisitor}
-            websiteId={websiteId}
-            paid={revenueBySession.get(selectedVisitor.id)}
-            onClose={() => setSelectedVisitor(null)}
-          />
+              v={selectedVisitor}
+              websiteId={websiteId}
+              paid={revenueBySession.get(selectedVisitor.id)}
+              onClose={() => setSelectedVisitor(null)}
+            />
           </Popup>
         )}
       </MapGL>
@@ -1522,7 +1577,13 @@ function Sparkline({ values }: { values: number[] }) {
   return (
     <svg width="100%" height={h} viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none">
       <polygon points={area} fill="rgba(99,102,241,0.15)" />
-      <polyline points={line} fill="none" stroke="#818cf8" strokeWidth="1.5" strokeLinejoin="round" />
+      <polyline
+        points={line}
+        fill="none"
+        stroke="#818cf8"
+        strokeWidth="1.5"
+        strokeLinejoin="round"
+      />
     </svg>
   );
 }
@@ -1541,13 +1602,17 @@ function FeedRow({
     <Tag
       onClick={onSelect ? () => onSelect(f.sessionId) : undefined}
       className={`feed-item pointer-events-auto flex w-full items-center gap-2.5 rounded-lg border border-white/10 bg-black/50 px-3 text-left backdrop-blur-md ${
-        onSelect ? 'cursor-pointer transition-colors hover:border-indigo-400/40 hover:bg-black/70' : ''
+        onSelect
+          ? 'cursor-pointer transition-colors hover:border-indigo-400/40 hover:bg-black/70'
+          : ''
       } ${compact ? 'py-1.5' : 'py-2'}`}
     >
       <span className="text-base leading-none shrink-0">{flagEmoji(f.country)}</span>
       <div className="min-w-0 flex-1">
         <p className="text-[13px] text-zinc-200 leading-tight truncate">
-          <span className="font-medium text-white">{f.city !== 'Unknown' ? f.city : countryName(f.country)}</span>
+          <span className="font-medium text-white">
+            {f.city !== 'Unknown' ? f.city : countryName(f.country)}
+          </span>
           <span className="text-zinc-500"> → </span>
           <span className="text-indigo-300">{f.urlPath}</span>
         </p>
@@ -1580,9 +1645,7 @@ function RevenueFeedRow({
     <Tag
       onClick={onSelect && r.sessionId ? () => onSelect(r.sessionId!) : undefined}
       className={`feed-item pointer-events-auto flex w-full items-center gap-2.5 rounded-lg border px-3 text-left backdrop-blur-md ${
-        refund
-          ? 'border-zinc-500/30 bg-zinc-500/10'
-          : 'border-amber-400/40 bg-amber-500/10'
+        refund ? 'border-zinc-500/30 bg-zinc-500/10' : 'border-amber-400/40 bg-amber-500/10'
       } ${onSelect ? 'cursor-pointer transition-colors hover:border-amber-300/60 hover:bg-amber-500/20' : ''} ${
         compact ? 'py-1.5' : 'py-2'
       }`}
@@ -1599,7 +1662,9 @@ function RevenueFeedRow({
           </span>
         </p>
         {!compact && (
-          <p className={`text-[11px] leading-tight truncate ${refund ? 'text-zinc-500' : 'text-amber-300/80'}`}>
+          <p
+            className={`text-[11px] leading-tight truncate ${refund ? 'text-zinc-500' : 'text-amber-300/80'}`}
+          >
             {refund ? 'refund' : 'payment'} · {r.gateway}
             {source && source !== 'Direct' ? ` · from ${source}` : ''}
           </p>
@@ -1625,6 +1690,17 @@ function VisitorCard({
 }) {
   const active = Date.now() - Number(v.lastSeen || 0) <= ACTIVE_MS;
   const duration = Number(v.lastSeen || 0) - Number(v.firstSeen || 0);
+  // Live surface knows a subset of signals (no scroll/clicks/visit history);
+  // the score renormalizes over what's actually observable right now.
+  const intent = computeIntentScore({
+    views: Number(v.pageCount) || 0,
+    totalSeconds: duration > 0 ? duration / 1000 : undefined,
+    lastAt: v.lastSeen,
+    activeNow: active,
+    referrerDomain: v.referrer && v.referrer !== 'Direct' ? v.referrer : null,
+    paths: [v.entryPath, v.currentPath].filter(Boolean),
+    spentMinor: paid?.minor,
+  });
   return (
     <div className="relative w-64 bg-zinc-950/95 backdrop-blur-md border border-zinc-800 rounded-lg shadow-xl overflow-hidden">
       {onClose && (
@@ -1671,6 +1747,10 @@ function VisitorCard({
         </div>
 
         <div className="space-y-1.5">
+          <div className="flex justify-between items-center text-xs gap-3">
+            <span className="text-zinc-500 font-medium shrink-0">Buying intent</span>
+            <IntentBadge result={intent} size="sm" />
+          </div>
           <Row label="Viewing" value={v.currentPath} mono />
           {v.entryPath && v.entryPath !== v.currentPath && (
             <Row label="Entered at" value={v.entryPath} mono />

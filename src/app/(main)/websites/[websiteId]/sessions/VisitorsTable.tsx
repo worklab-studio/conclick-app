@@ -8,6 +8,8 @@ import { Avatar } from '@/components/common/Avatar';
 import { TypeIcon } from '@/components/common/TypeIcon';
 import { SiteIcon } from '@/app/(main)/websites/SiteIcon';
 import { friendlyName } from '@/lib/friendly-name';
+import { computeIntentScore } from '@/lib/intent-score';
+import { IntentBadge } from '@/components/metrics/IntentBadge';
 
 // pg returns bigint as string → Number() it. Amounts are minor units (cents).
 function formatMoney(minorRaw: any, currency?: string) {
@@ -60,6 +62,7 @@ export function VisitorsTable({ data }: { data?: any[]; displayMode?: string }) 
           <div className="flex-1">Visitor</div>
           <div className="hidden items-center gap-7 md:flex">
             <div className="w-[150px]">Source</div>
+            <div className="w-[64px] text-right">Intent</div>
             <div className="w-[70px] text-right">Spent</div>
             <div className="w-[96px]">Activity</div>
             <div className="w-[120px] text-right">Last seen</div>
@@ -73,6 +76,15 @@ export function VisitorsTable({ data }: { data?: any[]; displayMode?: string }) 
         const views = Number(row.views) || 0;
         const visits = Number(row.visits) || 0;
         const ref = row.referrerDomain as string | undefined;
+        // List rows lack paths/time/scroll — the score renormalizes over the
+        // signals it does have (frequency, depth, recency, source, revenue).
+        const intent = computeIntentScore({
+          visits,
+          views,
+          lastAt: row.lastAt || row.createdAt,
+          referrerDomain: ref ?? null,
+          spentMinor: spent,
+        });
 
         // Read-only on the public share: rows aren't clickable (no profile modal).
         const Wrapper: any = isShare ? 'div' : Link;
@@ -134,6 +146,10 @@ export function VisitorsTable({ data }: { data?: any[]; displayMode?: string }) 
                       Direct
                     </span>
                   )}
+                </div>
+                {/* Intent */}
+                <div className="w-[64px] text-right">
+                  <IntentBadge result={intent} size="sm" />
                 </div>
                 {/* Spent */}
                 <div className="w-[70px] text-right">
