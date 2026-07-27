@@ -13,7 +13,16 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { ArrowRight, Check, Copy, ExternalLink, Globe, Loader2 } from 'lucide-react';
+import {
+  ArrowRight,
+  Check,
+  Code2,
+  Copy,
+  ExternalLink,
+  Globe,
+  Loader2,
+  Sparkles,
+} from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { DOMAIN_REGEX } from '@/lib/constants';
 import { SiteIcon } from './SiteIcon';
@@ -125,6 +134,7 @@ export function WebsiteAddModalContent({
   const [copiedScript, setCopiedScript] = useState(false);
   const [copiedTool, setCopiedTool] = useState<string | null>(null);
   const [liveStats, setLiveStats] = useState<{ pageviews: number; visitors: number } | null>(null);
+  const [installMode, setInstallMode] = useState<'manual' | 'ai'>('manual');
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -435,94 +445,122 @@ export function WebsiteAddModalContent({
           </span>
         </div>
 
-        <div className="space-y-1">
-          <h3 className="text-base font-semibold text-foreground">Install your tracking code</h3>
-          <p className="text-sm text-muted-foreground">
-            Paste this into your site&apos;s <code className="text-foreground">&lt;head&gt;</code> —
-            or hand it to your AI.
-          </p>
-        </div>
-
-        <div className="space-y-2.5">
-          <label className="text-sm font-medium leading-none">Tracking Code</label>
-          <div className="group relative">
-            <div className="flex w-full overflow-x-auto rounded-lg border border-zinc-800 bg-[#18181b] p-4 pr-12 font-mono">
-              <code className="text-[13px] leading-relaxed">
-                <span style={{ color: '#89ddff' }}>&lt;script</span>{' '}
-                <span style={{ color: '#c792ea' }}>defer</span>{' '}
-                <span style={{ color: '#c792ea' }}>src</span>
-                <span style={{ color: '#89ddff' }}>=</span>
-                <span style={{ color: '#c3e88d' }}>&quot;{trackingUrl}&quot;</span>{' '}
-                <span style={{ color: '#c792ea' }}>data-website-id</span>
-                <span style={{ color: '#89ddff' }}>=</span>
-                <span style={{ color: '#c3e88d' }}>&quot;{createdWebsite?.id}&quot;</span>
-                <span style={{ color: '#89ddff' }}>&gt;&lt;/script&gt;</span>
-              </code>
-            </div>
-            <Button
-              variant="outline"
-              size="icon"
-              className="absolute right-2 top-2 h-7 w-7"
-              onClick={() => copyToClipboard(scriptCode, setCopiedScript)}
-            >
-              {copiedScript ? (
-                <Check className="h-3 w-3 text-emerald-400" />
-              ) : (
-                <Copy className="h-3 w-3" />
-              )}
-            </Button>
-          </div>
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <span className="shrink-0">Website ID</span>
-            <code className="truncate text-zinc-400">{createdWebsite?.id}</code>
+        {/* One install path on screen at a time — the segment IS the heading. */}
+        <div
+          className="flex rounded-lg border border-zinc-800 bg-[#18181b] p-1"
+          role="tablist"
+          aria-label="Installation method"
+        >
+          {[
+            { key: 'manual' as const, label: 'Manual', icon: Code2 },
+            { key: 'ai' as const, label: 'AI prompt', icon: Sparkles },
+          ].map(({ key, label, icon: Icon }) => (
             <button
+              key={key}
               type="button"
-              className="shrink-0 text-zinc-500 transition-colors hover:text-zinc-300"
-              onClick={() => copyToClipboard(createdWebsite?.id, setCopiedId)}
-              aria-label="Copy website ID"
+              role="tab"
+              aria-selected={installMode === key}
+              onClick={() => setInstallMode(key)}
+              className={`flex flex-1 items-center justify-center gap-2 rounded-md py-2 text-sm font-medium transition-colors ${
+                installMode === key
+                  ? 'bg-zinc-800 text-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
             >
-              {copiedId ? (
-                <Check className="h-3 w-3 text-emerald-400" />
-              ) : (
-                <Copy className="h-3 w-3" />
-              )}
+              <Icon className="h-4 w-4" />
+              {label}
             </button>
-          </div>
+          ))}
         </div>
 
-        {/* Hand-off to a coding agent: one click copies a complete, tailored
-            prompt (exact snippet + placement rules + verify step). */}
-        <div className="space-y-2">
-          <div className="flex items-center gap-3">
-            <div className="h-px flex-1 bg-zinc-800" />
-            <span className="text-xs font-medium text-muted-foreground">or hand it to your AI</span>
-            <div className="h-px flex-1 bg-zinc-800" />
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {AI_TOOLS.map(tool => (
-              <button
-                key={tool.key}
-                type="button"
-                onClick={() => handleCopyAiPrompt(tool.key)}
-                className={`inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-xs font-medium transition-all ${
-                  copiedTool === tool.key
-                    ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-300'
-                    : 'border-zinc-800 bg-[#18181b] text-zinc-300 hover:border-[#5e5ba4]/60 hover:bg-zinc-900'
-                }`}
+        {installMode === 'manual' ? (
+          <div className="min-h-[176px] space-y-2.5">
+            <p className="text-sm text-muted-foreground">
+              Paste this just before <code className="text-foreground">&lt;/head&gt;</code> on every
+              page:
+            </p>
+            <div className="group relative">
+              <div className="flex w-full overflow-x-auto rounded-lg border border-zinc-800 bg-[#18181b] p-4 pr-12 font-mono">
+                <code className="text-[13px] leading-relaxed">
+                  <span style={{ color: '#89ddff' }}>&lt;script</span>{' '}
+                  <span style={{ color: '#c792ea' }}>defer</span>{' '}
+                  <span style={{ color: '#c792ea' }}>src</span>
+                  <span style={{ color: '#89ddff' }}>=</span>
+                  <span style={{ color: '#c3e88d' }}>&quot;{trackingUrl}&quot;</span>{' '}
+                  <span style={{ color: '#c792ea' }}>data-website-id</span>
+                  <span style={{ color: '#89ddff' }}>=</span>
+                  <span style={{ color: '#c3e88d' }}>&quot;{createdWebsite?.id}&quot;</span>
+                  <span style={{ color: '#89ddff' }}>&gt;&lt;/script&gt;</span>
+                </code>
+              </div>
+              <Button
+                variant="outline"
+                size="icon"
+                className="absolute right-2 top-2 h-7 w-7"
+                onClick={() => copyToClipboard(scriptCode, setCopiedScript)}
               >
-                {copiedTool === tool.key ? (
-                  <Check className="h-4 w-4" />
+                {copiedScript ? (
+                  <Check className="h-3 w-3 text-emerald-400" />
                 ) : (
-                  <img src={tool.icon} alt="" className="h-4 w-4 object-contain" />
+                  <Copy className="h-3 w-3" />
                 )}
-                {copiedTool === tool.key ? 'Prompt copied' : tool.label}
+              </Button>
+            </div>
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <span className="shrink-0">Website ID</span>
+              <code className="truncate text-zinc-400">{createdWebsite?.id}</code>
+              <button
+                type="button"
+                className="shrink-0 text-zinc-500 transition-colors hover:text-zinc-300"
+                onClick={() => copyToClipboard(createdWebsite?.id, setCopiedId)}
+                aria-label="Copy website ID"
+              >
+                {copiedId ? (
+                  <Check className="h-3 w-3 text-emerald-400" />
+                ) : (
+                  <Copy className="h-3 w-3" />
+                )}
               </button>
-            ))}
+            </div>
           </div>
-          <p className="text-xs text-muted-foreground">
-            One click copies a ready-made prompt for your coding agent.
-          </p>
-        </div>
+        ) : (
+          <div className="min-h-[176px] space-y-3">
+            <p className="text-sm text-muted-foreground">
+              Pick your agent — a complete install prompt lands on your clipboard.
+            </p>
+            <div className="grid grid-cols-5 gap-2">
+              {AI_TOOLS.map(tool => (
+                <button
+                  key={tool.key}
+                  type="button"
+                  onClick={() => handleCopyAiPrompt(tool.key)}
+                  className={`flex flex-col items-center gap-2 rounded-lg border py-3.5 transition-all ${
+                    copiedTool === tool.key
+                      ? 'border-emerald-500/40 bg-emerald-500/10'
+                      : 'border-zinc-800 bg-[#18181b] hover:border-[#5e5ba4]/60 hover:bg-zinc-900'
+                  }`}
+                >
+                  {copiedTool === tool.key ? (
+                    <Check className="h-6 w-6 text-emerald-400" />
+                  ) : (
+                    <img src={tool.icon} alt="" className="h-6 w-6 object-contain" />
+                  )}
+                  <span
+                    className={`text-[11px] font-medium ${
+                      copiedTool === tool.key ? 'text-emerald-300' : 'text-zinc-300'
+                    }`}
+                  >
+                    {copiedTool === tool.key ? 'Copied!' : tool.label}
+                  </span>
+                </button>
+              ))}
+            </div>
+            <p className="text-xs leading-relaxed text-muted-foreground">
+              The prompt carries your exact snippet, placement rules and a verify step — paste it
+              into the agent and it does the rest.
+            </p>
+          </div>
+        )}
 
         {isVerifying ? (
           <div className="space-y-2 border-t border-zinc-800/70 pt-4">
