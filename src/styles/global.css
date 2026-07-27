@@ -3,129 +3,132 @@
 @tailwind utilities;
 
 @layer base {
-    :root {
-        --background: #ffffff;
-        --foreground: #0a0a0a;
-        --card: #ffffff;
-        --card-foreground: #0a0a0a;
-        --popover: #ffffff;
-        --popover-foreground: #0a0a0a;
-        --primary: #171717;
-        --primary-foreground: #fafafa;
-        --secondary: #f5f5f5;
-        --secondary-foreground: #171717;
-        --muted: #f5f5f5;
-        --muted-foreground: #737373;
-        --accent: #f5f5f5;
-        --accent-foreground: #171717;
-        --destructive: #e7000b;
-        --border: 240 3.7% 15.9% / 0.2;
-        --input: #e5e5e5;
-        --ring: #a1a1a1;
-        --chart-1: #f54900;
-        --chart-2: #009689;
-        --chart-3: #104e64;
-        --chart-4: #ffb900;
-        --chart-5: #fe9a00;
-        --sidebar: #fafafa;
-        --sidebar-foreground: #0a0a0a;
-        --sidebar-primary: #171717;
-        --sidebar-primary-foreground: #fafafa;
-        --sidebar-accent: #f5f5f5;
-        --sidebar-accent-foreground: #171717;
-        --sidebar-border: #e5e5e5;
-        --sidebar-ring: oklch(0.708 0 0);
-        ;
+  :root {
+    --background: #ffffff;
+    --foreground: #0a0a0a;
+    --card: #ffffff;
+    --card-foreground: #0a0a0a;
+    --popover: #ffffff;
+    --popover-foreground: #0a0a0a;
+    --primary: #171717;
+    --primary-foreground: #fafafa;
+    --secondary: #f5f5f5;
+    --secondary-foreground: #171717;
+    --muted: #f5f5f5;
+    --muted-foreground: #737373;
+    --accent: #f5f5f5;
+    --accent-foreground: #171717;
+    --destructive: #e7000b;
+    --border: 240 3.7% 15.9% / 0.2;
+    --input: #e5e5e5;
+    --ring: #a1a1a1;
+    --chart-1: #f54900;
+    --chart-2: #009689;
+    --chart-3: #104e64;
+    --chart-4: #ffb900;
+    --chart-5: #fe9a00;
+    --sidebar: #fafafa;
+    --sidebar-foreground: #0a0a0a;
+    --sidebar-primary: #171717;
+    --sidebar-primary-foreground: #fafafa;
+    --sidebar-accent: #f5f5f5;
+    --sidebar-accent-foreground: #171717;
+    --sidebar-border: #e5e5e5;
+    --sidebar-ring: oklch(0.708 0 0);
+    --font-sans:
+      'Geist', 'Geist Fallback', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+      'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji',
+      'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-serif:
+      'Geist', 'Geist Fallback', ui-serif, Georgia, Cambria, 'Times New Roman', Times, serif;
+    --font-mono:
+      'Geist Mono', 'Geist Mono Fallback', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+      'Liberation Mono', 'Courier New', monospace;
 
-        --font-sans: 'Geist', 'Geist Fallback', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
-        --font-serif: "Geist", "Geist Fallback", ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
-        --font-mono: "Geist Mono", "Geist Mono Fallback", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    --radius: 0.625rem;
 
-        --radius: 0.625rem;
+    --shadow-2xs: 0 1px 3px 0px rgb(0 0 0 / 0.05);
+    --shadow-xs: 0 1px 3px 0px rgb(0 0 0 / 0.05);
+    --shadow-sm: 0 1px 3px 0px rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+    --shadow: 0 1px 3px 0px rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+    --shadow-md: 0 1px 3px 0px rgb(0 0 0 / 0.1), 0 2px 4px -1px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 1px 3px 0px rgb(0 0 0 / 0.1), 0 4px 6px -1px rgb(0 0 0 / 0.1);
+    --shadow-xl: 0 1px 3px 0px rgb(0 0 0 / 0.1), 0 8px 10px -1px rgb(0 0 0 / 0.1);
+    --shadow-2xl: 0 1px 3px 0px rgb(0 0 0 / 0.25);
+  }
 
-        --shadow-2xs: 0 1px 3px 0px rgb(0 0 0 / 0.05);
-        --shadow-xs: 0 1px 3px 0px rgb(0 0 0 / 0.05);
-        --shadow-sm: 0 1px 3px 0px rgb(0 0 0 / 0.10), 0 1px 2px -1px rgb(0 0 0 / 0.10);
-        --shadow: 0 1px 3px 0px rgb(0 0 0 / 0.10), 0 1px 2px -1px rgb(0 0 0 / 0.10);
-        --shadow-md: 0 1px 3px 0px rgb(0 0 0 / 0.10), 0 2px 4px -1px rgb(0 0 0 / 0.10);
-        --shadow-lg: 0 1px 3px 0px rgb(0 0 0 / 0.10), 0 4px 6px -1px rgb(0 0 0 / 0.10);
-        --shadow-xl: 0 1px 3px 0px rgb(0 0 0 / 0.10), 0 8px 10px -1px rgb(0 0 0 / 0.10);
-        --shadow-2xl: 0 1px 3px 0px rgb(0 0 0 / 0.25);
-    }
+  .dark,
+  [data-theme='dark'] {
+    --background: 0 0% 5%;
+    --foreground: 0 0% 100%;
+    --card: 0 0% 8%;
+    --card-foreground: 0 0% 100%;
+    --popover: 0 0% 3%;
+    --popover-foreground: 0 0% 100%;
+    --primary: 0 0% 98%;
+    --primary-foreground: 240 5.9% 10%;
+    --secondary: 0 0% 3%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 0 0% 6%;
+    --muted-foreground: 0 0% 63.9%;
+    --accent: 0 0% 6%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 9%;
+    --input: 0 0% 9%;
+    --ring: 240 4.9% 83.9%;
+    --chart-1: 243 29% 50%;
+    --chart-2: 0 0% 100% / 0.5;
+    --chart-3: 0 0% 100% / 0.3;
+    --chart-4: 0 0% 100% / 0.1;
+    --chart-5: 0 0% 100% / 0.8;
+    --sidebar: #171717;
+    --sidebar-foreground: #fafafa;
+    --sidebar-primary: #1447e6;
+    --sidebar-primary-foreground: #fafafa;
+    --sidebar-accent: #262626;
+    --sidebar-accent-foreground: #fafafa;
+    --sidebar-border: #ffffff1a;
+    --sidebar-ring: #737373;
 
-    .dark,
-    [data-theme="dark"] {
-        --background: 0 0% 5%;
-        --foreground: 0 0% 100%;
-        --card: 0 0% 8%;
-        --card-foreground: 0 0% 100%;
-        --popover: 0 0% 3%;
-        --popover-foreground: 0 0% 100%;
-        --primary: 0 0% 98%;
-        --primary-foreground: 240 5.9% 10%;
-        --secondary: 0 0% 3%;
-        --secondary-foreground: 0 0% 100%;
-        --muted: 0 0% 6%;
-        --muted-foreground: 0 0% 63.9%;
-        --accent: 0 0% 6%;
-        --accent-foreground: 0 0% 100%;
-        --destructive: 0 62.8% 30.6%;
-        --destructive-foreground: 0 0% 98%;
-        --border: 0 0% 9%;
-        --input: 0 0% 9%;
-        --ring: 240 4.9% 83.9%;
-        --chart-1: 243 29% 50%;
-        --chart-2: 0 0% 100% / 0.5;
-        --chart-3: 0 0% 100% / 0.3;
-        --chart-4: 0 0% 100% / 0.1;
-        --chart-5: 0 0% 100% / 0.8;
-        --sidebar: #171717;
-        --sidebar-foreground: #fafafa;
-        --sidebar-primary: #1447e6;
-        --sidebar-primary-foreground: #fafafa;
-        --sidebar-accent: #262626;
-        --sidebar-accent-foreground: #fafafa;
-        --sidebar-border: #ffffff1a;
-        --sidebar-ring: #737373;
-
-        --shadow-2xs: 0 1px 3px 0px rgb(0 0 0 / 0.05);
-        --shadow-xs: 0 1px 3px 0px rgb(0 0 0 / 0.05);
-        --shadow-sm: 0 1px 3px 0px rgb(0 0 0 / 0.10), 0 1px 2px -1px rgb(0 0 0 / 0.10);
-        --shadow: 0 1px 3px 0px rgb(0 0 0 / 0.10), 0 1px 2px -1px rgb(0 0 0 / 0.10);
-        --shadow-md: 0 1px 3px 0px rgb(0 0 0 / 0.10), 0 2px 4px -1px rgb(0 0 0 / 0.10);
-        --shadow-lg: 0 1px 3px 0px rgb(0 0 0 / 0.10), 0 4px 6px -1px rgb(0 0 0 / 0.10);
-        --shadow-xl: 0 1px 3px 0px rgb(0 0 0 / 0.10), 0 8px 10px -1px rgb(0 0 0 / 0.10);
-        --shadow-2xl: 0 1px 3px 0px rgb(0 0 0 / 0.25);
-    }
+    --shadow-2xs: 0 1px 3px 0px rgb(0 0 0 / 0.05);
+    --shadow-xs: 0 1px 3px 0px rgb(0 0 0 / 0.05);
+    --shadow-sm: 0 1px 3px 0px rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+    --shadow: 0 1px 3px 0px rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+    --shadow-md: 0 1px 3px 0px rgb(0 0 0 / 0.1), 0 2px 4px -1px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 1px 3px 0px rgb(0 0 0 / 0.1), 0 4px 6px -1px rgb(0 0 0 / 0.1);
+    --shadow-xl: 0 1px 3px 0px rgb(0 0 0 / 0.1), 0 8px 10px -1px rgb(0 0 0 / 0.1);
+    --shadow-2xl: 0 1px 3px 0px rgb(0 0 0 / 0.25);
+  }
 }
 
-
 @layer base {
-    * {
-        @apply border-border;
-    }
+  * {
+    @apply border-border;
+  }
 
-    body {
-        @apply bg-background text-foreground;
-    }
+  body {
+    @apply bg-background text-foreground;
+  }
 }
 
 html[style*='padding-right'],
 body[style*='padding-right'] {
-    padding-right: 0 !important;
+  padding-right: 0 !important;
 }
 
 a,
 a:active,
 a:hover {
-    color: var(--font-color);
-    text-decoration: none;
+  color: var(--font-color);
+  text-decoration: none;
 }
 
 /* Hide scrollbar for Chrome, Safari and Opera */
 ::-webkit-scrollbar {
-    display: none;
-    width: 0;
+  display: none;
+  width: 0;
 }
 
 /* Auth: hide the whole "Secured by Clerk" badge box — the "Secured by" text and
@@ -134,5 +137,19 @@ a:hover {
    (its link points to our own /login or /register, never clerk.com). */
 .cl-rootBox *:has(> a[href*='clerk.com']),
 .cl-rootBox a[href*='clerk.com'] {
-    display: none !important;
+  display: none !important;
+}
+
+/* react-zen buttons (date filter trigger etc.) define no :focus-visible style,
+   so Chrome paints its native blue `outline: auto` ring — and react-aria
+   re-focuses the trigger after every selection, so the blue stroke lingers
+   until you click elsewhere. Kill the UA ring and use the library's own quiet
+   grey border instead, so keyboard focus stays visible without the blue. */
+button[data-rac][class*='Button_button']:focus,
+button[data-rac][class*='Button_button']:focus-visible {
+  outline: none;
+}
+
+button[data-rac][class*='Button_button']:focus-visible {
+  border-color: #7b7b7b;
 }

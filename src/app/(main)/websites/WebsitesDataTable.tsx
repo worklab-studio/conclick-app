@@ -4,7 +4,8 @@ import { useLoginQuery, useUserWebsitesQuery } from '@/components/hooks';
 import { useApi } from '@/components/hooks/useApi';
 import { useDateParameters } from '@/components/hooks/useDateParameters';
 import { WebsitesOverview, type OverviewSums } from './WebsitesOverview';
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
+import { useQueries, keepPreviousData } from '@tanstack/react-query';
 import { WebsiteAddButton } from './WebsiteAddButton';
 import { DateFilter } from '@/components/input/DateFilter';
 import { parseDateRange } from '@/lib/date';
@@ -90,7 +91,7 @@ export function WebsitesDataTable({ userId, teamId }: { userId?: string; teamId?
 
   const range = useMemo(() => buildRange(rangeValue, timezone), [rangeValue, timezone]);
 
-  const { get, useQuery } = useApi();
+  const { get } = useApi();
 
   // Safely extract website IDs for stats fetching
   const websiteIds = useMemo(() => {
@@ -101,34 +102,41 @@ export function WebsitesDataTable({ userId, teamId }: { userId?: string; teamId?
     return [];
   }, [queryResult.data]);
 
-  // Aggregate stats across every website for the overview strip, over the
-  // page's selected range. These are the same /stats calls the cards make
-  // (same key parameters), so they de-dupe in the query cache.
-  const { data: overview, isLoading: overviewLoading } = useQuery<OverviewSums>({
-    queryKey: ['all-websites-overview', websiteIds.join(','), range.value, timezone],
-    queryFn: async () => {
-      const empty: OverviewSums = {
-        pageviews: 0,
-        visitors: 0,
-        visits: 0,
-        bounces: 0,
-        totaltime: 0,
-        prev: { pageviews: 0, visitors: 0, visits: 0, bounces: 0, totaltime: 0 },
-      };
+  // One stats query per website, on EXACTLY the cards' query keys and params —
+  // so each site is fetched once per range and the strip aggregates the same
+  // cache entries the cards render from. (The previous version ran its own
+  // aggregate fetch: 11 duplicate /stats requests on every range change.)
+  // staleTime keeps range-hopping instant for a minute; keepPreviousData means
+  // a range switch morphs the numbers in place instead of blanking the page.
+  const statsResults = useQueries({
+    queries: websiteIds.map((id: string) => ({
+      queryKey: ['card:stats', id, timezone, range.value],
+      queryFn: () =>
+        get(`/websites/${id}/stats`, {
+          startAt: range.startAt,
+          endAt: range.endAt,
+          unit: range.unit,
+          timezone,
+        }),
+      staleTime: 60_000,
+      placeholderData: keepPreviousData,
+    })),
+  });
 
-      if (websiteIds.length === 0) return empty;
+  // Atomic swap for the strip: keep showing the previous range's totals until
+  // EVERY site has fresh numbers, so the tiles never sum a mix of two ranges
+  // mid-transition. Errored sites count as settled (contributing zero) so one
+  // failing site can't pin the strip on stale totals forever.
+  const freshSums = useMemo<OverviewSums | null>(() => {
+    if (statsResults.length === 0) return null;
+    const settled = statsResults.every(
+      r => !r.isPlaceholderData && (r.data !== undefined || r.isError),
+    );
+    if (!settled) return null;
 
-      const allStats = await Promise.all(
-        websiteIds.map((id: string) =>
-          get(`/websites/${id}/stats`, {
-            startAt: range.startAt,
-            endAt: range.endAt,
-            timezone,
-          }).catch(() => null),
-        ),
-      );
-
-      return allStats.reduce((acc: OverviewSums, stat: any) => {
+    return statsResults.reduce(
+      (acc: OverviewSums, r: any) => {
+        const stat = r.data;
         if (!stat) return acc;
         const c = stat.comparison || {};
         acc.pageviews += stat.pageviews || 0;
@@ -142,17 +150,30 @@ export function WebsitesDataTable({ userId, teamId }: { userId?: string; teamId?
         acc.prev.bounces += c.bounces || 0;
         acc.prev.totaltime += c.totaltime || 0;
         return acc;
-      }, empty);
-    },
-    enabled: websiteIds.length > 0,
-  });
+      },
+      {
+        pageviews: 0,
+        visitors: 0,
+        visits: 0,
+        bounces: 0,
+        totaltime: 0,
+        prev: { pageviews: 0, visitors: 0, visits: 0, bounces: 0, totaltime: 0 },
+      },
+    );
+  }, [statsResults]);
+
+  // Hold the last complete totals across transitions (render-time "previous
+  // value" ref — the strip shows these until the new range fully settles).
+  const lastSumsRef = useRef<OverviewSums | null>(null);
+  if (freshSums) lastSumsRef.current = freshSums;
+  const overview = freshSums ?? lastSumsRef.current;
+  const overviewLoading = !overview;
 
   const username = user?.displayName || user?.username || 'User';
 
   const renderGreeting = () => (
     <div className="text-zinc-400 text-lg">
-      Hey <span className="text-zinc-200 font-medium">{username}</span> — here&apos;s{' '}
-      {range.phrase}
+      Hey <span className="text-zinc-200 font-medium">{username}</span> — here&apos;s {range.phrase}
       {websiteIds.length
         ? ` across ${websiteIds.length} ${websiteIds.length === 1 ? 'site' : 'sites'}`
         : ''}

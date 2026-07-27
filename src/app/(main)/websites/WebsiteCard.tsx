@@ -11,6 +11,7 @@ import {
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 import { useToast } from '@umami/react-zen';
+import { keepPreviousData } from '@tanstack/react-query';
 import { Settings, MoreHorizontal, LayoutDashboard, Code, Trash2, Globe } from 'lucide-react';
 import Link from 'next/link';
 import { useNavigation } from '@/components/hooks';
@@ -68,6 +69,11 @@ export function WebsiteCard({ website, range }: { website: any; range?: CardRang
   const startAt = r.startAt || Date.now() - DAY_MS;
   const endAt = r.endAt || Date.now();
 
+  // staleTime: hopping back to a range viewed in the last minute costs zero
+  // requests. keepPreviousData: a range switch keeps the previous numbers on
+  // screen and morphs them when fresh data lands — no skeleton flash. The
+  // stats key/params match the page's useQueries exactly, so this card and
+  // the overview strip share one fetch per site.
   const { data: stats } = useQuery({
     queryKey: ['card:stats', website.id, timezone, r.value],
     queryFn: () =>
@@ -78,18 +84,28 @@ export function WebsiteCard({ website, range }: { website: any; range?: CardRang
         timezone,
       }),
     enabled: !!website.id,
+    staleTime: 60_000,
+    placeholderData: keepPreviousData,
   });
 
+  // The window params ride along WITH the series so the sparkline always
+  // buckets data against the window it was fetched for — while the previous
+  // range's series is showing as placeholder, it keeps its own window instead
+  // of being smeared into the new range's buckets.
   const { data: pv } = useQuery({
     queryKey: ['card:pageviews', website.id, timezone, r.value],
-    queryFn: () =>
-      get(`/websites/${website.id}/pageviews`, {
+    queryFn: async () => {
+      const res = await get(`/websites/${website.id}/pageviews`, {
         startAt,
         endAt,
         unit: r.unit,
         timezone,
-      }),
+      });
+      return { sessions: res?.sessions || [], window: { startAt, endAt, unit: r.unit } };
+    },
     enabled: !!website.id,
+    staleTime: 60_000,
+    placeholderData: keepPreviousData,
   });
 
   // "Connected" = has the site ever received data? The all-time check is the
@@ -117,28 +133,32 @@ export function WebsiteCard({ website, range }: { website: any; range?: CardRang
   // 30d -> 30 daily, 12mo/all -> monthly. Capped so a pathological range can't
   // allocate an absurd array (recharts handles a few hundred points fine).
   const series = React.useMemo(() => {
-    const unitMs = r.unit === 'hour' ? HOUR_MS : DAY_MS; // months handled below
+    // Bucket against the window the series was FETCHED for (rides with the
+    // data), not the currently selected one — they differ briefly while a
+    // placeholder from the previous range is on screen.
+    const w = pv?.window ?? { startAt, endAt, unit: r.unit };
+    const unitMs = w.unit === 'hour' ? HOUR_MS : DAY_MS; // months handled below
     let count: number;
-    if (r.unit === 'month') {
-      const s = new Date(startAt);
-      const e = new Date(endAt);
+    if (w.unit === 'month') {
+      const s = new Date(w.startAt);
+      const e = new Date(w.endAt);
       count = (e.getFullYear() - s.getFullYear()) * 12 + (e.getMonth() - s.getMonth()) + 1;
     } else {
-      count = Math.ceil((endAt - startAt) / unitMs);
+      count = Math.ceil((w.endAt - w.startAt) / unitMs);
     }
     count = Math.max(1, Math.min(count, 500));
 
     const buckets = Array.from({ length: count }, (_, i) => ({ t: i, visitors: 0 }));
-    const s = new Date(startAt);
+    const s = new Date(w.startAt);
     for (const point of pv?.sessions || []) {
       const ts = Date.parse(String(point.x).replace(' ', 'T'));
       if (Number.isNaN(ts)) continue;
       let idx: number;
-      if (r.unit === 'month') {
+      if (w.unit === 'month') {
         const d = new Date(ts);
         idx = (d.getFullYear() - s.getFullYear()) * 12 + (d.getMonth() - s.getMonth());
       } else {
-        idx = Math.floor((ts - startAt) / unitMs);
+        idx = Math.floor((ts - w.startAt) / unitMs);
       }
       if (idx < 0) idx = 0;
       if (idx > count - 1) idx = count - 1;
