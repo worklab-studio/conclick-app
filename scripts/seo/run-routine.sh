@@ -71,6 +71,48 @@ trap 'rm -f "$LOCK"' EXIT
 
 cd "$REPO" || { echo "repo not found"; exit 1; }
 
+# --- health + alerting -----------------------------------------------------
+#
+# The engine failed silently for three days (2026-07-25..27, seven runs, revoked
+# claude token). The operator's stated requirement is "I don't want to check
+# daily", so silence has to mean healthy — which means a failure must escalate
+# on its own rather than wait to be discovered.
+#
+# Three levels, deliberately:
+#   1. HEALTH.md   — an append-only ledger, one line per run. Cheap to read,
+#                    survives log rotation, and is what a human or an agent
+#                    greps to answer "is this thing alive".
+#   2. notification— a toast on the first failure. Easy to miss, which is fine:
+#                    one bad run is usually transient (a stream hiccup, a lock).
+#   3. modal dialog— on the SECOND consecutive failure. Blocking, stays until
+#                    dismissed. Two in a row is never transient; it means the
+#                    engine is down and will stay down until someone acts.
+HEALTH="$LOG_DIR/HEALTH.md"
+FAILSTATE="$LOG_DIR/.consecutive-failures"
+
+record_health() {
+  mkdir -p "$LOG_DIR"
+  [ -f "$HEALTH" ] || printf '# Conclick SEO engine health\n\nOne line per run. Newest at the bottom.\n\n' > "$HEALTH"
+  printf '%s  %-14s %s\n' "$(date '+%Y-%m-%d %H:%M')" "$ROUTINE" "$1" >> "$HEALTH"
+}
+
+alert() {
+  local msg="$1"
+  local fails=0
+  [ -f "$FAILSTATE" ] && fails="$(cat "$FAILSTATE" 2>/dev/null || echo 0)"
+  fails=$((fails + 1))
+  echo "$fails" > "$FAILSTATE"
+
+  osascript -e "display notification \"$msg\" with title \"Conclick SEO\" sound name \"Basso\"" 2>/dev/null || true
+
+  # Second strike: a dialog that cannot be missed or auto-dismissed.
+  if [ "$fails" -ge 2 ]; then
+    osascript -e "display dialog \"Conclick SEO engine has failed $fails runs in a row.\n\n$msg\n\nNothing is publishing until this is fixed.\" with title \"Conclick SEO — engine down\" buttons {\"OK\"} default button 1 with icon stop" >/dev/null 2>&1 &
+  fi
+}
+
+clear_failures() { rm -f "$FAILSTATE"; }
+
 # --- preflight -------------------------------------------------------------
 # Each of these has already broken a run at least once.
 
@@ -90,6 +132,29 @@ fi
 if [ "$ROUTINE" != "news-watch" ]; then
   command -v fly >/dev/null || echo "WARN: fly missing — routine will commit but not deploy"
   fly auth whoami >/dev/null 2>&1 || echo "WARN: fly not authenticated — deploy step will fail"
+fi
+
+# CLAUDE AUTH PREFLIGHT — fail fast, loudly, with the fix in the message.
+#
+# 2026-07-25..27: seven consecutive runs died on "401 OAuth access token has
+# been revoked" and nobody noticed for three days, because the failure was
+# buried mid-log and the only alert was a toast that vanished. The engine
+# publishes nothing and looks fine from the outside, which is the worst
+# possible failure shape.
+#
+# NOTE `claude auth status` is NOT sufficient: during that outage it reported
+# {"loggedIn": true, "subscriptionType": "max"} while every actual call 401'd.
+# The stored session record and the server's view of the token had diverged.
+# The only trustworthy probe is a real (tiny) completion.
+if ! AUTH_PROBE="$(claude -p 'reply with exactly: OK' 2>&1)" || echo "$AUTH_PROBE" | grep -qiE 'authenticat|401|revoked|expired'; then
+  echo "FAIL: the claude CLI cannot authenticate — the routine cannot write anything."
+  echo "  probe said: $(echo "$AUTH_PROBE" | head -1)"
+  echo "  FIX (one command, in a terminal, needs a human):"
+  echo "    claude auth login          # re-auth interactively"
+  echo "    claude setup-token         # better for unattended: a long-lived token"
+  alert "Conclick SEO: claude auth is dead. Run 'claude auth login'. Nothing has published since it broke."
+  record_health "AUTH FAILED — $(echo "$AUTH_PROBE" | head -1)"
+  exit 1
 fi
 
 echo "playbook: $PLAYBOOK_FILE"
@@ -164,7 +229,17 @@ fi
 echo "=== exit $CODE at $(date) ==="
 if [ $CODE -ne 0 ]; then
   # Surface failures instead of letting them rot in a log nobody opens.
-  osascript -e "display notification \"$ROUTINE routine failed. Check ~/.conclick-seo-logs\" with title \"Conclick\"" 2>/dev/null || true
+  # alert() escalates to a blocking dialog on the second consecutive failure.
+  TAIL="$(grep -iE 'error|failed|denied|revoked' "$LOG" 2>/dev/null | tail -1 | cut -c1-140)"
+  record_health "FAILED (exit $CODE) ${TAIL:-see log}"
+  alert "$ROUTINE failed (exit $CODE). ${TAIL:-Check ~/.conclick-seo-logs}"
+else
+  # A run that correctly publishes nothing is still a healthy run, so record the
+  # verdict line rather than just "ok" — that is what makes HEALTH.md readable
+  # as a history instead of a heartbeat.
+  VERDICT="$(grep -oiE 'quota met|REPAIR|WRITE|nothing (happened|worth)|another run holds' "$LOG" 2>/dev/null | head -1)"
+  record_health "ok — ${VERDICT:-completed}"
+  clear_failures
 fi
 
 # Keep 30 days of logs.
