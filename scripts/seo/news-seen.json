@@ -146,6 +146,13 @@
       "at": "2026-07-24",
       "verdict": "ignored",
       "reason": "Off-beat: consumer-health chatbot feature, not analytics/SEO/privacy/GEO. No effect on site owners' analytics, tracking, or retrieval-citation strategy."
+    },
+    {
+      "url": "https://noyb.eu/en/data-privacy-framework-collapse-trump-slaughter",
+      "title": "noyb declares EU-US Data Privacy Framework 'collapsed' after SCOTUS Trump v. Slaughter FTC-independence ruling; preparing CJEU challenge (Schrems III)",
+      "at": "2026-07-27",
+      "verdict": "ignored",
+      "reason": "Out of window and not actionable: SCOTUS decision and noyb's letter to the Commission are dated 30 Jun 2026; as of Jul 14 the CJEU challenge was still not filed. An announced-but-unfiled challenge to DPF adequacy is a roadmap, not a ruling (fails 'Real'), and site owners cannot act on it yet (fails 'changes what someone should do'). Also not a specific enforcement action against an analytics vendor. Logging so weeks of Schrems-III / DPF-adequacy coverage don't re-trigger evaluation."
     }
   ]
 }
