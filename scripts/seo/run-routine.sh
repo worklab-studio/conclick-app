@@ -51,6 +51,23 @@ echo "=== conclick $ROUTINE — $(date) ==="
 # `fly` are all "command not found" and every scheduled run fails identically.
 export PATH="/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:$PATH"
 
+# CONCLICK'S OWN claude LOGIN — do not remove.
+#
+# This laptop runs TWO content engines under one macOS user. The other project
+# owns the DEFAULT claude CLI credential (deepak@parallelconnect.com); conclick
+# runs on hello@thedeepflux.com. They fought over the single default credential
+# store once already: on 2026-07-25 the stored token was revoked underneath us
+# and every conclick run died for three days while the other project carried on.
+#
+# CLAUDE_CONFIG_DIR gives this runner its own credential store (verified: a
+# fresh dir reports loggedIn:false while the default store stays logged in), so
+# the two engines can never invalidate each other again.
+#
+# If runs ever fail with "not authenticated" here, the fix is:
+#   CLAUDE_CONFIG_DIR="$HOME/.claude-conclick" claude auth login
+# ...and sign in as hello@thedeepflux.com. health.sh probes THIS store too.
+export CLAUDE_CONFIG_DIR="$HOME/.claude-conclick"
+
 # --- lock ------------------------------------------------------------------
 #
 # ONE lock across all three routines, not one each. They share a git working

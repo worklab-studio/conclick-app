@@ -14,6 +14,13 @@
 set -uo pipefail
 export PATH="/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:$PATH"
 
+# Probe the SAME credential store the routines use (conclick's own, isolated
+# from the other project's default CLI login — see run-routine.sh). Without
+# this line the health check would test the other project's account and could
+# report healthy while conclick's own login is dead — the exact lie that hid
+# the 2026-07-25 outage, one level up.
+export CLAUDE_CONFIG_DIR="$HOME/.claude-conclick"
+
 REPO="/Users/worklab/Conclick beta/umami"
 LOG_DIR="$HOME/.conclick-seo-logs"
 RC=0
@@ -31,8 +38,8 @@ bold "CLAUDE AUTH  (the thing that broke on 2026-07-25)"
 if PROBE="$(claude -p 'reply with exactly: OK' 2>&1)" && ! echo "$PROBE" | grep -qiE 'authenticat|401|revoked|expired'; then
   ok "claude -p works"
 else
-  bad "claude -p CANNOT authenticate: $(echo "$PROBE" | head -1)"
-  printf '      fix: \033[1mclaude auth login\033[0m   (or: claude setup-token, for a long-lived one)\n'
+  bad "claude -p CANNOT authenticate (conclick's own store): $(echo "$PROBE" | head -1)"
+  printf '      fix: \033[1mCLAUDE_CONFIG_DIR="$HOME/.claude-conclick" claude auth login\033[0m  (sign in as hello@thedeepflux.com)\n'
 fi
 
 bold "SCHEDULER"
