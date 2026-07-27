@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -13,16 +13,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import {
-  AlertTriangle,
-  ArrowRight,
-  Check,
-  Copy,
-  ExternalLink,
-  Globe,
-  Loader2,
-  Radar,
-} from 'lucide-react';
+import { AlertTriangle, ArrowRight, Check, Copy, ExternalLink, Globe, Loader2 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { DOMAIN_REGEX } from '@/lib/constants';
 import { SiteIcon } from './SiteIcon';
@@ -36,6 +27,50 @@ enum Step {
   FORM = 0,
   VERIFY = 1,
   SUCCESS = 2,
+}
+
+// Coding agents the user can hand installation to. Logos are REAL brand marks
+// served from our own /public (no runtime dependency on external CDNs).
+const AI_TOOLS = [
+  { key: 'claude', label: 'Claude Code', icon: '/images/ai/claude.svg' },
+  { key: 'codex', label: 'Codex', icon: '/images/ai/openai.png' },
+  { key: 'antigravity', label: 'Antigravity', icon: '/images/ai/antigravity.png' },
+  { key: 'v0', label: 'v0', icon: '/images/ai/v0.svg' },
+  { key: 'lovable', label: 'Lovable', icon: '/images/ai/lovable.png' },
+];
+
+function buildAiPrompt(domain: string, script: string) {
+  return `Install Conclick analytics on ${domain}.
+
+Add this snippet once to the <head> of every page (use the site-wide layout/template), just before </head>:
+
+${script}
+
+Rules:
+- Skip if this exact snippet already exists — never add it twice.
+- Keep the defer attribute.
+- Next.js/React: root layout head. Plain HTML: every page's <head>.
+
+Then deploy the change and open https://${domain} once so the first pageview fires. Reply with the file(s) you changed.`;
+}
+
+function fireConfetti() {
+  confetti({ particleCount: 150, spread: 100, origin: { y: 0.6 }, zIndex: 2147483647 });
+  setTimeout(() => {
+    confetti({ particleCount: 100, angle: 60, spread: 55, origin: { x: 0 }, zIndex: 2147483647 });
+    confetti({ particleCount: 100, angle: 120, spread: 55, origin: { x: 1 }, zIndex: 2147483647 });
+  }, 250);
+}
+
+// Small debounce so the favicon lookup follows typing smoothly instead of
+// firing a request per keystroke.
+function useDebounced<T>(value: T, ms: number): T {
+  const [debounced, setDebounced] = useState(value);
+  useEffect(() => {
+    const t = setTimeout(() => setDebounced(value), ms);
+    return () => clearTimeout(t);
+  }, [value, ms]);
+  return debounced;
 }
 
 function StepBar({ step }: { step: Step }) {
@@ -88,6 +123,7 @@ export function WebsiteAddModalContent({
   const config = useConfig();
   const [copiedId, setCopiedId] = useState(false);
   const [copiedScript, setCopiedScript] = useState(false);
+  const [copiedTool, setCopiedTool] = useState<string | null>(null);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -99,10 +135,12 @@ export function WebsiteAddModalContent({
 
   const nameVal = form.watch('name');
   const domainVal = form.watch('domain');
+  const previewDomain = useDebounced(domainVal, 300);
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       const data = await createWebsite(values);
+      successFired.current = false;
       setCreatedWebsite(data);
       setStep(Step.VERIFY);
       onSave?.(); // We call onSave to trigger list refresh, but don't close modal yet
@@ -136,6 +174,12 @@ export function WebsiteAddModalContent({
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const handleCopyAiPrompt = (toolKey: string) => {
+    navigator.clipboard.writeText(buildAiPrompt(createdWebsite?.domain || '', getTrackingScript()));
+    setCopiedTool(toolKey);
+    setTimeout(() => setCopiedTool(null), 1800);
+  };
+
   const [verifyOutcome, setVerifyOutcome] = useState<'notFound' | 'error' | null>(null);
   const [progress, setProgress] = useState(0);
 
@@ -160,6 +204,53 @@ export function WebsiteAddModalContent({
 
     return () => clearInterval(interval);
   }, [isVerifying]);
+
+  // Success can arrive from two directions (the explicit verify button and the
+  // background poll) — the ref guard makes whichever lands first the only one
+  // that fires confetti and advances the step.
+  const successFired = useRef(false);
+  const succeed = () => {
+    if (successFired.current) return;
+    successFired.current = true;
+    setStep(Step.SUCCESS);
+    fireConfetti();
+  };
+  const succeedRef = useRef(succeed);
+  succeedRef.current = succeed;
+
+  // The install step LISTENS: poll stats every 5s and flip to success the
+  // moment the first event lands — no button press required. This is what
+  // makes the step feel live instead of a static instruction sheet.
+  useEffect(() => {
+    if (step !== Step.VERIFY || !createdWebsite?.id) return;
+
+    let cancelled = false;
+    const createdAt = Date.parse(createdWebsite.createdAt) || Date.now() - 24 * 60 * 60 * 1000;
+
+    const check = async () => {
+      try {
+        const params = new URLSearchParams({
+          startAt: String(createdAt - 60_000),
+          endAt: String(Date.now() + 60_000),
+        });
+        const res = await fetch(`/api/websites/${createdWebsite.id}/stats?${params}`);
+        if (!res.ok) return;
+        const data = await res.json();
+        if (!cancelled && (Number(data?.pageviews) > 0 || Number(data?.visitors) > 0)) {
+          succeedRef.current();
+        }
+      } catch {
+        // Network hiccups just mean the next tick tries again.
+      }
+    };
+
+    check();
+    const interval = setInterval(check, 5000);
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
+  }, [step, createdWebsite?.id]);
 
   const handleVerify = async () => {
     setIsVerifying(true);
@@ -190,30 +281,7 @@ export function WebsiteAddModalContent({
       setProgress(100); // Complete bar
 
       if (data.success) {
-        setStep(Step.SUCCESS);
-        // Confetti logic
-        confetti({
-          particleCount: 150,
-          spread: 100,
-          origin: { y: 0.6 },
-          zIndex: 2147483647,
-        });
-        setTimeout(() => {
-          confetti({
-            particleCount: 100,
-            angle: 60,
-            spread: 55,
-            origin: { x: 0 },
-            zIndex: 2147483647,
-          });
-          confetti({
-            particleCount: 100,
-            angle: 120,
-            spread: 55,
-            origin: { x: 1 },
-            zIndex: 2147483647,
-          });
-        }, 250);
+        succeed();
       } else {
         setVerifyOutcome('notFound');
       }
@@ -288,7 +356,7 @@ export function WebsiteAddModalContent({
 
             {showPreview && (
               <div className="flex items-center gap-3 rounded-lg border border-zinc-800 bg-[#18181b]/60 p-3 animate-in fade-in slide-in-from-bottom-1 duration-200">
-                <SiteIcon domain={domainVal} name={nameVal} size={36} className="rounded-lg" />
+                <SiteIcon domain={previewDomain} name={nameVal} size={36} className="rounded-lg" />
                 <div className="min-w-0">
                   <div className="truncate text-sm font-medium text-foreground">
                     {nameVal || domainVal}
@@ -335,7 +403,7 @@ export function WebsiteAddModalContent({
       : `${window?.location?.origin || ''}${process.env.basePath || ''}/script.js`;
 
     return (
-      <div className="space-y-5">
+      <div className="space-y-4">
         <StepBar step={Step.VERIFY} />
 
         <div className="flex items-center gap-3 rounded-lg border border-zinc-800 bg-[#18181b]/60 p-3">
@@ -361,91 +429,74 @@ export function WebsiteAddModalContent({
           <h3 className="text-base font-semibold text-foreground">Install your tracking code</h3>
           <p className="text-sm text-muted-foreground">
             Paste this into the <code className="text-foreground">&lt;head&gt;</code> of your site —
-            then verify, or skip and do it later.
+            or hand it to your AI below.
           </p>
         </div>
 
-        {verifyOutcome === 'notFound' && (
-          <div className="rounded-lg border border-amber-500/20 bg-amber-500/[0.06] p-4">
-            <div className="flex items-start gap-3">
-              <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-amber-500/10 text-amber-400 ring-1 ring-inset ring-amber-500/20">
-                <Radar className="h-4 w-4" />
-              </div>
-              <div className="space-y-2.5">
-                <div className="space-y-1">
-                  <p className="text-sm font-semibold text-amber-200">
-                    No data yet — that&apos;s normal
+        {/* Live status: this panel IS the verification. It polls on its own and
+            flips the whole modal to success the moment the first event lands. */}
+        <div
+          className={`rounded-lg border p-3 transition-colors ${
+            verifyOutcome === 'error'
+              ? 'border-red-500/20 bg-red-500/[0.05]'
+              : 'border-zinc-800 bg-[#18181b]/60'
+          }`}
+        >
+          <div className="flex items-center gap-3">
+            <span className="relative flex h-8 w-8 shrink-0 items-center justify-center">
+              {verifyOutcome === 'error' ? (
+                <AlertTriangle className="h-4 w-4 text-red-400" />
+              ) : (
+                <>
+                  <span className="absolute inline-flex h-6 w-6 animate-ping rounded-full bg-[#5e5ba4]/30" />
+                  <span className="absolute inline-flex h-4 w-4 animate-pulse rounded-full bg-[#5e5ba4]/40" />
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-[#8b88d8]" />
+                </>
+              )}
+            </span>
+            <div className="min-w-0 flex-1">
+              {verifyOutcome === 'error' ? (
+                <>
+                  <p className="text-sm font-medium text-red-200">
+                    Couldn&apos;t reach {createdWebsite?.domain}
                   </p>
-                  <p className="text-sm text-muted-foreground">
-                    If you just added the code it can take a moment. We&apos;ll start tracking
-                    automatically the instant a visit comes in. Worth a quick check:
+                  <p className="text-xs text-muted-foreground">
+                    Make sure the domain is correct and publicly reachable, then try again.
                   </p>
-                </div>
-                <ul className="space-y-1.5 text-sm text-muted-foreground">
-                  <li className="flex items-start gap-2">
-                    <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-500/70" />
-                    <span>
-                      The snippet is pasted just before{' '}
-                      <code className="text-foreground">&lt;/head&gt;</code>
-                    </span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-500/70" />
-                    <span>Your latest changes are published / deployed live</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-500/70" />
-                    <span>You&apos;ve opened a page on the site at least once</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-500/70" />
-                    <span>No ad-blocker is blocking the tracker</span>
-                  </li>
-                </ul>
-              </div>
+                </>
+              ) : verifyOutcome === 'notFound' ? (
+                <>
+                  <p className="text-sm font-medium text-foreground">
+                    Snippet not found yet — still listening
+                  </p>
+                  <p className="text-xs leading-relaxed text-muted-foreground">
+                    Quick checks: pasted before <code className="text-zinc-300">&lt;/head&gt;</code>{' '}
+                    · deployed live · page opened once · ad-blocker off
+                  </p>
+                </>
+              ) : (
+                <>
+                  <p className="text-sm font-medium text-foreground">
+                    Listening for your first visit
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    This updates by itself — the moment a pageview arrives, you&apos;re done.
+                  </p>
+                </>
+              )}
             </div>
-          </div>
-        )}
-
-        {verifyOutcome === 'error' && (
-          <div className="rounded-lg border border-red-500/20 bg-red-500/[0.06] p-4">
-            <div className="flex items-start gap-3">
-              <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-red-500/10 text-red-400 ring-1 ring-inset ring-red-500/20">
-                <AlertTriangle className="h-4 w-4" />
-              </div>
-              <div className="space-y-1">
-                <p className="text-sm font-semibold text-red-200">Couldn&apos;t reach your site</p>
-                <p className="text-sm text-muted-foreground">
-                  We had trouble loading your site to check it. Make sure the domain is correct and
-                  publicly reachable, then try again.
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
-
-        <div className="space-y-2">
-          <label className="text-sm font-medium leading-none">Website ID</label>
-          <div className="flex gap-2">
-            <Input
-              readOnly
-              value={createdWebsite?.id}
-              className="dark:bg-[#18181b] dark:border-zinc-800"
-            />
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => copyToClipboard(createdWebsite?.id, setCopiedId)}
-            >
-              {copiedId ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-            </Button>
+            {verifyOutcome !== 'error' && (
+              <span className="shrink-0 rounded-full bg-zinc-800/70 px-2 py-0.5 text-[10px] font-medium text-zinc-400">
+                auto-checking
+              </span>
+            )}
           </div>
         </div>
 
         <div className="space-y-2">
           <label className="text-sm font-medium leading-none">Tracking Code</label>
           <div className="group relative">
-            <div className="flex min-h-[80px] w-full overflow-x-auto rounded-md border border-zinc-800 bg-[#18181b] px-3 py-3 font-mono text-sm">
+            <div className="flex min-h-[72px] w-full overflow-x-auto rounded-md border border-zinc-800 bg-[#18181b] py-3 pl-3 pr-11 font-mono text-sm">
               <code className="text-sm">
                 <span style={{ color: '#89ddff' }}>&lt;script</span>{' '}
                 <span style={{ color: '#c792ea' }}>defer</span>{' '}
@@ -461,18 +512,73 @@ export function WebsiteAddModalContent({
             <Button
               variant="outline"
               size="icon"
-              className="absolute right-2 top-2 h-7 w-7 opacity-0 transition-opacity group-hover:opacity-100"
+              className="absolute right-2 top-2 h-7 w-7"
               onClick={() => copyToClipboard(scriptCode, setCopiedScript)}
             >
-              {copiedScript ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
+              {copiedScript ? (
+                <Check className="h-3 w-3 text-emerald-400" />
+              ) : (
+                <Copy className="h-3 w-3" />
+              )}
             </Button>
           </div>
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <span className="shrink-0">Website ID</span>
+            <code className="truncate text-zinc-400">{createdWebsite?.id}</code>
+            <button
+              type="button"
+              className="shrink-0 text-zinc-500 transition-colors hover:text-zinc-300"
+              onClick={() => copyToClipboard(createdWebsite?.id, setCopiedId)}
+              aria-label="Copy website ID"
+            >
+              {copiedId ? (
+                <Check className="h-3 w-3 text-emerald-400" />
+              ) : (
+                <Copy className="h-3 w-3" />
+              )}
+            </button>
+          </div>
+        </div>
+
+        {/* Hand-off to a coding agent: one click copies a complete, tailored
+            prompt (exact snippet + placement rules + verify step). */}
+        <div className="space-y-2">
+          <div className="flex items-center gap-3">
+            <div className="h-px flex-1 bg-zinc-800" />
+            <span className="text-xs font-medium text-muted-foreground">or hand it to your AI</span>
+            <div className="h-px flex-1 bg-zinc-800" />
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {AI_TOOLS.map(tool => (
+              <button
+                key={tool.key}
+                type="button"
+                onClick={() => handleCopyAiPrompt(tool.key)}
+                className={`inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-xs font-medium transition-all ${
+                  copiedTool === tool.key
+                    ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-300'
+                    : 'border-zinc-800 bg-[#18181b] text-zinc-300 hover:border-[#5e5ba4]/60 hover:bg-zinc-900'
+                }`}
+              >
+                {copiedTool === tool.key ? (
+                  <Check className="h-4 w-4" />
+                ) : (
+                  <img src={tool.icon} alt="" className="h-4 w-4 object-contain" />
+                )}
+                {copiedTool === tool.key ? 'Prompt copied' : tool.label}
+              </button>
+            ))}
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Copies a ready-to-paste prompt with your exact snippet, placement rules and a verify
+            step.
+          </p>
         </div>
 
         {isVerifying && (
           <div className="space-y-2">
             <div className="flex justify-between text-xs text-muted-foreground">
-              <span>Verifying installation…</span>
+              <span>Checking {createdWebsite?.domain}…</span>
               <span>{Math.round(progress)}%</span>
             </div>
             <div className="h-2 w-full overflow-hidden rounded-full bg-secondary">
@@ -481,9 +587,6 @@ export function WebsiteAddModalContent({
                 style={{ width: `${progress}%`, backgroundColor: '#5e5ba4' }}
               />
             </div>
-            <p className="animate-pulse text-center text-xs text-muted-foreground">
-              Opening your site and checking for the tracking code…
-            </p>
           </div>
         )}
 
@@ -506,11 +609,11 @@ export function WebsiteAddModalContent({
             {isVerifying ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Verifying…
+                Checking…
               </>
             ) : (
               <>
-                {verifyOutcome ? 'Check again' : 'Verify Installation'}
+                {verifyOutcome ? 'Open site & check again' : 'Open site & verify'}
                 <ExternalLink className="ml-2 h-4 w-4" />
               </>
             )}

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 // Deterministic, pleasant gradient derived from the domain so each site gets a
 // stable, distinct monogram color even before/without a favicon.
@@ -25,9 +25,14 @@ function clean(domain?: string, name?: string) {
  * Site avatar: shows the real favicon when one genuinely exists, otherwise a
  * crisp gradient monogram (never a blurry fallback globe).
  *
- * We request a high-res favicon (sz=128) and only swap it in once it loads at a
- * real resolution — Google's "no favicon" globe comes back tiny, so the
- * naturalWidth check keeps us on the monogram for sites without an icon.
+ * Favicons are tried from THREE sources in order, advancing on failure:
+ *   1. DuckDuckGo's proxy — fetches live, so brand-new sites (the add-website
+ *      flow's whole audience) resolve immediately; 404s cleanly when missing.
+ *   2. Google s2 at sz=128 — huge cache, but returns a tiny generic globe for
+ *      unknown sites, so its result only counts at a real resolution (>=32px).
+ *   3. The site's own /favicon.ico, as a last resort.
+ * Only a successfully loaded real image swaps in; anything else keeps the
+ * monogram.
  */
 export function SiteIcon({
   domain,
@@ -42,14 +47,34 @@ export function SiteIcon({
 }) {
   const host = clean(domain, name);
   const letter = (name?.trim() || host || '?').charAt(0).toUpperCase();
+  const [srcIdx, setSrcIdx] = useState(0);
   const [ok, setOk] = useState(false);
+
+  const sources = useMemo(
+    () =>
+      host && host !== '?'
+        ? [
+            { src: `https://icons.duckduckgo.com/ip3/${host}.ico`, minWidth: 8 },
+            {
+              src: `https://www.google.com/s2/favicons?domain=${encodeURIComponent(host)}&sz=128`,
+              minWidth: 32,
+            },
+            { src: `https://${host}/favicon.ico`, minWidth: 8 },
+          ]
+        : [],
+    [host],
+  );
 
   // Reset when the domain changes (e.g. the live preview while typing).
   useEffect(() => {
+    setSrcIdx(0);
     setOk(false);
   }, [host]);
 
-  const src = `https://www.google.com/s2/favicons?domain=${encodeURIComponent(host)}&sz=128`;
+  const current = sources[srcIdx];
+  const advance = () => {
+    if (srcIdx < sources.length - 1) setSrcIdx(srcIdx + 1);
+  };
 
   return (
     <span
@@ -65,21 +90,24 @@ export function SiteIcon({
           {letter}
         </span>
       )}
-      {host && host !== '?' && (
+      {current && (
         <img
-          src={src}
+          key={current.src}
+          src={current.src}
           alt=""
           width={size}
           height={size}
-          loading="lazy"
           className={`absolute inset-0 h-full w-full object-contain transition-opacity duration-200 ${
             ok ? 'opacity-100' : 'opacity-0'
           }`}
           onLoad={e => {
-            // Real favicons return >= 32px at sz=128; the generic fallback is tiny.
-            if (e.currentTarget.naturalWidth >= 32) setOk(true);
+            if (e.currentTarget.naturalWidth >= current.minWidth) {
+              setOk(true);
+            } else {
+              advance();
+            }
           }}
-          onError={() => setOk(false)}
+          onError={advance}
         />
       )}
     </span>
