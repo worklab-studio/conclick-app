@@ -473,6 +473,12 @@
       "coverageState": "Discovered - currently not indexed",
       "lastCrawlTime": null,
       "at": "2026-07-26T11:00:52.650Z"
+    },
+    "https://conclick.io/vs/amplitude": {
+      "indexed": false,
+      "coverageState": "URL is unknown to Google",
+      "lastCrawlTime": null,
+      "at": "2026-07-27T10:42:00.446Z"
     }
   }
 }

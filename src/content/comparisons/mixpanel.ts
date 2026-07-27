@@ -17,7 +17,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "Mixpanel is a product analytics platform. It lives inside your app, tracking events like button clicks, feature usage, and user retention over time. It answers questions like: \"How many users reached step 3 of onboarding in the last 30 days, and what percentage churned within 90 days?\" That is valuable work, if you have the engineering hours to instrument everything and the team to act on it."
+      "text": "Mixpanel is a product analytics platform. It lives inside your app, tracking events like button clicks, feature usage, and user retention over time. It answers questions like: \"How many users reached step 3 of onboarding in the last 30 days, and what percentage churned within 90 days?\" That is valuable work, if you have the engineering hours to instrument everything and the team to act on it. Amplitude is Mixpanel's closest rival in this same category, so if it is also on your shortlist, I break down [Conclick vs Amplitude](/vs/amplitude) the same honest way."
     },
     {
       "type": "p",
@@ -195,7 +195,7 @@ const entry: ContentEntry = {
     "ctaLabel": "Add My Website"
   },
   "datePublished": "2026-06-18",
-  "dateModified": "2026-07-22",
+  "dateModified": "2026-07-27",
   "comparison": {
     "competitor": "Mixpanel",
     "competitorUrl": "https://mixpanel.com",

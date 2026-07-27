@@ -17,7 +17,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "PostHog is an open-source product analytics platform. It is built for product teams inside funded startups who want funnels, retention cohorts, session replays, feature flags, and A/B tests, ideally self-hosted or on their cloud. It is powerful. It is also complex. If you have a product engineer and a growth analyst, it rewards that investment."
+      "text": "PostHog is an open-source product analytics platform. It is built for product teams inside funded startups who want funnels, retention cohorts, session replays, feature flags, and A/B tests, ideally self-hosted or on their cloud. It is powerful. It is also complex. If you have a product engineer and a growth analyst, it rewards that investment. PostHog, Mixpanel, and Amplitude all chase that same product-team buyer, so if Amplitude is on your list too, here is [Conclick vs Amplitude](/vs/amplitude)."
     },
     {
       "type": "p",
@@ -190,7 +190,7 @@ const entry: ContentEntry = {
     "ctaLabel": "Add My Website"
   },
   "datePublished": "2026-06-18",
-  "dateModified": "2026-07-22",
+  "dateModified": "2026-07-27",
   "comparison": {
     "competitor": "PostHog",
     "competitorUrl": "https://posthog.com",
