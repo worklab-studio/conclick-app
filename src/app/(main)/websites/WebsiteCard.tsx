@@ -24,44 +24,77 @@ import { DeltaPill } from './WebsitesOverview';
 import { SiteIcon } from './SiteIcon';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
+const HOUR_MS = 60 * 60 * 1000;
 
-export function WebsiteCard({ website }: { website: any }) {
+/**
+ * The date window a card renders, owned by the PAGE (WebsitesDataTable), not
+ * the card — one selector drives the overview strip and every card, exactly
+ * like the per-website dashboard's own date filter. The copy fields ride along
+ * so the card never re-derives human phrasing from a range value.
+ */
+export interface CardRange {
+  value: string; // DateFilter value: '24hour' | '7day' | 'range:...' | 'all' | ...
+  startAt: number;
+  endAt: number;
+  unit: string; // 'hour' | 'day' | 'month' — granularity for the sparkline
+  phrase: string; // "the last 7 days" — mid-sentence copy
+  chip: string; // "7d" — the badge next to the domain
+  compare: string | null; // "previous 7 days"; null = comparison meaningless (all time)
+}
+
+// What every card shows when the page doesn't pass a range (no caller does
+// this today, but the default keeps the component self-contained): the same
+// rolling 24h window this card always used.
+const DEFAULT_RANGE: CardRange = {
+  value: '24hour',
+  startAt: 0, // computed at query time — see rangeWindow()
+  endAt: 0,
+  unit: 'hour',
+  phrase: 'the last 24h',
+  chip: 'Last 24h',
+  compare: 'previous 24h',
+};
+
+export function WebsiteCard({ website, range }: { website: any; range?: CardRange }) {
   const { renderUrl, router } = useNavigation();
   const { toast } = useToast();
   const { get, useQuery } = useApi();
   const { timezone } = useDateParameters();
   const [deleteOpen, setDeleteOpen] = React.useState(false);
 
-  // Fetch an explicit, self-contained rolling 24h window so the card's numbers,
-  // its "Last 24h" label and the sparkline window always agree — independent of
-  // any shared/global date selection elsewhere in the app.
+  const r = range ?? DEFAULT_RANGE;
+  // The default range computes its window lazily so a card mounted at 09:00
+  // and one mounted at 17:00 both mean "the trailing 24h from now".
+  const startAt = r.startAt || Date.now() - DAY_MS;
+  const endAt = r.endAt || Date.now();
+
   const { data: stats } = useQuery({
-    queryKey: ['card:stats:24h', website.id, timezone],
+    queryKey: ['card:stats', website.id, timezone, r.value],
     queryFn: () =>
       get(`/websites/${website.id}/stats`, {
-        startAt: Date.now() - DAY_MS,
-        endAt: Date.now(),
-        unit: 'hour',
+        startAt,
+        endAt,
+        unit: r.unit,
         timezone,
       }),
     enabled: !!website.id,
   });
 
   const { data: pv } = useQuery({
-    queryKey: ['card:pageviews:24h', website.id, timezone],
+    queryKey: ['card:pageviews', website.id, timezone, r.value],
     queryFn: () =>
       get(`/websites/${website.id}/pageviews`, {
-        startAt: Date.now() - DAY_MS,
-        endAt: Date.now(),
-        unit: 'hour',
+        startAt,
+        endAt,
+        unit: r.unit,
         timezone,
       }),
     enabled: !!website.id,
   });
 
   // "Connected" = has the site ever received data? The all-time check is the
-  // expensive query, so only run it for sites that look idle in the last 24h.
-  // Active sites are obviously connected and skip the extra round-trip.
+  // expensive query, so only run it for sites that look idle in the selected
+  // window. Active sites are obviously connected and skip the extra round-trip.
   const idle = !!stats && (stats.visitors || 0) === 0 && (stats.pageviews || 0) === 0;
   const { data: lifetime } = useQuery({
     queryKey: ['website:lifetime', website.id, timezone],
@@ -77,22 +110,42 @@ export function WebsiteCard({ website }: { website: any }) {
   });
   const connected = !stats ? null : !idle ? true : lifetime ? (lifetime.pageviews || 0) > 0 : null;
 
-  // The pageviews series is sparse (only hours that had activity). Zero-fill it
-  // into a complete 24-bucket timeline so a single visit reads as one clean
-  // spike instead of an odd centered hump, and "no data" is a flat baseline.
+  // The pageviews series is sparse (only buckets that had activity). Zero-fill
+  // it into a complete timeline for the selected window so a single visit reads
+  // as one clean spike instead of an odd centered hump, and "no data" is a flat
+  // baseline. Bucket count follows the range's unit: 24h -> 24 hourly buckets,
+  // 30d -> 30 daily, 12mo/all -> monthly. Capped so a pathological range can't
+  // allocate an absurd array (recharts handles a few hundred points fine).
   const series = React.useMemo(() => {
-    const buckets = Array.from({ length: 24 }, (_, i) => ({ t: i, visitors: 0 }));
-    const start = Date.now() - DAY_MS;
+    const unitMs = r.unit === 'hour' ? HOUR_MS : DAY_MS; // months handled below
+    let count: number;
+    if (r.unit === 'month') {
+      const s = new Date(startAt);
+      const e = new Date(endAt);
+      count = (e.getFullYear() - s.getFullYear()) * 12 + (e.getMonth() - s.getMonth()) + 1;
+    } else {
+      count = Math.ceil((endAt - startAt) / unitMs);
+    }
+    count = Math.max(1, Math.min(count, 500));
+
+    const buckets = Array.from({ length: count }, (_, i) => ({ t: i, visitors: 0 }));
+    const s = new Date(startAt);
     for (const point of pv?.sessions || []) {
       const ts = Date.parse(String(point.x).replace(' ', 'T'));
       if (Number.isNaN(ts)) continue;
-      let idx = Math.floor((ts - start) / (60 * 60 * 1000));
+      let idx: number;
+      if (r.unit === 'month') {
+        const d = new Date(ts);
+        idx = (d.getFullYear() - s.getFullYear()) * 12 + (d.getMonth() - s.getMonth());
+      } else {
+        idx = Math.floor((ts - startAt) / unitMs);
+      }
       if (idx < 0) idx = 0;
-      if (idx > 23) idx = 23;
+      if (idx > count - 1) idx = count - 1;
       buckets[idx].visitors += point.y || 0;
     }
     return buckets;
-  }, [pv]);
+  }, [pv, r.unit, startAt, endAt]);
 
   const maxVisitors = Math.max(...series.map(b => b.visitors), 0);
   const hasData = maxVisitors > 0;
@@ -159,7 +212,7 @@ export function WebsiteCard({ website }: { website: any }) {
               </span>
             ) : (
               <span className="shrink-0 rounded-full bg-zinc-800/70 px-2 py-0.5 text-[10px] font-medium text-zinc-400">
-                Last 24h
+                {r.chip}
               </span>
             )}
           </div>
@@ -230,10 +283,14 @@ export function WebsiteCard({ website }: { website: any }) {
                   {visitors === 1 ? 'Visitor' : 'Visitors'}
                 </span>
               </div>
-              <div className="mt-1.5 flex items-center gap-2 text-sm">
-                <DeltaPill delta={growth} goodWhenUp />
-                <span className="text-muted-foreground">vs previous 24h</span>
-              </div>
+              {/* All-time has no meaningful "previous period", so the row is
+                  dropped rather than showing a pill comparing against nothing. */}
+              {r.compare && (
+                <div className="mt-1.5 flex items-center gap-2 text-sm">
+                  <DeltaPill delta={growth} goodWhenUp />
+                  <span className="text-muted-foreground">vs {r.compare}</span>
+                </div>
+              )}
             </div>
             <div className="text-right">
               <div className="text-xl font-semibold text-foreground">
@@ -274,7 +331,7 @@ export function WebsiteCard({ website }: { website: any }) {
                 <span className="text-xs">
                   {connected === false
                     ? 'Add your tracking code to start'
-                    : 'No visits in the last 24h'}
+                    : `No visits in ${r.phrase}`}
                 </span>
               </div>
             </div>
