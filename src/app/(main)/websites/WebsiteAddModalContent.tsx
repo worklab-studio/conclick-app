@@ -1,8 +1,9 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { useUpdateQuery, useMessages, useConfig } from '@/components/hooks';
+import { useUpdateQuery, useMessages, useConfig, useNavigation } from '@/components/hooks';
+import { useApi } from '@/components/hooks/useApi';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -69,6 +70,17 @@ function fireConfetti() {
     confetti({ particleCount: 100, angle: 60, spread: 55, origin: { x: 0 }, zIndex: 2147483647 });
     confetti({ particleCount: 100, angle: 120, spread: 55, origin: { x: 1 }, zIndex: 2147483647 });
   }, 250);
+}
+
+// Same normalization for "is this domain already on the account": protocol,
+// www. and paths don't make a different site.
+function normalizeDomain(domain: string) {
+  return domain
+    .trim()
+    .toLowerCase()
+    .replace(/^https?:\/\//, '')
+    .replace(/^www\./, '')
+    .replace(/\/.*$/, '');
 }
 
 // Small debounce so the favicon lookup follows typing smoothly instead of
@@ -147,6 +159,48 @@ export function WebsiteAddModalContent({
   const nameVal = form.watch('name');
   const domainVal = form.watch('domain');
   const previewDomain = useDebounced(domainVal, 300);
+
+  const { get, useQuery } = useApi();
+  const { router } = useNavigation();
+
+  // Duplicate guard: if the typed domain is already on the account, don't let
+  // a second copy get created — route to the existing site instead (its stats
+  // if it's tracking, its install step if it never received data).
+  const { data: existingSites } = useQuery({
+    queryKey: ['websites:dup-check-list'],
+    queryFn: () => get('/me/websites', { includeTeams: 1, pageSize: 200 }),
+    staleTime: 30_000,
+  });
+
+  const existing = useMemo(() => {
+    const target = normalizeDomain(previewDomain || '');
+    if (!target) return null;
+    const rows = existingSites?.data || [];
+    return rows.find((w: any) => normalizeDomain(w.domain || '') === target) || null;
+  }, [existingSites, previewDomain]);
+
+  const { data: existingLifetime } = useQuery({
+    queryKey: ['websites:dup-lifetime', existing?.id],
+    queryFn: () =>
+      get(`/websites/${existing.id}/stats`, {
+        startAt: new Date('2020-01-01').getTime(),
+        endAt: Date.now(),
+      }),
+    enabled: !!existing?.id,
+    staleTime: 60_000,
+  });
+  const existingHasData =
+    Number(existingLifetime?.pageviews) > 0 || Number(existingLifetime?.visitors) > 0;
+
+  // "Finish setup" jumps straight into the install step FOR THE EXISTING site
+  // — the listening/verify flow works identically, no duplicate row created.
+  const continueWithExisting = () => {
+    successFired.current = false;
+    setLiveStats(null);
+    setVerifyOutcome(null);
+    setCreatedWebsite(existing);
+    setStep(Step.VERIFY);
+  };
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
@@ -371,7 +425,51 @@ export function WebsiteAddModalContent({
               )}
             />
 
-            {showPreview && (
+            {showPreview && existing ? (
+              <div className="space-y-3 rounded-lg border border-zinc-800 bg-[#18181b]/60 p-3 animate-in fade-in slide-in-from-bottom-1 duration-200">
+                <div className="flex items-center gap-3">
+                  <SiteIcon
+                    domain={existing.domain}
+                    name={existing.name}
+                    size={36}
+                    className="rounded-lg"
+                  />
+                  <div className="min-w-0">
+                    <div className="truncate text-sm font-medium text-foreground">
+                      {existing.name || existing.domain}
+                    </div>
+                    <div className="truncate text-xs text-muted-foreground">{existing.domain}</div>
+                  </div>
+                  <span className="ml-auto shrink-0 rounded-full bg-amber-500/10 px-2 py-0.5 text-[10px] font-medium text-amber-400 ring-1 ring-inset ring-amber-500/20">
+                    Already added
+                  </span>
+                </div>
+                <div className="flex items-center justify-between gap-3">
+                  <p className="text-xs text-muted-foreground">
+                    {existingHasData
+                      ? 'This site is already tracking visits.'
+                      : 'This site is set up but has never received data.'}
+                  </p>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    className="shrink-0 dark:bg-zinc-900 dark:border-zinc-800 dark:hover:bg-zinc-800"
+                    onClick={() => {
+                      if (existingHasData) {
+                        router.push(`/websites/${existing.id}`);
+                        onClose?.();
+                      } else {
+                        continueWithExisting();
+                      }
+                    }}
+                  >
+                    {existingHasData ? 'Check stats' : 'Finish setup'}
+                    <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
+                  </Button>
+                </div>
+              </div>
+            ) : showPreview ? (
               <div className="flex items-center gap-3 rounded-lg border border-zinc-800 bg-[#18181b]/60 p-3 animate-in fade-in slide-in-from-bottom-1 duration-200">
                 <SiteIcon domain={previewDomain} name={nameVal} size={36} className="rounded-lg" />
                 <div className="min-w-0">
@@ -384,7 +482,7 @@ export function WebsiteAddModalContent({
                   Preview
                 </span>
               </div>
-            )}
+            ) : null}
 
             <div className="flex justify-end gap-2 pt-2">
               <Button
@@ -397,9 +495,9 @@ export function WebsiteAddModalContent({
               </Button>
               <Button
                 type="submit"
-                disabled={isCreating}
+                disabled={isCreating || !!existing}
                 style={{ backgroundColor: '#5e5ba4', color: 'white' }}
-                className="group border-0 hover:opacity-90"
+                className="group border-0 hover:opacity-90 disabled:opacity-40"
               >
                 {isCreating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                 Continue
@@ -609,7 +707,9 @@ export function WebsiteAddModalContent({
           </div>
         )}
 
-        <div className="flex items-center justify-between">
+        {/* No primary here on purpose: verification happens by itself (the
+            listening poll). Both actions are quiet exits/aids. */}
+        <div className="flex items-center justify-end gap-2">
           <Button
             type="button"
             variant="ghost"
@@ -620,10 +720,10 @@ export function WebsiteAddModalContent({
             I&apos;ll do this later
           </Button>
           <Button
+            variant="outline"
             onClick={handleVerify}
             disabled={isVerifying}
-            style={{ backgroundColor: '#5e5ba4', color: 'white' }}
-            className="border-0 hover:opacity-90"
+            className="dark:bg-zinc-900 dark:border-zinc-800 dark:hover:bg-zinc-800"
           >
             {isVerifying ? (
               <>

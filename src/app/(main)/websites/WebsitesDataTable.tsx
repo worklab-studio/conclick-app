@@ -4,8 +4,19 @@ import { useLoginQuery, useUserWebsitesQuery } from '@/components/hooks';
 import { useApi } from '@/components/hooks/useApi';
 import { useDateParameters } from '@/components/hooks/useDateParameters';
 import { WebsitesOverview, type OverviewSums } from './WebsitesOverview';
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState, type ReactNode } from 'react';
 import { keepPreviousData } from '@tanstack/react-query';
+import {
+  DndContext,
+  PointerSensor,
+  TouchSensor,
+  closestCenter,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from '@dnd-kit/core';
+import { SortableContext, arrayMove, rectSortingStrategy, useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import { WebsiteAddButton } from './WebsiteAddButton';
 import { DateFilter } from '@/components/input/DateFilter';
 import { parseDateRange } from '@/lib/date';
@@ -39,6 +50,51 @@ const RANGE_COPY: Record<string, { phrase: string; chip: string; compare: string
 };
 // Custom "range:start:end" picks from the date picker.
 const CUSTOM_COPY = { phrase: 'the selected dates', chip: 'Custom', compare: 'previous period' };
+
+// User's manual card order (array of website ids). Local to this browser —
+// unknown ids (new sites) simply follow in the server's order.
+const ORDER_STORAGE_KEY = 'conclick.websites.cardOrder';
+
+/**
+ * Hold-to-drag wrapper: a quick click still navigates into the card, holding
+ * ~200ms picks it up. After a real drag, the trailing click is swallowed so
+ * dropping a card doesn't navigate.
+ */
+function SortableCard({
+  id,
+  justDragged,
+  children,
+}: {
+  id: string;
+  justDragged: React.MutableRefObject<boolean>;
+  children: ReactNode;
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id,
+  });
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={{
+        transform: CSS.Transform.toString(transform),
+        transition,
+        touchAction: 'manipulation',
+      }}
+      className={isDragging ? 'z-10 opacity-80' : ''}
+      onClickCapture={e => {
+        if (justDragged.current) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
+      }}
+      {...attributes}
+      {...listeners}
+    >
+      {children}
+    </div>
+  );
+}
 
 function buildRange(value: string, timezone?: string): CardRange {
   const copy = RANGE_COPY[value] ?? CUSTOM_COPY;
@@ -91,6 +147,31 @@ export function WebsitesDataTable({ userId, teamId }: { userId?: string; teamId?
 
   const range = useMemo(() => buildRange(rangeValue, timezone), [rangeValue, timezone]);
 
+  // Manual card order: hold a card ~200ms and drag to rearrange the grid.
+  const [cardOrder, setCardOrder] = useState<string[]>(() => {
+    if (typeof window === 'undefined') return [];
+    try {
+      return JSON.parse(localStorage.getItem(ORDER_STORAGE_KEY) || '[]');
+    } catch {
+      return [];
+    }
+  });
+  const justDragged = useRef(false);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { delay: 200, tolerance: 8 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 250, tolerance: 8 } }),
+  );
+
+  const sortByOrder = (list: any[]) => {
+    if (cardOrder.length === 0) return list;
+    const pos = new Map(cardOrder.map((id, i) => [id, i]));
+    return [...list].sort(
+      (a, b) =>
+        (pos.get(a.id) ?? Number.MAX_SAFE_INTEGER) - (pos.get(b.id) ?? Number.MAX_SAFE_INTEGER),
+    );
+  };
+
   const { get, useQuery } = useApi();
 
   // Safely extract website IDs for stats fetching
@@ -101,6 +182,34 @@ export function WebsitesDataTable({ userId, teamId }: { userId?: string; teamId?
     if (data.data && Array.isArray(data.data)) return data.data.map((w: any) => w.id);
     return [];
   }, [queryResult.data]);
+
+  // Reorder against the FULL fleet (not just what a search is showing), so
+  // rearranging while filtered never scrambles the hidden cards' positions.
+  const handleDragEnd = (event: DragEndEvent) => {
+    justDragged.current = true;
+    setTimeout(() => {
+      justDragged.current = false;
+    }, 150);
+
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    const pos = new Map(cardOrder.map((id, i) => [id, i]));
+    const fullOrdered = [...websiteIds].sort(
+      (a, b) => (pos.get(a) ?? Number.MAX_SAFE_INTEGER) - (pos.get(b) ?? Number.MAX_SAFE_INTEGER),
+    );
+    const from = fullOrdered.indexOf(String(active.id));
+    const to = fullOrdered.indexOf(String(over.id));
+    if (from < 0 || to < 0) return;
+
+    const next = arrayMove(fullOrdered, from, to);
+    setCardOrder(next);
+    try {
+      localStorage.setItem(ORDER_STORAGE_KEY, JSON.stringify(next));
+    } catch {
+      // Private mode: reorder still works for the session, just not persisted.
+    }
+  };
 
   // ONE request for the whole fleet: stats + comparison + visitors series for
   // every site, from /api/websites/overview. The old shape (2 HTTP calls per
@@ -218,33 +327,49 @@ export function WebsitesDataTable({ userId, teamId }: { userId?: string; teamId?
       renderActions={renderActions}
       renderEmpty={renderEmpty}
     >
-      {({ data }: { data: any[] }) => (
-        <div className="space-y-6">
-          <WebsitesOverview overview={overview ?? null} loading={overviewLoading} />
-          <div className="border-t border-[hsl(0,0%,12%)] pt-6">
-            <div className="mb-4 flex items-center gap-2">
-              <h2 className="text-sm font-semibold text-foreground">Your websites</h2>
-              <span className="rounded-full bg-zinc-800 px-2 py-0.5 text-xs font-medium text-zinc-400">
-                {data.length}
-              </span>
-            </div>
-            <div
-              className="grid gap-5"
-              style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))' }}
-            >
-              {data.map((website: any) => (
-                <WebsiteCard
-                  key={website.id}
-                  website={website}
-                  range={range}
-                  batched
-                  preloaded={preloadedById[website.id]}
-                />
-              ))}
+      {({ data }: { data: any[] }) => {
+        const ordered = sortByOrder(data);
+        return (
+          <div className="space-y-6">
+            <WebsitesOverview overview={overview ?? null} loading={overviewLoading} />
+            <div className="border-t border-[hsl(0,0%,12%)] pt-6">
+              <div className="mb-4 flex items-center gap-2">
+                <h2 className="text-sm font-semibold text-foreground">Your websites</h2>
+                <span className="rounded-full bg-zinc-800 px-2 py-0.5 text-xs font-medium text-zinc-400">
+                  {data.length}
+                </span>
+                <span className="text-xs text-zinc-600">· hold a card to rearrange</span>
+              </div>
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={handleDragEnd}
+              >
+                <SortableContext
+                  items={ordered.map((w: any) => w.id)}
+                  strategy={rectSortingStrategy}
+                >
+                  <div
+                    className="grid gap-5"
+                    style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))' }}
+                  >
+                    {ordered.map((website: any) => (
+                      <SortableCard key={website.id} id={website.id} justDragged={justDragged}>
+                        <WebsiteCard
+                          website={website}
+                          range={range}
+                          batched
+                          preloaded={preloadedById[website.id]}
+                        />
+                      </SortableCard>
+                    ))}
+                  </div>
+                </SortableContext>
+              </DndContext>
             </div>
           </div>
-        </div>
-      )}
+        );
+      }}
     </DataGrid>
   );
 }
