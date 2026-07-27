@@ -70,7 +70,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "The analytics market split into two camps: privacy-first tools that skip cookies entirely, and full-stack behavioral tools that go deeper on session recording and product analytics. You probably need to know which camp your use case falls into before you shop."
+      "text": "The analytics market split into two camps: privacy-first tools that skip cookies entirely, and full-stack behavioral tools that go deeper on session recording and product analytics. You probably need to know which camp your use case falls into before you shop. I ranked the main contenders in each camp in [my roundup of Google Analytics alternatives](/alternatives/google-analytics) if you want a shortlist rather than a blank market to survey."
     },
     {
       "type": "p",

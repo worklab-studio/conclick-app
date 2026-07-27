@@ -111,7 +111,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "If you are on the fence, do not rip anything out. Run a leaner, revenue-first tool next to GA4 for a month and compare which one answers your real questions faster and with less setup. Keep whichever wins. For me it was not close, and my only regret is the year I spent defending the free tool instead of measuring whether it still fit."
+      "text": "If you are on the fence, do not rip anything out. Run a leaner, revenue-first tool next to GA4 for a month and compare which one answers your real questions faster and with less setup. If you want a shortlist to start from, I ranked the tools I actually weighed in [my roundup of GA4 alternatives](/alternatives/google-analytics). Keep whichever wins. For me it was not close, and my only regret is the year I spent defending the free tool instead of measuring whether it still fit."
     }
   ],
   "faq": [
