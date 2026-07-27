@@ -1,0 +1,190 @@
+{
+  "type": "comparison",
+  "slug": "amplitude",
+  "kind": "comparison",
+  "comp": { "name": "Amplitude", "url": "https://amplitude.com" },
+  "keyword": "amplitude pricing plans",
+  "draft": {
+    "h1": "Amplitude Pricing Plans, Explained by a Founder Who Chose a Simpler Tool",
+    "metaTitle": "Amplitude Pricing Plans in 2026: Tiers, Cost, and Fit",
+    "metaDescription": "Amplitude pricing plans explained: the free 2M-event tier, event-based Plus, and custom Growth and Enterprise, plus when a flat $9 tool fits better.",
+    "tldr": "Amplitude pricing plans in 2026 come in four tiers, all priced on event volume: a permanent Free plan up to 2M events a month, a self-serve Plus tier that scales to 70M events, and sales-led Growth and Enterprise quotes, per their pricing page. If your real question is which traffic makes money, a flat tool like Conclick at $9 a month answers it for far less.",
+    "intro": "I built Conclick after years of paying for analytics tools priced for teams I did not have. So when a founder asks me about Amplitude pricing plans, I answer with a question: are you a product team instrumenting a whole app, or a small team that needs to know which campaign paid for itself? The first job is exactly what Amplitude is built for. This page breaks down what its plans actually cost, and where a simpler, flat-priced tool earns its place.",
+    "sections": [
+      {
+        "type": "h2",
+        "text": "What are Amplitude's pricing plans in 2026?",
+        "id": "amplitude-pricing-plans"
+      },
+      {
+        "type": "p",
+        "text": "The platform sells four tiers, and each is priced by how many events you send, not by how many people are on your team. Free is permanent, not a trial: up to two million events a month, no card, with basic product analytics, a monthly session-replay allowance, and the newer AI features. Plus is the self-serve paid tier. It starts at zero and charges as event volume grows, scaling to seventy million events, and it adds custom events, behavioral cohorts, alerts, heatmaps, and two-year data retention. Growth and Enterprise are sales-led: the price is a custom quote tied to your volume, and they add SSO, granular permissions, larger session-replay allowances, and role-based access control. I took these straight from their own pricing page, since the details move and you should confirm against the source before budgeting."
+      },
+      {
+        "type": "h2",
+        "text": "How does event-based pricing actually scale?",
+        "id": "event-based-pricing"
+      },
+      {
+        "type": "p",
+        "text": "This is the part that surprises people, so let me be concrete. An event is any tracked action: a pageview, a click, a signup step, a purchase. A product with real usage generates events fast, and the same design that makes this tool powerful, capturing everything so you can analyze it later, is what walks you up the pricing curve. Two million events sounds generous until a few thousand active users each fire dozens of events a session. Past the free ceiling you are on Plus and paying by volume; once you need SSO or tighter access control you are in a sales conversation. None of that is a knock. It is how a usage-priced product analytics platform is supposed to work, and it is the right model when in-app behavior is the thing you measure."
+      },
+      {
+        "type": "callout",
+        "text": "The trap I watch founders fall into: they buy a tool priced for the depth a ten-person product team needs, then use two of its reports. That is paying for a warehouse to store a shoebox. Match the tool to the question you actually ask every week."
+      },
+      {
+        "type": "h2",
+        "text": "Amplitude vs Conclick: the feature-by-feature view",
+        "id": "amplitude-vs-conclick"
+      },
+      {
+        "type": "p",
+        "text": "Pricing only means something next to what you get, so here is an honest side by side. I run Conclick, so read the table with that in mind, and note the rows I marked where the other tool wins outright. It wins several, and pretending otherwise would waste your time."
+      },
+      {
+        "type": "comparisonTable"
+      },
+      {
+        "type": "h2",
+        "text": "Where Amplitude is the better choice",
+        "id": "where-amplitude-wins"
+      },
+      {
+        "type": "p",
+        "text": "There are three situations where I would tell you to buy it without hesitation. First, if you have a product team doing deep behavioral work: retention cohorts, in-app funnels, and experimentation. Its cohort and retention engine is among the best there is, and the free tier is a real on-ramp for that work. Second, if session replay of in-app behavior matters, since replay is bundled into every tier. Third, if your team already lives in event dashboards and everything is instrumented, the switching cost runs the wrong way, so stay put. Respect what a tool is built for. This one is built for product analysis at depth, and it does that job well."
+      },
+      {
+        "type": "h2",
+        "text": "Is Amplitude worth it for a small marketing team?",
+        "id": "worth-it-for-marketing"
+      },
+      {
+        "type": "p",
+        "text": "For a solo founder or a small marketing team, my honest read is that it is more tool than the question needs. What most small teams are actually trying to answer is not 'what is my day-30 retention by cohort', it is 'which campaign, page, and source sent me visitors who paid'. That is a [revenue attribution](/glossary/revenue-attribution) question, and it lives on the boundary between your traffic and your payment processor. The platform models revenue through events you instrument, which is powerful once it is built and maintained. Conclick connects Stripe, Paddle, Polar, Lemon Squeezy, or Dodo directly and ties each payment back to the source, campaign, and [conversion funnel](/glossary/conversion-funnel) that earned it, with nothing to instrument. Same word, revenue. Very different amount of work."
+      },
+      {
+        "type": "h2",
+        "text": "How much does Conclick cost, and how hard is the switch?",
+        "id": "conclick-cost-and-switch"
+      },
+      {
+        "type": "p",
+        "text": "Conclick is nine dollars a month, or seven billed yearly, with a fourteen-day free trial that needs no card and an optional one-time lifetime deal. That is the whole pricing page. Now the switch, blocker by blocker. Effort: one script tag and about a two-minute setup, and it pulls in your Google Search Console and GA4 history so you are not staring at an empty dashboard on day one. Risk: leave your current tool running and put Conclick beside it for the trial, so you compare both on your own real traffic before deciding. Cost: a flat nine dollars against a bill that climbs with event volume is easy math for a bootstrapped team. The moment analytics shows which traffic makes you money, it stops being a monthly reporting cost and becomes the thing you plan next month around."
+      },
+      {
+        "type": "h2",
+        "text": "Should you switch from Amplitude to Conclick?",
+        "id": "should-you-switch"
+      },
+      {
+        "type": "p",
+        "text": "Here is the short version, so you can decide in a minute."
+      },
+      {
+        "type": "ul",
+        "items": [
+          "You run a small SaaS or ecommerce site and mainly need to know which traffic, campaign, and page produce revenue: Conclick fits. If you are weighing product analytics more broadly, [Conclick vs Mixpanel](/vs/mixpanel) covers that ground too.",
+          "You take payments through Stripe, Paddle, Polar, Lemon Squeezy, or Dodo and want revenue tied to its source automatically: Conclick.",
+          "You have a product team running retention cohorts, in-app funnels, and experiments across a real application: Amplitude, and its free two-million-event tier is a fine place to begin.",
+          "You need in-app session replay of user sessions: the replay bundled into every paid tier is the stronger pick.",
+          "You want both deep product analytics and traffic-to-revenue attribution: run both. The scripts do not conflict and the data barely overlaps."
+        ]
+      }
+    ],
+    "faq": [
+      {
+        "question": "How much do Amplitude's pricing plans cost?",
+        "answer": "Amplitude's plans are priced on monthly event volume rather than per seat. Free covers two million events a month at no cost, Plus is a self-serve paid tier that scales with event count up to seventy million events, and Growth and Enterprise are custom quotes from sales. Confirm the current figures on their pricing page before budgeting, since usage pricing changes."
+      },
+      {
+        "question": "Does Amplitude have a free plan?",
+        "answer": "Yes. The Free plan is permanent, not a trial, and covers up to two million events a month with no card required. It includes basic product analytics, a monthly session-replay allowance, and the newer AI features, which makes it a genuine starting point for a product team."
+      },
+      {
+        "question": "Why does Amplitude get expensive for small teams?",
+        "answer": "It gets expensive because it charges by event volume, and a live product generates events quickly. Every pageview, click, and step can be an event, so a few thousand active users can push you past the free ceiling and onto the paid curve. For a team that mostly wants marketing and revenue answers, that is a lot of spend aimed at a question the tool was not built to answer."
+      },
+      {
+        "question": "Is Amplitude good for website and marketing analytics?",
+        "answer": "It is built for in-app product analytics, not website marketing analytics, so it is only a partial fit there. It excels at behavioral cohorts, retention, and experimentation inside a product. For tying website traffic and campaigns to real revenue, a marketing-focused tool like Conclick maps to the question more directly by connecting your payment processor to your traffic sources."
+      },
+      {
+        "question": "How is Conclick's pricing different from Amplitude's?",
+        "answer": "Conclick is a flat nine dollars a month, or seven billed yearly, with a fourteen-day trial and an optional lifetime deal. The other tool is usage-based: free up to two million events, then priced on event volume, with custom quotes at the top. One is a fixed line item; the other scales with how heavily your product is used."
+      },
+      {
+        "question": "Can I run Amplitude and Conclick together?",
+        "answer": "Yes, and for some teams that is the right setup. One covers deep in-app product behavior while the other covers which traffic, campaign, and page turned into revenue on your site and checkout. The two scripts do not conflict and the data barely overlaps, so start with whichever answers your most urgent question and add the second later."
+      }
+    ],
+    "sources": [
+      { "label": "Amplitude Pricing (official)", "url": "https://amplitude.com/pricing" },
+      { "label": "Amplitude Session Replay (official product page)", "url": "https://amplitude.com/session-replay" },
+      { "label": "Amplitude Documentation", "url": "https://amplitude.com/docs" },
+      { "label": "Conclick Pricing", "url": "https://conclick.io/pricing" }
+    ],
+    "internalLinks": [
+      { "href": "/vs/mixpanel", "label": "Conclick vs Mixpanel", "group": "comparison" },
+      { "href": "/alternatives/mixpanel", "label": "Best Mixpanel alternatives", "group": "alternative" },
+      { "href": "/glossary/revenue-attribution", "label": "What is revenue attribution?", "group": "glossary" },
+      { "href": "/for/saas", "label": "Analytics for SaaS", "group": "useCase" }
+    ],
+    "comparisonRows": [
+      {
+        "feature": "Free tier",
+        "conclick": "14-day trial",
+        "competitor": "2M events/mo",
+        "note": "Amplitude's Free plan is permanent up to 2M events a month; Conclick runs a 14-day trial with no card, then a flat plan. Per Amplitude's pricing page."
+      },
+      {
+        "feature": "Pricing model",
+        "conclick": "$9/mo flat",
+        "competitor": "Event-based + custom",
+        "note": "Amplitude prices on monthly event volume; Plus scales to 70M events and Growth and Enterprise are quote-only, per their pricing page."
+      },
+      {
+        "feature": "Revenue attribution to traffic source",
+        "conclick": true,
+        "competitor": "Via instrumented events",
+        "note": "Conclick connects Stripe, Paddle, Polar, Lemon Squeezy, and Dodo and ties each payment to its source; Amplitude models revenue through events you instrument yourself."
+      },
+      {
+        "feature": "In-app cohorts, retention, experiments",
+        "conclick": "Basic",
+        "competitor": true,
+        "note": "Amplitude is purpose-built for behavioral cohorts, retention, and experimentation. This is where it wins."
+      },
+      {
+        "feature": "Session replay",
+        "conclick": false,
+        "competitor": true,
+        "note": "Amplitude bundles session replay into every tier, with larger allowances higher up, per their pricing page. Conclick focuses on heatmaps and click maps instead."
+      },
+      {
+        "feature": "Real-screenshot heatmaps",
+        "conclick": true,
+        "competitor": "Plus tier and up",
+        "note": "Both offer heatmaps; Amplitude includes them from the Plus tier upward, per their pricing page. Conclick captures real-screenshot click, scroll, rage, and dead-click maps."
+      },
+      {
+        "feature": "Cookieless, no cross-site ID",
+        "conclick": true,
+        "competitor": "Device/user IDs",
+        "note": "Conclick is cookieless and sets no cross-site identifier; Amplitude identifies users by device and user IDs for its behavioral model."
+      },
+      {
+        "feature": "Setup time",
+        "conclick": "~2 minutes",
+        "competitor": "Event instrumentation",
+        "note": "Conclick is a single script tag and about two minutes; Amplitude's value comes after you instrument the in-app events you want to analyze."
+      },
+      {
+        "feature": "Google Search Console + GA4 import",
+        "conclick": true,
+        "competitor": "Product events focus",
+        "note": "Conclick imports Google Search Console and GA4 history so acquisition data carries over; Amplitude centers on product and event streams."
+      }
+    ]
+  }
+}

@@ -54,6 +54,11 @@
     "all free traffic sources": {
       "status": "needs-human"
     },
+    "amplitude pricing plans": {
+      "status": "published",
+      "slug": "amplitude",
+      "published_at": "2026-07-27T10:36:00.811Z"
+    },
     "analytics a pre revenue startup needs": {
       "status": "covered",
       "slug": "analytics-a-pre-revenue-startup-needs",
@@ -128,6 +133,10 @@
     },
     "cheap targeted traffic sources": {
       "status": "needs-human"
+    },
+    "cheapest web site analytics": {
+      "status": "skipped",
+      "reason": "Unservable without grounding: a 'cheapest' superlative roundup needs verified current pricing across many vendors (no cached SERP, no LLM/pricing API in pipeline) to honestly name a winner; guessing at cross-vendor prices violates the honesty laws. Also typed 'comparison' but the /vs/ dir is a closed pairwise set, so a roundup does not fit. Needs a human with a pricing data source."
     },
     "click map vs funnel": {
       "status": "covered",

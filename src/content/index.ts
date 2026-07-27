@@ -22,6 +22,7 @@ import blog_per_event_pricing_trap from './blog/per-event-pricing-trap';
 import blog_switching_analytics_gotchas from './blog/switching-analytics-gotchas';
 import blog_vanity_metrics_are_lying from './blog/vanity-metrics-are-lying';
 import blog_why_revenue_attribution_matters from './blog/why-revenue-attribution-matters';
+import comparisons_amplitude from './comparisons/amplitude';
 import comparisons_clarity from './comparisons/clarity';
 import comparisons_datafast from './comparisons/datafast';
 import comparisons_fathom from './comparisons/fathom';
@@ -92,6 +93,7 @@ const ENTRIES: ContentEntry[] = [
   blog_switching_analytics_gotchas,
   blog_vanity_metrics_are_lying,
   blog_why_revenue_attribution_matters,
+  comparisons_amplitude,
   comparisons_clarity,
   comparisons_datafast,
   comparisons_fathom,
