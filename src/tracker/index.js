@@ -248,40 +248,131 @@
   };
 
   // Privacy-first frustration signals — element-level only, NEVER coordinates or
-  // typed values: rage clicks (rapid repeats on one element), dead clicks (looks
-  // clickable but isn't), and form abandons (started a form, never submitted).
+  // typed values: rage clicks (rapid repeats the page ignores), dead clicks
+  // (looks clickable, page didn't respond), form abandons (started, never sent).
+  //
+  // v2: a signal only fires when the page DEMONSTRABLY did not respond. After a
+  // candidate click we watch ~900ms for any response — DOM mutation, URL change,
+  // scroll, or a text selection (selecting text is reading, not clicking). React/
+  // Vue attach handlers synthetically, so "has an [onclick] attribute" proves
+  // nothing either way; observed response is the only honest test. Working
+  // buttons exonerate themselves; broken ones get flagged. False negatives are
+  // acceptable, false alarms are not.
   const _safeText = el => (/^(input|textarea|select)$/i.test(el.tagName) ? '' : _label(el));
 
-  const onFrustration = e => {
-    const t = e.target;
-    if (!t || t.nodeType !== 1) return;
-    const sel = _selector(t);
-    const now = Date.now();
+  const INTERACTIVE_SEL =
+    'a[href],button,input,select,textarea,[role="button"],[onclick],[tabindex],label,summary';
 
-    if (sel === lastFrustSel && now - lastFrustAt < 700) {
-      rageCount++;
-      if (rageCount === 3) {
-        track('frustration', { type: 'rage', selector: sel, text: _safeText(t) });
-      }
-    } else {
-      rageCount = 1;
+  // Prefer the interactive / pointer-cursor ancestor over raw leaf nodes: an
+  // svg <path> inside a button should report the button and its label.
+  const _frustTarget = el => {
+    try {
+      const anc = el.closest(INTERACTIVE_SEL);
+      if (anc) return anc;
+    } catch {
+      /* ignore */
     }
-    lastFrustSel = sel;
-    lastFrustAt = now;
-
-    const interactive = t.closest(
-      'a[href],button,input,select,textarea,[role="button"],[onclick],[tabindex],label,summary',
-    );
-    if (!interactive) {
-      let pointer = false;
+    let n = el;
+    for (let i = 0; n && n.nodeType === 1 && i < 4; i++) {
       try {
-        pointer = getComputedStyle(t).cursor === 'pointer';
+        if (getComputedStyle(n).cursor === 'pointer') return n;
       } catch {
-        pointer = false;
+        break;
       }
-      if (pointer) {
-        track('frustration', { type: 'dead', selector: sel, text: _safeText(t) });
+      n = n.parentElement;
+    }
+    return null; // nothing about this click looked clickable
+  };
+
+  const _cancelFrust = () => {
+    if (!frustPending) return;
+    try {
+      if (frustPending.observer) frustPending.observer.disconnect();
+    } catch {
+      /* ignore */
+    }
+    clearTimeout(frustPending.timer);
+    frustPending = null;
+  };
+
+  const onFrustration = e => {
+    try {
+      const raw = e.target;
+      if (!raw || raw.nodeType !== 1) return;
+      // Modified/secondary clicks are intentional browser gestures, never friction.
+      if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+
+      const now = Date.now();
+      const x = e.clientX;
+      const y = e.clientY;
+
+      // Rolling log for rage detection: SPATIAL (same spot), not selector
+      // string — and only ever on clickable things, so triple-click text
+      // selection can never register.
+      frustClicks.push({ t: now, x, y });
+      frustClicks = frustClicks.filter(c => now - c.t < 1200);
+
+      const target = _frustTarget(raw);
+      _cancelFrust(); // a new click supersedes the previous candidate
+      if (!target) return; // plain text / non-clickable → never a signal
+
+      const sel = _selector(target);
+      const burst = frustClicks.filter(c => Math.abs(c.x - x) < 24 && Math.abs(c.y - y) < 24);
+      const isRage = burst.length >= 4 && !frustSentRage[sel];
+      if (!isRage && frustSentDead[sel]) return; // one dead report per element per view
+
+      const pending = {
+        sel,
+        text: _safeText(target),
+        rage: isRage,
+        href: location.href,
+        scrollY: window.scrollY,
+        responded: false,
+        observer: null,
+        timer: 0,
+      };
+      frustPending = pending;
+      try {
+        pending.observer = new MutationObserver(() => {
+          pending.responded = true;
+          if (frustPending === pending) _cancelFrust();
+        });
+        pending.observer.observe(document.documentElement, {
+          childList: true,
+          subtree: true,
+          attributes: true,
+        });
+      } catch {
+        /* no observer → rely on nav/scroll/selection checks */
       }
+      pending.timer = setTimeout(() => {
+        if (frustPending !== pending) return;
+        frustPending = null;
+        try {
+          if (pending.observer) pending.observer.disconnect();
+        } catch {
+          /* ignore */
+        }
+        let selected = '';
+        try {
+          const s = window.getSelection && window.getSelection();
+          selected = s ? String(s.toString()) : '';
+        } catch {
+          /* ignore */
+        }
+        const navigated = location.href !== pending.href;
+        const scrolled = Math.abs(window.scrollY - pending.scrollY) > 8;
+        if (pending.responded || navigated || scrolled || selected) return; // page responded
+        if (pending.rage) {
+          frustSentRage[pending.sel] = 1;
+          track('frustration', { type: 'rage', selector: pending.sel, text: pending.text });
+        } else {
+          frustSentDead[pending.sel] = 1;
+          track('frustration', { type: 'dead', selector: pending.sel, text: pending.text });
+        }
+      }, 900);
+    } catch {
+      /* tracker must never break the host page */
     }
   };
 
@@ -475,9 +566,10 @@
   let maxScroll = 0;
   let clickCount = 0;
   let engagementSent;
-  let rageCount = 0;
-  let lastFrustSel;
-  let lastFrustAt = 0;
+  let frustClicks = []; // recent clicks {t,x,y} for spatial rage detection
+  let frustPending = null; // click candidate awaiting the response window
+  let frustSentDead = {}; // one dead report per element per pageview
+  let frustSentRage = {}; // one rage report per element per pageview
   let formTouched;
   let sectionObserver;
   const seenSections = new Set();

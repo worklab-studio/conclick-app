@@ -8,6 +8,9 @@ export interface FrustrationRow {
   selector: string;
   text: string | null;
   count: number;
+  /** Distinct sessions that hit this — the evidence weight. One session can
+      be one confused person; several sessions is a real problem. */
+  sessions: number;
 }
 
 // Privacy-first frustration signals from the tracker's "frustration" event
@@ -28,6 +31,7 @@ export async function getFrustration(
     with ev as (
       select
         event_data.website_event_id as id,
+        max(website_event.session_id::text) as session_id,
         max(case when event_data.data_key = 'type' then event_data.string_value end) as type,
         max(case when event_data.data_key = 'selector' then event_data.string_value end) as selector,
         max(case when event_data.data_key = 'text' then event_data.string_value end) as text
@@ -43,11 +47,12 @@ export async function getFrustration(
       ${filterQuery}
       group by event_data.website_event_id
     )
-    select type, selector, max(text) as text, count(*)::int as count
+    select type, selector, max(text) as text, count(*)::int as count,
+      count(distinct session_id)::int as sessions
     from ev
     where type is not null and selector is not null
     group by type, selector
-    order by count desc
+    order by sessions desc, count desc
     limit 50
     `,
     queryParams,
@@ -58,6 +63,7 @@ export async function getFrustration(
       selector: r.selector,
       text: r.text || null,
       count: Number(r.count) || 0,
+      sessions: Number(r.sessions) || 0,
     })),
   );
 }
