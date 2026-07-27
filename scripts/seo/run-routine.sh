@@ -166,9 +166,9 @@ fi
 if ! AUTH_PROBE="$(claude -p 'reply with exactly: OK' 2>&1)" || echo "$AUTH_PROBE" | grep -qiE 'authenticat|401|revoked|expired'; then
   echo "FAIL: the claude CLI cannot authenticate — the routine cannot write anything."
   echo "  probe said: $(echo "$AUTH_PROBE" | head -1)"
-  echo "  FIX (one command, in a terminal, needs a human):"
-  echo "    claude auth login          # re-auth interactively"
-  echo "    claude setup-token         # better for unattended: a long-lived token"
+  echo "  FIX (one command, in a terminal, needs a human) — the CONFIG_DIR prefix"
+  echo "  matters: without it you log in the OTHER project's default store:"
+  echo "    CLAUDE_CONFIG_DIR=\"\$HOME/.claude-conclick\" claude auth login   # as hello@thedeepflux.com"
   alert "Conclick SEO: claude auth is dead. Run 'claude auth login'. Nothing has published since it broke."
   record_health "AUTH FAILED — $(echo "$AUTH_PROBE" | head -1)"
   exit 1
