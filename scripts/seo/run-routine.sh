@@ -243,6 +243,18 @@ if [ "$CODE" -ne 0 ]; then
   CODE=$?
 fi
 
+# A session can exit 0 while accomplishing nothing. On 2026-07-27 an untrusted
+# workspace made the CLI ignore the whole allowlist; the inner agent aborted at
+# step 0, exited 0, and the health ledger recorded "ok — write" off the word
+# WRITE inside "Neither WRITE nor REPAIR was possible". The exit code is the
+# session's, not the mission's — so trust the log's distinctive failure markers
+# over it. The "Ignoring N permissions" line is printed by the CLI itself and is
+# the mechanical signature of the untrusted-workspace failure specifically.
+if [ "$CODE" -eq 0 ] && grep -qiE 'Ignoring [0-9]+ permissions\.allow|Run type[^A-Za-z]{0,6}ABORTED|Action needed \(human\)|aborted before step' "$LOG"; then
+  echo "!!! inner session exited 0 but self-reported an abort — treating as failure"
+  CODE=1
+fi
+
 echo "=== exit $CODE at $(date) ==="
 if [ $CODE -ne 0 ]; then
   # Surface failures instead of letting them rot in a log nobody opens.
@@ -254,7 +266,10 @@ else
   # A run that correctly publishes nothing is still a healthy run, so record the
   # verdict line rather than just "ok" — that is what makes HEALTH.md readable
   # as a history instead of a heartbeat.
-  VERDICT="$(grep -oiE 'quota met|REPAIR|WRITE|nothing (happened|worth)|another run holds' "$LOG" 2>/dev/null | head -1)"
+  #
+  # Anchored to "Run type:" — a bare /WRITE|REPAIR/ once matched the word WRITE
+  # inside an abort explanation and logged a green line for a dead run.
+  VERDICT="$(grep -oiE 'run type[^A-Za-z]{0,6}(WRITE|REPAIR)|quota met|nothing (happened|worth)|another run holds' "$LOG" 2>/dev/null | head -1)"
   record_health "ok — ${VERDICT:-completed}"
   clear_failures
 fi
