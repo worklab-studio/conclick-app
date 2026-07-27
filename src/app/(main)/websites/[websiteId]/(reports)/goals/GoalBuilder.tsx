@@ -33,13 +33,16 @@ export function GoalBuilder({
   websiteId: string;
   onClose: () => void;
   id?: string;
-  initial?: { type: GoalType; value: string; name: string };
+  initial?: { type: GoalType; value: string; name: string; targetWeekly?: number };
 }) {
   const editing = !!id;
   const [type, setType] = useState<GoalType>(initial?.type ?? 'path');
   const [value, setValue] = useState(initial?.value ?? '');
   const [name, setName] = useState(initial?.name ?? '');
   const [nameDirty, setNameDirty] = useState(!!initial?.name);
+  const [target, setTarget] = useState<string>(
+    initial?.targetWeekly ? String(initial.targetWeekly) : '',
+  );
   const { mutateAsync, isPending, error, touch } = useUpdateQuery(
     editing ? `/reports/${id}` : '/reports',
   );
@@ -70,8 +73,14 @@ export function GoalBuilder({
       onClose();
       return;
     }
+    const targetWeekly = Math.max(0, Math.round(Number(target))) || undefined;
     await mutateAsync(
-      { type: 'goal', name: effectiveName, websiteId, parameters: { type, value } },
+      {
+        type: 'goal',
+        name: effectiveName,
+        websiteId,
+        parameters: { type, value, ...(targetWeekly ? { targetWeekly } : {}) },
+      },
       {
         onSuccess: () => {
           if (editing) touch(`report:${id}`);
@@ -148,17 +157,31 @@ export function GoalBuilder({
         ) : null
       ) : null}
 
-      <div>
-        <div className="mb-2 text-[13px] font-semibold text-foreground/90">Name</div>
-        <input
-          value={effectiveName}
-          onChange={e => {
-            setName(e.target.value);
-            setNameDirty(true);
-          }}
-          placeholder="Name this goal"
-          className="h-10 w-full rounded-lg border border-[hsl(0,0%,16%)] bg-[#18181b] px-3 text-sm text-foreground placeholder:text-muted-foreground/50 focus:border-[#5e5ba4] focus:outline-none focus:ring-1 focus:ring-[#5e5ba4]"
-        />
+      <div className="grid grid-cols-[1fr_150px] gap-3">
+        <div>
+          <div className="mb-2 text-[13px] font-semibold text-foreground/90">Name</div>
+          <input
+            value={effectiveName}
+            onChange={e => {
+              setName(e.target.value);
+              setNameDirty(true);
+            }}
+            placeholder="Name this goal"
+            className="h-10 w-full rounded-lg border border-[hsl(0,0%,16%)] bg-[#18181b] px-3 text-sm text-foreground placeholder:text-muted-foreground/50 focus:border-[#5e5ba4] focus:outline-none focus:ring-1 focus:ring-[#5e5ba4]"
+          />
+        </div>
+        <div>
+          <div className="mb-2 text-[13px] font-semibold text-foreground/90">
+            Weekly target <span className="font-normal text-muted-foreground/60">optional</span>
+          </div>
+          <input
+            value={target}
+            onChange={e => setTarget(e.target.value.replace(/[^0-9]/g, ''))}
+            inputMode="numeric"
+            placeholder="e.g. 25"
+            className="h-10 w-full rounded-lg border border-[hsl(0,0%,16%)] bg-[#18181b] px-3 text-sm text-foreground placeholder:text-muted-foreground/50 focus:border-[#5e5ba4] focus:outline-none focus:ring-1 focus:ring-[#5e5ba4]"
+          />
+        </div>
       </div>
 
       {error ? (

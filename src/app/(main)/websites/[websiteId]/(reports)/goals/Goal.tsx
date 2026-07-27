@@ -1,10 +1,11 @@
 import { useEffect, useMemo } from 'react';
 import { Dialog } from '@umami/react-zen';
-import { Globe, Zap, Users, TrendingUp, TrendingDown } from 'lucide-react';
+import { Globe, Zap, Users, TrendingUp, TrendingDown, Target } from 'lucide-react';
 import { ReportEditButton } from '@/components/input/ReportEditButton';
-import { useMessages, useGoalQuery } from '@/components/hooks';
+import { useMessages, useGoalQuery, useWebsiteValuesQuery } from '@/components/hooks';
 import { LoadingPanel } from '@/components/common/LoadingPanel';
 import { formatLongNumber, formatMinorCurrency } from '@/lib/format';
+import { normalizePath } from '@/lib/event-noise';
 import { GoalBuilder } from './GoalBuilder';
 import { GoalFunnelButton } from './GoalFunnelButton';
 
@@ -12,7 +13,7 @@ export interface GoalProps {
   id: string;
   name: string;
   type: string;
-  parameters: { name?: string; type: string; value: string };
+  parameters: { name?: string; type: string; value: string; targetWeekly?: number };
   websiteId: string;
   startDate: Date;
   endDate: Date;
@@ -114,6 +115,46 @@ export function Goal({
       ? Math.round((num / Math.max(total, 1) - prevNum / prevTotal) * 1000) / 10
       : null;
 
+  // Weekly target scaled to the visible range: 25/week over a 30-day view
+  // means ~107 expected. Card switches to progress-toward-target mode.
+  const targetWeekly = Number(parameters?.targetWeekly) || 0;
+  const rangeDays = Math.max(
+    1,
+    Math.round((+new Date(endDate) - +new Date(startDate)) / 86400000) || 1,
+  );
+  const scaledTarget = targetWeekly ? Math.max(1, Math.round((targetWeekly * rangeDays) / 7)) : 0;
+  const targetPct = scaledTarget ? Math.min(100, Math.round((num / scaledTarget) * 100)) : 0;
+  const targetHit = scaledTarget > 0 && num >= scaledTarget;
+
+  // Zero-conversion diagnosis: "never fired vs typo vs just quiet". The values
+  // list is range-scoped and shared across cards of the same type (one cached
+  // query), so this costs nothing extra per card.
+  const { data: knownValues } = useWebsiteValuesQuery({
+    websiteId,
+    type: parameters?.type === 'path' ? 'path' : 'event',
+    startDate,
+    endDate,
+    clean: true,
+  });
+  const diagnosis = useMemo(() => {
+    if (!dead || !knownValues) return null;
+    const target = String(parameters?.value || '');
+    const norm = (v: string) =>
+      parameters?.type === 'path' ? normalizePath(v) : v.trim().toLowerCase();
+    const list = (knownValues as { value: string }[]) || [];
+    if (list.some(v => norm(v.value) === norm(target))) {
+      // It fired in this period but no session converted under current filters.
+      return 'No conversions under the current filters — try clearing them.';
+    }
+    const near = list.find(
+      v =>
+        v.value !== target &&
+        (norm(v.value).includes(norm(target)) || norm(target).includes(norm(v.value))),
+    );
+    if (near) return `Nothing named “${target}” fired — did you mean “${near.value}”?`;
+    return `“${target}” hasn't fired in this period — check the name or widen the range.`;
+  }, [dead, knownValues, parameters?.value, parameters?.type]);
+
   useEffect(() => {
     if (data) onResult?.(id, num);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -151,6 +192,7 @@ export function Goal({
                         type: parameters.type as 'path' | 'event',
                         value: parameters.value,
                         name,
+                        targetWeekly: parameters.targetWeekly,
                       }}
                       onClose={close}
                     />
@@ -194,10 +236,37 @@ export function Goal({
 
           <div className="h-2 w-full overflow-hidden rounded-full bg-[hsl(0,0%,14%)]">
             <div
-              className="h-full rounded-full bg-gradient-to-r from-[#5e5ba4] to-[#7c79c4] transition-all"
-              style={{ width: `${Math.min(pct, 100)}%` }}
+              className={`h-full rounded-full transition-all ${
+                scaledTarget
+                  ? targetHit
+                    ? 'bg-gradient-to-r from-emerald-500 to-emerald-400'
+                    : 'bg-gradient-to-r from-[#5e5ba4] to-[#7c79c4]'
+                  : 'bg-gradient-to-r from-[#5e5ba4] to-[#7c79c4]'
+              }`}
+              style={{ width: `${Math.min(scaledTarget ? targetPct : pct, 100)}%` }}
             />
           </div>
+
+          {scaledTarget > 0 && (
+            <div className="-mt-2 flex items-center justify-between text-xs">
+              <span
+                className={`inline-flex items-center gap-1 ${
+                  targetHit ? 'text-emerald-400' : 'text-muted-foreground'
+                }`}
+              >
+                <Target className="h-3 w-3" />
+                {formatLongNumber(num)} of ~{formatLongNumber(scaledTarget)} target
+                <span className="text-muted-foreground/50">
+                  ({targetWeekly}/wk over {rangeDays}d)
+                </span>
+              </span>
+              {targetHit ? (
+                <span className="font-semibold text-emerald-400">Target hit</span>
+              ) : (
+                <span className="tabular-nums text-muted-foreground/70">{targetPct}%</span>
+              )}
+            </div>
+          )}
 
           <div className="flex items-center justify-between gap-3">
             <div
@@ -216,12 +285,14 @@ export function Goal({
               >
                 {formatMinorCurrency(revenue, data.currency)}
               </span>
-            ) : dead ? (
-              <span className="text-xs text-muted-foreground/70">
-                No conversions — try a longer date range.
-              </span>
             ) : null}
           </div>
+
+          {dead && diagnosis ? (
+            <div className="rounded-lg border border-[hsl(0,0%,14%)] bg-[hsl(0,0%,9%)] px-3 py-2 text-xs leading-relaxed text-muted-foreground">
+              {diagnosis}
+            </div>
+          ) : null}
         </div>
       )}
     </LoadingPanel>

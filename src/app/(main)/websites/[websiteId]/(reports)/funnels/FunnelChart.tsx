@@ -10,12 +10,18 @@ const money = (minor: number, currency = 'USD') => formatMinorCurrency(minor, cu
 
 const dur = (ms: number) => formatShortTime(Math.round(ms / 1000), ['d', 'h', 'm', 's']);
 
-// Shared funnel visualization: a flowing violet ribbon (thickness = % remaining),
-// per-step conversion / revenue / median-time annotations, and the biggest leak
-// rendered as the rose FunnelLeakDiagnosis card below. The ribbon's step
-// thicknesses are spring-animated, so segment/date switches morph the shape
-// instead of swapping it. Used by both saved funnels (Funnel.tsx) and the
-// auto-detected funnel (AutoFunnelInline) so they always look identical.
+const BAR_AREA = 190; // px height of the column zone
+
+/**
+ * Shared funnel visualization: stepped columns on ghost rails — each step is a
+ * violet column whose height is the % of step-1 visitors remaining, with the
+ * drop between steps labeled at the boundary (the biggest leak in rose, with a
+ * dashed divider). Columns stay legible even at brutal drop-offs, unlike the
+ * old tapering-ribbon shape, which collapsed into a thread past −90%.
+ * Heights are spring-animated so segment/date switches morph instead of swap.
+ * Used by saved funnels (Funnel.tsx) and the auto-detected funnel
+ * (AutoFunnelInline) so they always look identical.
+ */
 export function FunnelChart({
   rows,
   currency = 'USD',
@@ -32,63 +38,33 @@ export function FunnelChart({
   // hovered segment can disappear without ever firing mouseleave, so clamp.
   const hover = hoverIndex !== null && hoverIndex < rows.length ? hoverIndex : null;
 
-  const W = 1000;
-  const H = 210;
   const n = rows.length;
-  const segW = n ? W / n : W;
-  const k = Math.min(segW * 0.3, 90);
-  const maxT = H * 0.7;
-  const minT = 10;
-  const t = rows.map(r => Math.max(Math.min(r.remaining ?? 0, 1) * maxT, minT));
-  const cx = rows.map((_, i) => segW * i + segW / 2);
+  // Column height as % of the bar area (floor keeps tiny steps visible).
+  const heights = rows.map(r => Math.max(Math.min(r.remaining ?? 0, 1) * 100, 2.5));
 
   // Springs can only morph between same-length arrays — when the step count
-  // changes (different funnel entirely) snap instead of interpolating. The ref
-  // is written in an effect, not during render, so a discarded/double render
-  // can never swallow the snap.
+  // changes (different funnel entirely) snap instead of interpolating.
   const prevN = useRef(n);
   const lengthChanged = prevN.current !== n;
   useLayoutEffect(() => {
     prevN.current = n;
   });
   const spring = useSpring({
-    ts: t,
+    hs: heights,
     immediate: lengthChanged,
     config: { tension: 170, friction: 26 },
   });
 
-  // Entrance: the ribbon draws itself left → right on mount (each tab visit
-  // remounts the chart, so the reveal plays every time the funnel is opened).
+  // Entrance: columns rise + fade in left → right on mount.
   const reveal = useSpring({
     from: { p: 0 },
     to: { p: 1 },
-    config: { duration: 900, easing: easings.easeOutCubic },
+    config: { duration: 700, easing: easings.easeOutCubic },
   });
 
   // Spring frames can briefly carry the previous array length around a step-
   // count change — every interpolator must fall back to the target values.
-  const safeVals = (vals: number[]) => (vals.length === n ? vals : t);
-
-  // Builds the closed ribbon path for a given set of step thicknesses.
-  const ribbon = (thicknesses: number[], mult: number) => {
-    const thick = safeVals(thicknesses).map(v => Math.min(v * mult, H - 6));
-    const yt = thick.map(v => (H - v) / 2);
-    const yb = thick.map(v => (H + v) / 2);
-    let d = `M 0 ${yt[0]}`;
-    for (let i = 0; i < n; i++) {
-      const bx = segW * (i + 1);
-      d += ` L ${i === n - 1 ? W : bx - k} ${yt[i]}`;
-      if (i < n - 1)
-        d += ` C ${bx - k / 2} ${yt[i]} ${bx + k / 2} ${yt[i + 1]} ${bx + k} ${yt[i + 1]}`;
-    }
-    d += ` L ${W} ${yb[n - 1]}`;
-    for (let i = n - 1; i >= 0; i--) {
-      const bx = segW * i;
-      d += ` L ${i === 0 ? 0 : bx + k} ${yb[i]}`;
-      if (i > 0) d += ` C ${bx + k / 2} ${yb[i]} ${bx - k / 2} ${yb[i - 1]} ${bx - k} ${yb[i - 1]}`;
-    }
-    return d + ' Z';
-  };
+  const safeVals = (vals: number[]) => (vals.length === n ? vals : heights);
 
   if (!rows.length) return null;
 
@@ -98,103 +74,91 @@ export function FunnelChart({
 
   return (
     <div className="relative animate-in fade-in duration-500">
-      <animated.svg
-        viewBox={`0 0 ${W} ${H}`}
-        width="100%"
-        preserveAspectRatio="none"
+      {/* Column zone */}
+      <animated.div
+        className="relative flex items-stretch gap-2.5"
         style={{
-          height: 'auto',
+          height: BAR_AREA,
           clipPath: reveal.p.to(v => `inset(0 ${(1 - v) * 100}% 0 0)`),
         }}
       >
-        <defs>
-          <linearGradient id="funnel-grad" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0" stopColor="#8b5cf6" />
-            <stop offset="1" stopColor="#a78bfa" />
-          </linearGradient>
-        </defs>
-
-        <animated.path
-          d={spring.ts.to((...vals: number[]) => ribbon(vals, 1.12))}
-          fill="#8b5cf6"
-          opacity={0.1}
-        />
-        <animated.path
-          d={spring.ts.to((...vals: number[]) => ribbon(vals, 1))}
-          fill="url(#funnel-grad)"
-        />
-
-        {/* rose marker at the biggest-leak boundary, tracking the morph */}
-        {leakIndex > 0 ? (
-          <animated.line
-            x1={segW * leakIndex}
-            y1={spring.ts.to((...vals: number[]) => (H - safeVals(vals)[leakIndex - 1]) / 2)}
-            x2={segW * leakIndex}
-            y2={spring.ts.to((...vals: number[]) => (H + safeVals(vals)[leakIndex - 1]) / 2)}
-            stroke="#fb7185"
-            strokeWidth={2}
-            strokeDasharray="3 3"
-            opacity={0.85}
-          />
-        ) : null}
-
-        {/* drop-off between steps (the leak one is rose) */}
-        {rows.map((r, i) =>
-          i === 0 || !((r.dropped ?? 0) > 0) ? null : (
-            <animated.text
-              key={`d${i}`}
-              x={segW * i}
-              y={spring.ts.to((...vals: number[]) => (H - safeVals(vals)[i - 1]) / 2 - 9)}
-              textAnchor="middle"
-              fontSize="12.5"
-              fontWeight={i === leakIndex ? 700 : 400}
-              fill={i === leakIndex ? '#fb7185' : '#8b8b93'}
-            >
-              −{Math.round(r.dropoff * 100)}%
-            </animated.text>
-          ),
-        )}
-
-        {/* % pill per step */}
+        {/* boundary drop labels + leak divider (positioned at column gaps) */}
         {rows.map((r, i) => {
-          const label = `${Math.round((r.remaining ?? 0) * 100)}%`;
-          const pw = 22 + label.length * 9;
+          if (i === 0 || !((r.dropped ?? 0) > 0)) return null;
+          const left = `${(i / n) * 100}%`;
+          const isLeak = i === leakIndex;
           return (
-            <g key={`p${i}`} transform={`translate(${cx[i] - pw / 2}, ${H / 2 - 14})`}>
-              <rect width={pw} height="28" rx="14" fill="#101013" stroke="hsl(0 0% 22%)" />
-              <text
-                x={pw / 2}
-                y="19"
-                textAnchor="middle"
-                fontSize="13"
-                fontWeight="600"
-                fill="#fff"
+            <div key={`d${i}`}>
+              {isLeak ? (
+                <div
+                  className="pointer-events-none absolute bottom-0 top-6 w-px border-l border-dashed border-rose-400/60"
+                  style={{ left }}
+                  aria-hidden
+                />
+              ) : null}
+              <div
+                className={`pointer-events-none absolute top-0 z-10 -translate-x-1/2 rounded-full px-2 py-0.5 text-[11px] font-semibold tabular-nums ${
+                  isLeak
+                    ? 'bg-rose-500/15 text-rose-300 ring-1 ring-inset ring-rose-500/30'
+                    : 'bg-zinc-800/80 text-zinc-400'
+                }`}
+                style={{ left }}
               >
-                {label}
-              </text>
-            </g>
+                −{Math.round(r.dropoff * 100)}%
+              </div>
+            </div>
           );
         })}
 
-        {rows.map((_, i) => (
-          <rect
-            key={`h${i}`}
-            x={segW * i}
-            y={0}
-            width={segW}
-            height={H}
-            fill="transparent"
+        {rows.map((r, i) => (
+          <div
+            key={`c${i}`}
+            className="relative flex min-w-0 flex-1 flex-col justify-end"
             onMouseEnter={() => setHover(i)}
             onMouseLeave={() => setHover(null)}
-          />
+          >
+            {/* ghost rail so every column reads against a track */}
+            <div
+              className="pointer-events-none absolute inset-x-0 bottom-0 top-7 rounded-lg bg-white/[0.025]"
+              aria-hidden
+            />
+            {/* value + count ride on top of the column */}
+            <animated.div
+              className="relative z-[1] flex flex-col items-center"
+              style={{
+                marginBottom: 6,
+              }}
+            >
+              <span
+                className={`text-sm font-bold tabular-nums ${
+                  i === leakIndex ? 'text-rose-300' : 'text-foreground'
+                }`}
+              >
+                {Math.round((r.remaining ?? 0) * 100)}%
+              </span>
+              <span className="text-[10px] tabular-nums text-muted-foreground">
+                {formatLongNumber(r.visitors)} vis
+              </span>
+            </animated.div>
+            <animated.div
+              className="relative z-[1] w-full rounded-t-lg bg-gradient-to-b from-[#a78bfa] to-[#6d5bd0] shadow-[inset_0_1px_0_rgba(255,255,255,0.25)]"
+              style={{
+                height: spring.hs.to((...vals: number[]) => {
+                  const h = safeVals(vals)[i] ?? heights[i];
+                  // headroom for the % label above the tallest column
+                  return `${(h * (BAR_AREA - 52)) / BAR_AREA}%`;
+                }),
+                opacity: i === leakIndex ? 0.95 : 1,
+              }}
+            />
+          </div>
         ))}
-      </animated.svg>
+      </animated.div>
 
-      {/* step labels + per-step revenue / median annotations — fade in just
-          behind the ribbon reveal */}
-      <div className="mt-1.5 flex animate-in fade-in fill-mode-backwards delay-300 duration-700">
+      {/* step labels + per-step revenue / median annotations */}
+      <div className="mt-2 flex gap-2.5 border-t border-[hsl(0,0%,12%)] pt-2 animate-in fade-in fill-mode-backwards delay-200 duration-700">
         {rows.map((r, i) => (
-          <div key={`l${i}`} className="min-w-0 flex-1 space-y-0.5 px-1 text-center">
+          <div key={`l${i}`} className="min-w-0 flex-1 space-y-0.5 text-center">
             <div
               className={`truncate text-xs font-medium ${
                 i === leakIndex ? 'text-rose-300' : 'text-foreground/90'
@@ -202,9 +166,6 @@ export function FunnelChart({
               title={r.value}
             >
               {r.value}
-            </div>
-            <div className="text-[10px] text-muted-foreground">
-              {formatLongNumber(r.visitors)} vis
             </div>
             <div className="flex flex-wrap items-center justify-center gap-0.5">
               {(r.revenue || 0) > 0 ? (
@@ -236,7 +197,7 @@ export function FunnelChart({
       {hover !== null ? (
         <div
           className="pointer-events-none absolute top-1 z-10 -translate-x-1/2 whitespace-nowrap rounded-lg border border-[hsl(0,0%,16%)] bg-[hsl(0,0%,10%)] px-3 py-2 text-xs shadow-xl"
-          style={{ left: `${(cx[hover] / W) * 100}%` }}
+          style={{ left: `${((hover + 0.5) / n) * 100}%` }}
         >
           <div className="font-semibold text-foreground">{rows[hover].value}</div>
           <div className="mt-0.5 text-muted-foreground">

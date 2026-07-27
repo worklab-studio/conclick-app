@@ -111,8 +111,10 @@ export function DashboardSectionsPanel({ websiteId }: { websiteId: string }) {
             <div className="p-4">
               {tab === 'funnels' && (
                 <>
-                  <AutoFunnelInline websiteId={websiteId} />
+                  {/* User-built funnels lead; the auto-detected one is a
+                      suggestion, not the headline. */}
                   <FunnelsInline websiteId={websiteId} />
+                  <AutoFunnelInline websiteId={websiteId} />
                 </>
               )}
               {tab === 'goals' && <GoalsInline websiteId={websiteId} />}
