@@ -10,12 +10,15 @@ export function useWebsiteValuesQuery({
   startDate,
   endDate,
   search,
+  clean,
 }: {
   websiteId: string;
   type: string;
   startDate: Date;
   endDate: Date;
   search?: string;
+  /** Picker hygiene: drop internal events, merge /#hash path variants. */
+  clean?: boolean;
 }) {
   const { get, useQuery } = useApi();
   const { locale } = useLocale();
@@ -50,13 +53,14 @@ export function useWebsiteValuesQuery({
   };
 
   return useQuery({
-    queryKey: ['websites:values', { websiteId, type, startDate, endDate, search }],
+    queryKey: ['websites:values', { websiteId, type, startDate, endDate, search, clean }],
     queryFn: () =>
       get(`/websites/${websiteId}/values`, {
         type,
         startAt: +startDate,
         endAt: +endDate,
         search: getSearch(type, search),
+        ...(clean ? { clean: 1 } : {}),
       }),
     enabled: !!(websiteId && type && startDate && endDate),
     // Date changes keep the previous values while refetching, so consumers

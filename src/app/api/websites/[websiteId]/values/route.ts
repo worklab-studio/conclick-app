@@ -5,6 +5,7 @@ import { badRequest, json, unauthorized } from '@/lib/response';
 import { getValues } from '@/queries/sql';
 import { z } from 'zod';
 import { dateRangeParams, fieldsParam, searchParams } from '@/lib/schema';
+import { cleanValues } from '@/lib/event-noise';
 
 export async function GET(
   request: Request,
@@ -14,6 +15,10 @@ export async function GET(
     type: fieldsParam,
     ...dateRangeParams,
     ...searchParams,
+    // clean=1: picker/suggestion hygiene — internal events (`engagement`)
+    // dropped, `/#hash` + trailing-slash path variants merged. Off by default
+    // so generic filter dropdowns keep raw values.
+    clean: z.string().optional(),
   });
 
   const { auth, query, error } = await parseRequest(request, schema);
@@ -43,5 +48,11 @@ export async function GET(
 
   // Drop rows with no value (e.g. null event_name from pageview rows) so consumers
   // never receive `{ value: null }` (which broke auto-funnel scoring).
-  return json((values ?? []).filter((n: any) => n && n.value));
+  let result = (values ?? []).filter((n: any) => n && n.value);
+
+  if (query.clean && (type === 'path' || type === 'event')) {
+    result = cleanValues(type, result);
+  }
+
+  return json(result);
 }

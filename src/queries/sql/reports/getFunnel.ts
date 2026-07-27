@@ -61,11 +61,12 @@ async function relationalQuery(
         const startSum = i > 0 ? 'union ' : '';
         const isURL = cv.type === 'path';
         const column = isURL ? 'url_path' : 'event_name';
+        const isWildcard = cv.value.startsWith('*') || cv.value.endsWith('*');
 
         let operator = '=';
         let paramValue = cv.value;
 
-        if (cv.value.startsWith('*') || cv.value.endsWith('*')) {
+        if (isWildcard) {
           operator = 'like';
           // Escape LIKE metacharacters (\ % _) in the user-supplied value FIRST
           // so an interior % or _ is matched literally, THEN map the leading/
@@ -73,6 +74,17 @@ async function relationalQuery(
           // producing incorrect funnel cohorts (e.g. "/foo%bar" matched "/fooXbar").
           paramValue = cv.value.replace(/[\\%_]/g, '\\$&').replace(/^\*|\*$/g, '%');
         }
+
+        // Plain path steps match hash-anchor and trailing-slash variants: a
+        // step "/" must count "/#pricing" rows (scroll anchors, not pages),
+        // and "/docs" must count "/docs/". The pickers merge those variants,
+        // so matching has to as well or cohorts silently undercount. An
+        // explicit "#" in the value opts back into exact anchor targeting.
+        const normalizedPathEq = isURL && !isWildcard && !cv.value.includes('#');
+        const stepCondition = (prefix: string) =>
+          normalizedPathEq
+            ? `rtrim(split_part(${prefix}${column}, '#', 1), '/') = rtrim({{${i}}}, '/')`
+            : `${prefix}${column} ${operator} {{${i}}}`;
 
         if (levelNumber === 1) {
           pv.levelOneQuery = `
@@ -83,7 +95,7 @@ async function relationalQuery(
             ${joinSessionQuery}
             where website_event.website_id = {{websiteId::uuid}}
               and website_event.created_at between {{startDate}} and {{endDate}}
-              and ${column} ${operator} {{${i}}}
+              and ${stepCondition('website_event.')}
               ${filterQuery}
           )`;
         } else {
@@ -98,7 +110,7 @@ async function relationalQuery(
                   `l.created_at `,
                   `${window} minute`,
                 )}
-                and we.${column} ${operator} {{${i}}}
+                and ${stepCondition('we.')}
                 and we.created_at <= {{endDate}}
           )`;
         }

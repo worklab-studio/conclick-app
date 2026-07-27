@@ -99,6 +99,7 @@ export function FunnelBuilder({
     type: 'path',
     startDate,
     endDate,
+    clean: true,
   });
   const pages = useMemo(
     () => ((pagesData || []) as { value: string }[]).map(d => d.value),
@@ -346,7 +347,7 @@ function StepValueSelect({
   const {
     dateRange: { startDate, endDate },
   } = useDateRange();
-  const { data } = useWebsiteValuesQuery({ websiteId, type, startDate, endDate });
+  const { data } = useWebsiteValuesQuery({ websiteId, type, startDate, endDate, clean: true });
   const opts = (data || []) as { value: string; count: number }[];
   const all = value && !opts.some(o => o.value === value) ? [{ value, count: 0 }, ...opts] : opts;
 

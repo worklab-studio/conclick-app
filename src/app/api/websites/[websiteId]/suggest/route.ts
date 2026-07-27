@@ -3,6 +3,7 @@ import { json, unauthorized } from '@/lib/response';
 import { canViewWebsite } from '@/permissions';
 import { getWebsite } from '@/queries/prisma';
 import { getValues } from '@/queries/sql';
+import { cleanValues } from '@/lib/event-noise';
 import { analyzeSite } from '@/lib/site-analyzer';
 import { scoreConversionEvent, buildAutoSteps } from '@/lib/auto-funnel';
 
@@ -62,12 +63,20 @@ export async function POST(
       getValues(websiteId, 'event_name', filters).catch(() => []),
       getValues(websiteId, 'url_path', filters).catch(() => []),
     ]);
-    const events: VC[] = (eventVals as any[])
-      .filter(v => v && v.value)
-      .map(v => ({ value: String(v.value), count: Number(v.count) || 0 }));
-    const paths: VC[] = (pathVals as any[])
-      .filter(v => v && v.value)
-      .map(v => ({ value: String(v.value), count: Number(v.count) || 0 }));
+    // Same hygiene as the pickers: internal events out, hash/slash path
+    // variants merged — suggestions must draw from the same clean universe.
+    const events: VC[] = cleanValues(
+      'event',
+      (eventVals as any[])
+        .filter(v => v && v.value)
+        .map(v => ({ value: String(v.value), count: Number(v.count) || 0 })),
+    );
+    const paths: VC[] = cleanValues(
+      'path',
+      (pathVals as any[])
+        .filter(v => v && v.value)
+        .map(v => ({ value: String(v.value), count: Number(v.count) || 0 })),
+    );
 
     if (events.length || paths.length) {
       const evMap = new Map<string, VC>();

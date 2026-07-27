@@ -74,7 +74,14 @@ async function relationalQuery(
       ${cohortQuery}
       ${joinSessionQuery}
       where website_event.website_id = {{websiteId::uuid}}
-        and ${column} = {{value}}
+        and ${
+          // Plain path goals match hash-anchor and trailing-slash variants
+          // (same rule as funnel steps + the cleaned pickers): a goal on "/"
+          // counts "/#pricing" rows. An explicit "#" opts into exact anchors.
+          type === 'path' && !String(value).includes('#')
+            ? `rtrim(split_part(website_event.url_path, '#', 1), '/') = rtrim({{value}}, '/')`
+            : `${column} = {{value}}`
+        }
         ${dateQuery}
         ${filterQuery}
       group by website_event.session_id

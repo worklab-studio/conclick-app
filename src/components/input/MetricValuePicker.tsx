@@ -38,6 +38,7 @@ export function MetricValuePicker({
     startDate,
     endDate,
     search: debounced,
+    clean: true,
   });
   const items = (data || []) as { value: string; count: number }[];
   const Icon = type === 'event' ? Zap : Globe;

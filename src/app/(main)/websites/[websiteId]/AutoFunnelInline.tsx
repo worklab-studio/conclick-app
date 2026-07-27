@@ -118,12 +118,14 @@ export function AutoFunnelInline({ websiteId }: { websiteId: string }) {
     type: 'path',
     startDate,
     endDate,
+    clean: true,
   });
   const { data: eventsData } = useWebsiteValuesQuery({
     websiteId,
     type: 'event',
     startDate,
     endDate,
+    clean: true,
   });
   const pages = useMemo(() => (pagesData || []) as { value: string; count: number }[], [pagesData]);
   const events = useMemo(

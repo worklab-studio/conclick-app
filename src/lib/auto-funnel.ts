@@ -2,6 +2,8 @@
 // "Clicked: Close"), detects whether a site is single-page or multipage, and assembles
 // a meaningful multi-step funnel toward the best available conversion. Pure + testable.
 
+import { isAutoViewEvent, isInternalEvent, normalizePath } from '@/lib/event-noise';
+
 export interface ValueCount {
   value: string;
   count: number;
@@ -66,6 +68,8 @@ const CONVERSION = [
   'email',
   'submit',
   'contact',
+  'download',
+  'install',
 ];
 // Mid-funnel consideration.
 const CONSIDERATION = [
@@ -99,6 +103,9 @@ function hasWord(label: string, words: string[]): boolean {
 /** Score an event's conversion-worthiness. Returns -1 to drop (UI noise). */
 export function scoreConversionEvent(name: string, count: number, maxCount: number): number {
   if (!name) return -1;
+  // The tracker's internal engagement heartbeat is high-volume on every site;
+  // its popularity bonus let it outrank genuine low-count conversions.
+  if (isInternalEvent(name)) return -1;
   const label = labelOf(name);
   if (!label) return -1;
   if (hasWord(label, NOISE)) return -1;
@@ -112,16 +119,33 @@ export function scoreConversionEvent(name: string, count: number, maxCount: numb
   return base;
 }
 
-/** Single-page if there are < 4 meaningful (non-root, non-asset, with-traffic) paths. */
+/**
+ * Single-page if there are < 4 meaningful (non-root, non-asset, with-traffic)
+ * NORMALIZED paths — `/#pricing`/`/#top` are scroll anchors on `/`, not pages —
+ * OR if the root (plus its hash anchors) carries at least as much traffic as
+ * every other page combined. The second rule catches "one-pager with a blog":
+ * plenty of distinct /blog/* paths, but the actual journey lives on `/`.
+ */
 export function detectSiteType(pages: ValueCount[]): {
   isSinglePage: boolean;
   meaningful: ValueCount[];
 } {
   const meaningful = (pages || []).filter(
-    p => p && p.value && p.value !== '/' && !ASSET_RX.test(p.value) && (p.count || 0) > 0,
+    p =>
+      p &&
+      p.value &&
+      normalizePath(p.value) !== '/' &&
+      !ASSET_RX.test(p.value) &&
+      (p.count || 0) > 0,
   );
-  const uniq = new Set(meaningful.map(p => p.value.split('?')[0].split('#')[0]));
-  return { isSinglePage: uniq.size < 4, meaningful };
+  const uniq = new Set(meaningful.map(p => normalizePath(p.value.split('?')[0])));
+
+  const rootTraffic = (pages || [])
+    .filter(p => p && p.value && normalizePath(p.value) === '/')
+    .reduce((sum, p) => sum + (p.count || 0), 0);
+  const otherTraffic = meaningful.reduce((sum, p) => sum + (p.count || 0), 0);
+
+  return { isSinglePage: uniq.size < 4 || rootTraffic >= otherTraffic, meaningful };
 }
 
 function bestConversion(
@@ -132,6 +156,10 @@ function bestConversion(
   let best: string | null = null;
   let bestScore = 0;
   for (const e of events) {
+    // Passive section-view markers are never conversions: "Viewed: demo" is
+    // someone scrolling past the demo, not booking one. They remain valid
+    // MID-funnel steps for one-pagers — just not the destination.
+    if (isAutoViewEvent(e.value)) continue;
     let s = scoreConversionEvent(e.value, e.count, maxCount);
     // User-declared intent beats keyword guessing: saved goals get a strong boost.
     if (s >= 0 && goalSet?.has(String(e.value || '').toLowerCase())) s += 50;
@@ -158,7 +186,9 @@ export function buildAutoSteps(
 ): { steps: AutoStep[]; isSinglePage: boolean } {
   const { isSinglePage, meaningful } = detectSiteType(pages);
   const maxEv = Math.max(1, ...events.map(e => e.count || 0));
-  const entry = pages.some(p => p.value === '/') ? '/' : pages[0]?.value || '';
+  const entry = pages.some(p => normalizePath(p.value) === '/')
+    ? '/'
+    : normalizePath(pages[0]?.value || '');
   const goalSet = goalValues?.length
     ? new Set(goalValues.filter(Boolean).map(v => String(v).toLowerCase()))
     : undefined;
@@ -186,7 +216,7 @@ export function buildAutoSteps(
     const considerationPage =
       meaningful.find(p => hasWord(p.value.toLowerCase(), CONSIDERATION))?.value ||
       meaningful[0]?.value;
-    if (considerationPage) steps.push({ type: 'path', value: considerationPage });
+    if (considerationPage) steps.push({ type: 'path', value: normalizePath(considerationPage) });
   }
 
   if (conv) {
@@ -195,7 +225,7 @@ export function buildAutoSteps(
     const convPath = meaningful.find(p =>
       CHECKOUT_PATHS.some(c => p.value.toLowerCase().includes(c)),
     )?.value;
-    if (convPath) steps.push({ type: 'path', value: convPath });
+    if (convPath) steps.push({ type: 'path', value: normalizePath(convPath) });
   }
 
   // Dedupe, drop any later step equal to the entry, cap at 5.
