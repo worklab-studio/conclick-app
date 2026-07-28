@@ -39,7 +39,7 @@ const contentSecurityPolicy = `
   connect-src 'self' https:;
   worker-src 'self' blob:;
   child-src 'self' blob:;
-  frame-src 'self' https://challenges.cloudflare.com https://clerk.fluxdesignlab.io https://*.clerk.accounts.dev;
+  frame-src 'self' https: https://challenges.cloudflare.com https://clerk.fluxdesignlab.io https://*.clerk.accounts.dev;
   frame-ancestors 'self' ${frameAncestors};
 `;
 
