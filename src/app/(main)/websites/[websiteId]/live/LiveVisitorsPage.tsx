@@ -13,7 +13,6 @@ import {
   Globe as GlobeIcon,
   ShieldCheck,
   X,
-  Zap,
 } from 'lucide-react';
 import { createAvatar } from '@dicebear/core';
 import { notionistsNeutral } from '@dicebear/collection';
@@ -442,7 +441,22 @@ export function LiveVisitorsPage({ websiteId }: { websiteId: string }) {
 
         {/* CENTER — the globe */}
         <main className="relative min-w-0 flex-1">
-          <LiveGlobe visitors={globeVisitors} focus={focus} className="h-full w-full" />
+          <LiveGlobe
+            visitors={globeVisitors}
+            focus={focus}
+            onPick={({ lat, lng }) => {
+              // Nearest visitor to the clicked dot (dots are exact coords,
+              // so this is effectively an id lookup with float tolerance).
+              let best: { id: string; d: number } | null = null;
+              for (const v of visitors) {
+                if (v.lat == null || v.lng == null) continue;
+                const d = Math.abs(v.lat - lat) + Math.abs(v.lng - lng);
+                if (!best || d < best.d) best = { id: v.id, d };
+              }
+              if (best && best.d < 0.5) selectVisitor(best.id);
+            }}
+            className="h-full w-full"
+          />
           {visitors.length === 0 && (
             <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
               <div className="rounded-2xl border border-white/10 bg-black/50 px-8 py-7 text-center backdrop-blur-md">
@@ -466,48 +480,11 @@ export function LiveVisitorsPage({ websiteId }: { websiteId: string }) {
             <span className="flex items-center gap-1.5">
               <span className="h-1.5 w-1.5 rounded-full bg-[#8b88d8]/40" /> Recent · 1h
             </span>
-            <span className="text-zinc-700">drag to rotate · scroll to zoom to street level</span>
+            <span className="text-zinc-700">
+              drag to rotate · scroll to zoom to street level · click a dot for details
+            </span>
           </div>
         </main>
-
-        {/* RIGHT — live feed (calm, neutral; clicking flies the globe) */}
-        <aside className="hidden w-[320px] shrink-0 flex-col overflow-hidden p-5 pl-0 lg:flex">
-          <div className="mb-2.5 text-[11px] font-semibold uppercase tracking-widest text-zinc-600">
-            Live feed
-          </div>
-          <div className="min-h-0 flex-1 space-y-2 overflow-y-auto pr-1">
-            {feedEvents.length === 0 ? (
-              <div className="rounded-xl border border-dashed border-zinc-800/70 px-4 py-6 text-center text-xs text-zinc-600">
-                Activity appears here the moment it happens.
-              </div>
-            ) : (
-              feedEvents.map(f => (
-                <button
-                  key={f.id}
-                  type="button"
-                  onClick={() => selectVisitor(f.sessionId)}
-                  className="block w-full rounded-xl border border-zinc-800/70 bg-zinc-950/70 px-3.5 py-2.5 text-left backdrop-blur transition-colors animate-in fade-in slide-in-from-right-2 duration-300 hover:border-[#5e5ba4]/50"
-                >
-                  <div className="flex items-center gap-2 text-sm">
-                    <span aria-hidden>{flagEmoji(f.country)}</span>
-                    <span className="truncate font-medium text-zinc-200">{f.city}</span>
-                    <span className="text-zinc-600">→</span>
-                    <span className="truncate font-mono text-xs text-indigo-300">{f.urlPath}</span>
-                    <span className="ml-auto shrink-0 text-[10px] tabular-nums text-zinc-600">
-                      {timeAgo(f.createdAt)}
-                    </span>
-                  </div>
-                  {f.eventName ? (
-                    <div className="mt-1.5 inline-flex items-center gap-1.5 rounded-md bg-zinc-800/70 px-2 py-0.5 text-[11px] text-zinc-300">
-                      <Zap className="h-3 w-3 text-[#8b88cf]" />
-                      {f.eventName}
-                    </div>
-                  ) : null}
-                </button>
-              ))
-            )}
-          </div>
-        </aside>
       </div>
 
       {/* selected visitor card */}

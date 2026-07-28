@@ -30,10 +30,13 @@ const STYLE_URL = 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.j
 export function LiveGlobe({
   visitors,
   focus,
+  onPick,
   className,
 }: {
   visitors: GlobeVisitor[];
   focus?: { lat: number; lng: number; key: string } | null;
+  /** Click on a visitor dot — receives the dot's coordinates. */
+  onPick?: (coords: { lat: number; lng: number }) => void;
   className?: string;
 }) {
   const wrapRef = useRef<HTMLDivElement | null>(null);
@@ -43,6 +46,9 @@ export function LiveGlobe({
   const idleTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const visitorsRef = useRef<GlobeVisitor[]>([]);
   visitorsRef.current = visitors;
+  const onPickRef = useRef(onPick);
+  onPickRef.current = onPick;
+  const homeZoomRef = useRef(1.1);
 
   const toGeoJSON = (list: GlobeVisitor[]) =>
     ({
@@ -61,12 +67,21 @@ export function LiveGlobe({
     const wrap = wrapRef.current;
     if (!wrap || mapRef.current) return;
 
+    // Fit the WHOLE sphere inside the container with breathing room — the
+    // sphere's apparent diameter is ~512*2^zoom px, so solve for the zoom
+    // that leaves ~12% margin against the smaller container edge.
+    const fitZoom = () => {
+      const side = Math.min(wrap.clientWidth, wrap.clientHeight) * 0.88;
+      return Math.max(0.35, Math.min(1.6, Math.log2(side / 512)));
+    };
+    homeZoomRef.current = fitZoom();
+
     const map = new maplibregl.Map({
       container: wrap,
       style: STYLE_URL,
-      center: [40, 18],
-      zoom: 1.7,
-      minZoom: 1.1,
+      center: [20, 12],
+      zoom: homeZoomRef.current,
+      minZoom: 0.35,
       maxZoom: 17,
       attributionControl: false,
       fadeDuration: 150,
@@ -87,14 +102,23 @@ export function LiveGlobe({
       } catch {
         /* ignore */
       }
-      // Blend the basemap's background into the page's space background.
+      // Recolor the basemap into the page's palette: space-black background,
+      // deep-navy ocean, charcoal land — Carto's default grey water is what
+      // made the page look washed out.
       for (const layer of map.getStyle().layers || []) {
-        if (layer.type === 'background') {
-          try {
+        try {
+          if (layer.type === 'background') {
             map.setPaintProperty(layer.id, 'background-color', '#04040a');
-          } catch {
-            /* ignore */
+          } else if (layer.id.includes('water') && layer.type === 'fill') {
+            map.setPaintProperty(layer.id, 'fill-color', '#0a0d1a');
+          } else if (
+            layer.type === 'fill' &&
+            (layer.id.includes('land') || layer.id.includes('earth'))
+          ) {
+            map.setPaintProperty(layer.id, 'fill-color', '#12141f');
           }
+        } catch {
+          /* style variations */
         }
       }
 
@@ -139,6 +163,25 @@ export function LiveGlobe({
         },
       });
 
+      // Click a visitor dot → hand its coordinates up (opens the card).
+      const pick = (e: maplibregl.MapLayerMouseEvent) => {
+        const f = e.features?.[0];
+        const g = f?.geometry;
+        if (g && g.type === 'Point') {
+          const [lng, lat] = (g as any).coordinates;
+          onPickRef.current?.({ lat, lng });
+        }
+      };
+      for (const id of ['v-active', 'v-recent']) {
+        map.on('click', id, pick);
+        map.on('mouseenter', id, () => {
+          map.getCanvas().style.cursor = 'pointer';
+        });
+        map.on('mouseleave', id, () => {
+          map.getCanvas().style.cursor = '';
+        });
+      }
+
       readyRef.current = true;
     });
 
@@ -181,7 +224,14 @@ export function LiveGlobe({
     map.on('touchstart', pauseSpin);
     map.on('wheel', pauseSpin);
 
+    const ro = new ResizeObserver(() => {
+      map.resize();
+      homeZoomRef.current = fitZoom();
+    });
+    ro.observe(wrap);
+
     return () => {
+      ro.disconnect();
       cancelAnimationFrame(raf);
       clearInterval(pulse);
       if (idleTimer.current) clearTimeout(idleTimer.current);
@@ -208,8 +258,10 @@ export function LiveGlobe({
     map.flyTo({ center: [focus.lng, focus.lat], zoom: 5.5, speed: 0.85, curve: 1.5 });
     if (idleTimer.current) clearTimeout(idleTimer.current);
     idleTimer.current = setTimeout(() => {
+      // Drift back out to the full floating sphere, then resume the spin.
+      mapRef.current?.easeTo({ zoom: homeZoomRef.current, duration: 2200 });
       spinRef.current = true;
-    }, 9000);
+    }, 8000);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [focus?.key]);
 
