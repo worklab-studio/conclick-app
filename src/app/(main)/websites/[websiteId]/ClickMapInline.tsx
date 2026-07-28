@@ -230,10 +230,11 @@ export function ClickMapInline({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [targets, liveStatus]);
 
-  // No handshake within 6s → screenshot fallback.
+  // No handshake within 12s → screenshot fallback. (The tracker announces as
+  // soon as it executes, but a slow origin still needs headroom.)
   useEffect(() => {
     if (!liveUrl || liveStatus !== 'connecting') return;
-    const t = setTimeout(() => setLiveStatus(s => (s === 'connecting' ? 'off' : s)), 6000);
+    const t = setTimeout(() => setLiveStatus(s => (s === 'connecting' ? 'off' : s)), 12000);
     return () => clearTimeout(t);
   }, [liveUrl, liveStatus]);
 

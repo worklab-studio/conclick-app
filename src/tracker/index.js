@@ -698,8 +698,12 @@
       setTimeout(hmSend, 500);
       setTimeout(hmSend, 2500);
     };
-    if (document.readyState === 'complete') hmReady();
-    else window.addEventListener('load', hmReady);
+    // Announce IMMEDIATELY (this script runs deferred, DOM is parsed) so the
+    // dashboard's handshake beats its screenshot-fallback timer even on
+    // image-heavy pages where window.load takes many seconds — then announce
+    // again on load when geometry is final.
+    hmReady();
+    if (document.readyState !== 'complete') window.addEventListener('load', hmReady);
   }
 
   if (!hmMode && !trackingDisabled()) {
