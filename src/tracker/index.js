@@ -672,8 +672,15 @@
       hmPost({
         type: 'boxes',
         boxes: hmMeasure(hmTargets),
-        width: de.clientWidth,
-        height: Math.max(de.scrollHeight, document.body ? document.body.scrollHeight : 0),
+        // innerWidth, not documentElement.clientWidth: builders like Framer
+        // style the root so it has no box (clientWidth 0) while children lay
+        // out at the viewport width just fine.
+        width: window.innerWidth || de.clientWidth,
+        height: Math.max(
+          de.scrollHeight,
+          document.body ? document.body.scrollHeight : 0,
+          window.innerHeight || 0,
+        ),
         scrollY: window.scrollY,
       });
     };
