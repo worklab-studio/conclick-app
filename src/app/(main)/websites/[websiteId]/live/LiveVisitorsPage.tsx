@@ -466,7 +466,7 @@ export function LiveVisitorsPage({ websiteId }: { websiteId: string }) {
             <span className="flex items-center gap-1.5">
               <span className="h-1.5 w-1.5 rounded-full bg-[#8b88d8]/40" /> Recent · 1h
             </span>
-            <span className="text-zinc-700">drag to rotate</span>
+            <span className="text-zinc-700">drag to rotate · scroll to zoom to street level</span>
           </div>
         </main>
 

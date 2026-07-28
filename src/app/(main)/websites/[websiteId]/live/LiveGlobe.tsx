@@ -1,31 +1,31 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import createGlobe from 'cobe';
+import maplibregl from 'maplibre-gl';
+import type { FeatureCollection } from 'geojson';
+import 'maplibre-gl/dist/maplibre-gl.css';
 
 export interface GlobeVisitor {
   id: string;
   lat: number;
   lng: number;
   active: boolean;
-  /** 0..1 — scales the marker (e.g. buying-intent or recency). */
+  /** 0..1 — scales the marker (e.g. engagement/recency). */
   weight?: number;
 }
 
-// cobe's official location→angles mapping.
-function locationToAngles(lat: number, lng: number): [number, number] {
-  return [Math.PI - ((lng * Math.PI) / 180 - Math.PI / 2), (lat * Math.PI) / 180];
-}
+// Free vector basemap with real geography and city/street labels at zoom.
+const STYLE_URL = 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json';
 
 /**
- * Premium WebGL globe (cobe): dotted continents, indigo glow, exact lat/lng
- * markers. Everything per-frame is mutated through refs inside onRender — no
- * React re-renders during animation, which is what keeps it at 60fps where
- * the old vector-tile map stuttered.
+ * Real-earth globe (MapLibre v5 globe projection): space view zoomed out,
+ * Google-Earth-style dive to city/street labels on scroll. Everything data-
+ * driven goes through setData/paint updates — React never re-renders during
+ * animation, which is what keeps it smooth where the old page stuttered.
  *
- * - Idle: slow auto-rotation.
- * - Drag: rotate with inertia.
- * - `focus`: eases the camera to a visitor (new arrival / feed click).
+ * - Idle: slow auto-spin (only while zoomed out; pauses on interaction).
+ * - Scroll: zoom from orbit to street level (maxZoom 17).
+ * - `focus`: flies the camera to a visitor at city zoom.
  */
 export function LiveGlobe({
   visitors,
@@ -36,148 +36,189 @@ export function LiveGlobe({
   focus?: { lat: number; lng: number; key: string } | null;
   className?: string;
 }) {
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const wrapRef = useRef<HTMLDivElement | null>(null);
+  const mapRef = useRef<maplibregl.Map | null>(null);
+  const readyRef = useRef(false);
+  const spinRef = useRef(true);
+  const idleTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const visitorsRef = useRef<GlobeVisitor[]>([]);
+  visitorsRef.current = visitors;
 
-  const markersRef = useRef<{ location: [number, number]; size: number }[]>([]);
-  const phiRef = useRef(0.3);
-  const thetaRef = useRef(0.25);
-  const targetRef = useRef<{ phi: number; theta: number } | null>(null);
-  const draggingRef = useRef<{ x: number; y: number; phi: number; theta: number } | null>(null);
-  const inertiaRef = useRef(0);
-  const idleRef = useRef(true);
-
-  // Visitors → markers (active bright & big, recent small & dim via size).
-  useEffect(() => {
-    markersRef.current = visitors
-      .filter(v => Number.isFinite(v.lat) && Number.isFinite(v.lng))
-      .slice(0, 120)
-      .map(v => ({
-        location: [v.lat, v.lng] as [number, number],
-        size: v.active ? 0.055 + 0.05 * Math.min(1, v.weight ?? 0.4) : 0.022,
-      }));
-  }, [visitors]);
-
-  // Focus request → set easing target and pause idle spin briefly.
-  useEffect(() => {
-    if (!focus) return;
-    const [phi, theta] = locationToAngles(focus.lat, focus.lng);
-    targetRef.current = { phi, theta: Math.max(-1.1, Math.min(1.1, theta)) };
-    idleRef.current = false;
-    const t = setTimeout(() => {
-      idleRef.current = true;
-      targetRef.current = null;
-    }, 4500);
-    return () => clearTimeout(t);
-  }, [focus?.key]); // eslint-disable-line react-hooks/exhaustive-deps
+  const toGeoJSON = (list: GlobeVisitor[]) =>
+    ({
+      type: 'FeatureCollection',
+      features: list
+        .filter(v => Number.isFinite(v.lat) && Number.isFinite(v.lng))
+        .slice(0, 300)
+        .map(v => ({
+          type: 'Feature',
+          geometry: { type: 'Point', coordinates: [v.lng, v.lat] },
+          properties: { active: v.active ? 1 : 0, weight: Math.min(1, v.weight ?? 0.4) },
+        })),
+    }) as FeatureCollection;
 
   useEffect(() => {
-    const canvas = canvasRef.current;
     const wrap = wrapRef.current;
-    if (!canvas || !wrap) return;
+    if (!wrap || mapRef.current) return;
 
-    let width = wrap.clientWidth;
-    let height = wrap.clientHeight;
-    const size = Math.min(width, height);
+    const map = new maplibregl.Map({
+      container: wrap,
+      style: STYLE_URL,
+      center: [40, 18],
+      zoom: 1.7,
+      minZoom: 1.1,
+      maxZoom: 17,
+      attributionControl: false,
+      fadeDuration: 150,
+    });
+    mapRef.current = map;
 
-    const globe = createGlobe(canvas, {
-      devicePixelRatio: 2,
-      width: size * 2,
-      height: size * 2,
-      phi: phiRef.current,
-      theta: thetaRef.current,
-      dark: 1,
-      diffuse: 1.2,
-      mapSamples: 22000,
-      mapBrightness: 5.2,
-      baseColor: [0.16, 0.16, 0.28],
-      markerColor: [0.62, 0.58, 1],
-      glowColor: [0.22, 0.2, 0.5],
-      markers: [],
-      opacity: 0.92,
-      onRender: state => {
-        // Ease toward a focus target, else idle-rotate (unless dragging).
-        const target = targetRef.current;
-        if (target && !draggingRef.current) {
-          let dPhi = target.phi - phiRef.current;
-          // shortest path around the sphere
-          while (dPhi > Math.PI) dPhi -= 2 * Math.PI;
-          while (dPhi < -Math.PI) dPhi += 2 * Math.PI;
-          phiRef.current += dPhi * 0.07;
-          thetaRef.current += (target.theta - thetaRef.current) * 0.07;
-        } else if (!draggingRef.current) {
-          phiRef.current += idleRef.current ? 0.0028 : 0.0006;
-          phiRef.current += inertiaRef.current;
-          inertiaRef.current *= 0.93;
+    map.on('style.load', () => {
+      try {
+        map.setProjection({ type: 'globe' });
+      } catch {
+        /* flat fallback on very old GPUs */
+      }
+      try {
+        // Space-black canvas behind the globe + soft atmosphere halo.
+        (map as any).setSky?.({
+          'atmosphere-blend': ['interpolate', ['linear'], ['zoom'], 0, 1, 6, 1, 8, 0],
+        });
+      } catch {
+        /* ignore */
+      }
+      // Blend the basemap's background into the page's space background.
+      for (const layer of map.getStyle().layers || []) {
+        if (layer.type === 'background') {
+          try {
+            map.setPaintProperty(layer.id, 'background-color', '#04040a');
+          } catch {
+            /* ignore */
+          }
         }
-        state.phi = phiRef.current;
-        state.theta = thetaRef.current;
-        state.markers = markersRef.current;
-        state.width = size * 2;
-        state.height = size * 2;
-      },
+      }
+
+      map.addSource('visitors', { type: 'geojson', data: toGeoJSON(visitorsRef.current) });
+
+      // Soft glow under active visitors.
+      map.addLayer({
+        id: 'v-halo',
+        type: 'circle',
+        source: 'visitors',
+        filter: ['==', ['get', 'active'], 1],
+        paint: {
+          'circle-radius': ['+', 11, ['*', 7, ['get', 'weight']]],
+          'circle-color': '#8b88d8',
+          'circle-blur': 1,
+          'circle-opacity': 0.4,
+        },
+      });
+      // Recent (last hour) — dim, small.
+      map.addLayer({
+        id: 'v-recent',
+        type: 'circle',
+        source: 'visitors',
+        filter: ['==', ['get', 'active'], 0],
+        paint: {
+          'circle-radius': 3,
+          'circle-color': '#8b88d8',
+          'circle-opacity': 0.35,
+        },
+      });
+      // Active — bright core with white ring.
+      map.addLayer({
+        id: 'v-active',
+        type: 'circle',
+        source: 'visitors',
+        filter: ['==', ['get', 'active'], 1],
+        paint: {
+          'circle-radius': ['+', 4, ['*', 2.5, ['get', 'weight']]],
+          'circle-color': '#a5a1ff',
+          'circle-stroke-color': '#ffffff',
+          'circle-stroke-width': 1.2,
+        },
+      });
+
+      readyRef.current = true;
     });
 
-    const onDown = (e: PointerEvent) => {
-      draggingRef.current = {
-        x: e.clientX,
-        y: e.clientY,
-        phi: phiRef.current,
-        theta: thetaRef.current,
-      };
-      idleRef.current = false;
-      targetRef.current = null;
-      canvas.style.cursor = 'grabbing';
-    };
-    const onMove = (e: PointerEvent) => {
-      const d = draggingRef.current;
-      if (!d) return;
-      const dx = e.clientX - d.x;
-      const dy = e.clientY - d.y;
-      phiRef.current = d.phi + dx / 160;
-      thetaRef.current = Math.max(-1.1, Math.min(1.1, d.theta + dy / 240));
-      inertiaRef.current = dx / 16000;
-    };
-    const onUp = () => {
-      draggingRef.current = null;
-      canvas.style.cursor = 'grab';
-      setTimeout(() => {
-        idleRef.current = true;
-      }, 1800);
-    };
+    // Gentle breathing pulse on the halo (paint-property tween, no React).
+    const pulse = setInterval(() => {
+      if (!readyRef.current || !mapRef.current) return;
+      const t = (Date.now() % 2000) / 2000;
+      const s = 1 + 0.35 * Math.sin(t * Math.PI * 2);
+      try {
+        mapRef.current.setPaintProperty('v-halo', 'circle-radius', [
+          '+',
+          11 * s,
+          ['*', 7, ['get', 'weight']],
+        ]);
+      } catch {
+        /* layer not ready */
+      }
+    }, 90);
 
-    canvas.addEventListener('pointerdown', onDown);
-    window.addEventListener('pointermove', onMove);
-    window.addEventListener('pointerup', onUp);
+    // Slow orbital spin while zoomed out and untouched.
+    let raf = 0;
+    const spin = () => {
+      const m = mapRef.current;
+      if (m && spinRef.current && readyRef.current && m.getZoom() < 3.2 && !m.isMoving()) {
+        const c = m.getCenter();
+        m.jumpTo({ center: [c.lng + 0.018, c.lat] });
+      }
+      raf = requestAnimationFrame(spin);
+    };
+    raf = requestAnimationFrame(spin);
 
-    const ro = new ResizeObserver(() => {
-      width = wrap.clientWidth;
-      height = wrap.clientHeight;
-    });
-    ro.observe(wrap);
+    const pauseSpin = () => {
+      spinRef.current = false;
+      if (idleTimer.current) clearTimeout(idleTimer.current);
+      idleTimer.current = setTimeout(() => {
+        spinRef.current = true;
+      }, 8000);
+    };
+    map.on('mousedown', pauseSpin);
+    map.on('touchstart', pauseSpin);
+    map.on('wheel', pauseSpin);
 
     return () => {
-      globe.destroy();
-      canvas.removeEventListener('pointerdown', onDown);
-      window.removeEventListener('pointermove', onMove);
-      window.removeEventListener('pointerup', onUp);
-      ro.disconnect();
+      cancelAnimationFrame(raf);
+      clearInterval(pulse);
+      if (idleTimer.current) clearTimeout(idleTimer.current);
+      map.remove();
+      mapRef.current = null;
+      readyRef.current = false;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Visitor updates → setData (never re-create the map).
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !readyRef.current) return;
+    const src = map.getSource('visitors') as maplibregl.GeoJSONSource | undefined;
+    src?.setData(toGeoJSON(visitors));
+  }, [visitors]);
+
+  // Focus request → cinematic fly-to at city zoom.
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !focus) return;
+    spinRef.current = false;
+    map.flyTo({ center: [focus.lng, focus.lat], zoom: 5.5, speed: 0.85, curve: 1.5 });
+    if (idleTimer.current) clearTimeout(idleTimer.current);
+    idleTimer.current = setTimeout(() => {
+      spinRef.current = true;
+    }, 9000);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [focus?.key]);
+
   return (
-    <div ref={wrapRef} className={`flex items-center justify-center ${className || ''}`}>
-      <canvas
-        ref={canvasRef}
-        style={{
-          width: 'min(100%, 78vh)',
-          aspectRatio: '1',
-          cursor: 'grab',
-          contain: 'layout paint size',
-        }}
-        aria-label="Live visitor globe"
-      />
-    </div>
+    <div
+      ref={wrapRef}
+      className={className}
+      style={{ background: '#04040a' }}
+      aria-label="Live visitor globe"
+    />
   );
 }
