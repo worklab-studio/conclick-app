@@ -166,21 +166,17 @@ export function ClickMapInline({
   );
   const topByClicks = byClicks[0];
 
-  // Page snapshot: captured server-side with measured element boxes.
+  // Page snapshot: captured server-side with measured element boxes. The
+  // query key deliberately EXCLUDES the cohort's target list — the screenshot
+  // is the same page whoever clicked it, and the server measures every
+  // clickable element, so cohort switches reuse one snapshot instantly.
+  // (The old key hashed the targets: 7 cohorts = up to 7 full recaptures.)
   const targets = useMemo(
     () => byClicks.slice(0, 40).map(e => ({ selector: e.selector, text: e.label })),
     [byClicks],
   );
-  const selKey = useMemo(
-    () =>
-      targets
-        .map(t => t.selector)
-        .sort()
-        .join('|'),
-    [targets],
-  );
   const snapQuery = useQuery<Snapshot>({
-    queryKey: ['click-map-snapshot', { websiteId, urlPath, selKey, refreshKey }],
+    queryKey: ['click-map-snapshot', { websiteId, urlPath, refreshKey }],
     queryFn: () =>
       post(`/websites/${websiteId}/page-snapshot`, {
         path: urlPath,

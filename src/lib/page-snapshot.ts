@@ -1,19 +1,30 @@
 import fs from 'fs';
 import puppeteer, { type Browser, type Page } from 'puppeteer-core';
+import prisma from '@/lib/prisma';
 
 // Server-side page snapshot for the Click map: a faithful full-page screenshot of the
 // user's OWN site plus the measured bounding box of every clicked element (located by
 // the CSS selector the tracker stored, disambiguated by the element's text). Positions
-// are MEASURED at capture time, never estimated. Cached per (page, selectors) per day.
+// are MEASURED at capture time, never estimated.
+//
+// Caching (v2): the screenshot is identical no matter which cohort is being
+// viewed, so the cache key is (domain, path, day) ONLY — the old key hashed
+// the cohort-dependent target list, which recaptured the same page up to 7×
+// as the user flipped cohorts. Box coverage for arbitrary cohorts comes from
+// a generic sweep: at capture time we measure EVERY clickable element keyed
+// by the tracker's own selector format, so any future target set resolves
+// from the cached entry. Entries are served stale-while-revalidate (instant
+// response, background recapture) and persisted to Postgres so a deploy
+// doesn't cold-start every page back to a 5-10s capture.
 
 const VIEWPORT_W = 1280;
 const VIEWPORT_H = 900;
 const SCALE = 1.5; // crisp on retina without huge rasters on a 1GB machine
 const MAX_HEIGHT = 12000; // CSS px cap — long landing pages run 8-11k incl. footer
-const SCALE_DROP_HEIGHT = 5500; // beyond this, raster at 1x to keep memory bounded
+const SCALE_DROP_HEIGHT = 8000; // beyond this, raster at 1.25x to keep memory bounded
 const NAV_TIMEOUT = 20_000;
 const CACHE_TTL = 24 * 60 * 60 * 1000;
-const CACHE_MAX = 24;
+const CACHE_MAX = 60;
 
 export interface SnapshotBox {
   x: number;
@@ -180,6 +191,25 @@ async function measureBoxes(
       const b = el && box(el);
       if (b) out[it.selector] = b;
     }
+    // Generic sweep: measure EVERY clickable element keyed by the tracker's
+    // own selector format (tag#id.c1.c2, first two classes, 100 chars). This
+    // makes the snapshot cohort-independent — any future target set resolves
+    // from these boxes without re-opening the page.
+    for (const c of clickables) {
+      try {
+        let sel = c.tagName.toLowerCase();
+        if (c.id) sel += '#' + c.id;
+        const cls = c.className && typeof c.className === 'string'
+          ? c.className.trim().split(/\\s+/).slice(0, 2).join('.')
+          : '';
+        if (cls) sel += '.' + cls;
+        sel = sel.slice(0, 100);
+        if (!out[sel]) {
+          const b = box(c);
+          if (b) out[sel] = b;
+        }
+      } catch (e) { /* ignore */ }
+    }
     return out;
   })()`;
   return (await page.evaluate(src)) as Record<string, SnapshotBox>;
@@ -205,6 +235,17 @@ async function captureOnce(url: string, targets: SnapshotTarget[]): Promise<Page
       new Promise(r => setTimeout(r, 3000)),
     ]);
     await primeLazyContent(page);
+    // Let in-flight images finish decoding (lazy-loaded hero/media shift boxes
+    // if captured mid-decode) — capped so a broken image can't stall us.
+    await page
+      .evaluate(
+        `Promise.race([
+          Promise.all(Array.from(document.images).filter(i => !i.complete)
+            .map(i => new Promise(r => { i.onload = i.onerror = r; }))),
+          new Promise(r => setTimeout(r, 1500)),
+        ])`,
+      )
+      .catch(() => undefined);
     // Freeze animations/transitions so the screenshot and the measured boxes agree.
     await page.addStyleTag({
       content:
@@ -216,13 +257,14 @@ async function captureOnce(url: string, targets: SnapshotTarget[]): Promise<Page
       `Math.min(Math.max(document.documentElement.scrollHeight, document.body ? document.body.scrollHeight : 0, 600), ${MAX_HEIGHT})`,
     )) as number;
     const boxes = await measureBoxes(page, targets);
-    // Very tall pages re-raster at 1x — same CSS layout (boxes stay valid), bounded memory.
+    // Very tall pages re-raster at 1.25x — same CSS layout (boxes stay valid),
+    // bounded memory. (Was 1x, which is what made long pages look blurry.)
     if (height > SCALE_DROP_HEIGHT) {
-      await page.setViewport({ width: VIEWPORT_W, height: VIEWPORT_H, deviceScaleFactor: 1 });
+      await page.setViewport({ width: VIEWPORT_W, height: VIEWPORT_H, deviceScaleFactor: 1.25 });
     }
     const buf = await page.screenshot({
       type: 'jpeg',
-      quality: 80,
+      quality: 85,
       clip: { x: 0, y: 0, width: VIEWPORT_W, height },
       captureBeyondViewport: true,
     });
@@ -240,17 +282,89 @@ async function captureOnce(url: string, targets: SnapshotTarget[]): Promise<Page
   }
 }
 
-// ---- day cache ----
+// ---- cache: memory (fast path) + Postgres (survives deploys), SWR semantics ----
 const cache = new Map<string, { snap: PageSnapshot; ts: number }>();
+const inFlight = new Map<string, Promise<PageSnapshot>>();
 
-function hashTargets(targets: SnapshotTarget[]): string {
-  const s = targets
-    .map(t => t.selector)
-    .sort()
-    .join('|');
-  let h = 5381;
-  for (let i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) | 0;
-  return String(h);
+// Lazily-created cache table — deliberately raw SQL (not a Prisma model):
+// it's an internal cache, safe to drop at any time, and versioning it through
+// migrations would be ceremony without benefit.
+let tableReady: Promise<void> | null = null;
+function ensureTable(): Promise<void> {
+  if (!tableReady) {
+    tableReady = prisma
+      .rawQuery(
+        `create table if not exists page_snapshot_cache (
+          cache_key text primary key,
+          payload jsonb not null,
+          ts timestamptz not null default now()
+        )`,
+        {},
+      )
+      .then(() => undefined)
+      .catch(() => {
+        tableReady = null;
+      }) as Promise<void>;
+  }
+  return tableReady;
+}
+
+async function dbGet(key: string): Promise<{ snap: PageSnapshot; ts: number } | null> {
+  try {
+    await ensureTable();
+    const rows: any[] = await prisma.rawQuery(
+      `select payload, extract(epoch from ts) * 1000 as ts
+       from page_snapshot_cache where cache_key = {{key}}`,
+      { key },
+    );
+    if (!rows?.length) return null;
+    const payload = rows[0].payload;
+    const snap = typeof payload === 'string' ? JSON.parse(payload) : payload;
+    return snap?.ok ? { snap, ts: Number(rows[0].ts) || 0 } : null;
+  } catch {
+    return null;
+  }
+}
+
+function dbPut(key: string, snap: PageSnapshot): void {
+  // Fire-and-forget — a cache write must never slow the response down.
+  ensureTable()
+    .then(() =>
+      prisma.rawQuery(
+        `insert into page_snapshot_cache (cache_key, payload, ts)
+         values ({{key}}, {{payload}}::jsonb, now())
+         on conflict (cache_key) do update set payload = excluded.payload, ts = now()`,
+        { key, payload: JSON.stringify(snap) },
+      ),
+    )
+    .then(() =>
+      prisma.rawQuery(`delete from page_snapshot_cache where ts < now() - interval '7 days'`, {}),
+    )
+    .catch(() => undefined);
+}
+
+function remember(key: string, snap: PageSnapshot) {
+  cache.set(key, { snap, ts: Date.now() });
+  while (cache.size > CACHE_MAX) {
+    const oldest = [...cache.entries()].sort((a, b) => a[1].ts - b[1].ts)[0];
+    cache.delete(oldest[0]);
+  }
+  dbPut(key, snap);
+}
+
+function startCapture(key: string, url: string, targets: SnapshotTarget[]): Promise<PageSnapshot> {
+  const existing = inFlight.get(key);
+  if (existing) return existing;
+  const run = queue
+    .then(() => captureOnce(url, targets))
+    .then(snap => {
+      remember(key, snap);
+      return snap;
+    })
+    .finally(() => inFlight.delete(key));
+  inFlight.set(key, run);
+  queue = run.catch(() => undefined);
+  return run;
 }
 
 export async function capturePageSnapshot(
@@ -267,23 +381,26 @@ export async function capturePageSnapshot(
     String(rawPath || '/')
       .replace(/^\/+/, '')
       .slice(0, 300);
-  const key = `${domain}|${path}|${hashTargets(targets)}|${new Date().toISOString().slice(0, 10)}`;
+  // Cohort-independent: the page looks the same whoever clicked it.
+  const key = `${domain}|${path}`;
+  const url = `https://${domain}${path}`;
 
-  const hit = cache.get(key);
-  if (hit && !refresh && Date.now() - hit.ts < CACHE_TTL) return hit.snap;
-
-  // Serialize captures (memory) and share the in-flight result via the cache.
-  const run = queue.then(() => captureOnce(`https://${domain}${path}`, targets));
-  queue = run.catch(() => undefined);
+  if (!refresh) {
+    let hit = cache.get(key) || null;
+    if (!hit) {
+      hit = await dbGet(key);
+      if (hit) cache.set(key, hit); // warm the memory tier from Postgres
+    }
+    if (hit) {
+      // Stale-while-revalidate: past TTL we still answer instantly with the
+      // old snapshot and recapture in the background for the next view.
+      if (Date.now() - hit.ts >= CACHE_TTL) startCapture(key, url, targets);
+      return hit.snap;
+    }
+  }
 
   try {
-    const snap = await run;
-    cache.set(key, { snap, ts: Date.now() });
-    while (cache.size > CACHE_MAX) {
-      const oldest = [...cache.entries()].sort((a, b) => a[1].ts - b[1].ts)[0];
-      cache.delete(oldest[0]);
-    }
-    return snap;
+    return await startCapture(key, url, targets);
   } catch (e: any) {
     // eslint-disable-next-line no-console
     console.error('[page-snapshot] capture failed:', e?.message || e);
