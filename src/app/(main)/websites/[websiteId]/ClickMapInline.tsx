@@ -211,9 +211,13 @@ export function ClickMapInline({
           '*',
         );
       } else if (d.type === 'boxes') {
-        setLiveStatus('on');
-        setLiveDoc({ boxes: d.boxes || {}, width: d.width || 0, height: d.height || 0 });
-        if (typeof d.scrollY === 'number') setLiveScrollY(d.scrollY);
+        // Zero geometry = the page hasn't laid out (or an old tracker) — keep
+        // "connecting" so the screenshot fallback can still rescue the view.
+        if ((d.width || 0) > 0 && (d.height || 0) > 0) {
+          setLiveStatus('on');
+          setLiveDoc({ boxes: d.boxes || {}, width: d.width, height: d.height });
+          if (typeof d.scrollY === 'number') setLiveScrollY(d.scrollY);
+        }
       } else if (d.type === 'scroll') {
         setLiveScrollY(Number(d.y) || 0);
       }
