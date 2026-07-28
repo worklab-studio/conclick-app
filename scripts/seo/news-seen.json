@@ -153,6 +153,20 @@
       "at": "2026-07-27",
       "verdict": "ignored",
       "reason": "Out of window and not actionable: SCOTUS decision and noyb's letter to the Commission are dated 30 Jun 2026; as of Jul 14 the CJEU challenge was still not filed. An announced-but-unfiled challenge to DPF adequacy is a roadmap, not a ruling (fails 'Real'), and site owners cannot act on it yet (fails 'changes what someone should do'). Also not a specific enforcement action against an analytics vendor. Logging so weeks of Schrems-III / DPF-adequacy coverage don't re-trigger evaluation."
+    },
+    {
+      "url": "https://www.seroundtable.com/google-search-profiles-publisher-41447.html",
+      "title": "Google Search Profiles 'now officially live' with Search Console-powered Insights view (re-reported Jul 28 2026)",
+      "at": "2026-07-29",
+      "verdict": "ignored",
+      "reason": "Primary launch was Jun 4 2026 (Google PM Ibrahim Badr); the Jul 28 SERP-recap is a re-report of the same US rollout, outside the last-3-days window. Also off-beat: publisher Discover profiles + Search Console insights, not web-analytics/privacy/GEO. Conclick has no first-hand credibility on Discover publisher profiles. Logging so recurring recap re-surfacing doesn't re-trigger."
+    },
+    {
+      "url": "https://www.seroundtable.com/google-review-snippets-guidelines-update-41754.html",
+      "title": "Google review-snippet structured-data guidelines now prohibit fake or undisclosed incentivized reviews (manual-action risk), Jul 24 2026",
+      "at": "2026-07-29",
+      "verdict": "ignored",
+      "reason": "Primary (Google review-snippet structured-data doc) and consequential, but dated Jul 24 2026 — outside the last-3-days window (today Jul 29). Also off-beat: rich-results/structured-data markup, not analytics/privacy/GEO. Conclick has no first-hand credibility on review-schema manual actions. Logging so ongoing coverage doesn't re-trigger."
     }
   ]
 }
