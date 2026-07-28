@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Crosshair,
   Loader2,
@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import {
   useClickMapQuery,
+  useWebsiteQuery,
   useWebsiteValuesQuery,
   useDateRange,
   useApi,
@@ -166,15 +167,79 @@ export function ClickMapInline({
   );
   const topByClicks = byClicks[0];
 
-  // Page snapshot: captured server-side with measured element boxes. The
-  // query key deliberately EXCLUDES the cohort's target list — the screenshot
-  // is the same page whoever clicked it, and the server measures every
-  // clickable element, so cohort switches reuse one snapshot instantly.
-  // (The old key hashed the targets: 7 cohorts = up to 7 full recaptures.)
   const targets = useMemo(
     () => byClicks.slice(0, 40).map(e => ({ selector: e.selector, text: e.label })),
     [byClicks],
   );
+
+  // ---- LIVE mode: the real page in an iframe, heat overlaid on top ---------
+  // Our tracker runs inside the customer's page. Loaded with ?conclick_hm=1
+  // it records nothing and instead streams element boxes + scroll offsets via
+  // postMessage — zero capture latency, always-current pixels, scrollable.
+  // If the handshake doesn't arrive (site blocks framing / old cached
+  // tracker), we fall back to the server screenshot automatically.
+  const { data: website } = useWebsiteQuery(websiteId);
+  const domain = (website?.domain || '').replace(/^https?:\/\//, '').replace(/\/.*$/, '');
+  const iframeRef = useRef<HTMLIFrameElement | null>(null);
+  const [liveStatus, setLiveStatus] = useState<'connecting' | 'on' | 'off'>('connecting');
+  const [liveDoc, setLiveDoc] = useState<{
+    boxes: Record<string, SnapshotBox>;
+    width: number;
+    height: number;
+  }>({ boxes: {}, width: 0, height: 0 });
+  const [liveScrollY, setLiveScrollY] = useState(0);
+
+  const liveUrl =
+    domain && urlPath
+      ? `https://${domain}${urlPath}${urlPath.includes('?') ? '&' : '?'}conclick_hm=1`
+      : null;
+
+  // New page → new handshake.
+  useEffect(() => {
+    setLiveStatus('connecting');
+    setLiveDoc({ boxes: {}, width: 0, height: 0 });
+    setLiveScrollY(0);
+  }, [liveUrl]);
+
+  useEffect(() => {
+    const onMsg = (e: MessageEvent) => {
+      const d: any = e.data;
+      if (!d || !d.__conclick) return;
+      if (d.type === 'ready') {
+        iframeRef.current?.contentWindow?.postMessage(
+          { __conclick: 1, type: 'hello', targets },
+          '*',
+        );
+      } else if (d.type === 'boxes') {
+        setLiveStatus('on');
+        setLiveDoc({ boxes: d.boxes || {}, width: d.width || 0, height: d.height || 0 });
+        if (typeof d.scrollY === 'number') setLiveScrollY(d.scrollY);
+      } else if (d.type === 'scroll') {
+        setLiveScrollY(Number(d.y) || 0);
+      }
+    };
+    window.addEventListener('message', onMsg);
+    return () => window.removeEventListener('message', onMsg);
+  }, [targets]);
+
+  // Re-request boxes when the cohort's target list changes mid-session.
+  useEffect(() => {
+    if (liveStatus === 'on') {
+      iframeRef.current?.contentWindow?.postMessage({ __conclick: 1, type: 'hello', targets }, '*');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [targets, liveStatus]);
+
+  // No handshake within 6s → screenshot fallback.
+  useEffect(() => {
+    if (!liveUrl || liveStatus !== 'connecting') return;
+    const t = setTimeout(() => setLiveStatus(s => (s === 'connecting' ? 'off' : s)), 6000);
+    return () => clearTimeout(t);
+  }, [liveUrl, liveStatus]);
+
+  const liveOn = liveStatus === 'on' && liveDoc.width > 0 && liveDoc.height > 0;
+
+  // ---- Screenshot fallback (server-captured, day-cached, cohort-free key) --
   const snapQuery = useQuery<Snapshot>({
     queryKey: ['click-map-snapshot', { websiteId, urlPath, refreshKey }],
     queryFn: () =>
@@ -183,35 +248,44 @@ export function ClickMapInline({
         targets,
         refresh: refreshKey > 0,
       }),
-    enabled: !!websiteId && !!urlPath && targets.length > 0,
+    enabled: !!websiteId && !!urlPath && targets.length > 0 && liveStatus === 'off',
     staleTime: Infinity,
     retry: false,
   });
   const snap = snapQuery.data?.ok ? snapQuery.data : null;
-  const snapLoading = snapQuery.isLoading || snapQuery.isFetching;
-  const snapFailed = !snapLoading && (snapQuery.isError || snapQuery.data?.ok === false);
+  const snapLoading = liveStatus === 'off' && (snapQuery.isLoading || snapQuery.isFetching);
+  const snapFailed =
+    liveStatus === 'off' && !snapLoading && (snapQuery.isError || snapQuery.data?.ok === false);
 
-  // Heat markers: only elements the snapshot actually located (measured, not guessed).
+  // One geometry source for the heat math, whichever mode is active.
+  const activeDoc = liveOn
+    ? { width: liveDoc.width, height: liveDoc.height, boxes: liveDoc.boxes }
+    : snap
+      ? { width: snap.width, height: snap.height, boxes: snap.boxes }
+      : null;
+
+  // Heat markers: only elements actually located (measured, not guessed) —
+  // by the live bridge or the snapshot, whichever is active.
   const heat = useMemo(() => {
-    if (!snap) return [];
+    if (!activeDoc) return [];
     const max = Math.max(1, ...byClicks.map(e => e.clicks));
     return byClicks
-      .map(e => ({ e, box: snap.boxes[e.selector] }))
-      .filter(({ box }) => box && box.y < snap.height)
+      .map(e => ({ e, box: activeDoc.boxes[e.selector] }))
+      .filter(({ box }) => box && box.y < activeDoc.height)
       .map(({ e, box }) => {
         const t = e.clicks / max;
         return {
           e,
           t,
-          cx: ((box.x + box.w / 2) / snap.width) * 100,
-          cy: ((box.y + box.h / 2) / snap.height) * 100,
-          bottom: (Math.min(box.y + box.h, snap.height) / snap.height) * 100,
-          top: (box.y / snap.height) * 100,
-          d: ((56 + 70 * Math.sqrt(t)) / snap.width) * 100, // blob diameter, % of width
+          cx: ((box.x + box.w / 2) / activeDoc.width) * 100,
+          cy: ((box.y + box.h / 2) / activeDoc.height) * 100,
+          bottom: (Math.min(box.y + box.h, activeDoc.height) / activeDoc.height) * 100,
+          top: (box.y / activeDoc.height) * 100,
+          d: ((56 + 70 * Math.sqrt(t)) / activeDoc.width) * 100, // blob diameter, % of width
         };
       });
-  }, [snap, byClicks]);
-  const unplaced = snap ? byClicks.filter(e => !snap.boxes[e.selector]).length : 0;
+  }, [activeDoc, byClicks]);
+  const unplaced = activeDoc ? byClicks.filter(e => !activeDoc.boxes[e.selector]).length : 0;
   const selectedHeat = heat.find(h => h.e.selector === selected) || null;
 
   // Headline: median click depth from the depth buckets (only clicks with a tracked
@@ -235,6 +309,115 @@ export function ClickMapInline({
           ? 'middle of the page'
           : 'bottom of the page';
   }
+
+  // Heat overlay nodes — identical in live and snapshot mode (positions are
+  // percentages of the active document geometry). pointer-events-auto on the
+  // interactive bits because the live overlay container is pointer-events-none
+  // (the iframe underneath must stay scrollable).
+  const overlay = (
+    <>
+      {heat.map(h => (
+        <div
+          key={`blob-${h.e.selector}`}
+          className="pointer-events-none absolute aspect-square -translate-x-1/2 -translate-y-1/2 rounded-full"
+          style={{
+            left: `${h.cx}%`,
+            top: `${h.cy}%`,
+            width: `${h.d}%`,
+            background: heatGradient(h.t, h.e.revenue > 0),
+          }}
+        />
+      ))}
+      {heat.map(h => (
+        <button
+          key={`badge-${h.e.selector}`}
+          type="button"
+          onClick={ev => {
+            ev.stopPropagation();
+            setSelected(s => (s === h.e.selector ? null : h.e.selector));
+          }}
+          className={`pointer-events-auto absolute -translate-x-1/2 rounded-full border px-2 py-0.5 text-[11px] font-bold tabular-nums text-white shadow-lg transition-transform hover:scale-110 ${
+            h.e.revenue > 0 ? 'border-emerald-500/50' : 'border-[hsl(0,0%,26%)]'
+          } bg-[hsl(0,0%,7%)]/95`}
+          style={{ left: `${h.cx}%`, top: `${h.bottom}%`, marginTop: 6 }}
+        >
+          {h.e.clicks}×
+          {h.e.revenue > 0 ? (
+            <span className="ml-1.5 font-semibold text-emerald-300">
+              {money(h.e.revenue, currency)}
+            </span>
+          ) : null}
+        </button>
+      ))}
+      {selectedHeat ? (
+        <div
+          className="pointer-events-auto absolute z-10 w-[260px] rounded-xl border border-[hsl(0,0%,22%)] bg-[hsl(0,0%,9%)]/[.98] p-3.5 shadow-2xl"
+          style={{
+            left: `${Math.min(Math.max(selectedHeat.cx, 14), 86)}%`,
+            top: selectedHeat.bottom < 72 ? `${selectedHeat.bottom}%` : `${selectedHeat.top}%`,
+            transform:
+              selectedHeat.bottom < 72
+                ? 'translate(-50%, 34px)'
+                : 'translate(-50%, calc(-100% - 14px))',
+          }}
+          onClick={ev => ev.stopPropagation()}
+        >
+          <div className="text-[13px] font-semibold text-foreground">
+            {friendly(selectedHeat.e)}
+          </div>
+          <div className="mt-0.5 truncate font-mono text-[10px] text-muted-foreground/50">
+            {selectedHeat.e.selector}
+          </div>
+          <div className="mt-3 grid grid-cols-2 gap-x-3 gap-y-2.5">
+            <div>
+              <div className="text-[10px] uppercase tracking-wide text-muted-foreground/50">
+                Clicks
+              </div>
+              <div className="text-[15px] font-bold tabular-nums">{selectedHeat.e.clicks}</div>
+            </div>
+            <div>
+              <div className="text-[10px] uppercase tracking-wide text-muted-foreground/50">
+                Visitors
+              </div>
+              <div className="text-[15px] font-bold tabular-nums">{selectedHeat.e.sessions}</div>
+            </div>
+            <div>
+              <div className="text-[10px] uppercase tracking-wide text-muted-foreground/50">
+                Revenue
+              </div>
+              <div
+                className={`text-[15px] font-bold tabular-nums ${
+                  selectedHeat.e.revenue > 0 ? 'text-emerald-300' : 'text-muted-foreground/40'
+                }`}
+              >
+                {selectedHeat.e.revenue > 0 ? money(selectedHeat.e.revenue, currency) : '—'}
+              </div>
+            </div>
+            <div>
+              <div className="text-[10px] uppercase tracking-wide text-muted-foreground/50">
+                Share of clicks
+              </div>
+              <div className="text-[15px] font-bold tabular-nums">
+                {total ? Math.round((selectedHeat.e.clicks / total) * 100) : 0}%
+              </div>
+            </div>
+          </div>
+          <div className="mt-3 flex items-center justify-between border-t border-[hsl(0,0%,13%)] pt-2.5 text-[11px] text-muted-foreground/60">
+            <span>{depthBand(selectedHeat.e.medianY) || '—'} of page</span>
+            {selectedHeat.e.label?.trim() ? (
+              <button
+                type="button"
+                onClick={() => setFunnelFor(selectedHeat.e)}
+                className="inline-flex items-center gap-1 text-[#b7b4e4] transition-colors hover:text-foreground"
+              >
+                <Filter className="h-3 w-3" /> Funnel to this →
+              </button>
+            ) : null}
+          </div>
+        </div>
+      ) : null}
+    </>
+  );
 
   // No pages at all → the site hasn't gathered autocapture clicks yet.
   if (!pages.length && !urlPath) {
@@ -417,10 +600,29 @@ export function ClickMapInline({
                   <span className="h-1.5 w-16 rounded bg-gradient-to-r from-[#7c79c4]/40 via-[rgba(255,170,40,.7)] to-[rgba(255,70,40,.95)]" />
                   more clicks
                 </span>
-                {snap ? <span>Snapshot · {relativeTime(snap.capturedAt)}</span> : null}
+                {liveOn ? (
+                  <span className="inline-flex items-center gap-1.5 text-emerald-300/90">
+                    <span className="relative flex h-1.5 w-1.5">
+                      <span className="absolute h-full w-full animate-ping rounded-full bg-emerald-400 opacity-70" />
+                      <span className="relative h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                    </span>
+                    Live · your real page
+                  </span>
+                ) : snap ? (
+                  <span>Snapshot · {relativeTime(snap.capturedAt)}</span>
+                ) : null}
                 <button
                   type="button"
-                  onClick={() => setRefreshKey(k => k + 1)}
+                  onClick={() => {
+                    if (liveOn) {
+                      iframeRef.current?.contentWindow?.postMessage(
+                        { __conclick: 1, type: 'hello', targets },
+                        '*',
+                      );
+                    } else {
+                      setRefreshKey(k => k + 1);
+                    }
+                  }}
                   disabled={snapLoading}
                   className="inline-flex items-center gap-1.5 rounded-md border border-[hsl(0,0%,16%)] px-2 py-1 text-[11px] text-muted-foreground transition-colors hover:text-foreground disabled:opacity-50"
                 >
@@ -430,7 +632,43 @@ export function ClickMapInline({
               </span>
             </div>
 
-            {snapLoading ? (
+            {liveStatus !== 'off' ? (
+              // LIVE MODE: the real page in a sandboxed iframe (no capture, no
+              // staleness), heat overlaid and counter-scrolled via the tracker's
+              // postMessage bridge. Scroll the page like a real browser window.
+              <div
+                className="relative"
+                style={{ height: 'min(72vh, 740px)' }}
+                onClick={() => setSelected(null)}
+              >
+                <iframe
+                  ref={iframeRef}
+                  src={liveUrl || undefined}
+                  title={`Live view of ${urlPath}`}
+                  sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
+                  className="h-full w-full border-0 bg-white"
+                />
+                {liveOn ? (
+                  <div className="pointer-events-none absolute inset-0 overflow-hidden">
+                    <div
+                      className="relative w-full will-change-transform"
+                      style={{
+                        height: liveDoc.height,
+                        transform: `translate3d(0, -${liveScrollY}px, 0)`,
+                      }}
+                    >
+                      <div className="absolute inset-0 bg-[rgba(5,5,8,.18)]" />
+                      {overlay}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="absolute bottom-3 left-3 z-10 inline-flex items-center gap-2 rounded-full border border-[hsl(0,0%,18%)] bg-[hsl(0,0%,8%)]/90 px-3 py-1.5 text-xs text-muted-foreground shadow-lg">
+                    <Loader2 className="h-3.5 w-3.5 animate-spin text-[#8b88cf]" />
+                    Connecting live view…
+                  </div>
+                )}
+              </div>
+            ) : snapLoading ? (
               <div className="flex h-[360px] flex-col items-center justify-center gap-3 text-sm text-muted-foreground">
                 <Loader2 className="h-5 w-5 animate-spin text-[#8b88cf]" />
                 Capturing your page… the first snapshot takes a few seconds.
@@ -443,136 +681,20 @@ export function ClickMapInline({
                 </span>
               </div>
             ) : (
-              // The full page scrolls INSIDE the frame (like a real browser window) so
-              // a 10k-px landing page doesn't dwarf the dashboard.
+              // SNAPSHOT FALLBACK: the full page scrolls INSIDE the frame so a
+              // 10k-px landing page doesn't dwarf the dashboard.
               <div className="max-h-[75vh] overflow-y-auto">
                 <div className="relative" onClick={() => setSelected(null)}>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={snap.image} alt={`Snapshot of ${urlPath}`} className="block w-full" />
                   <div className="absolute inset-0 bg-[rgba(5,5,8,.30)]" />
-
-                  {/* heat blobs */}
-                  {heat.map(h => (
-                    <div
-                      key={`blob-${h.e.selector}`}
-                      className="pointer-events-none absolute aspect-square -translate-x-1/2 -translate-y-1/2 rounded-full"
-                      style={{
-                        left: `${h.cx}%`,
-                        top: `${h.cy}%`,
-                        width: `${h.d}%`,
-                        background: heatGradient(h.t, h.e.revenue > 0),
-                      }}
-                    />
-                  ))}
-
-                  {/* count badges (click → popup) */}
-                  {heat.map(h => (
-                    <button
-                      key={`badge-${h.e.selector}`}
-                      type="button"
-                      onClick={ev => {
-                        ev.stopPropagation();
-                        setSelected(s => (s === h.e.selector ? null : h.e.selector));
-                      }}
-                      className={`absolute -translate-x-1/2 rounded-full border px-2 py-0.5 text-[11px] font-bold tabular-nums text-white shadow-lg transition-transform hover:scale-110 ${
-                        h.e.revenue > 0 ? 'border-emerald-500/50' : 'border-[hsl(0,0%,26%)]'
-                      } bg-[hsl(0,0%,7%)]/95`}
-                      style={{ left: `${h.cx}%`, top: `${h.bottom}%`, marginTop: 6 }}
-                    >
-                      {h.e.clicks}×
-                      {h.e.revenue > 0 ? (
-                        <span className="ml-1.5 font-semibold text-emerald-300">
-                          {money(h.e.revenue, currency)}
-                        </span>
-                      ) : null}
-                    </button>
-                  ))}
-
-                  {/* popup */}
-                  {selectedHeat ? (
-                    <div
-                      className="absolute z-10 w-[260px] rounded-xl border border-[hsl(0,0%,22%)] bg-[hsl(0,0%,9%)]/[.98] p-3.5 shadow-2xl"
-                      style={{
-                        left: `${Math.min(Math.max(selectedHeat.cx, 14), 86)}%`,
-                        top:
-                          selectedHeat.bottom < 72
-                            ? `${selectedHeat.bottom}%`
-                            : `${selectedHeat.top}%`,
-                        transform:
-                          selectedHeat.bottom < 72
-                            ? 'translate(-50%, 34px)'
-                            : 'translate(-50%, calc(-100% - 14px))',
-                      }}
-                      onClick={ev => ev.stopPropagation()}
-                    >
-                      <div className="text-[13px] font-semibold text-foreground">
-                        {friendly(selectedHeat.e)}
-                      </div>
-                      <div className="mt-0.5 truncate font-mono text-[10px] text-muted-foreground/50">
-                        {selectedHeat.e.selector}
-                      </div>
-                      <div className="mt-3 grid grid-cols-2 gap-x-3 gap-y-2.5">
-                        <div>
-                          <div className="text-[10px] uppercase tracking-wide text-muted-foreground/50">
-                            Clicks
-                          </div>
-                          <div className="text-[15px] font-bold tabular-nums">
-                            {selectedHeat.e.clicks}
-                          </div>
-                        </div>
-                        <div>
-                          <div className="text-[10px] uppercase tracking-wide text-muted-foreground/50">
-                            Visitors
-                          </div>
-                          <div className="text-[15px] font-bold tabular-nums">
-                            {selectedHeat.e.sessions}
-                          </div>
-                        </div>
-                        <div>
-                          <div className="text-[10px] uppercase tracking-wide text-muted-foreground/50">
-                            Revenue
-                          </div>
-                          <div
-                            className={`text-[15px] font-bold tabular-nums ${
-                              selectedHeat.e.revenue > 0
-                                ? 'text-emerald-300'
-                                : 'text-muted-foreground/40'
-                            }`}
-                          >
-                            {selectedHeat.e.revenue > 0
-                              ? money(selectedHeat.e.revenue, currency)
-                              : '—'}
-                          </div>
-                        </div>
-                        <div>
-                          <div className="text-[10px] uppercase tracking-wide text-muted-foreground/50">
-                            Share of clicks
-                          </div>
-                          <div className="text-[15px] font-bold tabular-nums">
-                            {total ? Math.round((selectedHeat.e.clicks / total) * 100) : 0}%
-                          </div>
-                        </div>
-                      </div>
-                      <div className="mt-3 flex items-center justify-between border-t border-[hsl(0,0%,13%)] pt-2.5 text-[11px] text-muted-foreground/60">
-                        <span>{depthBand(selectedHeat.e.medianY) || '—'} of page</span>
-                        {selectedHeat.e.label?.trim() ? (
-                          <button
-                            type="button"
-                            onClick={() => setFunnelFor(selectedHeat.e)}
-                            className="inline-flex items-center gap-1 text-[#b7b4e4] transition-colors hover:text-foreground"
-                          >
-                            <Filter className="h-3 w-3" /> Funnel to this →
-                          </button>
-                        ) : null}
-                      </div>
-                    </div>
-                  ) : null}
+                  {overlay}
                 </div>
               </div>
             )}
           </div>
 
-          {snap && unplaced > 0 ? (
+          {activeDoc && unplaced > 0 ? (
             <p className="flex items-start gap-1.5 text-[11px] leading-relaxed text-muted-foreground/55">
               <Info className="mt-0.5 h-3 w-3 shrink-0" />
               {unplaced} element{unplaced === 1 ? ' isn’t' : 's aren’t'} on the current snapshot

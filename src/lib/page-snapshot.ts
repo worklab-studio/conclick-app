@@ -246,10 +246,15 @@ async function captureOnce(url: string, targets: SnapshotTarget[]): Promise<Page
         ])`,
       )
       .catch(() => undefined);
-    // Freeze animations/transitions so the screenshot and the measured boxes agree.
+    // Freeze animations/transitions so the screenshot and the measured boxes
+    // agree — via ZERO DURATION, not `animation:none`. `none` erases keyframe
+    // end-states (`fill-mode: forwards`), which left every reveal-animated
+    // element stuck at opacity:0 and produced grey-void screenshots on
+    // Framer/GSAP-style sites. Zero duration jumps everything to its final
+    // frame instead.
     await page.addStyleTag({
       content:
-        '*,*::before,*::after{animation:none!important;transition:none!important} html{scroll-behavior:auto!important}',
+        '*,*::before,*::after{animation-duration:0s!important;animation-delay:0s!important;transition-duration:0s!important;transition-delay:0s!important} html{scroll-behavior:auto!important}',
     });
 
     // Some sites size <html> to the viewport and scroll <body> — take the taller.

@@ -592,11 +592,121 @@
       encodeURIComponent(vid);
   };
 
-  if (!trackingDisabled()) {
+  // ---- Click-map live bridge ------------------------------------------------
+  // When the Conclick dashboard embeds this page in an iframe with
+  // ?conclick_hm=1, the tracker switches to measurement mode: it records
+  // NOTHING (the owner viewing their own heatmap must not pollute analytics)
+  // and instead streams element positions + scroll offsets to the parent,
+  // which overlays click heat on the LIVE page. Positions only — no content,
+  // no inputs, nothing sensitive leaves the page.
+  const hmMode = /[?&#]conclick_hm=1/.test(href) && window.self !== window.top;
+
+  const hmPost = msg => {
+    try {
+      window.parent.postMessage(Object.assign({ __conclick: 1 }, msg), '*');
+    } catch {
+      /* ignore */
+    }
+  };
+
+  const hmMeasure = items => {
+    const out = {};
+    const normT = s => (s || '').replace(/\s+/g, ' ').trim().slice(0, 80);
+    const loose = s =>
+      normT(s)
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/gi, '');
+    const clickables = Array.prototype.slice.call(
+      document.querySelectorAll(
+        'a, button, [role="button"], input[type="submit"], input[type="button"]',
+      ),
+    );
+    const boxOf = el => {
+      const r = el.getBoundingClientRect();
+      if (r.width < 2 || r.height < 2) return null;
+      return { x: r.x + window.scrollX, y: r.y + window.scrollY, w: r.width, h: r.height };
+    };
+    for (const it of items || []) {
+      try {
+        let el = null;
+        const els = Array.prototype.slice.call(document.querySelectorAll(it.selector));
+        el = els[0] || null;
+        if (els.length > 1 && it.text) {
+          const want = normT(it.text);
+          const hit = els.find(c => {
+            const t = normT(c.innerText || c.textContent || '');
+            return !!t && (t === want || t.startsWith(want) || want.startsWith(t));
+          });
+          if (hit) el = hit;
+        }
+        if ((!el || !boxOf(el)) && it.text) {
+          const want = loose(it.text);
+          if (want) {
+            el = clickables.find(c => loose(c.innerText || c.textContent || '') === want) || el;
+          }
+        }
+        const b = el && boxOf(el);
+        if (b) out[it.selector] = b;
+      } catch {
+        /* invalid selector */
+      }
+    }
+    for (const c of clickables) {
+      try {
+        const sel = _selector(c);
+        if (!out[sel]) {
+          const b = boxOf(c);
+          if (b) out[sel] = b;
+        }
+      } catch {
+        /* ignore */
+      }
+    }
+    return out;
+  };
+
+  if (hmMode) {
+    let hmTargets = [];
+    const hmSend = () => {
+      const de = document.documentElement;
+      hmPost({
+        type: 'boxes',
+        boxes: hmMeasure(hmTargets),
+        width: de.clientWidth,
+        height: Math.max(de.scrollHeight, document.body ? document.body.scrollHeight : 0),
+        scrollY: window.scrollY,
+      });
+    };
+    window.addEventListener('message', e => {
+      const d = e.data;
+      if (d && d.__conclick && d.type === 'hello') {
+        hmTargets = d.targets || [];
+        hmSend();
+      }
+    });
+    window.addEventListener(
+      'scroll',
+      () => {
+        requestAnimationFrame(() => hmPost({ type: 'scroll', y: window.scrollY }));
+      },
+      { passive: true },
+    );
+    window.addEventListener('resize', hmSend);
+    const hmReady = () => {
+      hmPost({ type: 'ready' });
+      // Re-measure after reveal animations / late content settle.
+      setTimeout(hmSend, 500);
+      setTimeout(hmSend, 2500);
+    };
+    if (document.readyState === 'complete') hmReady();
+    else window.addEventListener('load', hmReady);
+  }
+
+  if (!hmMode && !trackingDisabled()) {
     document.addEventListener('click', tagCheckoutLinks, true);
   }
 
-  if (autoTrack && !trackingDisabled()) {
+  if (!hmMode && autoTrack && !trackingDisabled()) {
     if (document.readyState === 'complete') {
       init();
     } else {
