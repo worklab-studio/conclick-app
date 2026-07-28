@@ -67,8 +67,11 @@ const trackerHeaders = [
     value: '*',
   },
   {
+    // One hour, not a day: tracker fixes (friction detection, the click-map
+    // live bridge) must reach returning visitors quickly. Revalidation is a
+    // cheap 304 via ETag; stale-while-revalidate keeps page loads instant.
     key: 'Cache-Control',
-    value: 'public, max-age=86400, must-revalidate',
+    value: 'public, max-age=3600, stale-while-revalidate=86400',
   },
 ];
 
