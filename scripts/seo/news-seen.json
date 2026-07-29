@@ -167,6 +167,13 @@
       "at": "2026-07-29",
       "verdict": "ignored",
       "reason": "Primary (Google review-snippet structured-data doc) and consequential, but dated Jul 24 2026 — outside the last-3-days window (today Jul 29). Also off-beat: rich-results/structured-data markup, not analytics/privacy/GEO. Conclick has no first-hand credibility on review-schema manual actions. Logging so ongoing coverage doesn't re-trigger."
+    },
+    {
+      "url": "https://blog.mean.ceo/google-analytics-news-july-2026/",
+      "title": "GA4 campaign data import now requires a currency field when uploading cost data, Jul 28 2026",
+      "at": "2026-07-29",
+      "verdict": "ignored",
+      "reason": "In-window and real (GA4 'What's new' announcements), but off-beat and fails 'Conclick can answer it honestly': this is GA4 ad-cost-import schema plumbing affecting only the niche subset that uploads cost data. Conclick is privacy analytics built on Umami and has zero first-hand credibility on GA4 cost-data imports; the query it creates is narrow GA4 support content Conclick cannot honestly win. Logging so it isn't re-evaluated next run."
     }
   ]
 }
