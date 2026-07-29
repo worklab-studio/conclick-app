@@ -51,6 +51,10 @@
     "ai powered traffic signals": {
       "status": "needs-human"
     },
+    "ai sales funnel builder": {
+      "status": "skipped",
+      "reason": "NEEDS-HUMAN: unservable — Conclick is privacy-first web analytics + clickmaps, not a sales funnel builder; cannot serve without a product we don't have"
+    },
     "all free traffic sources": {
       "status": "needs-human"
     },
@@ -109,6 +113,10 @@
       "slug": "attribution-is-guessing",
       "reason": "live page /blogs/attribution-is-guessing",
       "published_at": "2026-07-26T08:40:17.156Z"
+    },
+    "best ai analytics tools": {
+      "status": "skipped",
+      "reason": "Conclick is not an AI analytics tool; page would require overclaiming AI features we don't have or a generic listicle that cannibalises alternatives corpus"
     },
     "best ai tool for data analyst": {
       "status": "needs-human"
@@ -306,6 +314,11 @@
     },
     "free trial pricing saas": {
       "status": "needs-human"
+    },
+    "fullstory alternatives": {
+      "status": "published",
+      "slug": "fullstory",
+      "published_at": "2026-07-29T04:07:35.636Z"
     },
     "ga4 360 costs": {
       "status": "skipped",

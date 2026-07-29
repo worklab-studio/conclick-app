@@ -30,7 +30,7 @@ function leadMagnetFor(rec) {
       return {
         kind: 'addWebsite',
         headline: `See what ${name} can't show you`,
-        sub: `Add your site and Conclick shows which traffic actually makes money — heatmaps, funnels, and revenue in one dashboard. Free for 14 days, no card.`,
+        sub: `Add your site and Conclick shows which traffic actually makes money: heatmaps, funnels, and revenue in one dashboard. Free for 14 days, no card.`,
         ctaLabel: 'Add My Website',
       };
     case 'glossary':
