@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, type ReactNode } from 'react';
 import maplibregl from 'maplibre-gl';
 import type { FeatureCollection } from 'geojson';
 import 'maplibre-gl/dist/maplibre-gl.css';
@@ -31,12 +31,17 @@ export function LiveGlobe({
   visitors,
   focus,
   onPick,
+  anchor,
+  anchorContent,
   className,
 }: {
   visitors: GlobeVisitor[];
   focus?: { lat: number; lng: number; key: string } | null;
   /** Click on a visitor dot — receives the dot's coordinates. */
   onPick?: (coords: { lat: number; lng: number }) => void;
+  /** Pin `anchorContent` to this coordinate (the visitor card on its dot). */
+  anchor?: { lat: number; lng: number } | null;
+  anchorContent?: ReactNode;
   className?: string;
 }) {
   const wrapRef = useRef<HTMLDivElement | null>(null);
@@ -49,6 +54,9 @@ export function LiveGlobe({
   const onPickRef = useRef(onPick);
   onPickRef.current = onPick;
   const homeZoomRef = useRef(1.1);
+  const anchorRef = useRef<{ lat: number; lng: number } | null>(null);
+  anchorRef.current = anchor || null;
+  const anchorElRef = useRef<HTMLDivElement | null>(null);
 
   const toGeoJSON = (list: GlobeVisitor[]) =>
     ({
@@ -110,12 +118,14 @@ export function LiveGlobe({
           if (layer.type === 'background') {
             map.setPaintProperty(layer.id, 'background-color', '#04040a');
           } else if (layer.id.includes('water') && layer.type === 'fill') {
-            map.setPaintProperty(layer.id, 'fill-color', '#0a0d1a');
+            map.setPaintProperty(layer.id, 'fill-color', '#0a1020');
           } else if (
             layer.type === 'fill' &&
             (layer.id.includes('land') || layer.id.includes('earth'))
           ) {
-            map.setPaintProperty(layer.id, 'fill-color', '#12141f');
+            // Clearly lighter than the ocean — the first recolor flattened
+            // land and water into the same near-black and killed all detail.
+            map.setPaintProperty(layer.id, 'fill-color', '#232a3d');
           }
         } catch {
           /* style variations */
@@ -185,29 +195,44 @@ export function LiveGlobe({
       readyRef.current = true;
     });
 
-    // Gentle breathing pulse on the halo (paint-property tween, no React).
-    const pulse = setInterval(() => {
-      if (!readyRef.current || !mapRef.current) return;
-      const t = (Date.now() % 2000) / 2000;
-      const s = 1 + 0.35 * Math.sin(t * Math.PI * 2);
-      try {
-        mapRef.current.setPaintProperty('v-halo', 'circle-radius', [
-          '+',
-          11 * s,
-          ['*', 7, ['get', 'weight']],
-        ]);
-      } catch {
-        /* layer not ready */
+    // Keep the anchored card glued to its dot — imperative style writes on
+    // the map's own render tick, zero React re-renders while moving. Hidden
+    // when the dot rotates to the far side of the globe (>82° from center).
+    const syncAnchor = () => {
+      const el = anchorElRef.current;
+      const a = anchorRef.current;
+      if (!el) return;
+      if (!a) {
+        el.style.display = 'none';
+        return;
       }
-    }, 90);
+      const c = map.getCenter();
+      const rad = Math.PI / 180;
+      const gc =
+        Math.acos(
+          Math.min(
+            1,
+            Math.sin(a.lat * rad) * Math.sin(c.lat * rad) +
+              Math.cos(a.lat * rad) * Math.cos(c.lat * rad) * Math.cos((a.lng - c.lng) * rad),
+          ),
+        ) / rad;
+      if (gc > 82 && map.getZoom() < 4) {
+        el.style.display = 'none';
+        return;
+      }
+      const pt = map.project([a.lng, a.lat]);
+      el.style.display = 'block';
+      el.style.transform = `translate(${Math.round(pt.x)}px, ${Math.round(pt.y)}px) translate(-50%, calc(-100% - 16px))`;
+    };
+    map.on('render', syncAnchor);
 
     // Slow orbital spin while zoomed out and untouched.
     let raf = 0;
     const spin = () => {
       const m = mapRef.current;
-      if (m && spinRef.current && readyRef.current && m.getZoom() < 3.2 && !m.isMoving()) {
+      if (m && spinRef.current && readyRef.current && m.getZoom() < 1.9 && !m.isMoving()) {
         const c = m.getCenter();
-        m.jumpTo({ center: [c.lng + 0.018, c.lat] });
+        m.jumpTo({ center: [c.lng + 0.012, c.lat] });
       }
       raf = requestAnimationFrame(spin);
     };
@@ -233,7 +258,6 @@ export function LiveGlobe({
     return () => {
       ro.disconnect();
       cancelAnimationFrame(raf);
-      clearInterval(pulse);
       if (idleTimer.current) clearTimeout(idleTimer.current);
       map.remove();
       mapRef.current = null;
@@ -265,12 +289,23 @@ export function LiveGlobe({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [focus?.key]);
 
+  // Re-sync immediately when the anchor target changes.
+  useEffect(() => {
+    mapRef.current?.triggerRepaint();
+  }, [anchor?.lat, anchor?.lng]);
+
   return (
-    <div
-      ref={wrapRef}
-      className={className}
-      style={{ background: '#04040a' }}
-      aria-label="Live visitor globe"
-    />
+    <div className={`relative ${className || ''}`} style={{ background: '#04040a' }}>
+      <div ref={wrapRef} className="absolute inset-0" aria-label="Live visitor globe" />
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div
+          ref={anchorElRef}
+          className="pointer-events-auto absolute left-0 top-0"
+          style={{ display: 'none', willChange: 'transform' }}
+        >
+          {anchorContent}
+        </div>
+      </div>
+    </div>
   );
 }

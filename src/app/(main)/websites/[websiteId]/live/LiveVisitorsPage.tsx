@@ -325,6 +325,80 @@ export function LiveVisitorsPage({ websiteId }: { websiteId: string }) {
     : null;
   const selPaid = selected ? revenueBySession.get(selected.id) : undefined;
 
+  const visitorCard = selected ? (
+    <div className="w-[290px] rounded-2xl border border-zinc-800 bg-zinc-950/95 p-4 shadow-2xl backdrop-blur animate-in fade-in zoom-in-95 duration-200">
+      <button
+        type="button"
+        onClick={() => setSelectedId(null)}
+        className="absolute right-2.5 top-2.5 rounded-md p-1 text-zinc-500 transition-colors hover:bg-zinc-800 hover:text-white"
+        aria-label="Close"
+      >
+        <X className="h-3.5 w-3.5" />
+      </button>
+      <div className="flex items-center gap-3 pr-6">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={avatarFor(selected.id)}
+          alt=""
+          width={38}
+          height={38}
+          className="h-[38px] w-[38px] rounded-full border border-zinc-700 bg-zinc-900"
+        />
+        <div className="min-w-0">
+          <div className="truncate text-sm font-semibold text-white">
+            {flagEmoji(selected.country)}{' '}
+            {selected.city !== 'Unknown' ? selected.city : countryName(selected.country)}
+          </div>
+          <div className="truncate text-xs text-zinc-500">{countryName(selected.country)}</div>
+        </div>
+      </div>
+      <div className="mt-3 space-y-1.5 text-xs">
+        <div className="flex items-center justify-between gap-3">
+          <span className="shrink-0 text-zinc-500">Buying intent</span>
+          {selIntent ? <IntentBadge result={selIntent} size="sm" /> : null}
+        </div>
+        {selPaid && selPaid.minor > 0 ? (
+          <div className="flex items-center justify-between gap-3">
+            <span className="text-zinc-500">Paid</span>
+            <span className="font-semibold text-emerald-300">
+              {formatMinorCurrency(selPaid.minor, selPaid.currency)}
+            </span>
+          </div>
+        ) : null}
+        <div className="flex items-center justify-between gap-3">
+          <span className="shrink-0 text-zinc-500">Viewing</span>
+          <span className="truncate font-mono text-indigo-300">{selected.currentPath}</span>
+        </div>
+        <div className="flex items-center justify-between gap-3">
+          <span className="text-zinc-500">Source</span>
+          <span className="truncate text-zinc-200">{selected.referrer || 'Direct'}</span>
+        </div>
+        <div className="flex items-center justify-between gap-3">
+          <span className="text-zinc-500">Pages</span>
+          <span className="tabular-nums text-zinc-200">{selected.pageCount || 1}</span>
+        </div>
+        {selected.lastSeen > selected.firstSeen ? (
+          <div className="flex items-center justify-between gap-3">
+            <span className="text-zinc-500">Time on site</span>
+            <span className="tabular-nums text-zinc-200">
+              {fmtDuration(selected.lastSeen - selected.firstSeen)}
+            </span>
+          </div>
+        ) : null}
+        <div className="flex items-center justify-between gap-3">
+          <span className="text-zinc-500">Last active</span>
+          <span className="text-zinc-200">{timeAgo(selected.lastSeen)}</span>
+        </div>
+      </div>
+      <a
+        href={`/websites/${websiteId}/sessions?session=${selected.id}`}
+        className="mt-3.5 flex items-center justify-center gap-1.5 rounded-lg border border-indigo-500/30 bg-indigo-500/10 py-1.5 text-xs font-medium text-indigo-300 transition-colors hover:bg-indigo-500/20 hover:text-indigo-200"
+      >
+        View full journey <ArrowRight className="h-3 w-3" />
+      </a>
+    </div>
+  ) : null;
+
   return (
     <div className="relative flex h-screen w-full flex-col overflow-hidden bg-[#04040a] text-foreground">
       {/* ambient background: two soft glows, no tiles, no images */}
@@ -455,6 +529,12 @@ export function LiveVisitorsPage({ websiteId }: { websiteId: string }) {
               }
               if (best && best.d < 0.5) selectVisitor(best.id);
             }}
+            anchor={
+              selected && selected.lat != null
+                ? { lat: selected.lat, lng: selected.lng as number }
+                : null
+            }
+            anchorContent={visitorCard}
             className="h-full w-full"
           />
           {visitors.length === 0 && (
@@ -486,81 +566,6 @@ export function LiveVisitorsPage({ websiteId }: { websiteId: string }) {
           </div>
         </main>
       </div>
-
-      {/* selected visitor card */}
-      {selected && (
-        <div className="absolute bottom-5 right-5 z-20 w-[300px] rounded-2xl border border-zinc-800 bg-zinc-950/95 p-4 shadow-2xl backdrop-blur animate-in fade-in slide-in-from-bottom-3 duration-300">
-          <button
-            type="button"
-            onClick={() => setSelectedId(null)}
-            className="absolute right-2.5 top-2.5 rounded-md p-1 text-zinc-500 transition-colors hover:bg-zinc-800 hover:text-white"
-            aria-label="Close"
-          >
-            <X className="h-3.5 w-3.5" />
-          </button>
-          <div className="flex items-center gap-3 pr-6">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={avatarFor(selected.id)}
-              alt=""
-              width={38}
-              height={38}
-              className="h-[38px] w-[38px] rounded-full border border-zinc-700 bg-zinc-900"
-            />
-            <div className="min-w-0">
-              <div className="truncate text-sm font-semibold text-white">
-                {flagEmoji(selected.country)}{' '}
-                {selected.city !== 'Unknown' ? selected.city : countryName(selected.country)}
-              </div>
-              <div className="truncate text-xs text-zinc-500">{countryName(selected.country)}</div>
-            </div>
-          </div>
-          <div className="mt-3 space-y-1.5 text-xs">
-            <div className="flex items-center justify-between gap-3">
-              <span className="shrink-0 text-zinc-500">Buying intent</span>
-              {selIntent ? <IntentBadge result={selIntent} size="sm" /> : null}
-            </div>
-            {selPaid && selPaid.minor > 0 ? (
-              <div className="flex items-center justify-between gap-3">
-                <span className="text-zinc-500">Paid</span>
-                <span className="font-semibold text-emerald-300">
-                  {formatMinorCurrency(selPaid.minor, selPaid.currency)}
-                </span>
-              </div>
-            ) : null}
-            <div className="flex items-center justify-between gap-3">
-              <span className="shrink-0 text-zinc-500">Viewing</span>
-              <span className="truncate font-mono text-indigo-300">{selected.currentPath}</span>
-            </div>
-            <div className="flex items-center justify-between gap-3">
-              <span className="text-zinc-500">Source</span>
-              <span className="truncate text-zinc-200">{selected.referrer || 'Direct'}</span>
-            </div>
-            <div className="flex items-center justify-between gap-3">
-              <span className="text-zinc-500">Pages</span>
-              <span className="tabular-nums text-zinc-200">{selected.pageCount || 1}</span>
-            </div>
-            {selected.lastSeen > selected.firstSeen ? (
-              <div className="flex items-center justify-between gap-3">
-                <span className="text-zinc-500">Time on site</span>
-                <span className="tabular-nums text-zinc-200">
-                  {fmtDuration(selected.lastSeen - selected.firstSeen)}
-                </span>
-              </div>
-            ) : null}
-            <div className="flex items-center justify-between gap-3">
-              <span className="text-zinc-500">Last active</span>
-              <span className="text-zinc-200">{timeAgo(selected.lastSeen)}</span>
-            </div>
-          </div>
-          <a
-            href={`/websites/${websiteId}/sessions?session=${selected.id}`}
-            className="mt-3.5 flex items-center justify-center gap-1.5 rounded-lg border border-indigo-500/30 bg-indigo-500/10 py-1.5 text-xs font-medium text-indigo-300 transition-colors hover:bg-indigo-500/20 hover:text-indigo-200"
-          >
-            View full journey <ArrowRight className="h-3 w-3" />
-          </a>
-        </div>
-      )}
     </div>
   );
 }
