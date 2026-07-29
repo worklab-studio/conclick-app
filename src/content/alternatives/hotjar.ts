@@ -108,7 +108,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "One thing all of these have in common: none of them are Hotjar. That's the point. Hotjar built a solid product, but the pricing model doesn't scale well for small teams, the cookie requirements add compliance overhead, and the revenue attribution story is weak. Every tool on this list solves at least one of those problems meaningfully better."
+      "text": "One thing all of these have in common: none of them are Hotjar. That's the point. Hotjar built a solid product, but the pricing model doesn't scale well for small teams, the cookie requirements add compliance overhead, and the revenue attribution story is weak. Every tool on this list solves at least one of those problems meaningfully better. And if you're actually shopping at the heavier end of this category, FullStory is the other session-replay suite founders outgrow the same way, so I ranked the [FullStory alternatives](/alternatives/fullstory) separately for the same reasons."
     }
   ],
   "faq": [

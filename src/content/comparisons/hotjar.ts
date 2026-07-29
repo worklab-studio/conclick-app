@@ -124,6 +124,7 @@ const entry: ContentEntry = {
       "items": [
         "You run a SaaS or ecommerce store and want to know [which channel pays](/glossary/marketing-attribution): Conclick",
         "You want to watch session recordings of individual users: Hotjar",
+        "You want session recordings but FullStory's enterprise pricing put you off: my ranked [FullStory alternatives](/alternatives/fullstory) cover the lighter replay options",
         "You need in-app feedback surveys or NPS: Hotjar",
         "You are a bootstrapped founder who wants one tool that covers analytics, heatmaps, funnels, and revenue: Conclick",
         "You are on a UX research team doing continuous discovery: Hotjar",
