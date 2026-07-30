@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import maplibregl from 'maplibre-gl';
 import type { FeatureCollection } from 'geojson';
 import 'maplibre-gl/dist/maplibre-gl.css';
@@ -14,8 +14,34 @@ export interface GlobeVisitor {
   weight?: number;
 }
 
-// Free vector basemap with real geography and city/street labels at zoom.
-const STYLE_URL = 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json';
+// Fully INLINE style — no external style.json fetch (those live on adblock
+// lists and their failure blanked the globe silently). Real satellite
+// imagery (the Google-Earth look) with a dark place-label overlay.
+const SATELLITE_STYLE: any = {
+  version: 8,
+  sources: {
+    sat: {
+      type: 'raster',
+      tiles: [
+        'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+      ],
+      tileSize: 256,
+      maxzoom: 19,
+      attribution: 'Imagery © Esri',
+    },
+    labels: {
+      type: 'raster',
+      tiles: ['https://a.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}.png'],
+      tileSize: 256,
+      attribution: '© CARTO © OpenStreetMap contributors',
+    },
+  },
+  layers: [
+    { id: 'bg', type: 'background', paint: { 'background-color': '#04040a' } },
+    { id: 'sat', type: 'raster', source: 'sat', paint: { 'raster-fade-duration': 150 } },
+    { id: 'labels', type: 'raster', source: 'labels', paint: { 'raster-opacity': 0.85 } },
+  ],
+};
 
 /**
  * Real-earth globe (MapLibre v5 globe projection): space view zoomed out,
@@ -57,6 +83,7 @@ export function LiveGlobe({
   const anchorRef = useRef<{ lat: number; lng: number } | null>(null);
   anchorRef.current = anchor || null;
   const anchorElRef = useRef<HTMLDivElement | null>(null);
+  const [failed, setFailed] = useState(false);
 
   const toGeoJSON = (list: GlobeVisitor[]) =>
     ({
@@ -86,15 +113,25 @@ export function LiveGlobe({
 
     const map = new maplibregl.Map({
       container: wrap,
-      style: STYLE_URL,
+      style: SATELLITE_STYLE,
       center: [20, 12],
       zoom: homeZoomRef.current,
       minZoom: 0.35,
       maxZoom: 17,
-      attributionControl: false,
+      attributionControl: { compact: true },
       fadeDuration: 150,
     });
     mapRef.current = map;
+
+    // Never blank silently again: if the style hasn't come up in 8s, say so.
+    const watchdog = setTimeout(() => {
+      if (!readyRef.current) setFailed(true);
+    }, 8000);
+    map.on('error', e => {
+      // Individual tile errors are routine; only log.
+      // eslint-disable-next-line no-console
+      console.warn('[live-globe]', (e as any)?.error?.message || e);
+    });
 
     map.on('style.load', () => {
       try {
@@ -110,28 +147,6 @@ export function LiveGlobe({
       } catch {
         /* ignore */
       }
-      // Recolor the basemap into the page's palette: space-black background,
-      // deep-navy ocean, charcoal land — Carto's default grey water is what
-      // made the page look washed out.
-      for (const layer of map.getStyle().layers || []) {
-        try {
-          if (layer.type === 'background') {
-            map.setPaintProperty(layer.id, 'background-color', '#04040a');
-          } else if (layer.id.includes('water') && layer.type === 'fill') {
-            map.setPaintProperty(layer.id, 'fill-color', '#0a1020');
-          } else if (
-            layer.type === 'fill' &&
-            (layer.id.includes('land') || layer.id.includes('earth'))
-          ) {
-            // Clearly lighter than the ocean — the first recolor flattened
-            // land and water into the same near-black and killed all detail.
-            map.setPaintProperty(layer.id, 'fill-color', '#232a3d');
-          }
-        } catch {
-          /* style variations */
-        }
-      }
-
       map.addSource('visitors', { type: 'geojson', data: toGeoJSON(visitorsRef.current) });
 
       // Soft glow under active visitors.
@@ -193,6 +208,8 @@ export function LiveGlobe({
       }
 
       readyRef.current = true;
+      setFailed(false);
+      clearTimeout(watchdog);
     });
 
     // Keep the anchored card glued to its dot — imperative style writes on
@@ -256,6 +273,7 @@ export function LiveGlobe({
     ro.observe(wrap);
 
     return () => {
+      clearTimeout(watchdog);
       ro.disconnect();
       cancelAnimationFrame(raf);
       if (idleTimer.current) clearTimeout(idleTimer.current);
@@ -306,6 +324,21 @@ export function LiveGlobe({
           {anchorContent}
         </div>
       </div>
+      {failed ? (
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="rounded-xl border border-zinc-800 bg-zinc-950/90 px-5 py-4 text-center text-sm text-zinc-400">
+            The globe couldn&apos;t load — an ad-blocker or network issue may be blocking map
+            imagery.
+            <button
+              type="button"
+              onClick={() => location.reload()}
+              className="ml-2 text-indigo-300 underline-offset-2 hover:underline"
+            >
+              Retry
+            </button>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }
