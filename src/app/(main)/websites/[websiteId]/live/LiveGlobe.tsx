@@ -102,36 +102,82 @@ export function LiveGlobe({
     const wrap = wrapRef.current;
     if (!wrap || mapRef.current) return;
 
-    // Fit the WHOLE sphere inside the container with breathing room — the
-    // sphere's apparent diameter is ~512*2^zoom px, so solve for the zoom
-    // that leaves ~12% margin against the smaller container edge.
+    // Fit the WHOLE sphere at ~80% of the shorter container edge. Calibrated
+    // empirically against maplibre v5 globe rendering: apparent sphere
+    // diameter ≈ 160·2^(0.88·zoom) px (measured at zooms 0.8/1.6/2.2).
     const fitZoom = () => {
-      const side = Math.min(wrap.clientWidth, wrap.clientHeight) * 0.88;
-      return Math.max(0.35, Math.min(1.6, Math.log2(side / 512)));
+      const target = Math.min(wrap.clientWidth, wrap.clientHeight) * 0.8;
+      return Math.max(0.35, Math.min(3.2, Math.log2(target / 160) / 0.88));
     };
     homeZoomRef.current = fitZoom();
 
-    const map = new maplibregl.Map({
-      container: wrap,
-      style: SATELLITE_STYLE,
-      center: [20, 12],
-      zoom: homeZoomRef.current,
-      minZoom: 0.35,
-      maxZoom: 17,
-      attributionControl: { compact: true },
-      fadeDuration: 150,
-    });
+    const errors: string[] = [];
+    let contextLost = false;
+    let map: maplibregl.Map;
+    try {
+      map = new maplibregl.Map({
+        container: wrap,
+        style: SATELLITE_STYLE,
+        center: [20, 12],
+        zoom: homeZoomRef.current,
+        minZoom: 0.35,
+        maxZoom: 17,
+        attributionControl: { compact: true },
+        fadeDuration: 150,
+      });
+    } catch (e) {
+      // Most likely: WebGL context creation failed (GPU denylist/exhaustion).
+      errors.push(`constructor: ${(e as Error)?.message || e}`);
+      setFailed(true);
+      navigator.sendBeacon?.(
+        '/api/live-globe-debug',
+        JSON.stringify({ phase: 'constructor-threw', errors, ua: navigator.userAgent }),
+      );
+      return;
+    }
     mapRef.current = map;
+
+    // If Chrome kills our WebGL context (GPU pressure), the canvas goes
+    // permanently black with no exception — surface it instead.
+    map.getCanvas().addEventListener('webglcontextlost', () => {
+      contextLost = true;
+      setFailed(true);
+    });
 
     // Never blank silently again: if the style hasn't come up in 8s, say so.
     const watchdog = setTimeout(() => {
       if (!readyRef.current) setFailed(true);
     }, 8000);
     map.on('error', e => {
+      const msg = (e as any)?.error?.message || String(e);
+      if (errors.length < 10) errors.push(msg);
       // Individual tile errors are routine; only log.
       // eslint-disable-next-line no-console
-      console.warn('[live-globe]', (e as any)?.error?.message || e);
+      console.warn('[live-globe]', msg);
     });
+
+    // Temporary render-health beacon → /api/live-globe-debug → fly logs.
+    const snapshot = (phase: string) => {
+      const canvas = map.getCanvas();
+      return JSON.stringify({
+        phase,
+        wrap: `${wrap.clientWidth}x${wrap.clientHeight}`,
+        canvas: `${canvas.width}x${canvas.height}`,
+        canvasCss: `${canvas.clientWidth}x${canvas.clientHeight}`,
+        dpr: window.devicePixelRatio,
+        ready: readyRef.current,
+        loaded: map.loaded(),
+        styleLoaded: map.isStyleLoaded(),
+        zoom: +map.getZoom().toFixed(2),
+        contextLost,
+        errors,
+        ua: navigator.userAgent.slice(0, 160),
+      });
+    };
+    const beacons = [
+      setTimeout(() => navigator.sendBeacon?.('/api/live-globe-debug', snapshot('t+3s')), 3000),
+      setTimeout(() => navigator.sendBeacon?.('/api/live-globe-debug', snapshot('t+12s')), 12000),
+    ];
 
     map.on('style.load', () => {
       try {
@@ -247,7 +293,13 @@ export function LiveGlobe({
     let raf = 0;
     const spin = () => {
       const m = mapRef.current;
-      if (m && spinRef.current && readyRef.current && m.getZoom() < 1.9 && !m.isMoving()) {
+      if (
+        m &&
+        spinRef.current &&
+        readyRef.current &&
+        m.getZoom() < homeZoomRef.current + 0.3 &&
+        !m.isMoving()
+      ) {
         const c = m.getCenter();
         m.jumpTo({ center: [c.lng + 0.012, c.lat] });
       }
@@ -274,6 +326,7 @@ export function LiveGlobe({
 
     return () => {
       clearTimeout(watchdog);
+      beacons.forEach(clearTimeout);
       ro.disconnect();
       cancelAnimationFrame(raf);
       if (idleTimer.current) clearTimeout(idleTimer.current);
@@ -314,7 +367,18 @@ export function LiveGlobe({
 
   return (
     <div className={`relative ${className || ''}`} style={{ background: '#04040a' }}>
-      <div ref={wrapRef} className="absolute inset-0" aria-label="Live visitor globe" />
+      {/* ROOT CAUSE OF THE BLANK GLOBE — do not size this div with position
+          utilities alone: maplibre-gl.css loads AFTER Tailwind here and its
+          `.maplibregl-map{position:relative}` overrides Tailwind's `absolute`,
+          which made `inset-0` stop sizing the div → 0×0 container → canvas
+          clipped to nothing. Inline position wins over any stylesheet, and
+          h-full/w-full are dimension-based so they survive regardless. */}
+      <div
+        ref={wrapRef}
+        className="absolute inset-0 h-full w-full"
+        style={{ position: 'absolute', inset: 0 }}
+        aria-label="Live visitor globe"
+      />
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <div
           ref={anchorElRef}
@@ -327,8 +391,8 @@ export function LiveGlobe({
       {failed ? (
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="rounded-xl border border-zinc-800 bg-zinc-950/90 px-5 py-4 text-center text-sm text-zinc-400">
-            The globe couldn&apos;t load — an ad-blocker or network issue may be blocking map
-            imagery.
+            The globe couldn&apos;t render — this is usually a graphics (WebGL) hiccup in the
+            browser, an ad-blocker, or a network issue.
             <button
               type="button"
               onClick={() => location.reload()}
