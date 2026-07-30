@@ -17,7 +17,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "Conclick is where I'd start if I were switching from Fathom today. The core pitch is simple: most analytics tools show you traffic. Conclick shows you which traffic makes money. That's a different product."
+      "text": "Conclick is where I'd start if I were switching from Fathom today. The core pitch is simple: most analytics tools show you traffic. Conclick shows you which traffic makes money. That's a different product. If you want the line-by-line version rather than this roundup, I put the two [head to head on features and price](/vs/fathom)."
     },
     {
       "type": "p",

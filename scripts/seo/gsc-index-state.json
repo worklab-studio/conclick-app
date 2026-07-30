@@ -485,6 +485,12 @@
       "coverageState": "URL is unknown to Google",
       "lastCrawlTime": null,
       "at": "2026-07-29T12:56:55.296Z"
+    },
+    "https://conclick.io/guides/best-ai-website-analytics": {
+      "indexed": false,
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null,
+      "at": "2026-07-30T08:59:58.366Z"
     }
   }
 }
