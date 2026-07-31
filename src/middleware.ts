@@ -70,6 +70,7 @@ const umamiRewrites = [customCollectEndpoint, customScriptName, customScriptUrl,
 // Page routes that require a signed-in user. API routes self-authorize.
 const PROTECTED_PREFIXES = [
   '/dashboard',
+  '/onboarding',
   '/websites',
   '/account',
   '/teams',
