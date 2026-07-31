@@ -259,14 +259,24 @@ export function LiveVisitorsPage({ websiteId }: { websiteId: string }) {
           lng: v.lng as number,
           active: now - v.lastSeen <= ACTIVE_MS,
           weight: Math.min(1, v.pageCount / 6),
+          avatar: avatarFor(v.id),
         })),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [visitors],
   );
 
-  // Auto fly-to when someone NEW shows up — the "feel-good" beat.
+  // Rotate the globe to someone NEW — the "feel-good" beat. The FIRST payload
+  // seeds silently: without this, page load treated every existing visitor as
+  // "new" and yanked the camera immediately (the stranded-at-street-zoom bug).
   const knownIds = useRef<Set<string>>(new Set());
+  const seededIds = useRef(false);
   useEffect(() => {
+    if (visitors.length === 0) return;
+    if (!seededIds.current) {
+      seededIds.current = true;
+      visitors.forEach(v => knownIds.current.add(v.id));
+      return;
+    }
     for (const v of activeVisitors) {
       if (!knownIds.current.has(v.id)) {
         knownIds.current.add(v.id);

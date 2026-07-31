@@ -12,6 +12,8 @@ export interface GlobeVisitor {
   active: boolean;
   /** 0..1 — scales the marker (e.g. engagement/recency). */
   weight?: number;
+  /** Data-URI avatar; active visitors with one get an on-globe avatar pin. */
+  avatar?: string;
 }
 
 // Fully INLINE style — no external style.json fetch (those live on adblock
@@ -37,7 +39,12 @@ const SATELLITE_STYLE: any = {
     },
   },
   layers: [
-    { id: 'bg', type: 'background', paint: { 'background-color': '#04040a' } },
+    // Transparent — the page starfield shows through around the sphere.
+    {
+      id: 'bg',
+      type: 'background',
+      paint: { 'background-color': 'rgba(0,0,0,0)', 'background-opacity': 0 },
+    },
     { id: 'sat', type: 'raster', source: 'sat', paint: { 'raster-fade-duration': 150 } },
     { id: 'labels', type: 'raster', source: 'labels', paint: { 'raster-opacity': 0.85 } },
   ],
@@ -83,6 +90,11 @@ export function LiveGlobe({
   const anchorRef = useRef<{ lat: number; lng: number } | null>(null);
   anchorRef.current = anchor || null;
   const anchorElRef = useRef<HTMLDivElement | null>(null);
+  const starsRef = useRef<HTMLCanvasElement | null>(null);
+  const haloRef = useRef<HTMLDivElement | null>(null);
+  const markersRef = useRef<
+    Map<string, { marker: maplibregl.Marker; el: HTMLElement; lat: number; lng: number }>
+  >(new Map());
   const [failed, setFailed] = useState(false);
 
   const toGeoJSON = (list: GlobeVisitor[]) =>
@@ -102,14 +114,50 @@ export function LiveGlobe({
     const wrap = wrapRef.current;
     if (!wrap || mapRef.current) return;
 
-    // Fit the WHOLE sphere at ~80% of the shorter container edge. Calibrated
-    // empirically against maplibre v5 globe rendering: apparent sphere
-    // diameter ≈ 160·2^(0.88·zoom) px (measured at zooms 0.8/1.6/2.2).
+    // Apparent sphere diameter ≈ 193·2^(0.79·zoom) px — calibrated by
+    // pixel-measuring real renders at zooms 2.2–3.3 (the orbit window).
+    const sphereDiameter = (z: number) => 193 * Math.pow(2, 0.79 * z);
+    // Fit the WHOLE sphere at ~88% of the shorter container edge.
     const fitZoom = () => {
-      const target = Math.min(wrap.clientWidth, wrap.clientHeight) * 0.8;
-      return Math.max(0.35, Math.min(3.2, Math.log2(target / 160) / 0.88));
+      const target = Math.min(wrap.clientWidth, wrap.clientHeight) * 0.88;
+      return Math.max(0.35, Math.min(3.4, Math.log2(target / 193) / 0.79));
     };
     homeZoomRef.current = fitZoom();
+
+    // Static starfield — painted once per size, zero per-frame cost.
+    const paintStars = () => {
+      const cv = starsRef.current;
+      if (!cv) return;
+      const w = cv.clientWidth,
+        h = cv.clientHeight,
+        dpr = window.devicePixelRatio || 1;
+      if (!w || !h) return;
+      cv.width = w * dpr;
+      cv.height = h * dpr;
+      const ctx = cv.getContext('2d');
+      if (!ctx) return;
+      ctx.scale(dpr, dpr);
+      ctx.clearRect(0, 0, w, h);
+      let seed = 42;
+      const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+      for (let i = 0; i < 420; i++) {
+        const x = rnd() * w,
+          y = rnd() * h;
+        const r = rnd() < 0.92 ? rnd() * 0.9 + 0.25 : rnd() * 1.6 + 0.9;
+        const a = 0.18 + rnd() * 0.5;
+        ctx.beginPath();
+        ctx.arc(x, y, r, 0, 7);
+        const tint = rnd();
+        ctx.fillStyle =
+          tint < 0.75
+            ? `rgba(255,255,255,${a})`
+            : tint < 0.9
+              ? `rgba(170,190,255,${a})`
+              : `rgba(255,225,180,${a * 0.85})`;
+        ctx.fill();
+      }
+    };
+    paintStars();
 
     const errors: string[] = [];
     let contextLost = false;
@@ -188,7 +236,7 @@ export function LiveGlobe({
       try {
         // Space-black canvas behind the globe + soft atmosphere halo.
         (map as any).setSky?.({
-          'atmosphere-blend': ['interpolate', ['linear'], ['zoom'], 0, 1, 6, 1, 8, 0],
+          'atmosphere-blend': ['interpolate', ['linear'], ['zoom'], 0, 0.35, 6, 0.35, 8, 0],
         });
       } catch {
         /* ignore */
@@ -258,36 +306,54 @@ export function LiveGlobe({
       clearTimeout(watchdog);
     });
 
-    // Keep the anchored card glued to its dot — imperative style writes on
-    // the map's own render tick, zero React re-renders while moving. Hidden
-    // when the dot rotates to the far side of the globe (>82° from center).
-    const syncAnchor = () => {
-      const el = anchorElRef.current;
-      const a = anchorRef.current;
-      if (!el) return;
-      if (!a) {
-        el.style.display = 'none';
-        return;
-      }
+    // One imperative pass per map render tick: anchored card position, halo
+    // geometry, and far-side hiding for avatar markers. Zero React re-renders.
+    const rad = Math.PI / 180;
+    const degFromCenter = (lat: number, lng: number) => {
       const c = map.getCenter();
-      const rad = Math.PI / 180;
-      const gc =
+      return (
         Math.acos(
           Math.min(
             1,
-            Math.sin(a.lat * rad) * Math.sin(c.lat * rad) +
-              Math.cos(a.lat * rad) * Math.cos(c.lat * rad) * Math.cos((a.lng - c.lng) * rad),
+            Math.sin(lat * rad) * Math.sin(c.lat * rad) +
+              Math.cos(lat * rad) * Math.cos(c.lat * rad) * Math.cos((lng - c.lng) * rad),
           ),
-        ) / rad;
-      if (gc > 82 && map.getZoom() < 4) {
-        el.style.display = 'none';
-        return;
-      }
-      const pt = map.project([a.lng, a.lat]);
-      el.style.display = 'block';
-      el.style.transform = `translate(${Math.round(pt.x)}px, ${Math.round(pt.y)}px) translate(-50%, calc(-100% - 16px))`;
+        ) / rad
+      );
     };
-    map.on('render', syncAnchor);
+    const syncOverlays = () => {
+      const zoom = map.getZoom();
+      // — anchored visitor card —
+      const el = anchorElRef.current;
+      const a = anchorRef.current;
+      if (el) {
+        if (!a || (degFromCenter(a.lat, a.lng) > 82 && zoom < 4)) {
+          el.style.display = 'none';
+        } else {
+          const pt = map.project([a.lng, a.lat]);
+          el.style.display = 'block';
+          el.style.transform = `translate(${Math.round(pt.x)}px, ${Math.round(pt.y)}px) translate(-50%, calc(-100% - 30px))`;
+        }
+      }
+      // — blue halo hugging the sphere limb, fades out as the user dives —
+      const halo = haloRef.current;
+      if (halo) {
+        const d = sphereDiameter(zoom);
+        const box = d * 1.22;
+        const fade = Math.max(0, Math.min(1, (homeZoomRef.current + 1.6 - zoom) / 1.2));
+        halo.style.width = `${box}px`;
+        halo.style.height = `${box}px`;
+        halo.style.left = `${(wrap.clientWidth - box) / 2}px`;
+        halo.style.top = `${(wrap.clientHeight - box) / 2}px`;
+        halo.style.opacity = String(0.95 * fade);
+      }
+      // — avatar pins hide when their dot rotates behind the globe —
+      for (const it of markersRef.current.values()) {
+        it.el.style.visibility =
+          degFromCenter(it.lat, it.lng) > 78 && zoom < 4 ? 'hidden' : 'visible';
+      }
+    };
+    map.on('render', syncOverlays);
 
     // Slow orbital spin while zoomed out and untouched.
     let raf = 0;
@@ -321,6 +387,7 @@ export function LiveGlobe({
     const ro = new ResizeObserver(() => {
       map.resize();
       homeZoomRef.current = fitZoom();
+      paintStars();
     });
     ro.observe(wrap);
 
@@ -330,6 +397,8 @@ export function LiveGlobe({
       ro.disconnect();
       cancelAnimationFrame(raf);
       if (idleTimer.current) clearTimeout(idleTimer.current);
+      markersRef.current.forEach(it => it.marker.remove());
+      markersRef.current.clear();
       map.remove();
       mapRef.current = null;
       readyRef.current = false;
@@ -337,26 +406,73 @@ export function LiveGlobe({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Visitor updates → setData (never re-create the map).
+  // Visitor updates → setData + avatar-marker reconciliation (never re-create
+  // the map). DataFast-style: active visitors show as avatar pins on the globe.
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !readyRef.current) return;
     const src = map.getSource('visitors') as maplibregl.GeoJSONSource | undefined;
     src?.setData(toGeoJSON(visitors));
+
+    const want = visitors
+      .filter(v => v.active && v.avatar && Number.isFinite(v.lat) && Number.isFinite(v.lng))
+      .sort((x, y) => (y.weight ?? 0) - (x.weight ?? 0))
+      .slice(0, 14);
+    const wantIds = new Set(want.map(v => v.id));
+    const have = markersRef.current;
+    for (const [id, it] of have) {
+      if (!wantIds.has(id)) {
+        it.marker.remove();
+        have.delete(id);
+      }
+    }
+    for (const v of want) {
+      const existing = have.get(v.id);
+      if (existing) {
+        if (existing.lat !== v.lat || existing.lng !== v.lng) {
+          existing.marker.setLngLat([v.lng, v.lat]);
+          existing.lat = v.lat;
+          existing.lng = v.lng;
+        }
+        continue;
+      }
+      const el = document.createElement('img');
+      el.src = v.avatar as string;
+      el.alt = '';
+      Object.assign(el.style, {
+        width: '34px',
+        height: '34px',
+        borderRadius: '50%',
+        border: '2px solid rgba(255,255,255,0.9)',
+        boxShadow: '0 0 0 3px rgba(139,136,216,0.35), 0 2px 10px rgba(0,0,0,0.6)',
+        cursor: 'pointer',
+        background: '#1c1c28',
+      });
+      const coords = { lat: v.lat, lng: v.lng };
+      el.addEventListener('click', e => {
+        e.stopPropagation();
+        onPickRef.current?.(coords);
+      });
+      const marker = new maplibregl.Marker({ element: el }).setLngLat([v.lng, v.lat]).addTo(map);
+      have.set(v.id, { marker, el, lat: v.lat, lng: v.lng });
+    }
+    map.triggerRepaint();
   }, [visitors]);
 
-  // Focus request → cinematic fly-to at city zoom.
+  // Focus request → rotate the globe to bring the dot front-center, at orbit.
+  // The camera NEVER dives on its own (the old flyTo-5.5 left users stranded
+  // on a flat clipped map); street zoom belongs to the user's scroll wheel.
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !focus) return;
     spinRef.current = false;
-    map.flyTo({ center: [focus.lng, focus.lat], zoom: 5.5, speed: 0.85, curve: 1.5 });
+    if (map.getZoom() <= homeZoomRef.current + 0.75) {
+      map.easeTo({ center: [focus.lng, focus.lat], zoom: homeZoomRef.current, duration: 1600 });
+    }
     if (idleTimer.current) clearTimeout(idleTimer.current);
     idleTimer.current = setTimeout(() => {
-      // Drift back out to the full floating sphere, then resume the spin.
-      mapRef.current?.easeTo({ zoom: homeZoomRef.current, duration: 2200 });
       spinRef.current = true;
-    }, 8000);
+    }, 6000);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [focus?.key]);
 
@@ -367,6 +483,22 @@ export function LiveGlobe({
 
   return (
     <div className={`relative ${className || ''}`} style={{ background: '#04040a' }}>
+      <canvas
+        ref={starsRef}
+        aria-hidden
+        style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}
+      />
+      <div
+        ref={haloRef}
+        aria-hidden
+        style={{
+          position: 'absolute',
+          pointerEvents: 'none',
+          borderRadius: '50%',
+          background:
+            'radial-gradient(circle closest-side, rgba(56,89,199,0) 78%, rgba(70,105,230,0.26) 85%, rgba(96,130,255,0.34) 89%, rgba(56,89,199,0.12) 95%, rgba(0,0,0,0) 100%)',
+        }}
+      />
       {/* ROOT CAUSE OF THE BLANK GLOBE — do not size this div with position
           utilities alone: maplibre-gl.css loads AFTER Tailwind here and its
           `.maplibregl-map{position:relative}` overrides Tailwind's `absolute`,
