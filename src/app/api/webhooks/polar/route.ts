@@ -144,10 +144,25 @@ export async function POST(request: NextRequest) {
       confirmPlan = type === 'subscription.active' ? 'monthly' : null;
       break;
 
+    // Polar sends `updated` for renewals and any other change, so mirror the
+    // authoritative status off the payload rather than assuming.
     case 'subscription.cycled':
-      updates.subscriptionStatus = 'active';
+    case 'subscription.updated': {
+      const status = String(data?.status || '');
+      if (status === 'active') {
+        updates.subscriptionStatus = 'active';
+        updates.subscriptionPlan = user.subscriptionPlan === 'lifetime' ? 'lifetime' : 'monthly';
+        updates.endsAt = null;
+      } else if (status === 'past_due') {
+        updates.subscriptionStatus = 'past_due';
+      } else if (status === 'canceled') {
+        updates.subscriptionStatus = 'cancelled';
+        updates.endsAt = periodEnd || user.currentPeriodEndsAt;
+      }
       if (periodEnd) updates.currentPeriodEndsAt = periodEnd;
+      if (data?.id) updates.subscriptionId = data.id;
       break;
+    }
 
     case 'subscription.past_due':
       updates.subscriptionStatus = 'past_due';
