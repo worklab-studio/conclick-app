@@ -2,7 +2,7 @@
 
 import { ReactNode, useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { useAuth, SignInButton, SignUpButton } from '@clerk/nextjs';
+import { authClient } from '@/lib/auth-client';
 import { Button } from '@/components/ui/button';
 import { Loader2, Users, AlertCircle, Check } from 'lucide-react';
 
@@ -25,7 +25,8 @@ function Card({ children }: { children: ReactNode }) {
 export default function InvitePage() {
   const params = useParams<{ token: string }>();
   const token = (params?.token as string) || '';
-  const { isLoaded, isSignedIn } = useAuth();
+  const { data: sessionData, isPending: sessionPending } = authClient.useSession();
+  const isSignedIn = !!sessionData?.session;
   const router = useRouter();
   const path = `/invite/${token}`;
 
@@ -50,7 +51,7 @@ export default function InvitePage() {
     setAccepting(true);
     setError(null);
     try {
-      // Same-origin → the Clerk session cookie authenticates the request.
+      // Same-origin → the session cookie authenticates the request.
       const r = await fetch(`/api/invites/${token}/accept`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -69,7 +70,7 @@ export default function InvitePage() {
     }
   };
 
-  if (loading || !isLoaded) {
+  if (loading || sessionPending) {
     return (
       <Card>
         <Loader2 className="mx-auto h-6 w-6 animate-spin text-muted-foreground" />
@@ -144,19 +145,19 @@ export default function InvitePage() {
         </Button>
       ) : (
         <div className="mt-6 space-y-2">
-          <SignUpButton mode="redirect" forceRedirectUrl={path} signInForceRedirectUrl={path}>
-            <Button className="w-full bg-[#5e5ba4] text-white hover:bg-[#5e5ba4]/90">
-              Sign up to join
-            </Button>
-          </SignUpButton>
-          <SignInButton mode="redirect" forceRedirectUrl={path} signUpForceRedirectUrl={path}>
-            <Button
-              variant="outline"
-              className="w-full dark:border-zinc-800 dark:bg-zinc-900 dark:hover:bg-zinc-800"
-            >
-              I already have an account
-            </Button>
-          </SignInButton>
+          <Button
+            className="w-full bg-[#5e5ba4] text-white hover:bg-[#5e5ba4]/90"
+            onClick={() => router.push(`/register?next=${encodeURIComponent(path)}`)}
+          >
+            Sign up to join
+          </Button>
+          <Button
+            variant="outline"
+            className="w-full dark:border-zinc-800 dark:bg-zinc-900 dark:hover:bg-zinc-800"
+            onClick={() => router.push(`/login?next=${encodeURIComponent(path)}`)}
+          >
+            I already have an account
+          </Button>
           <p className="pt-1 text-xs text-muted-foreground">
             Use the email this invitation was sent to.
           </p>

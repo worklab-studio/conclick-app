@@ -1,10 +1,10 @@
 import debug from 'debug';
-import { auth as clerkAuth } from '@clerk/nextjs/server';
 import { ROLE_PERMISSIONS, SHARE_TOKEN_HEADER } from '@/lib/constants';
 import { secret } from '@/lib/crypto';
 import { parseToken } from '@/lib/jwt';
 import { ensureArray } from '@/lib/utils';
-import { getOrCreateLocalUser } from '@/lib/clerk';
+import { auth as betterAuth } from '@/lib/better-auth';
+import { getLocalUserByAuthId } from '@/lib/auth-bridge';
 import { isApiKey, getUserByApiKey } from '@/lib/apikey';
 
 const log = debug('umami:auth');
@@ -18,9 +18,9 @@ export function getBearerToken(request: Request) {
 /**
  * Resolve the caller's identity for an API request.
  *
- * Authentication is handled by Clerk (cookie/session, read via `auth()` which
- * relies on clerkMiddleware having run). Share tokens remain a separate,
- * header-based mechanism for public/embedded dashboards.
+ * Authentication is handled by Better Auth (session cookie, self-hosted in
+ * our Postgres). Share tokens remain a separate, header-based mechanism for
+ * public/embedded dashboards.
  *
  * Returns the same shape the rest of the app expects: `{ user, shareToken }`.
  * Never logs credentials.
@@ -35,17 +35,14 @@ export async function checkAuth(request: Request) {
   if (isApiKey(bearer)) {
     user = await getUserByApiKey(bearer as string);
   } else {
-    // 2. Clerk session (cookie), read via auth() which relies on clerkMiddleware.
+    // 2. Better Auth session cookie → auth_user → local app user.
     try {
-      const { userId: clerkUserId } = await clerkAuth();
-
-      if (clerkUserId) {
-        user = await getOrCreateLocalUser(clerkUserId);
+      const session = await betterAuth.api.getSession({ headers: request.headers as any });
+      if (session?.user?.id) {
+        user = await getLocalUserByAuthId(session.user.id, session.user.email, session.user.name);
       }
     } catch {
-      // auth() throws if clerkMiddleware didn't run for this route (e.g. some
-      // public/collect endpoints). Treat as unauthenticated and fall through.
-      log('clerk auth() unavailable for this route');
+      log('better-auth session unavailable for this request');
     }
   }
 
@@ -64,9 +61,8 @@ export async function hasPermission(role: string, permission: string | string[])
 }
 
 /**
- * Gate for /api/admin/* routes. Replaces the old forgeable
- * `conclick_admin_session` cookie: now requires a real Clerk-authenticated
- * user whose local role is admin (granted via ADMIN_EMAILS on first sign-in).
+ * Gate for /api/admin/* routes: requires an authenticated user whose local
+ * role is admin (granted via ADMIN_EMAILS on first sign-in).
  */
 export async function checkAdmin(request: Request): Promise<boolean> {
   const auth = await checkAuth(request);

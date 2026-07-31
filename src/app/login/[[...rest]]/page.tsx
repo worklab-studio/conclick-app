@@ -1,16 +1,16 @@
 import { Metadata } from 'next';
-import { SignIn } from '@clerk/nextjs';
 import { AuthShell, cleanDomain } from '@/components/auth/AuthShell';
+import { AuthForm } from '@/components/auth/AuthForm';
 
 export default async function Page({
   searchParams,
 }: {
-  searchParams: Promise<{ site?: string | string[] }>;
+  searchParams: Promise<{ site?: string | string[]; next?: string }>;
 }) {
-  const { site } = await searchParams;
+  const { site, next } = await searchParams;
   return (
     <AuthShell domain={cleanDomain(site)}>
-      <SignIn />
+      <AuthForm mode="login" next={typeof next === 'string' ? next : undefined} />
     </AuthShell>
   );
 }

@@ -19,8 +19,8 @@ async function handleResponse(res: FetchResponse): Promise<any> {
 export function useApi() {
   const shareToken = useApp(selector);
 
-  // Auth is via Clerk's same-origin session cookie — do NOT send an empty
-  // "Bearer null" Authorization header, or Clerk treats the request as having
+  // Auth is via the same-origin session cookie — do NOT send an empty
+  // "Bearer null" Authorization header, or the server treats the request as having
   // an invalid token and skips the cookie (causes a 401 + post-login redirect
   // loop). Only attach a Bearer token if one actually exists (legacy/share).
   const authToken = getClientAuthToken();

@@ -31,7 +31,7 @@ export default function PrivacyPage() {
       <LegalH2>Service providers</LegalH2>
       <LegalP>{`We share data only with the providers needed to run Conclick:`}</LegalP>
       <LegalUL>
-        <li>Clerk — authentication and account management.</li>
+        <li>Google — optional “Sign in with Google” authentication.</li>
         <li>Dodo Payments — subscription billing and payment processing.</li>
         <li>Resend — transactional and digest email.</li>
         <li>Google — Search Console and Analytics data you authorize us to read (read-only).</li>

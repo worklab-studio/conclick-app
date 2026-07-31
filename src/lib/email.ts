@@ -56,6 +56,37 @@ export async function sendTeamInviteEmail(
   });
 }
 
+const OTP_PURPOSE: Record<string, string> = {
+  'sign-in': 'Sign in to Conclick',
+  'email-verification': 'Verify your email',
+  'forget-password': 'Reset your password',
+};
+
+export async function sendOtpEmail(email: string, otp: string, type: string) {
+  // Local/dev without Resend: surface the code in the server log so the
+  // flow stays fully testable end-to-end.
+  if (process.env.NODE_ENV !== 'production' && !process.env.RESEND_API_KEY) {
+    // eslint-disable-next-line no-console
+    console.log(`[auth-otp] ${type} code for ${email}: ${otp}`);
+    return;
+  }
+  const resend = resendClient();
+  if (!resend) return;
+  const purpose = OTP_PURPOSE[type] || 'Your Conclick code';
+  await resend.emails.send({
+    from: FROM_EMAIL,
+    to: email,
+    subject: `${otp} — ${purpose}`,
+    html: `
+      <div style="font-family:ui-sans-serif,system-ui,-apple-system,sans-serif;max-width:420px;margin:0 auto;padding:32px 24px;color:#18181b">
+        <div style="font-size:18px;font-weight:700;margin-bottom:4px">Conclick</div>
+        <p style="font-size:14px;color:#52525b;margin:16px 0 20px">${purpose} with this code — it expires in 10 minutes.</p>
+        <div style="font-size:32px;font-weight:800;letter-spacing:10px;text-align:center;background:#f4f4f5;border-radius:12px;padding:18px 0">${otp}</div>
+        <p style="font-size:12px;color:#a1a1aa;margin-top:20px">If you didn't request this, you can safely ignore this email.</p>
+      </div>`,
+  });
+}
+
 export async function sendPasswordResetEmail(email: string, resetToken: string) {
   const resetUrl = `${process.env.NEXT_PUBLIC_APP_URL}/reset-password?token=${resetToken}`;
 
@@ -294,7 +325,10 @@ export function renderHypeDigest(
     ? `<div style="background:#ecfdf5;border:1px solid #a7f3d0;border-radius:12px;padding:14px 16px;margin:0 0 16px;">
         <div style="font-size:14px;font-weight:700;color:${GREEN};">🏆 Milestone${milestones.length > 1 ? 's' : ''} unlocked</div>
         ${milestones
-          .map(m => `<div style="font-size:14px;color:#065f46;margin-top:4px;">${escapeHtml(m.hit.siteName)} crossed <b>${milestoneLabel(m.hit, m.ccy)}</b></div>`)
+          .map(
+            m =>
+              `<div style="font-size:14px;color:#065f46;margin-top:4px;">${escapeHtml(m.hit.siteName)} crossed <b>${milestoneLabel(m.hit, m.ccy)}</b></div>`,
+          )
           .join('')}
       </div>`
     : '';
@@ -428,7 +462,14 @@ export function buildDigestText(
 ): string {
   const t = snapshot.totals;
   const lines: string[] = [];
-  lines.push(`Conclick — ${snapshot.dateLabel}`, '', narrative.subject, '', narrative.emailNarrative, '');
+  lines.push(
+    `Conclick — ${snapshot.dateLabel}`,
+    '',
+    narrative.subject,
+    '',
+    narrative.emailNarrative,
+    '',
+  );
 
   for (const m of collectMilestones(snapshot)) {
     lines.push(`** Milestone: ${m.hit.siteName} crossed ${milestoneLabel(m.hit, m.ccy)}`);
@@ -451,14 +492,20 @@ export function buildDigestText(
     `Revenue: ${t.revenueMinor > 0 ? digestMoney(t.revenueMinor, t.currency) : '—'}`,
   );
   if (snapshot.deltas.vsLastWeekPct != null)
-    lines.push(`vs weekly average: ${snapshot.deltas.vsLastWeekPct >= 0 ? '+' : ''}${snapshot.deltas.vsLastWeekPct}%`);
+    lines.push(
+      `vs weekly average: ${snapshot.deltas.vsLastWeekPct >= 0 ? '+' : ''}${snapshot.deltas.vsLastWeekPct}%`,
+    );
   if (snapshot.deltas.vsLastMonthPct != null)
-    lines.push(`vs last month: ${snapshot.deltas.vsLastMonthPct >= 0 ? '+' : ''}${snapshot.deltas.vsLastMonthPct}%`);
+    lines.push(
+      `vs last month: ${snapshot.deltas.vsLastMonthPct >= 0 ? '+' : ''}${snapshot.deltas.vsLastMonthPct}%`,
+    );
 
   if (snapshot.sites.length > 1) {
     lines.push('', 'By site:');
     for (const s of snapshot.sites.slice().sort((a, b) => b.visitors - a.visitors)) {
-      lines.push(`  - ${s.name}: ${s.visitors.toLocaleString('en-US')} visitors, ${s.topReferrers[0]?.label || 'Direct'}${s.revenueMinor > 0 ? `, ${digestMoney(s.revenueMinor, s.currency)}` : ''}`);
+      lines.push(
+        `  - ${s.name}: ${s.visitors.toLocaleString('en-US')} visitors, ${s.topReferrers[0]?.label || 'Direct'}${s.revenueMinor > 0 ? `, ${digestMoney(s.revenueMinor, s.currency)}` : ''}`,
+      );
     }
   }
 

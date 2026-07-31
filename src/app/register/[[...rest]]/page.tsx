@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
-import { SignUp } from '@clerk/nextjs';
 import { AuthShell, cleanDomain } from '@/components/auth/AuthShell';
+import { AuthForm } from '@/components/auth/AuthForm';
 
 export default async function Page({
   searchParams,
@@ -10,11 +10,11 @@ export default async function Page({
   const { site } = await searchParams;
   return (
     <AuthShell domain={cleanDomain(site)}>
-      <SignUp />
+      <AuthForm mode="register" />
     </AuthShell>
   );
 }
 
 export const metadata: Metadata = {
-  title: 'Sign up',
+  title: 'Create your account',
 };

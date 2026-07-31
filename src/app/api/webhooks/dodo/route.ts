@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { Webhook } from 'svix';
 import prisma from '@/lib/prisma';
 import { getDodoConfig } from '@/lib/dodo';
-import { clearCachedUser } from '@/lib/clerk';
+import { clearCachedAuthUser } from '@/lib/auth-bridge';
 import { sendSubscriptionConfirmation } from '@/lib/email';
 
 export const dynamic = 'force-dynamic';
@@ -172,7 +172,7 @@ export async function POST(request: NextRequest) {
   ]);
 
   // Unlock instantly — the 30s auth cache would otherwise keep the paywall up.
-  if (user.clerkId) clearCachedUser(user.clerkId);
+  if (user.authId) clearCachedAuthUser(user.authId);
 
   if (confirmPlan && user.email) {
     try {

@@ -1,14 +1,14 @@
-import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 import { NextRequest, NextResponse } from 'next/server';
+import { getSessionCookie } from 'better-auth/cookies';
 
 // ---------------------------------------------------------------------------
-// Unified middleware: umami tracker/CORS rewrites + Clerk auth.
+// Unified middleware: umami tracker/CORS rewrites + Better Auth page gating.
 //
 // This file is the single source of truth (the Docker build no longer swaps in
 // docker/middleware.ts). The umami helpers below are all opt-in via env vars
 // (tracker script renaming, custom collect endpoint, disable-login) and run
-// BEFORE Clerk so tracker traffic is never gated by auth. Clerk then protects
-// the app's page routes; API routes self-authorize via parseRequest/checkAuth.
+// BEFORE auth so tracker traffic is never gated by it. A fast session-cookie
+// check then protects page routes; API routes self-authorize via checkAuth.
 // ---------------------------------------------------------------------------
 
 const TRACKER_PATH = '/script.js';
@@ -68,35 +68,45 @@ function disableLogin(request: NextRequest) {
 const umamiRewrites = [customCollectEndpoint, customScriptName, customScriptUrl, disableLogin];
 
 // Page routes that require a signed-in user. API routes self-authorize.
-const isProtectedPage = createRouteMatcher([
-  '/dashboard(.*)',
-  '/websites(.*)',
-  '/account(.*)',
-  '/teams(.*)',
-  '/boards(.*)',
-  '/links(.*)',
-  '/pixels(.*)',
-  '/inbox(.*)',
-  '/console(.*)',
-  '/settings(.*)',
-  '/admin(.*)',
-]);
+const PROTECTED_PREFIXES = [
+  '/dashboard',
+  '/websites',
+  '/account',
+  '/teams',
+  '/boards',
+  '/links',
+  '/pixels',
+  '/inbox',
+  '/console',
+  '/settings',
+  '/admin',
+];
 
-export default clerkMiddleware(async (auth, req) => {
+export default function middleware(req: NextRequest) {
   // 1. umami tracker/CORS rewrites (opt-in via env). Return early if matched
   //    so tracker traffic is never subjected to auth.
   for (const fn of umamiRewrites) {
-    const res = fn(req as NextRequest);
+    const res = fn(req);
     if (res) {
       return res;
     }
   }
 
-  // 2. Clerk: protect app page routes.
-  if (isProtectedPage(req)) {
-    await auth.protect();
+  // 2. Protect app page routes: a fast cookie-presence check (no DB) — the
+  //    session itself is verified server-side by every API route via
+  //    parseRequest/checkAuth, so a forged cookie only reaches an empty shell.
+  const { pathname } = req.nextUrl;
+  if (PROTECTED_PREFIXES.some(p => pathname === p || pathname.startsWith(p + '/'))) {
+    if (!getSessionCookie(req)) {
+      const url = req.nextUrl.clone();
+      url.pathname = '/login';
+      url.search = pathname === '/dashboard' ? '' : `?next=${encodeURIComponent(pathname)}`;
+      return NextResponse.redirect(url);
+    }
   }
-});
+
+  return NextResponse.next();
+}
 
 export const config = {
   matcher: [

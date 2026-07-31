@@ -68,8 +68,6 @@
   ],
   "dependencies": {
     "@anthropic-ai/sdk": "0.104.1",
-    "@clerk/nextjs": "^7.4.3",
-    "@clerk/themes": "^2.4.57",
     "@clickhouse/client": "^1.12.0",
     "@date-fns/utc": "^1.2.0",
     "@dicebear/collection": "^9.2.3",
@@ -102,6 +100,7 @@
     "@umami/react-zen": "^0.207.0",
     "@umami/redis-client": "^0.29.0",
     "bcryptjs": "^3.0.2",
+    "better-auth": "^1.6.25",
     "canvas-confetti": "^1.9.4",
     "chalk": "^5.6.2",
     "chart.js": "^4.5.1",
