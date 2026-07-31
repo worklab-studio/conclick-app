@@ -42,7 +42,17 @@ function GoogleMark() {
  * The whole owned-auth surface: Google, email/password, OTP email
  * verification, and OTP password reset — no third-party widgets.
  */
-export function AuthForm({ mode, next }: { mode: 'login' | 'register'; next?: string }) {
+export function AuthForm({
+  mode,
+  next,
+  googleEnabled = true,
+}: {
+  mode: 'login' | 'register';
+  next?: string;
+  /** False when the server has no Google OAuth credentials — hide the button
+   *  rather than show one that can only fail. */
+  googleEnabled?: boolean;
+}) {
   const router = useRouter();
   const [view, setView] = useState<View>(mode);
   const [email, setEmail] = useState('');
@@ -174,7 +184,7 @@ export function AuthForm({ mode, next }: { mode: 'login' | 'register'; next?: st
         </p>
       )}
 
-      {(view === 'login' || view === 'register') && (
+      {googleEnabled && (view === 'login' || view === 'register') && (
         <>
           <button
             type="button"

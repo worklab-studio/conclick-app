@@ -10,7 +10,10 @@ export default async function Page({
   const { site } = await searchParams;
   return (
     <AuthShell domain={cleanDomain(site)}>
-      <AuthForm mode="register" />
+      <AuthForm
+        googleEnabled={!!process.env.GOOGLE_CLIENT_ID && !!process.env.GOOGLE_CLIENT_SECRET}
+        mode="register"
+      />
     </AuthShell>
   );
 }
