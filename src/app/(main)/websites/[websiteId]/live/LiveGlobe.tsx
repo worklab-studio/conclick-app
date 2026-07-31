@@ -16,39 +16,53 @@ export interface GlobeVisitor {
   avatar?: string;
 }
 
-// Fully INLINE style — no external style.json fetch (those live on adblock
-// lists and their failure blanked the globe silently). Real satellite
-// imagery (the Google-Earth look) with a dark place-label overlay.
-const SATELLITE_STYLE: any = {
-  version: 8,
-  sources: {
-    sat: {
-      type: 'raster',
-      tiles: [
-        'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-      ],
-      tileSize: 256,
-      maxzoom: 19,
-      attribution: 'Imagery © Esri',
-    },
-    labels: {
-      type: 'raster',
-      tiles: ['https://a.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}.png'],
-      tileSize: 256,
-      attribution: '© CARTO © OpenStreetMap contributors',
-    },
-  },
-  layers: [
-    // Transparent — the page starfield shows through around the sphere.
-    {
-      id: 'bg',
-      type: 'background',
-      paint: { 'background-color': 'rgba(0,0,0,0)', 'background-opacity': 0 },
-    },
-    { id: 'sat', type: 'raster', source: 'sat', paint: { 'raster-fade-duration': 150 } },
-    { id: 'labels', type: 'raster', source: 'labels', paint: { 'raster-opacity': 0.85 } },
-  ],
+// Carto dark-matter vector basemap, recolored into the dark matte planet
+// look: near-black oceans, navy land, faint borders, soft labels. Vector is
+// the only way to control each of those independently (raster can't). If an
+// ad-blocker kills the style fetch, the 8s watchdog shows the retry overlay.
+const STYLE_URL = 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json';
+
+const PALETTE = {
+  ocean: '#0a0d16',
+  land: '#1a2130',
+  border: 'rgba(132,152,196,0.32)',
+  road: '#242c3e',
+  label: '#9aa3ba',
+  labelHalo: '#070a12',
 };
+
+/** Repaint every basemap layer into PALETTE; background goes transparent so
+ *  the page starfield shows through around the sphere. */
+function recolorBasemap(map: maplibregl.Map) {
+  for (const layer of map.getStyle().layers || []) {
+    try {
+      if (layer.type === 'background') {
+        map.setPaintProperty(layer.id, 'background-color', 'rgba(0,0,0,0)');
+        map.setPaintProperty(layer.id, 'background-opacity', 0);
+      } else if (layer.type === 'fill') {
+        const id = layer.id.toLowerCase();
+        map.setPaintProperty(
+          layer.id,
+          'fill-color',
+          id.includes('water') ? PALETTE.ocean : PALETTE.land,
+        );
+        map.setPaintProperty(layer.id, 'fill-outline-color', 'rgba(0,0,0,0)');
+      } else if (layer.type === 'line') {
+        const id = layer.id.toLowerCase();
+        map.setPaintProperty(
+          layer.id,
+          'line-color',
+          id.includes('boundary') || id.includes('admin') ? PALETTE.border : PALETTE.road,
+        );
+      } else if (layer.type === 'symbol') {
+        map.setPaintProperty(layer.id, 'text-color', PALETTE.label);
+        map.setPaintProperty(layer.id, 'text-halo-color', PALETTE.labelHalo);
+      }
+    } catch {
+      /* style variations across carto versions */
+    }
+  }
+}
 
 /**
  * Real-earth globe (MapLibre v5 globe projection): space view zoomed out,
@@ -138,6 +152,15 @@ export function LiveGlobe({
       if (!ctx) return;
       ctx.scale(dpr, dpr);
       ctx.clearRect(0, 0, w, h);
+      // Deep-blue space glow centered on the sphere.
+      const R = Math.min(w, h);
+      const g = ctx.createRadialGradient(w / 2, h / 2, R * 0.3, w / 2, h / 2, R * 1.05);
+      g.addColorStop(0, 'rgba(37,71,171,0.5)');
+      g.addColorStop(0.45, 'rgba(26,48,120,0.3)');
+      g.addColorStop(0.75, 'rgba(14,26,70,0.16)');
+      g.addColorStop(1, 'rgba(4,4,10,0)');
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, w, h);
       let seed = 42;
       const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
       for (let i = 0; i < 420; i++) {
@@ -165,14 +188,16 @@ export function LiveGlobe({
     try {
       map = new maplibregl.Map({
         container: wrap,
-        style: SATELLITE_STYLE,
+        style: STYLE_URL,
         center: [20, 12],
         zoom: homeZoomRef.current,
         minZoom: 0.35,
         maxZoom: 17,
-        attributionControl: { compact: true },
+        attributionControl: false,
         fadeDuration: 150,
       });
+      // Bottom-left so the Conclick badge owns the bottom-right corner.
+      map.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-left');
     } catch (e) {
       // Most likely: WebGL context creation failed (GPU denylist/exhaustion).
       errors.push(`constructor: ${(e as Error)?.message || e}`);
@@ -228,16 +253,19 @@ export function LiveGlobe({
     ];
 
     map.on('style.load', () => {
+      recolorBasemap(map);
       try {
         map.setProjection({ type: 'globe' });
       } catch {
         /* flat fallback on very old GPUs */
       }
       try {
-        // Space-black canvas behind the globe + soft atmosphere halo.
+        // Soft atmosphere rim; front light kills the day/night terminator so
+        // the disc reads as one uniform matte planet (the DataFast look).
         (map as any).setSky?.({
-          'atmosphere-blend': ['interpolate', ['linear'], ['zoom'], 0, 0.35, 6, 0.35, 8, 0],
+          'atmosphere-blend': ['interpolate', ['linear'], ['zoom'], 0, 0.25, 6, 0.25, 8, 0],
         });
+        (map as any).setLight?.({ anchor: 'viewport', position: [1.15, 0, 0], intensity: 0.35 });
       } catch {
         /* ignore */
       }
@@ -339,7 +367,7 @@ export function LiveGlobe({
       const halo = haloRef.current;
       if (halo) {
         const d = sphereDiameter(zoom);
-        const box = d * 1.22;
+        const box = d * 1.34;
         const fade = Math.max(0, Math.min(1, (homeZoomRef.current + 1.6 - zoom) / 1.2));
         halo.style.width = `${box}px`;
         halo.style.height = `${box}px`;
@@ -436,18 +464,20 @@ export function LiveGlobe({
         }
         continue;
       }
-      const el = document.createElement('img');
-      el.src = v.avatar as string;
-      el.alt = '';
-      Object.assign(el.style, {
-        width: '34px',
-        height: '34px',
-        borderRadius: '50%',
-        border: '2px solid rgba(255,255,255,0.9)',
-        boxShadow: '0 0 0 3px rgba(139,136,216,0.35), 0 2px 10px rgba(0,0,0,0.6)',
-        cursor: 'pointer',
-        background: '#1c1c28',
-      });
+      const el = document.createElement('div');
+      el.style.cssText = 'position:relative;width:38px;height:38px;cursor:pointer;';
+      const img = document.createElement('img');
+      img.src = v.avatar as string;
+      img.alt = '';
+      img.style.cssText =
+        'width:38px;height:38px;border-radius:50%;border:2px solid rgba(20,20,34,0.9);' +
+        'box-shadow:0 3px 12px rgba(0,0,0,0.65);background:#1c1c28;display:block;';
+      const statusDot = document.createElement('span');
+      statusDot.style.cssText =
+        'position:absolute;right:-1px;top:-1px;width:11px;height:11px;border-radius:50%;' +
+        'background:#34d399;border:2px solid #0a0a14;';
+      el.appendChild(img);
+      el.appendChild(statusDot);
       const coords = { lat: v.lat, lng: v.lng };
       el.addEventListener('click', e => {
         e.stopPropagation();
@@ -496,7 +526,7 @@ export function LiveGlobe({
           pointerEvents: 'none',
           borderRadius: '50%',
           background:
-            'radial-gradient(circle closest-side, rgba(56,89,199,0) 78%, rgba(70,105,230,0.26) 85%, rgba(96,130,255,0.34) 89%, rgba(56,89,199,0.12) 95%, rgba(0,0,0,0) 100%)',
+            'radial-gradient(circle closest-side, rgba(56,89,199,0) 70%, rgba(59,96,220,0.20) 77%, rgba(90,125,255,0.30) 82%, rgba(59,96,220,0.16) 89%, rgba(0,0,0,0) 100%)',
         }}
       />
       {/* ROOT CAUSE OF THE BLANK GLOBE — do not size this div with position

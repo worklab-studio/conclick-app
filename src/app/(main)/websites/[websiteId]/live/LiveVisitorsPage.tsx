@@ -6,14 +6,7 @@ import { computeIntentScore } from '@/lib/intent-score';
 import { IntentBadge } from '@/components/metrics/IntentBadge';
 import { isAutoViewEvent, isInternalEvent } from '@/lib/event-noise';
 import { formatMinorCurrency } from '@/lib/format';
-import {
-  Activity,
-  ArrowRight,
-  BadgeDollarSign,
-  Globe as GlobeIcon,
-  ShieldCheck,
-  X,
-} from 'lucide-react';
+import { ArrowRight, ShieldCheck, X } from 'lucide-react';
 import { createAvatar } from '@dicebear/core';
 import { notionistsNeutral } from '@dicebear/collection';
 import { Logo } from '@/components/logo';
@@ -299,7 +292,23 @@ export function LiveVisitorsPage({ websiteId }: { websiteId: string }) {
     }
   };
 
-  /* ----------------------------- left panel ------------------------------ */
+  /* --------------------------- summary card ------------------------------ */
+  // DataFast-style chip rows: top referrers / countries / devices (last hour).
+  const chipAgg = useMemo(() => {
+    const refs = new Map<string, number>();
+    const countries = new Map<string, number>();
+    const devices = new Map<string, number>();
+    visitors.forEach(v => {
+      refs.set(v.referrer || 'Direct', (refs.get(v.referrer || 'Direct') || 0) + 1);
+      if (v.country) countries.set(v.country, (countries.get(v.country) || 0) + 1);
+      const d = v.device === 'laptop' ? 'desktop' : v.device;
+      if (d) devices.set(d, (devices.get(d) || 0) + 1);
+    });
+    const top = (m: Map<string, number>, n: number) =>
+      [...m.entries()].sort((a, b) => b[1] - a[1]).slice(0, n);
+    return { refs: top(refs, 3), countries: top(countries, 3), devices: top(devices, 3) };
+  }, [visitors]);
+
   const topPaths = useMemo(() => {
     const counts = new Map<string, number>();
     activeVisitors.forEach(v => counts.set(v.currentPath, (counts.get(v.currentPath) || 0) + 1));
@@ -410,172 +419,198 @@ export function LiveVisitorsPage({ websiteId }: { websiteId: string }) {
   ) : null;
 
   return (
-    <div className="relative flex h-screen w-full flex-col overflow-hidden bg-[#04040a] text-foreground">
-      {/* ambient background: two soft glows, no tiles, no images */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0"
-        style={{
-          background:
-            'radial-gradient(600px 400px at 18% 12%, rgba(94,91,164,0.14), transparent 70%), radial-gradient(700px 500px at 85% 90%, rgba(60,56,140,0.10), transparent 70%)',
+    <div className="relative h-screen w-full overflow-hidden bg-[#04040a] text-foreground">
+      {/* FULL-BLEED globe — all chrome floats above it */}
+      <LiveGlobe
+        visitors={globeVisitors}
+        focus={focus}
+        onPick={({ lat, lng }) => {
+          // Nearest visitor to the clicked dot (dots are exact coords,
+          // so this is effectively an id lookup with float tolerance).
+          let best: { id: string; d: number } | null = null;
+          for (const v of visitors) {
+            if (v.lat == null || v.lng == null) continue;
+            const d = Math.abs(v.lat - lat) + Math.abs(v.lng - lng);
+            if (!best || d < best.d) best = { id: v.id, d };
+          }
+          if (best && best.d < 0.5) selectVisitor(best.id);
         }}
+        anchor={
+          selected && selected.lat != null
+            ? { lat: selected.lat, lng: selected.lng as number }
+            : null
+        }
+        anchorContent={visitorCard}
+        className="absolute inset-0 h-full w-full"
       />
 
-      {/* top bar */}
-      <div className="relative z-10 flex items-center gap-3 px-5 py-3.5">
-        <Logo />
-        <span className="text-sm font-semibold tracking-wide text-zinc-300">Live</span>
-        <span className="inline-flex items-center gap-1.5 rounded-full border border-zinc-800/80 bg-zinc-900/60 px-2.5 py-1 text-[11px] text-zinc-400">
-          <span className="relative flex h-1.5 w-1.5">
-            <span className="absolute h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" />
-            <span className="relative h-1.5 w-1.5 rounded-full bg-emerald-400" />
-          </span>
-          streaming
-        </span>
+      {/* TOP-LEFT — back link + summary card */}
+      <div className="absolute left-4 top-4 z-10 flex w-[320px] flex-col gap-2.5">
         <a
           href={`/websites/${websiteId}`}
-          className="ml-auto inline-flex items-center gap-1.5 rounded-lg border border-zinc-800/80 bg-zinc-900/60 px-3 py-1.5 text-xs text-zinc-300 transition-colors hover:text-white"
+          className="inline-flex w-fit items-center gap-1.5 rounded-full border border-zinc-800/80 bg-zinc-950/70 px-3 py-1.5 text-xs text-zinc-300 backdrop-blur transition-colors hover:text-white"
         >
-          Dashboard <ArrowRight className="h-3.5 w-3.5" />
+          <ArrowRight className="h-3.5 w-3.5 rotate-180" /> Back to dashboard
         </a>
-      </div>
 
-      <div className="relative z-10 flex min-h-0 flex-1">
-        {/* LEFT — summary panel */}
-        <aside className="hidden w-[300px] shrink-0 flex-col gap-4 overflow-y-auto p-5 md:flex">
-          <div className="rounded-2xl border border-zinc-800/70 bg-zinc-950/70 p-5 backdrop-blur">
-            <div className="flex items-center gap-2 text-xs text-zinc-500">
-              <GlobeIcon className="h-3.5 w-3.5 text-[#8b88cf]" /> Website
-            </div>
-            <div className="mt-1.5 truncate text-lg font-semibold text-white">
-              {website?.name || '—'}
-            </div>
-            <div className="truncate text-xs text-zinc-500">{website?.domain}</div>
-
-            <div className="mt-5 flex items-end justify-between">
-              <div>
-                <div className="text-xs font-medium text-zinc-500">Active now</div>
-                <div className="text-[44px] font-bold leading-none tracking-tight text-white">
-                  {activeVisitors.length}
-                </div>
-                <div className="mt-1 text-[11px] text-zinc-600">
-                  {visitors.length} in the last hour
-                </div>
+        <div className="rounded-2xl border border-zinc-800/70 bg-zinc-950/75 p-4 shadow-2xl backdrop-blur">
+          <div className="flex items-center gap-2.5">
+            <Logo />
+            <div className="min-w-0">
+              <div className="truncate text-sm font-semibold text-white">
+                {website?.name || '—'}
               </div>
-              <span className="relative mb-2 flex h-3 w-3">
-                <span className="absolute h-full w-full animate-ping rounded-full bg-[#8b88d8] opacity-60" />
-                <span className="relative h-3 w-3 rounded-full bg-[#8b88d8]" />
+            </div>
+            <span className="relative ml-auto flex h-2 w-2">
+              <span className="absolute h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" />
+              <span className="relative h-2 w-2 rounded-full bg-emerald-400" />
+            </span>
+          </div>
+
+          <div className="mt-3 flex items-baseline gap-1.5">
+            <span className="inline-flex items-center gap-2 text-[15px] font-semibold text-white">
+              <span className="h-2 w-2 rounded-full bg-emerald-400" />
+              {activeVisitors.length} visitor{activeVisitors.length === 1 ? '' : 's'} on
+            </span>
+            <span className="truncate text-[15px] font-semibold text-indigo-300">
+              {website?.domain}
+            </span>
+          </div>
+          <div className="mt-0.5 pl-4 text-[11px] text-zinc-500">
+            {visitors.length} in the last hour
+            {revenueTotal ? (
+              <span className="text-emerald-300">
+                {' '}
+                · {formatMinorCurrency(revenueTotal.minor, revenueTotal.currency)}
+                {revenueTotal.mixed ? '+' : ''}
               </span>
-            </div>
-
-            <div className="mt-4 flex h-9 items-end gap-1" aria-hidden>
-              {sparkBars.map((b, i) => (
-                <div
-                  key={i}
-                  className="flex-1 rounded-sm bg-[#5e5ba4]/70 transition-all"
-                  style={{ height: `${Math.max(8, (b / sparkMax) * 100)}%`, opacity: b ? 1 : 0.25 }}
-                />
-              ))}
-            </div>
-            <div className="mt-1.5 text-[10px] uppercase tracking-wide text-zinc-600">
-              Activity · last hour
-            </div>
+            ) : null}
           </div>
 
-          {(botsBlocked > 0 || revenueTotal) && (
-            <div className="space-y-2.5 rounded-2xl border border-zinc-800/70 bg-zinc-950/70 p-4 text-sm backdrop-blur">
-              {revenueTotal ? (
-                <div className="flex items-center gap-2 text-emerald-300">
-                  <BadgeDollarSign className="h-4 w-4" />
-                  {formatMinorCurrency(revenueTotal.minor, revenueTotal.currency)}
-                  {revenueTotal.mixed ? '+' : ''}
-                  <span className="text-xs text-zinc-500">this hour</span>
-                </div>
-              ) : null}
-              {botsBlocked > 0 ? (
-                <div className="flex items-center gap-2 text-zinc-400">
-                  <ShieldCheck className="h-4 w-4 text-emerald-400/80" />
-                  {botsBlocked} bot hit{botsBlocked === 1 ? '' : 's'} blocked
-                </div>
-              ) : null}
-            </div>
-          )}
-
-          {topPaths.length > 0 && (
-            <div className="rounded-2xl border border-zinc-800/70 bg-zinc-950/70 p-4 backdrop-blur">
-              <div className="mb-2.5 flex items-center gap-2 text-xs text-zinc-500">
-                <Activity className="h-3.5 w-3.5 text-[#8b88cf]" /> Viewing now
-              </div>
-              <div className="space-y-1.5">
-                {topPaths.map(([path, count]) => (
-                  <div
-                    key={path}
-                    className="flex items-center justify-between gap-3 rounded-lg bg-zinc-900/60 px-2.5 py-1.5 text-xs"
-                  >
-                    <span className="truncate font-mono text-indigo-300">{path}</span>
-                    <span className="shrink-0 font-semibold tabular-nums text-zinc-300">
-                      {count}
+          <div className="mt-3.5 space-y-2 text-xs">
+            {chipAgg.refs.length > 0 && (
+              <div className="flex items-start gap-2">
+                <span className="w-[64px] shrink-0 pt-1 text-[11px] text-zinc-500">Referrers</span>
+                <div className="flex min-w-0 flex-wrap gap-1">
+                  {chipAgg.refs.map(([r, n]) => (
+                    <span
+                      key={r}
+                      className="inline-flex max-w-full items-center gap-1 truncate rounded-md border border-zinc-800/70 bg-zinc-900/70 px-1.5 py-0.5 text-zinc-300"
+                    >
+                      <span className="truncate">{r}</span>
+                      <span className="text-zinc-500">({n})</span>
                     </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </aside>
-
-        {/* CENTER — the globe */}
-        <main className="relative min-w-0 flex-1">
-          <LiveGlobe
-            visitors={globeVisitors}
-            focus={focus}
-            onPick={({ lat, lng }) => {
-              // Nearest visitor to the clicked dot (dots are exact coords,
-              // so this is effectively an id lookup with float tolerance).
-              let best: { id: string; d: number } | null = null;
-              for (const v of visitors) {
-                if (v.lat == null || v.lng == null) continue;
-                const d = Math.abs(v.lat - lat) + Math.abs(v.lng - lng);
-                if (!best || d < best.d) best = { id: v.id, d };
-              }
-              if (best && best.d < 0.5) selectVisitor(best.id);
-            }}
-            anchor={
-              selected && selected.lat != null
-                ? { lat: selected.lat, lng: selected.lng as number }
-                : null
-            }
-            anchorContent={visitorCard}
-            className="h-full w-full"
-          />
-          {visitors.length === 0 && (
-            <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-              <div className="rounded-2xl border border-white/10 bg-black/50 px-8 py-7 text-center backdrop-blur-md">
-                <div className="mx-auto mb-3 relative flex h-3 w-3">
-                  <span className="absolute h-full w-full animate-ping rounded-full bg-indigo-500 opacity-70" />
-                  <span className="relative h-3 w-3 rounded-full bg-indigo-500" />
+                  ))}
                 </div>
-                <p className="text-base font-semibold text-white">It&apos;s quiet right now</p>
-                <p className="mt-1 max-w-[260px] text-sm text-zinc-400">
-                  No visitors in the last hour. This view updates live — leave it open and watch
-                  them land.
-                </p>
               </div>
-            </div>
-          )}
-          {/* legend */}
-          <div className="pointer-events-none absolute bottom-4 left-5 flex items-center gap-4 text-[11px] text-zinc-500">
-            <span className="flex items-center gap-1.5">
-              <span className="h-2 w-2 rounded-full bg-[#8b88d8]" /> Active now
-            </span>
-            <span className="flex items-center gap-1.5">
-              <span className="h-1.5 w-1.5 rounded-full bg-[#8b88d8]/40" /> Recent · 1h
-            </span>
-            <span className="text-zinc-700">
-              drag to rotate · scroll to zoom to street level · click a dot for details
-            </span>
+            )}
+            {chipAgg.countries.length > 0 && (
+              <div className="flex items-start gap-2">
+                <span className="w-[64px] shrink-0 pt-1 text-[11px] text-zinc-500">Countries</span>
+                <div className="flex min-w-0 flex-wrap gap-1">
+                  {chipAgg.countries.map(([c, n]) => (
+                    <span
+                      key={c}
+                      className="inline-flex items-center gap-1 rounded-md border border-zinc-800/70 bg-zinc-900/70 px-1.5 py-0.5 text-zinc-300"
+                    >
+                      {flagEmoji(c)} {countryName(c)} <span className="text-zinc-500">({n})</span>
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+            {chipAgg.devices.length > 0 && (
+              <div className="flex items-start gap-2">
+                <span className="w-[64px] shrink-0 pt-1 text-[11px] text-zinc-500">Devices</span>
+                <div className="flex min-w-0 flex-wrap gap-1">
+                  {chipAgg.devices.map(([d, n]) => (
+                    <span
+                      key={d}
+                      className="inline-flex items-center gap-1 rounded-md border border-zinc-800/70 bg-zinc-900/70 px-1.5 py-0.5 capitalize text-zinc-300"
+                    >
+                      {d} <span className="text-zinc-500">({n})</span>
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+            {topPaths.length > 0 && (
+              <div className="flex items-start gap-2">
+                <span className="w-[64px] shrink-0 pt-1 text-[11px] text-zinc-500">Viewing</span>
+                <div className="flex min-w-0 flex-wrap gap-1">
+                  {topPaths.map(([path, count]) => (
+                    <span
+                      key={path}
+                      className="inline-flex max-w-full items-center gap-1 truncate rounded-md border border-zinc-800/70 bg-zinc-900/70 px-1.5 py-0.5 font-mono text-indigo-300"
+                    >
+                      <span className="truncate">{path}</span>
+                      <span className="font-sans text-zinc-500">({count})</span>
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
-        </main>
+
+          <div className="mt-3.5 flex h-7 items-end gap-1" aria-hidden>
+            {sparkBars.map((b, i) => (
+              <div
+                key={i}
+                className="flex-1 rounded-sm bg-[#5e5ba4]/70 transition-all"
+                style={{ height: `${Math.max(8, (b / sparkMax) * 100)}%`, opacity: b ? 1 : 0.25 }}
+              />
+            ))}
+          </div>
+          <div className="mt-1 flex items-center justify-between text-[10px] uppercase tracking-wide text-zinc-600">
+            <span>Activity · last hour</span>
+            {botsBlocked > 0 ? (
+              <span className="inline-flex items-center gap-1 normal-case text-zinc-500">
+                <ShieldCheck className="h-3 w-3 text-emerald-400/80" /> {botsBlocked} bot
+                {botsBlocked === 1 ? '' : 's'} blocked
+              </span>
+            ) : null}
+          </div>
+        </div>
       </div>
+
+      {visitors.length === 0 && (
+        <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+          <div className="rounded-2xl border border-white/10 bg-black/50 px-8 py-7 text-center backdrop-blur-md">
+            <div className="mx-auto mb-3 relative flex h-3 w-3">
+              <span className="absolute h-full w-full animate-ping rounded-full bg-indigo-500 opacity-70" />
+              <span className="relative h-3 w-3 rounded-full bg-indigo-500" />
+            </div>
+            <p className="text-base font-semibold text-white">It&apos;s quiet right now</p>
+            <p className="mt-1 max-w-[260px] text-sm text-zinc-400">
+              No visitors in the last hour. This view updates live — leave it open and watch them
+              land.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* legend — bottom center */}
+      <div className="pointer-events-none absolute bottom-4 left-1/2 z-10 flex -translate-x-1/2 items-center gap-4 text-[11px] text-zinc-500">
+        <span className="flex items-center gap-1.5">
+          <span className="h-2 w-2 rounded-full bg-[#8b88d8]" /> Active now
+        </span>
+        <span className="flex items-center gap-1.5">
+          <span className="h-1.5 w-1.5 rounded-full bg-[#8b88d8]/40" /> Recent · 1h
+        </span>
+        <span className="hidden text-zinc-700 md:inline">
+          drag to rotate · scroll to zoom · click a visitor
+        </span>
+      </div>
+
+      {/* Powered by — bottom right */}
+      <a
+        href="https://conclick.io"
+        target="_blank"
+        rel="noreferrer"
+        className="absolute bottom-4 right-4 z-10 inline-flex items-center gap-2 rounded-full border border-zinc-800/80 bg-zinc-950/75 px-3.5 py-2 text-xs font-medium text-zinc-300 shadow-xl backdrop-blur transition-colors hover:text-white"
+      >
+        <Logo /> Powered by Conclick.io
+      </a>
     </div>
   );
 }
