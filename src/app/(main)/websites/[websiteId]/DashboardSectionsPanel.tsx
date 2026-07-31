@@ -26,6 +26,7 @@ import { AutoFunnelInline } from '@/app/(main)/websites/[websiteId]/AutoFunnelIn
 import { FrictionInline } from '@/app/(main)/websites/[websiteId]/FrictionInline';
 import { ClickMapInline } from '@/app/(main)/websites/[websiteId]/ClickMapInline';
 import { SeoInline } from '@/app/(main)/websites/[websiteId]/SeoInline';
+import { CrawlersInline } from '@/app/(main)/websites/[websiteId]/CrawlersInline';
 import { DashboardTabContext } from '@/app/(main)/websites/[websiteId]/dashboard-tab-context';
 
 const TABS = [
@@ -102,7 +103,12 @@ export function DashboardSectionsPanel({ websiteId }: { websiteId: string }) {
               <CustomersDataTable websiteId={websiteId} />
             </>
           )}
-          {tab === 'ai' && <AiTrafficInline websiteId={websiteId} />}
+          {tab === 'ai' && (
+            <div className="space-y-4">
+              <AiTrafficInline websiteId={websiteId} />
+              <CrawlersInline websiteId={websiteId} />
+            </div>
+          )}
           {tab === 'campaigns' && <CampaignsInline websiteId={websiteId} />}
           {tab === 'friction' && <FrictionInline websiteId={websiteId} />}
           {tab === 'clickmap' && <ClickMapInline websiteId={websiteId} focus={clickMapFocus} />}

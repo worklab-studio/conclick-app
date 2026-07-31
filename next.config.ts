@@ -214,17 +214,29 @@ export default {
     return headers;
   },
   async rewrites() {
-    return [
-      ...rewrites,
-      {
-        source: '/telemetry.js',
-        destination: '/api/scripts/telemetry',
-      },
-      {
-        source: '/teams/:teamId/:path+',
-        destination: '/:path*',
-      },
-    ];
+    return {
+      // beforeFiles: runs BEFORE the public/ filesystem check — required to
+      // route /script.js through the crawler-logging handler (which serves
+      // the identical file with identical cache headers).
+      beforeFiles: [
+        {
+          source: TRACKER_SCRIPT,
+          destination: '/api/tracker-script',
+        },
+      ],
+      afterFiles: [
+        ...rewrites,
+        {
+          source: '/telemetry.js',
+          destination: '/api/scripts/telemetry',
+        },
+        {
+          source: '/teams/:teamId/:path+',
+          destination: '/:path*',
+        },
+      ],
+      fallback: [],
+    };
   },
   async redirects() {
     return [...redirects];

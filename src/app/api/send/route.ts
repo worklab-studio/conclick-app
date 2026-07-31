@@ -7,6 +7,7 @@ import { badRequest, json, forbidden, serverError } from '@/lib/response';
 import { fetchWebsite } from '@/lib/load';
 import { getClientInfo, hasBlockedIp, isDatacenterIp } from '@/lib/detect';
 import { recordBotBlock } from '@/lib/botBlocks';
+import { classifyCrawler, genericBotId, recordCrawlerHit } from '@/lib/crawlers';
 import { createToken, parseToken } from '@/lib/jwt';
 import { secret, uuid, hash } from '@/lib/crypto';
 import { COLLECTION_TYPE, EVENT_TYPE } from '@/lib/constants';
@@ -131,6 +132,8 @@ export async function POST(request: Request) {
       (!userAgent || isbot(userAgent) || EXTRA_BOT.test(userAgent))
     ) {
       recordBotBlock(websiteId);
+      // Not just dropped — classified and recorded as crawler analytics.
+      recordCrawlerHit(websiteId, classifyCrawler(userAgent) || genericBotId(userAgent), 'send');
       return json({ beep: 'boop' });
     }
 
@@ -139,6 +142,15 @@ export async function POST(request: Request) {
     // on residential/mobile networks.
     if (await isDatacenterIp(ip)) {
       recordBotBlock(websiteId);
+      recordCrawlerHit(
+        websiteId,
+        classifyCrawler(userAgent) || {
+          name: 'Datacenter IP',
+          company: 'Unknown',
+          category: 'other',
+        },
+        'send',
+      );
       return json({ beep: 'boop' });
     }
 

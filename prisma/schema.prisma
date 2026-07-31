@@ -21,7 +21,7 @@ model User {
   createdAt   DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt   DateTime? @updatedAt @map("updated_at") @db.Timestamptz(6)
   deletedAt   DateTime? @map("deleted_at") @db.Timestamptz(6)
-  
+
   // Subscription fields (Lemon Squeezy)
   subscriptionId      String?   @map("subscription_id") @db.VarChar(255)
   subscriptionStatus  String?   @map("subscription_status") @db.VarChar(50)
@@ -32,11 +32,11 @@ model User {
   currentPeriodEndsAt DateTime? @map("current_period_ends_at") @db.Timestamptz(6)
   endsAt              DateTime? @map("ends_at") @db.Timestamptz(6)
   email               String?   @db.VarChar(255)
-  
+
   // Trial fields
-  trialStartedAt      DateTime? @map("trial_started_at") @db.Timestamptz(6)
-  trialEndsAt         DateTime? @map("trial_ends_at") @db.Timestamptz(6)
-  
+  trialStartedAt DateTime? @map("trial_started_at") @db.Timestamptz(6)
+  trialEndsAt    DateTime? @map("trial_ends_at") @db.Timestamptz(6)
+
   // Password reset fields
   passwordResetToken   String?   @map("password_reset_token") @db.VarChar(255)
   passwordResetExpires DateTime? @map("password_reset_expires") @db.Timestamptz(6)
@@ -44,12 +44,12 @@ model User {
   // Founder daily digest opt-out
   dailyDigestEnabled Boolean @default(true) @map("daily_digest_enabled")
 
-  websites  Website[]  @relation("user")
-  createdBy Website[]  @relation("createUser")
-  links     Link[]     @relation("user")
-  pixels    Pixel[]    @relation("user")
-  teams     TeamUser[]
-  reports   Report[]
+  websites      Website[]      @relation("user")
+  createdBy     Website[]      @relation("createUser")
+  links         Link[]         @relation("user")
+  pixels        Pixel[]        @relation("user")
+  teams         TeamUser[]
+  reports       Report[]
   notifications Notification[]
   apiKeys       ApiKey[]
 
@@ -145,20 +145,20 @@ model Website {
   updatedAt DateTime? @updatedAt @map("updated_at") @db.Timestamptz(6)
   deletedAt DateTime? @map("deleted_at") @db.Timestamptz(6)
 
-  user        User?         @relation("user", fields: [userId], references: [id])
-  createUser  User?         @relation("createUser", fields: [createdBy], references: [id])
-  team        Team?         @relation(fields: [teamId], references: [id])
-  stripeId             String?   @map("stripe_id") @db.VarChar(50)
-  stripeSecretKey      String?   @map("stripe_secret_key") @db.VarChar(255)
-  stripePublishableKey String?   @map("stripe_publishable_key") @db.VarChar(255)
-  autocaptureEnabled   Boolean   @default(true) @map("autocapture_enabled")
-  eventData   EventData[]
-  reports     Report[]
-  revenue     Revenue[]
-  segments    Segment[]
-  sessionData SessionData[]
-  paymentIntegrations PaymentIntegration[]
-  revenueEvents       RevenueEvent[]
+  user                 User?                @relation("user", fields: [userId], references: [id])
+  createUser           User?                @relation("createUser", fields: [createdBy], references: [id])
+  team                 Team?                @relation(fields: [teamId], references: [id])
+  stripeId             String?              @map("stripe_id") @db.VarChar(50)
+  stripeSecretKey      String?              @map("stripe_secret_key") @db.VarChar(255)
+  stripePublishableKey String?              @map("stripe_publishable_key") @db.VarChar(255)
+  autocaptureEnabled   Boolean              @default(true) @map("autocapture_enabled")
+  eventData            EventData[]
+  reports              Report[]
+  revenue              Revenue[]
+  segments             Segment[]
+  sessionData          SessionData[]
+  paymentIntegrations  PaymentIntegration[]
+  revenueEvents        RevenueEvent[]
 
   @@index([userId])
   @@index([teamId])
@@ -524,4 +524,18 @@ model Milestone {
   @@unique([websiteId, type, threshold])
   @@index([websiteId])
   @@map("milestone")
+}
+
+model CrawlerHit {
+  id        BigInt   @id @default(autoincrement()) @map("crawler_hit_id")
+  websiteId String?  @map("website_id") @db.Uuid
+  botName   String   @map("bot_name") @db.VarChar(100)
+  company   String   @db.VarChar(50)
+  category  String   @db.VarChar(20) // answers | indexing | training | preview | seo | other
+  source    String   @db.VarChar(10) // send | script
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@index([websiteId, createdAt])
+  @@index([createdAt])
+  @@map("crawler_hit")
 }
