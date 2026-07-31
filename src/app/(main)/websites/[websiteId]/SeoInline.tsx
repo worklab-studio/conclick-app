@@ -117,7 +117,7 @@ export function SeoInline({ websiteId }: { websiteId: string }) {
       <TabEmptyState
         icon={Search}
         title="Connect Google Search Console"
-        description="See the queries that bring you Google traffic — clicks, impressions, CTR and position — right next to your analytics. Connect Google in this website's settings and pick your Search Console property."
+        description="See the queries that bring you Google traffic, clicks, impressions, CTR and position, right next to your analytics. Connect Google in this website's settings and pick your Search Console property."
         action={
           isShare ? undefined : (
             <Link
@@ -153,7 +153,7 @@ export function SeoInline({ websiteId }: { websiteId: string }) {
           </div>
           <p className="mx-auto mt-1.5 max-w-md text-xs leading-relaxed text-muted-foreground">
             Connected to <span className="font-medium text-foreground/80">{data.siteUrl}</span>. Try
-            a wider range — <span className="font-medium text-foreground/80">Last 28 days</span> or{' '}
+            a wider range, <span className="font-medium text-foreground/80">Last 28 days</span> or{' '}
             <span className="font-medium text-foreground/80">3 months</span>. Google Search Console
             data also lags about 2–3 days, so today and the last day or two are usually empty.
           </p>
@@ -272,7 +272,7 @@ export function SeoInline({ websiteId }: { websiteId: string }) {
                 <span className="font-semibold text-amber-100">
                   {fmt(opportunity.impressions)} impressions
                 </span>{' '}
-                at position {opportunity.position.toFixed(1)} —{' '}
+                at position {opportunity.position.toFixed(1)},{' '}
                 <ArrowUp className="inline h-3 w-3" /> one spot onto page 1 could multiply those{' '}
                 {fmt(opportunity.clicks)} clicks.
               </span>

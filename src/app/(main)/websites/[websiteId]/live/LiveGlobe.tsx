@@ -529,7 +529,7 @@ export function LiveGlobe({
             'radial-gradient(circle closest-side, rgba(56,89,199,0) 70%, rgba(59,96,220,0.20) 77%, rgba(90,125,255,0.30) 82%, rgba(59,96,220,0.16) 89%, rgba(0,0,0,0) 100%)',
         }}
       />
-      {/* ROOT CAUSE OF THE BLANK GLOBE — do not size this div with position
+      {/* ROOT CAUSE OF THE BLANK GLOBE, do not size this div with position
           utilities alone: maplibre-gl.css loads AFTER Tailwind here and its
           `.maplibregl-map{position:relative}` overrides Tailwind's `absolute`,
           which made `inset-0` stop sizing the div → 0×0 container → canvas
@@ -553,7 +553,7 @@ export function LiveGlobe({
       {failed ? (
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="rounded-xl border border-zinc-800 bg-zinc-950/90 px-5 py-4 text-center text-sm text-zinc-400">
-            The globe couldn&apos;t render — this is usually a graphics (WebGL) hiccup in the
+            The globe couldn&apos;t render, this is usually a graphics (WebGL) hiccup in the
             browser, an ad-blocker, or a network issue.
             <button
               type="button"

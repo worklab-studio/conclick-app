@@ -89,7 +89,7 @@ export function GoalsInline({ websiteId }: { websiteId: string }) {
             <TabEmptyState
               icon={Target}
               title="No goals yet"
-              description="Track a conversion target — a page view or a custom event. On a single-page site, use event goals (track an action like 'signup' or 'purchase')."
+              description="Track a conversion target, a page view or a custom event. On a single-page site, use event goals (track an action like 'signup' or 'purchase')."
             />
           )}
         >

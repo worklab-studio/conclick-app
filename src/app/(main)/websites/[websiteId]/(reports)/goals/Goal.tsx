@@ -144,15 +144,15 @@ export function Goal({
     const list = (knownValues as { value: string }[]) || [];
     if (list.some(v => norm(v.value) === norm(target))) {
       // It fired in this period but no session converted under current filters.
-      return 'No conversions under the current filters — try clearing them.';
+      return 'No conversions under the current filters, try clearing them.';
     }
     const near = list.find(
       v =>
         v.value !== target &&
         (norm(v.value).includes(norm(target)) || norm(target).includes(norm(v.value))),
     );
-    if (near) return `Nothing named “${target}” fired — did you mean “${near.value}”?`;
-    return `“${target}” hasn't fired in this period — check the name or widen the range.`;
+    if (near) return `Nothing named “${target}” fired, did you mean “${near.value}”?`;
+    return `“${target}” hasn't fired in this period, check the name or widen the range.`;
   }, [dead, knownValues, parameters?.value, parameters?.type]);
 
   useEffect(() => {

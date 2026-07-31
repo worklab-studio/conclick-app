@@ -6,7 +6,7 @@ export const revalidate = 86400;
 export const metadata = hubMetadata(
   '/glossary',
   'Web analytics glossary',
-  'Plain-English definitions of the web analytics and growth terms that actually matter — attribution, funnels, UTM, cookieless analytics and more.',
+  'Plain-English definitions of the web analytics and growth terms that actually matter, attribution, funnels, UTM, cookieless analytics and more.',
 );
 
 export default function Page() {

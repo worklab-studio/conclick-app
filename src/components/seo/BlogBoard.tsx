@@ -93,9 +93,7 @@ export function BlogBoard({ featured, rest, tabs }: BlogBoardProps) {
             >
               {t.label}
               <span
-                className={
-                  'text-[11px] tabular-nums ' + (on ? 'text-[#c7c5ec]' : 'text-zinc-500')
-                }
+                className={'text-[11px] tabular-nums ' + (on ? 'text-[#c7c5ec]' : 'text-zinc-500')}
               >
                 {t.total}
               </span>
@@ -130,7 +128,9 @@ export function BlogBoard({ featured, rest, tabs }: BlogBoardProps) {
               <h2 className="mt-3 text-[24px] font-semibold leading-[1.15] tracking-[-0.02em] text-white transition-colors group-hover:text-[#c7c5ec] sm:text-[30px]">
                 {featured.h1}
               </h2>
-              <p className="mt-3 max-w-2xl text-[15px] leading-relaxed text-zinc-400">{featured.desc}</p>
+              <p className="mt-3 max-w-2xl text-[15px] leading-relaxed text-zinc-400">
+                {featured.desc}
+              </p>
               <div className="mt-4 flex items-center gap-2 text-[13px] text-zinc-500">
                 <time dateTime={featured.datePublished}>{featured.date}</time>
                 <ArrowUpRight className="h-4 w-4 transition-colors group-hover:text-[#8b88cf]" />
@@ -140,7 +140,7 @@ export function BlogBoard({ featured, rest, tabs }: BlogBoardProps) {
         </article>
       )}
 
-      {/* Latest heading — hidden when the active category has no grid posts */}
+      {/* Latest heading, hidden when the active category has no grid posts */}
       <h2
         className="mb-6 text-[13px] font-semibold uppercase tracking-[0.16em] text-zinc-500"
         hidden={!showLatestHeading}
@@ -158,7 +158,11 @@ export function BlogBoard({ featured, rest, tabs }: BlogBoardProps) {
           // attribute silently fails to hide the card. This was the "shows 11
           // instead of 8" bug.
           return (
-            <article key={c.href} className={visible ? 'flex flex-col' : 'hidden'} data-cat={c.catId}>
+            <article
+              key={c.href}
+              className={visible ? 'flex flex-col' : 'hidden'}
+              data-cat={c.catId}
+            >
               <a href={c.href} className="group flex flex-col">
                 {c.hero}
                 <div className="mt-4 flex flex-wrap items-center gap-2 text-[11px] font-medium uppercase tracking-[0.14em] text-[#8b88cf]">
@@ -179,7 +183,7 @@ export function BlogBoard({ featured, rest, tabs }: BlogBoardProps) {
         })}
       </div>
 
-      {/* Pagination — only when the active filter has more than one page */}
+      {/* Pagination, only when the active filter has more than one page */}
       {pageCount > 1 && (
         <nav
           className="mt-12 flex items-center justify-center gap-1.5 border-t border-white/[0.07] pt-8"

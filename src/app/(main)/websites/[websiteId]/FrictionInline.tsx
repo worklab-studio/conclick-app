@@ -49,7 +49,7 @@ export function FrictionInline({ websiteId }: { websiteId: string }) {
       <TabEmptyState
         icon={MousePointerClick}
         title="No friction detected"
-        description="Nothing to fix right now. Signals only appear when a click demonstrably went nowhere — working buttons and text-selection never count. Autocapture must be on in Settings."
+        description="Nothing to fix right now. Signals only appear when a click demonstrably went nowhere, working buttons and text-selection never count. Autocapture must be on in Settings."
       />
     );
   }
@@ -79,12 +79,12 @@ export function FrictionInline({ websiteId }: { websiteId: string }) {
               {rows.length > strong ? (
                 <span className="text-muted-foreground/60">
                   {' '}
-                  · {rows.length - strong} single-session (grey — may be one-offs)
+                  · {rows.length - strong} single-session (grey, may be one-offs)
                 </span>
               ) : null}
             </>
           ) : (
-            <>Only single-session signals so far — grey until they repeat across visitors.</>
+            <>Only single-session signals so far, grey until they repeat across visitors.</>
           )}
         </div>
         <div
@@ -129,7 +129,7 @@ export function FrictionInline({ websiteId }: { websiteId: string }) {
                   <Icon className="h-3.5 w-3.5 shrink-0 opacity-70" />
                   <span>{meta.label}</span>
                   {meta.what ? (
-                    <span className="hidden text-muted-foreground/50 md:inline">— {meta.what}</span>
+                    <span className="hidden text-muted-foreground/50 md:inline">, {meta.what}</span>
                   ) : null}
                 </div>
               </div>

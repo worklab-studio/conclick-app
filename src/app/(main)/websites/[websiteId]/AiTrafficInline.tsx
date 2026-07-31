@@ -51,7 +51,7 @@ export function AiTrafficInline({ websiteId }: { websiteId: string }) {
       <TabEmptyState
         icon={Sparkles}
         title="No AI traffic yet"
-        description="When visitors arrive from ChatGPT, Perplexity, Gemini, Copilot or Claude, they'll show up here — with how many paid and how much revenue they drove."
+        description="When visitors arrive from ChatGPT, Perplexity, Gemini, Copilot or Claude, they'll show up here, with how many paid and how much revenue they drove."
       />
     );
   }
@@ -85,7 +85,7 @@ export function AiTrafficInline({ websiteId }: { websiteId: string }) {
                 {money(r.revenue, r.currency)}
               </span>
             ) : (
-              <span className="text-sm text-muted-foreground/50">—</span>
+              <span className="text-sm text-muted-foreground/50">, </span>
             )}
           </div>
         </div>

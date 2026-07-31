@@ -322,7 +322,7 @@ export function WebsiteChart({
                 />
                 <Legend formatter={v => <span style={{ color: '#a1a1aa' }}>{v}</span>} />
                 {/* Only the TOPMOST segment of the stack gets rounded top
-                    corners — inner seams stay square so the stack reads as
+                    corners, inner seams stay square so the stack reads as
                     one solid bar, not stacked pills. */}
                 <Bar
                   yAxisId="left"

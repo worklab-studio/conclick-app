@@ -50,7 +50,7 @@ export function SmartSetupButton({ websiteId }: { websiteId: string }) {
         <DialogHeader className="mb-4">
           <DialogTitle>Suggested setup</DialogTitle>
           <DialogDescription>
-            Goals &amp; funnels proposed from your site&apos;s real buttons, links, and forms — plus
+            Goals &amp; funnels proposed from your site&apos;s real buttons, links, and forms, plus
             what your visitors actually do.
           </DialogDescription>
         </DialogHeader>
@@ -173,7 +173,7 @@ function SmartSetup({ websiteId }: { websiteId: string }) {
     return (
       <div className="flex flex-col items-center gap-3 py-12 text-center">
         <div className="text-sm leading-relaxed text-muted-foreground">
-          Couldn&apos;t analyze your site right now — make sure the domain is public.
+          Couldn&apos;t analyze your site right now, make sure the domain is public.
         </div>
         <Button
           size="sm"

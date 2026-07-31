@@ -104,7 +104,7 @@ export async function POST(request: NextRequest) {
         });
         return NextResponse.json({ ok: true });
       } catch (e: any) {
-        return badRequest({ message: `Send failed — ${String(e?.message || e).slice(0, 140)}` });
+        return badRequest({ message: `Send failed, ${String(e?.message || e).slice(0, 140)}` });
       }
     }
 
@@ -137,7 +137,7 @@ export async function POST(request: NextRequest) {
     });
   } catch (e: any) {
     return badRequest({
-      message: `Couldn't reach that channel — ${String(e?.message || e).slice(0, 140)}`,
+      message: `Couldn't reach that channel, ${String(e?.message || e).slice(0, 140)}`,
     });
   }
 

@@ -148,7 +148,7 @@ export function CampaignsInline({ websiteId }: { websiteId: string }) {
                     {money(r.revenue, r.currency)}
                   </span>
                 ) : (
-                  <span className="text-sm text-muted-foreground/50">—</span>
+                  <span className="text-sm text-muted-foreground/50">, </span>
                 )}
               </div>
             </div>

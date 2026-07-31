@@ -10,7 +10,10 @@ function Block({ section, entry }: { section: Section; entry: ContentEntry }) {
   switch (section.type) {
     case 'h2':
       return (
-        <h2 id={section.id} className="mb-3 mt-12 scroll-mt-24 text-2xl font-semibold tracking-[-0.01em] text-white">
+        <h2
+          id={section.id}
+          className="mb-3 mt-12 scroll-mt-24 text-2xl font-semibold tracking-[-0.01em] text-white"
+        >
           {section.text}
         </h2>
       );
@@ -53,7 +56,11 @@ function Block({ section, entry }: { section: Section; entry: ContentEntry }) {
       return (
         <blockquote className="my-5 border-l-2 border-[#5e5ba4] pl-4 text-[15px] italic leading-relaxed text-muted-foreground">
           <RichText text={section.text} />
-          {section.cite && <footer className="mt-1 text-xs not-italic text-muted-foreground/70">— {section.cite}</footer>}
+          {section.cite && (
+            <footer className="mt-1 text-xs not-italic text-muted-foreground/70">
+              – {section.cite}
+            </footer>
+          )}
         </blockquote>
       );
     case 'callout':
@@ -84,7 +91,9 @@ function Block({ section, entry }: { section: Section; entry: ContentEntry }) {
             loading="lazy"
           />
           {section.caption && (
-            <figcaption className="mt-2 text-center text-xs text-muted-foreground">{section.caption}</figcaption>
+            <figcaption className="mt-2 text-center text-xs text-muted-foreground">
+              {section.caption}
+            </figcaption>
           )}
         </figure>
       );

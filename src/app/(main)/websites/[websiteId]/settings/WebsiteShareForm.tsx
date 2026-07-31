@@ -47,7 +47,7 @@ export function WebsiteShareForm({ websiteId, shareId, onSave, onClose }: Websit
   const handleSwitch = (checked: boolean) => persist(checked ? generateId() : null);
   const handleGenerate = async () => {
     await persist(generateId());
-    toast('New link generated — the old one no longer works.');
+    toast('New link generated, the old one no longer works.');
   };
 
   const copyToClipboard = () => {
@@ -67,7 +67,7 @@ export function WebsiteShareForm({ websiteId, shareId, onSave, onClose }: Websit
         <div>
           <h3 className="text-sm font-semibold text-foreground">Public dashboard link</h3>
           <p className="mt-0.5 text-sm text-muted-foreground">
-            Share a live, read-only dashboard. Anyone with the link can view — no account needed.
+            Share a live, read-only dashboard. Anyone with the link can view, no account needed.
           </p>
         </div>
       </div>

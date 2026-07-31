@@ -38,7 +38,7 @@ export function FunnelsInline({ websiteId }: { websiteId: string }) {
         isEmpty={reports.length === 0}
         renderEmpty={() => (
           <div className="rounded-lg border border-dashed border-[hsl(0,0%,14%)] px-4 py-3 text-[12.5px] text-muted-foreground">
-            No saved funnels yet —{' '}
+            No saved funnels yet,{' '}
             <span className="font-medium text-foreground/80">Save as funnel</span> keeps the
             auto-detected one above, or build your own with{' '}
             <span className="font-medium text-foreground/80">+ Funnel</span>.

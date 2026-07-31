@@ -11,7 +11,7 @@ export function PaymentJourneyPage({ websiteId }: { websiteId: string }) {
       <div>
         <h2 className="text-lg font-semibold text-foreground">Journey for payment</h2>
         <p className="text-sm text-muted-foreground">
-          Customers who completed a payment — what they spent and how long they took to convert.
+          Customers who completed a payment, what they spent and how long they took to convert.
           Based on attributed payments (visitors identified at checkout).
         </p>
       </div>

@@ -129,7 +129,7 @@ export default function SettingsPage() {
             <div className="mb-6">
               <h2 className="text-xl font-bold tracking-tight">Integrations</h2>
               <p className="text-sm text-muted-foreground">
-                Connect Conclick to your stack — messaging is workspace-wide, payments and Google
+                Connect Conclick to your stack, messaging is workspace-wide, payments and Google
                 connect per product.
               </p>
             </div>

@@ -25,13 +25,17 @@ export function SeoNav() {
         </a>
         <nav className="hidden items-center gap-8 lg:flex">
           {NAV.map(n => (
-            <a key={n.label} href={n.href} className="text-[15px] text-zinc-300 transition-colors hover:text-white">
+            <a
+              key={n.label}
+              href={n.href}
+              className="text-[15px] text-zinc-300 transition-colors hover:text-white"
+            >
               {n.label}
             </a>
           ))}
           <ResourcesMenu />
         </nav>
-        {/* White pill, dark text — matches the Framer homepage Login button */}
+        {/* White pill, dark text, matches the Framer homepage Login button */}
         <a
           href={`${APP}/login`}
           className="rounded-lg bg-white px-4 py-2 text-sm font-medium text-zinc-900 transition-colors hover:bg-zinc-200"

@@ -69,18 +69,18 @@ export function GoogleIntegrationForm({ websiteId }: { websiteId: string }) {
       const hasLists = !!(res.gscSites?.length || res.ga4Properties?.length);
       if (!hasLists) {
         toast(
-          'No shared properties yet — add the reader email above, give Google a few seconds, and retry.',
+          'No shared properties yet, add the reader email above, give Google a few seconds, and retry.',
         );
       } else if (res.suggested?.gscSiteUrl || res.suggested?.ga4PropertyId) {
         await post(`/websites/${websiteId}/google`, {
           gscSiteUrl: res.suggested.gscSiteUrl,
           ga4PropertyId: res.suggested.ga4PropertyId,
         });
-        toast('Connected — using the property you shared.');
+        toast('Connected, using the property you shared.');
       }
       await refetch();
     } catch (e: any) {
-      toast(e?.message || 'Could not reach Google — try again.');
+      toast(e?.message || 'Could not reach Google, try again.');
     } finally {
       setBusy(null);
     }
@@ -133,7 +133,7 @@ export function GoogleIntegrationForm({ websiteId }: { websiteId: string }) {
         <p className="text-sm text-muted-foreground">
           Connect Google for the <span className="font-semibold text-foreground">SEO tab</span>{' '}
           (Search Console queries, clicks, impressions) and a one-time{' '}
-          <span className="font-semibold text-foreground">GA history import</span>. Read-only — you
+          <span className="font-semibold text-foreground">GA history import</span>. Read-only, you
           grant access in your own Google, no sign-in here, revoke anytime.
         </p>
 
@@ -163,12 +163,12 @@ export function GoogleIntegrationForm({ websiteId }: { websiteId: string }) {
         <div className="space-y-2.5">
           <Step n={1} href={GSC_USERS} label="Open Search Console">
             Add it in <b className="font-semibold text-foreground">Search Console</b> → Settings →
-            Users and permissions — permission <Role>Restricted</Role> is enough.
+            Users and permissions, permission <Role>Restricted</Role> is enough.
           </Step>
           <Step n={2} href={GA_ADMIN} label="Open Analytics">
             Add the same address in{' '}
             <b className="font-semibold text-foreground">Google Analytics</b> → Admin → Property
-            access management — role <Role>Viewer</Role>.
+            access management, role <Role>Viewer</Role>.
           </Step>
         </div>
 
@@ -182,14 +182,14 @@ export function GoogleIntegrationForm({ websiteId }: { websiteId: string }) {
           ) : (
             <ArrowRight className="mr-1.5 h-4 w-4" />
           )}
-          I&apos;ve added it — find my properties
+          I&apos;ve added it, find my properties
         </Button>
 
         {/* lists found but nothing auto-matched → pick manually */}
         {revealed && hasLists ? (
           <div className="space-y-3 rounded-lg border border-[hsl(0,0%,13%)] bg-[hsl(0,0%,9%)] p-4">
             <div className="text-xs text-muted-foreground">
-              Found your shared properties — pick which map to this website.
+              Found your shared properties, pick which map to this website.
             </div>
             <PropertyPickers status={status} onSelect={select} />
           </div>
@@ -251,7 +251,7 @@ export function GoogleIntegrationForm({ websiteId }: { websiteId: string }) {
             <span className="text-xs text-emerald-300">{importResult}</span>
           ) : (
             <span className="text-xs text-muted-foreground/60">
-              One click — re-running replaces the previous import.
+              One click, re-running replaces the previous import.
             </span>
           )}
         </div>

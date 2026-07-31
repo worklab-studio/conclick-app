@@ -12,7 +12,7 @@ export const revalidate = 86400;
 export const metadata = hubMetadata(
   '/blogs',
   'The Conclick blog',
-  'Opinionated writing on analytics, revenue attribution, and growth for bootstrapped founders — from the team building Conclick.',
+  'Opinionated writing on analytics, revenue attribution, and growth for bootstrapped founders, from the team building Conclick.',
 );
 
 export default function Page() {

@@ -32,7 +32,7 @@ const countryName = (code?: string) => {
 };
 
 const timeAgo = (ts?: number | null) => {
-  if (!ts) return '—';
+  if (!ts) return ', ';
   const s = Math.max(0, Math.round((Date.now() - ts) / 1000));
   if (s < 10) return 'just now';
   if (s < 60) return `${s}s ago`;
@@ -420,7 +420,7 @@ export function LiveVisitorsPage({ websiteId }: { websiteId: string }) {
 
   return (
     <div className="relative h-screen w-full overflow-hidden bg-[#04040a] text-foreground">
-      {/* FULL-BLEED globe — all chrome floats above it */}
+      {/* FULL-BLEED globe, all chrome floats above it */}
       <LiveGlobe
         visitors={globeVisitors}
         focus={focus}
@@ -444,7 +444,7 @@ export function LiveVisitorsPage({ websiteId }: { websiteId: string }) {
         className="absolute inset-0 h-full w-full"
       />
 
-      {/* TOP-LEFT — back link + summary card */}
+      {/* TOP-LEFT, back link + summary card */}
       <div className="absolute left-4 top-4 z-10 flex w-[320px] flex-col gap-2.5">
         <a
           href={`/websites/${websiteId}`}
@@ -458,7 +458,7 @@ export function LiveVisitorsPage({ websiteId }: { websiteId: string }) {
             <Logo />
             <div className="min-w-0">
               <div className="truncate text-sm font-semibold text-white">
-                {website?.name || '—'}
+                {website?.name || ', '}
               </div>
             </div>
             <span className="relative ml-auto flex h-2 w-2">
@@ -582,14 +582,14 @@ export function LiveVisitorsPage({ websiteId }: { websiteId: string }) {
             </div>
             <p className="text-base font-semibold text-white">It&apos;s quiet right now</p>
             <p className="mt-1 max-w-[260px] text-sm text-zinc-400">
-              No visitors in the last hour. This view updates live — leave it open and watch them
+              No visitors in the last hour. This view updates live, leave it open and watch them
               land.
             </p>
           </div>
         </div>
       )}
 
-      {/* legend — bottom center */}
+      {/* legend, bottom center */}
       <div className="pointer-events-none absolute bottom-4 left-1/2 z-10 flex -translate-x-1/2 items-center gap-4 text-[11px] text-zinc-500">
         <span className="flex items-center gap-1.5">
           <span className="h-2 w-2 rounded-full bg-[#8b88d8]" /> Active now
@@ -602,7 +602,7 @@ export function LiveVisitorsPage({ websiteId }: { websiteId: string }) {
         </span>
       </div>
 
-      {/* Powered by — bottom right */}
+      {/* Powered by, bottom right */}
       <a
         href="https://conclick.io"
         target="_blank"

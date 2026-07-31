@@ -37,9 +37,9 @@ export interface CardRange {
   value: string; // DateFilter value: '24hour' | '7day' | 'range:...' | 'all' | ...
   startAt: number;
   endAt: number;
-  unit: string; // 'hour' | 'day' | 'month' — granularity for the sparkline
-  phrase: string; // "the last 7 days" — mid-sentence copy
-  chip: string; // "7d" — the badge next to the domain
+  unit: string; // 'hour' | 'day' | 'month', granularity for the sparkline
+  phrase: string; // "the last 7 days", mid-sentence copy
+  chip: string; // "7d", the badge next to the domain
   compare: string | null; // "previous 7 days"; null = comparison meaningless (all time)
 }
 
@@ -48,7 +48,7 @@ export interface CardRange {
 // rolling 24h window this card always used.
 const DEFAULT_RANGE: CardRange = {
   value: '24hour',
-  startAt: 0, // computed at query time — see rangeWindow()
+  startAt: 0, // computed at query time, see rangeWindow()
   endAt: 0,
   unit: 'hour',
   phrase: 'the last 24h',

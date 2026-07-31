@@ -96,7 +96,7 @@ export const stripeProvider: RevenueProvider = {
     const endpoint = await stripe.webhookEndpoints.create({
       url: webhookUrl,
       enabled_events,
-      description: 'Conclick — revenue tracking + attribution',
+      description: 'Conclick, revenue tracking + attribution',
     });
     return { webhookSecret: endpoint.secret || undefined };
   },

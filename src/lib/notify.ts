@@ -108,7 +108,7 @@ export function digestMessage(sites: DigestSite[]): ChannelMessage {
     const money =
       s.revenue > 0 ? ` · **${formatMinorCurrency(s.revenue, s.currency)}** revenue` : '';
     lines.push(
-      `**${s.name}** — ${s.visitors.toLocaleString()} visitors · ${s.pageviews.toLocaleString()} pageviews${money}`,
+      `**${s.name}**, ${s.visitors.toLocaleString()} visitors · ${s.pageviews.toLocaleString()} pageviews${money}`,
     );
     if (s.topSource) lines.push(`Top source: ${s.topSource}`);
     if (s.leak) {
@@ -135,16 +135,20 @@ export function hypeDigestMessage(snapshot: DigestSnapshot, narrative: Narrative
       x.s.kind === 'traffic'
         ? `📈 Overall traffic on **${x.site}** is **${x.s.multiple}×** its usual (${x.s.today} visitors)`
         : x.s.isNew
-          ? `📈 New traffic from **${x.s.label}** on ${x.site} — ${x.s.today} visits`
+          ? `📈 New traffic from **${x.s.label}** on ${x.site}, ${x.s.today} visits`
           : `📈 **${x.s.label}** sent **${x.s.multiple}×** its usual to ${x.site} (${x.s.today} visits)`,
     );
   }
 
   const dyd = snapshot.deltas.vsYesterdayPct;
-  const dArrow = dyd == null ? '' : ` · ${dyd > 0 ? '▲' : dyd < 0 ? '▼' : '→'} ${Math.abs(dyd)}% vs yesterday`;
-  lines.push(`**${t.visitors.toLocaleString('en-US')}** visitors · ${t.pageviews.toLocaleString('en-US')} pageviews${dArrow}`);
+  const dArrow =
+    dyd == null ? '' : ` · ${dyd > 0 ? '▲' : dyd < 0 ? '▼' : '→'} ${Math.abs(dyd)}% vs yesterday`;
+  lines.push(
+    `**${t.visitors.toLocaleString('en-US')}** visitors · ${t.pageviews.toLocaleString('en-US')} pageviews${dArrow}`,
+  );
 
-  if (t.revenueMinor > 0) lines.push(`💰 **${formatMinorCurrency(t.revenueMinor, t.currency)}** in revenue`);
+  if (t.revenueMinor > 0)
+    lines.push(`💰 **${formatMinorCurrency(t.revenueMinor, t.currency)}** in revenue`);
 
   const topSite = snapshot.sites.slice().sort((a, b) => b.visitors - a.visitors)[0];
   const topSource = topSite?.topReferrers[0]?.label;
@@ -152,9 +156,13 @@ export function hypeDigestMessage(snapshot: DigestSnapshot, narrative: Narrative
 
   const cmp: string[] = [];
   if (snapshot.deltas.vsLastWeekPct != null)
-    cmp.push(`${Math.abs(snapshot.deltas.vsLastWeekPct)}% ${snapshot.deltas.vsLastWeekPct >= 0 ? 'above' : 'below'} weekly avg`);
+    cmp.push(
+      `${Math.abs(snapshot.deltas.vsLastWeekPct)}% ${snapshot.deltas.vsLastWeekPct >= 0 ? 'above' : 'below'} weekly avg`,
+    );
   if (snapshot.deltas.vsLastMonthPct != null)
-    cmp.push(`${Math.abs(snapshot.deltas.vsLastMonthPct)}% ${snapshot.deltas.vsLastMonthPct >= 0 ? 'ahead of' : 'behind'} last month`);
+    cmp.push(
+      `${Math.abs(snapshot.deltas.vsLastMonthPct)}% ${snapshot.deltas.vsLastMonthPct >= 0 ? 'ahead of' : 'behind'} last month`,
+    );
   if (cmp.length) lines.push(cmp.join(' · '));
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://app.conclick.io';
@@ -182,7 +190,7 @@ export function paymentAlertMessage(info: {
   if (info.country) extras.push(info.country);
   extras.push(info.attributed ? 'attributed to a visitor session' : 'not yet attributed');
   lines.push(extras.join(' · '));
-  return { title: `New payment — ${money}`, lines, accent: 'green' };
+  return { title: `New payment, ${money}`, lines, accent: 'green' };
 }
 
 // ---------- storage helpers ----------

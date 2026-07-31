@@ -129,7 +129,7 @@ export function GoalBuilder({
       <div>
         <div className="mb-2 text-[13px] font-semibold text-foreground/90">
           {type === 'path' ? 'Which page?' : 'Which event?'}{' '}
-          <span className="font-normal text-muted-foreground/60">— pick from your site</span>
+          <span className="font-normal text-muted-foreground/60">, pick from your site</span>
         </div>
         <MetricValuePicker websiteId={websiteId} type={type} value={value} onChange={setValue} />
       </div>
@@ -138,7 +138,7 @@ export function GoalBuilder({
         isDuplicate ? (
           <div className="flex items-start gap-2 rounded-lg border border-[#5e5ba4]/30 bg-[#5e5ba4]/10 px-3 py-2 text-xs text-[#c7c4f0]">
             <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-            You&apos;re already tracking this — saving won&apos;t create a duplicate.
+            You&apos;re already tracking this, saving won&apos;t create a duplicate.
           </div>
         ) : preview ? (
           <div className="rounded-lg border border-[hsl(0,0%,14%)] bg-[hsl(0,0%,9%)] px-3 py-2 text-xs text-muted-foreground">

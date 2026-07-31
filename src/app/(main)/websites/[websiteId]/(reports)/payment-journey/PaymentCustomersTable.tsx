@@ -23,7 +23,7 @@ function formatMoney(minorRaw: any, currency?: string) {
 // first touch -> first payment, in human terms ("3 minutes", "13 days").
 function humanizeDuration(secsRaw: any) {
   const secs = Number(secsRaw);
-  if (!secs || secs < 0 || isNaN(secs)) return '—';
+  if (!secs || secs < 0 || isNaN(secs)) return ', ';
   const units: [string, number][] = [
     ['day', 86400],
     ['hour', 3600],

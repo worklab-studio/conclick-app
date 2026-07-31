@@ -6,7 +6,7 @@ export const revalidate = 86400;
 export const metadata = hubMetadata(
   '/alternatives',
   'Analytics tool alternatives',
-  'Roundups of the best alternatives to Google Analytics, Plausible, Fathom, Hotjar and more — what each is good at, and where Conclick fits.',
+  'Roundups of the best alternatives to Google Analytics, Plausible, Fathom, Hotjar and more, what each is good at, and where Conclick fits.',
 );
 
 export default function Page() {
@@ -20,7 +20,7 @@ export default function Page() {
       path="/alternatives"
       eyebrow="Alternatives"
       title="The best analytics alternatives"
-      intro="Switching off your current tool? These roundups cover the real options for each — ranked by what actually matters."
+      intro="Switching off your current tool? These roundups cover the real options for each, ranked by what actually matters."
       items={items}
     />
   );

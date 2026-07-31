@@ -6,7 +6,7 @@ export const revalidate = 86400;
 export const metadata = hubMetadata(
   '/for',
   'Conclick for your kind of business',
-  'How Conclick fits SaaS, ecommerce, agencies, indie hackers, and creators — the metrics that matter for each and how to track what actually pays.',
+  'How Conclick fits SaaS, ecommerce, agencies, indie hackers, and creators, the metrics that matter for each and how to track what actually pays.',
 );
 
 export default function Page() {

@@ -16,7 +16,7 @@ const CARDS = [
   {
     icon: Filter,
     title: 'Auto-detected funnels',
-    body: 'Surfaces your single biggest drop-off and the revenue you are losing to it — no manual setup.',
+    body: 'Surfaces your single biggest drop-off and the revenue you are losing to it, no manual setup.',
   },
 ];
 

@@ -72,18 +72,29 @@ export function HubGrid({
 
   return (
     <>
-      <JsonLd data={[itemListSchema(title, path, items.map(it => ({ url: canonical(it.href), name: it.title })))]} />
+      <JsonLd
+        data={[
+          itemListSchema(
+            title,
+            path,
+            items.map(it => ({ url: canonical(it.href), name: it.title })),
+          ),
+        ]}
+      />
 
       <section className="relative overflow-hidden border-b border-white/[0.07]">
         <div
           aria-hidden
           className="pointer-events-none absolute inset-x-0 top-0 h-[360px]"
-          style={{ background: 'radial-gradient(50% 100% at 50% 0%, rgba(108,99,201,0.16), rgba(108,99,201,0) 70%)' }}
+          style={{
+            background:
+              'radial-gradient(50% 100% at 50% 0%, rgba(108,99,201,0.16), rgba(108,99,201,0) 70%)',
+          }}
         />
         {/* Left-aligned on the SAME container string as the card grid below
             (max-w-6xl px-6 sm:px-8), so the eyebrow/h1 left edge lands exactly
             on the first card's left edge. The old hero was max-w-3xl over a
-            max-w-6xl grid — invisible while it was centred, an obvious step the
+            max-w-6xl grid, invisible while it was centred, an obvious step the
             moment it is not. Matches ContentArticle and BlogIndex, so every
             public surface now shares one left edge. */}
         <div className="relative mx-auto max-w-6xl px-6 pb-12 pt-14 sm:px-8">
@@ -101,7 +112,7 @@ export function HubGrid({
       <div className="mx-auto max-w-6xl px-6 py-14 sm:px-8">
         {body && <div className="mx-auto mb-12 max-w-3xl">{body}</div>}
 
-        {/* Featured card — the first (highest-priority) entry, full width. */}
+        {/* Featured card, the first (highest-priority) entry, full width. */}
         {featured && (
           <a
             href={featured.href}
@@ -115,9 +126,15 @@ export function HubGrid({
               <Icon className="h-6 w-6" />
             </div>
             <div className="relative min-w-0 flex-1">
-              <div className="text-[11px] font-medium uppercase tracking-[0.14em] text-[#8b88cf]">Start here</div>
-              <div className="mt-1 text-lg font-semibold tracking-[-0.01em] text-white sm:text-xl">{featured.title}</div>
-              <p className="mt-1.5 max-w-2xl text-sm leading-relaxed text-zinc-400">{featured.desc}</p>
+              <div className="text-[11px] font-medium uppercase tracking-[0.14em] text-[#8b88cf]">
+                Start here
+              </div>
+              <div className="mt-1 text-lg font-semibold tracking-[-0.01em] text-white sm:text-xl">
+                {featured.title}
+              </div>
+              <p className="mt-1.5 max-w-2xl text-sm leading-relaxed text-zinc-400">
+                {featured.desc}
+              </p>
             </div>
             <ArrowUpRight className="relative hidden h-5 w-5 shrink-0 text-zinc-500 transition-colors group-hover:text-[#8b88cf] sm:block" />
           </a>
@@ -136,7 +153,9 @@ export function HubGrid({
                   <Icon className="h-4 w-4 shrink-0 text-zinc-500 transition-colors group-hover:text-[#8b88cf]" />
                   <ArrowUpRight className="h-4 w-4 shrink-0 text-zinc-600 transition-colors group-hover:text-[#8b88cf]" />
                 </div>
-                <div className="mt-3 text-[15px] font-semibold leading-snug text-white">{it.title}</div>
+                <div className="mt-3 text-[15px] font-semibold leading-snug text-white">
+                  {it.title}
+                </div>
                 <p className="mt-2 text-[13px] leading-relaxed text-zinc-400">{it.desc}</p>
               </a>
             ))}

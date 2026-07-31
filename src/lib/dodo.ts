@@ -59,7 +59,7 @@ export async function createCheckoutSession({
   const productId = productIdForPlan(plan);
   if (!productId) {
     throw new Error(
-      `Dodo product id for "${plan}" is not configured — run scripts/create-dodo-products.ts and set the env vars.`,
+      `Dodo product id for "${plan}" is not configured, run scripts/create-dodo-products.ts and set the env vars.`,
     );
   }
 

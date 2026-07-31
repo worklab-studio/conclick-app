@@ -45,8 +45,8 @@ const COHORTS: { id: ClickMapCohort; label: string }[] = [
 const COHORT_CONTEXT: Record<ClickMapCohort, string> = {
   all: 'Clicks from everyone who visited this page.',
   paid: 'Where your paying customers clicked on this page.',
-  trial: 'Where trial users clicked — compare with Paid to see what converts.',
-  non_buyer: 'Where visitors who never paid clicked — look for distractions or dead ends.',
+  trial: 'Where trial users clicked, compare with Paid to see what converts.',
+  non_buyer: 'Where visitors who never paid clicked, look for distractions or dead ends.',
   refunded: 'Where refunded customers clicked before churning.',
   high_ltv: 'Where your highest-value customers focused their attention.',
   abandoner: 'Where checkout abandoners clicked before dropping off.',
@@ -395,7 +395,7 @@ export function ClickMapInline({
                   selectedHeat.e.revenue > 0 ? 'text-emerald-300' : 'text-muted-foreground/40'
                 }`}
               >
-                {selectedHeat.e.revenue > 0 ? money(selectedHeat.e.revenue, currency) : '—'}
+                {selectedHeat.e.revenue > 0 ? money(selectedHeat.e.revenue, currency) : ', '}
               </div>
             </div>
             <div>
@@ -408,7 +408,7 @@ export function ClickMapInline({
             </div>
           </div>
           <div className="mt-3 flex items-center justify-between border-t border-[hsl(0,0%,13%)] pt-2.5 text-[11px] text-muted-foreground/60">
-            <span>{depthBand(selectedHeat.e.medianY) || '—'} of page</span>
+            <span>{depthBand(selectedHeat.e.medianY) || ', '} of page</span>
             {selectedHeat.e.label?.trim() ? (
               <button
                 type="button"
@@ -430,7 +430,7 @@ export function ClickMapInline({
       <TabEmptyState
         icon={Crosshair}
         title="No click data yet"
-        description="Turn on Autocapture (on by default) and let visitors click around. The click map paints real click data onto a snapshot of your page — by element and buyer cohort, weighted by revenue."
+        description="Turn on Autocapture (on by default) and let visitors click around. The click map paints real click data onto a snapshot of your page, by element and buyer cohort, weighted by revenue."
       />
     );
   }
@@ -482,7 +482,7 @@ export function ClickMapInline({
           )}
         </div>
 
-        {/* Cohort switcher — buyer cohorts lock until payment data exists */}
+        {/* Cohort switcher, buyer cohorts lock until payment data exists */}
         <div className="flex flex-wrap items-center gap-1">
           {COHORTS.map(c => {
             const active = c.id === cohort;
@@ -525,7 +525,7 @@ export function ClickMapInline({
         </div>
       ) : error ? (
         <div className="p-7 text-sm text-muted-foreground">
-          Couldn&apos;t load click data — try refreshing the page.
+          Couldn&apos;t load click data, try refreshing the page.
         </div>
       ) : !hasAnything ? (
         <div className="space-y-4 p-7">
@@ -579,7 +579,7 @@ export function ClickMapInline({
               )}
               {total < 20 && (
                 <span className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground/60">
-                  <Info className="h-3 w-3" /> Early data — only {total} click
+                  <Info className="h-3 w-3" /> Early data, only {total} click
                   {total === 1 ? '' : 's'} so far
                 </span>
               )}
@@ -680,7 +680,7 @@ export function ClickMapInline({
               </div>
             ) : snapFailed || !snap ? (
               <div className="flex h-[200px] flex-col items-center justify-center gap-2 px-6 text-center text-sm text-muted-foreground">
-                Couldn&apos;t capture your page — it may block bots or be unreachable right now.
+                Couldn&apos;t capture your page, it may block bots or be unreachable right now.
                 <span className="text-xs text-muted-foreground/60">
                   Every click is still in the list below.
                 </span>
@@ -703,11 +703,11 @@ export function ClickMapInline({
             <p className="flex items-start gap-1.5 text-[11px] leading-relaxed text-muted-foreground/55">
               <Info className="mt-0.5 h-3 w-3 shrink-0" />
               {unplaced} element{unplaced === 1 ? ' isn’t' : 's aren’t'} on the current snapshot
-              (changed or removed since the clicks happened) — still counted in the list below.
+              (changed or removed since the clicks happened), still counted in the list below.
             </p>
           ) : null}
 
-          {/* All elements — ranked, label-first */}
+          {/* All elements, ranked, label-first */}
           <div>
             <div className="mb-2 flex items-center justify-between">
               <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground/60">
@@ -777,7 +777,7 @@ export function ClickMapInline({
                             {money(e.revenue, currency)}
                           </span>
                         ) : (
-                          <span className="text-sm text-muted-foreground/40">—</span>
+                          <span className="text-sm text-muted-foreground/40">, </span>
                         )}
                       </div>
                     </div>

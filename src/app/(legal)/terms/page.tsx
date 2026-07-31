@@ -30,7 +30,7 @@ export default function TermsPage() {
 
       <LegalH2>Acceptable use</LegalH2>
       <LegalP>
-        {`You agree not to misuse Conclick — including by collecting data unlawfully, infringing others' rights, attempting to breach security or access other customers' data, reselling the service without permission, or sending unlawful content through connected channels. You are responsible for having a lawful basis and appropriate notices or consent for the analytics you collect on your websites.`}
+        {`You agree not to misuse Conclick, including by collecting data unlawfully, infringing others' rights, attempting to breach security or access other customers' data, reselling the service without permission, or sending unlawful content through connected channels. You are responsible for having a lawful basis and appropriate notices or consent for the analytics you collect on your websites.`}
       </LegalP>
 
       <LegalH2>Your data</LegalH2>

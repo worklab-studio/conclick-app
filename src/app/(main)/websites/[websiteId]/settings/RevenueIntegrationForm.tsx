@@ -111,7 +111,7 @@ export function RevenueIntegrationForm({ websiteId }: { websiteId: string }) {
         await save();
       }
     } catch (e: any) {
-      toast(e?.message || 'Could not read products — double-check the key and mode.');
+      toast(e?.message || 'Could not read products, double-check the key and mode.');
     } finally {
       setBusy(false);
     }
@@ -138,7 +138,7 @@ export function RevenueIntegrationForm({ websiteId }: { websiteId: string }) {
     try {
       await save();
     } catch (e: any) {
-      toast(e?.message || 'Could not connect — double-check the key and try again.');
+      toast(e?.message || 'Could not connect, double-check the key and try again.');
     } finally {
       setBusy(false);
     }
@@ -215,7 +215,7 @@ export function RevenueIntegrationForm({ websiteId }: { websiteId: string }) {
             Which products belong to this website?
           </div>
           <p className="text-xs text-muted-foreground">
-            We&apos;ll only count revenue from the products you pick — so two websites on the same{' '}
+            We&apos;ll only count revenue from the products you pick, so two websites on the same{' '}
             {cfg.name} key don&apos;t show the same total. Leave all unchecked to track every
             product.
           </p>
@@ -373,8 +373,8 @@ export function RevenueIntegrationForm({ websiteId }: { websiteId: string }) {
             </Button>
           </div>
           <p className="text-xs text-muted-foreground">
-            No API key needed — every webhook is signature-verified with this secret, which is
-            stored encrypted. For per-visitor attribution, pass{' '}
+            No API key needed, every webhook is signature-verified with this secret, which is stored
+            encrypted. For per-visitor attribution, pass{' '}
             <span className="font-mono">distinct_id</span> in the checkout&apos;s custom
             data/metadata (shown after connecting).
           </p>
@@ -487,12 +487,12 @@ ${cfg.snippet}`}</pre>
         <div className="flex items-center gap-2">
           <Check className="h-4 w-4 text-emerald-400" />
           <div className="text-sm font-semibold text-foreground">
-            Attribution is on — nothing else to do
+            Attribution is on, nothing else to do
           </div>
         </div>
         <p className="text-xs text-muted-foreground">
           The webhook is connected, and your Conclick script automatically tags {cfg.name} checkout
-          links with the visitor — so payments attach to the right person in Users → Spent.
+          links with the visitor, so payments attach to the right person in Users → Spent.
         </p>
       </div>
     );
@@ -506,7 +506,7 @@ ${cfg.snippet}`}</pre>
         <div className="flex items-center gap-2">
           <Check className="h-4 w-4 text-emerald-400" />
           <div className="text-sm font-semibold text-foreground">
-            Connected — {cfg.name} revenue is syncing
+            Connected, {cfg.name} revenue is syncing
           </div>
         </div>
         <div>
@@ -514,7 +514,7 @@ ${cfg.snippet}`}</pre>
             Attribute payments to visitors (optional)
           </div>
           <p className="mt-0.5 text-xs text-muted-foreground">
-            Tie each payment to the visitor who made it — shows in Users → Spent and the Paying
+            Tie each payment to the visitor who made it, shows in Users → Spent and the Paying
             filter. Totals already work without this.
           </p>
         </div>
@@ -532,7 +532,7 @@ ${cfg.snippet}`}</pre>
       });
       setSaved(true);
       setSecret('');
-      toast('Webhook secret saved — payments will now attribute to visitors.');
+      toast('Webhook secret saved, payments will now attribute to visitors.');
     } catch (e: any) {
       toast(e?.message || 'Could not save the secret.');
     } finally {
@@ -547,8 +547,7 @@ ${cfg.snippet}`}</pre>
           Attribute payments to visitors (optional)
         </div>
         <p className="mt-0.5 text-xs text-muted-foreground">
-          Tie each payment to the visitor who made it — shows in Users → Spent and the Paying
-          filter.
+          Tie each payment to the visitor who made it, shows in Users → Spent and the Paying filter.
         </p>
       </div>
 

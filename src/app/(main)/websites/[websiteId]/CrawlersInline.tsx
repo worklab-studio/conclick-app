@@ -170,7 +170,7 @@ export function CrawlersInline({ websiteId }: { websiteId: string }) {
         <div className="flex h-44 flex-col items-center justify-center gap-1.5 text-center">
           <p className="text-sm font-medium text-zinc-300">No crawler visits recorded yet</p>
           <p className="max-w-md text-xs text-zinc-500">
-            When ChatGPT, Googlebot, GPTBot and friends visit your site, they&apos;ll show up here —
+            When ChatGPT, Googlebot, GPTBot and friends visit your site, they&apos;ll show up here,
             classified by why they came, and always kept out of your visitor metrics.
           </p>
         </div>
@@ -276,7 +276,7 @@ export function CrawlersInline({ websiteId }: { websiteId: string }) {
       )}
 
       <p className="mt-3 text-[11px] text-zinc-600">
-        Crawler visits are detected from bot fetches of your pages and tracking script — and are
+        Crawler visits are detected from bot fetches of your pages and tracking script, and are
         always excluded from your visitor metrics.
       </p>
     </div>

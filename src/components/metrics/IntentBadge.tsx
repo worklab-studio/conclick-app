@@ -36,7 +36,7 @@ const STYLES: Record<IntentLevel, { dot: string; text: string; bg: string; ring:
  */
 export function IntentBadge({ result, size = 'sm' }: { result: IntentResult; size?: 'sm' | 'md' }) {
   const s = STYLES[result.level];
-  const title = `Buying intent ${result.score}/100 — ${result.label}${
+  const title = `Buying intent ${result.score}/100, ${result.label}${
     result.reasons.length ? `\n• ${result.reasons.join('\n• ')}` : ''
   }`;
 

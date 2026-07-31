@@ -126,7 +126,7 @@ export function RevenueConnect({ websiteId }: { websiteId: string }) {
           </Link>
         ) : (
           <Button disabled variant="outline" className="w-full opacity-60">
-            {provider.name} — coming soon
+            {provider.name}, coming soon
           </Button>
         )}
 

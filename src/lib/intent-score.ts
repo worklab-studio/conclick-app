@@ -179,7 +179,7 @@ export function computeIntentScore(s: IntentSignals): IntentResult {
     const src = `${s.utmSource || ''} ${s.referrerDomain || ''}`.trim();
     let pts: number;
     if (!src) {
-      pts = 6; // direct: typed the URL or kept the tab — brand-aware
+      pts = 6; // direct: typed the URL or kept the tab, brand-aware
     } else if (AI_SOURCES.test(src)) {
       pts = 8;
       reasons.push('Came from an AI assistant');

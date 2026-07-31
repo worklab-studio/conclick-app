@@ -250,7 +250,7 @@ export const dodoProvider: RevenueProvider = {
         headers: { ...authHeader, 'Content-Type': 'application/json' },
         body: JSON.stringify({
           url: webhookUrl,
-          description: 'Conclick — payment attribution',
+          description: 'Conclick, payment attribution',
           filter_types: ['payment.succeeded', 'refund.succeeded', 'dispute.accepted'],
         }),
       });

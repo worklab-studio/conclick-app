@@ -43,7 +43,7 @@ export function TeamWebsitesForm({ teamId }: { teamId: string }) {
   return (
     <div className="space-y-4">
       <p className="text-sm text-muted-foreground">
-        Choose which of your websites belong to this team. Team members get access to these — under
+        Choose which of your websites belong to this team. Team members get access to these, under
         your plan, with no extra seats.
       </p>
 

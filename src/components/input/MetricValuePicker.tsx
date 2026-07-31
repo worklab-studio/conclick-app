@@ -61,7 +61,7 @@ export function MetricValuePicker({
         ) : items.length === 0 ? (
           <div className="px-3 py-6 text-center text-sm leading-relaxed text-muted-foreground">
             {type === 'event'
-              ? 'No events tracked yet. Events record actions like button clicks — add one in your tracking code, or pick a page instead.'
+              ? 'No events tracked yet. Events record actions like button clicks, add one in your tracking code, or pick a page instead.'
               : 'No pages found for this date range.'}
           </div>
         ) : (

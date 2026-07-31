@@ -59,7 +59,8 @@ function pctStr(p: number | null): string {
 }
 
 function spikeStr(s: PeakMoment, site: string): string {
-  if (s.kind === 'traffic') return `${site}: overall traffic ${s.multiple}× its usual (${s.today} visitors)`;
+  if (s.kind === 'traffic')
+    return `${site}: overall traffic ${s.multiple}× its usual (${s.today} visitors)`;
   if (s.isNew) return `${site}: brand-new traffic from ${s.label} (${s.today} visits today)`;
   return `${site}: ${s.label} sent ${s.multiple}× its usual (${s.today} visits)`;
 }
@@ -73,7 +74,9 @@ export function collectSpikes(snapshot: DigestSnapshot): { s: PeakMoment; site: 
 
 function buildFacts(snapshot: DigestSnapshot) {
   const t = snapshot.totals;
-  const milestones = collectMilestones(snapshot).map(m => milestoneLabel(m.hit, m.ccy) + ` on ${m.hit.siteName}`);
+  const milestones = collectMilestones(snapshot).map(
+    m => milestoneLabel(m.hit, m.ccy) + ` on ${m.hit.siteName}`,
+  );
   const spikes = collectSpikes(snapshot).map(x => spikeStr(x.s, x.site));
   const isSlowDay = t.visitors < 5 && milestones.length === 0 && spikes.length === 0;
 
@@ -103,17 +106,17 @@ function buildFacts(snapshot: DigestSnapshot) {
   };
 }
 
-const SYSTEM = `You are the voice of Conclick, a web-analytics product. Every day you write a short, energetic note that makes a founder EXCITED to check their numbers — like a hype friend who just read their dashboard.
+const SYSTEM = `You are the voice of Conclick, a web-analytics product. Every day you write a short, energetic note that makes a founder EXCITED to check their numbers, like a hype friend who just read their dashboard.
 
 HARD RULES:
-- Use ONLY the numbers and facts in the provided JSON. Never invent, estimate, or do arithmetic. Currency and percentage strings are already formatted — quote them as-is.
+- Use ONLY the numbers and facts in the provided JSON. Never invent, estimate, or do arithmetic. Currency and percentage strings are already formatted, quote them as-is.
 - If "isSlowDay" is true, be warm and honest, never fake-celebrate. Acknowledge it's quiet and point to one real signal or a "tomorrow" framing.
-- If milestones or spikes exist, LEAD with the biggest one — that's the headline moment.
+- If milestones or spikes exist, LEAD with the biggest one, that's the headline moment.
 - Voice: confident, genuine, founder-to-founder. No corporate filler.
 - "subject": under 50 characters. No ALL-CAPS words, no "FREE", no "$$$", no exclamation spam. At most ONE emoji.
 - "narrative": 2 to 4 sentences. Plain text only (NO markdown, NO bullet points). At most TWO emoji total.
 - "headline": one line under 90 characters for a chat message.
-- Vary your wording — today's stylistic angle: "{ANGLE}".
+- Vary your wording, today's stylistic angle: "{ANGLE}".
 
 Respond with ONLY a JSON object: {"subject": "...", "narrative": "...", "headline": "..."}`;
 
@@ -178,27 +181,31 @@ export function fallbackNarrative(snapshot: DigestSnapshot): Narrative {
   let lead: string;
   if (milestones.length) {
     const top = milestones[0];
-    lead = `Milestone unlocked — ${top.hit.siteName} just crossed ${milestoneLabel(top.hit, top.ccy)}. 🎉`;
+    lead = `Milestone unlocked, ${top.hit.siteName} just crossed ${milestoneLabel(top.hit, top.ccy)}. 🎉`;
   } else if (spikes.length) {
     const top = spikes[0];
     const what = top.s.kind === 'traffic' ? 'Traffic' : top.s.label;
-    lead = `${what} is having a moment on ${top.site} — ${top.s.multiple}× the usual.`;
+    lead = `${what} is having a moment on ${top.site}, ${top.s.multiple}× the usual.`;
   } else if (t.visitors < 5) {
     lead = `A quiet ${snapshot.dateLabel}. Calm days are when you build the next spike.`;
   } else if (dyd != null && dyd > 0) {
-    lead = `Nice momentum — ${visitors} visitors today, up ${dyd}% from yesterday.`;
+    lead = `Nice momentum, ${visitors} visitors today, up ${dyd}% from yesterday.`;
   } else {
     lead = `${visitors} visitors stopped by today. Steady hands win.`;
   }
 
   // Supporting line.
   const bits: string[] = [];
-  if (t.visitors >= 5) bits.push(`${visitors} visitors, ${t.pageviews.toLocaleString('en-US')} pageviews`);
+  if (t.visitors >= 5)
+    bits.push(`${visitors} visitors, ${t.pageviews.toLocaleString('en-US')} pageviews`);
   if (snapshot.deltas.vsLastWeekPct != null) {
     const w = snapshot.deltas.vsLastWeekPct;
-    bits.push(w >= 0 ? `${w}% above your weekly average` : `${Math.abs(w)}% below your weekly average`);
+    bits.push(
+      w >= 0 ? `${w}% above your weekly average` : `${Math.abs(w)}% below your weekly average`,
+    );
   }
-  if (t.revenueMinor > 0) bits.push(`${formatMinorCurrency(t.revenueMinor, t.currency)} in revenue`);
+  if (t.revenueMinor > 0)
+    bits.push(`${formatMinorCurrency(t.revenueMinor, t.currency)} in revenue`);
   const support = bits.length ? bits.join(' · ') + '.' : 'Your dashboard has the full story.';
 
   const subject = milestones.length

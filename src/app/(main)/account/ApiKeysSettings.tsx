@@ -85,13 +85,13 @@ export function ApiKeysSettings() {
   return (
     <div className="space-y-5">
       <p className="text-sm text-muted-foreground">
-        Let Cursor, Claude Code, Codex, or any script control Conclick — query visitors, inspect
-        revenue, manage websites, and connect payment providers — through the Conclick MCP server.
+        Let Cursor, Claude Code, Codex, or any script control Conclick, query visitors, inspect
+        revenue, manage websites, and connect payment providers, through the Conclick MCP server.
       </p>
 
       {newKey && (
         <div className="space-y-2 rounded-lg border border-emerald-500/20 bg-emerald-500/[0.06] p-4">
-          <div className="text-sm font-semibold text-emerald-200">Your new key — copy it now</div>
+          <div className="text-sm font-semibold text-emerald-200">Your new key, copy it now</div>
           <div className="flex gap-2">
             <code className="flex-1 truncate rounded-md border border-zinc-800 bg-[#0f0f12] px-3 py-2 font-mono text-xs text-zinc-200">
               {newKey}
@@ -106,7 +106,7 @@ export function ApiKeysSettings() {
             </Button>
           </div>
           <p className="text-xs text-muted-foreground">
-            You won&apos;t be able to see this key again — store it somewhere safe.
+            You won&apos;t be able to see this key again, store it somewhere safe.
           </p>
         </div>
       )}
@@ -209,7 +209,7 @@ export function ApiKeysSettings() {
           </Button>
         </div>
 
-        <p className="text-xs text-muted-foreground">Claude Code — one command:</p>
+        <p className="text-xs text-muted-foreground">Claude Code, one command:</p>
         <div className="relative">
           <pre className="overflow-x-auto rounded-md border border-zinc-800 bg-[#0f0f12] p-3 pr-10 text-xs text-zinc-300">
             <code>{CLAUDE_CMD}</code>

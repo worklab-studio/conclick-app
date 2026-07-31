@@ -41,7 +41,7 @@ export function DateRangePicker({ websiteId }: { websiteId?: string }) {
     if (value === 'all') {
       const { startDate, endDate } = websiteDateRange;
       const date =
-        startDate && endDate ? `${getDateRangeValue(startDate, endDate ?? new Date())}:all` : 'all'; // data span not loaded yet — parseDateRange falls back safely
+        startDate && endDate ? `${getDateRangeValue(startDate, endDate ?? new Date())}:all` : 'all'; // data span not loaded yet, parseDateRange falls back safely
       router.push(updateParams({ date, offset: undefined }), { scroll: false });
     } else {
       router.push(updateParams({ date: value, offset: undefined }), { scroll: false });

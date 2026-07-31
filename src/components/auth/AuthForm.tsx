@@ -164,12 +164,12 @@ export function AuthForm({
     try {
       const res = await fn();
       if (res && 'error' in res && res.error) {
-        setError(res.error.message || 'Something went wrong — please try again.');
+        setError(res.error.message || 'Something went wrong, please try again.');
         return false;
       }
       return true;
     } catch {
-      setError('Something went wrong — please try again.');
+      setError('Something went wrong, please try again.');
       return false;
     } finally {
       setBusy(false);
@@ -190,7 +190,7 @@ export function AuthForm({
         pendingPassword.current = password;
         await authClient.emailOtp.sendVerificationOtp({ email, type: 'email-verification' });
         setView('verify');
-        setNotice('Check your email — we sent you a 6-digit code.');
+        setNotice('Check your email, we sent you a 6-digit code.');
         return;
       }
       setError(res.error.message || 'That email and password don’t match.');
@@ -207,7 +207,7 @@ export function AuthForm({
     if (ok) {
       pendingPassword.current = password;
       setView('verify');
-      setNotice('Check your email — we sent you a 6-digit code.');
+      setNotice('Check your email, we sent you a 6-digit code.');
     }
   };
 
@@ -231,7 +231,7 @@ export function AuthForm({
     );
     if (ok) {
       setView('reset');
-      setNotice('Check your email — we sent you a 6-digit code.');
+      setNotice('Check your email, we sent you a 6-digit code.');
     }
   };
 
@@ -243,7 +243,7 @@ export function AuthForm({
       if (!signed.error) router.push(callbackURL);
       else {
         setView('login');
-        setNotice('Password updated — sign in with your new password.');
+        setNotice('Password updated, sign in with your new password.');
       }
     }
   };

@@ -35,7 +35,7 @@ import { SessionData } from './SessionData';
 
 function fmtDate(value: any) {
   const d = new Date(value);
-  if (isNaN(d.getTime())) return '—';
+  if (isNaN(d.getTime())) return ', ';
   return format(d, 'MMM d, yyyy · h:mm a');
 }
 
@@ -175,12 +175,12 @@ export function SessionProfile({ websiteId, sessionId }: { websiteId: string; se
             />
             <Stat
               label="Max scroll"
-              value={data.maxScroll != null ? `${Math.round(Number(data.maxScroll))}%` : '—'}
+              value={data.maxScroll != null ? `${Math.round(Number(data.maxScroll))}%` : ', '}
             />
-            <Stat label="Clicks" value={data.clicks != null ? Number(data.clicks) : '—'} />
+            <Stat label="Clicks" value={data.clicks != null ? Number(data.clicks) : ', '} />
           </div>
 
-          {/* Info grid — 3 columns so full dates and UUIDs fit without truncating */}
+          {/* Info grid, 3 columns so full dates and UUIDs fit without truncating */}
           <div className="grid grid-cols-2 gap-x-7 gap-y-5 p-6 md:grid-cols-3">
             <Field label="First seen" icon={<Calendar className="h-3.5 w-3.5" />}>
               {fmtDate(data.firstAt)}
@@ -196,16 +196,17 @@ export function SessionProfile({ websiteId, sessionId }: { websiteId: string; se
               {data.distinctId || 'not identified'}
             </Field>
             <Field label="Region" icon={<MapPin className="h-3.5 w-3.5" />}>
-              {getRegionName(data.region) || '—'}
+              {getRegionName(data.region) || ', '}
             </Field>
             <Field label="City" icon={<Building2 className="h-3.5 w-3.5" />}>
-              {data.city || '—'}
+              {data.city || ', '}
             </Field>
             <Field label="Device" icon={<Monitor className="h-3.5 w-3.5" />}>
-              {[formatValue(data.device, 'device'), data.screen].filter(Boolean).join(' · ') || '—'}
+              {[formatValue(data.device, 'device'), data.screen].filter(Boolean).join(' · ') ||
+                ', '}
             </Field>
             <Field label="Language" icon={<Languages className="h-3.5 w-3.5" />}>
-              {data.language ? formatValue(data.language, 'language') : '—'}
+              {data.language ? formatValue(data.language, 'language') : ', '}
             </Field>
             <Field
               label="Source"
@@ -215,7 +216,7 @@ export function SessionProfile({ websiteId, sessionId }: { websiteId: string; se
               {source}
             </Field>
             <Field label="Landing page" icon={<LogIn className="h-3.5 w-3.5" />}>
-              {data.entryUrl || '—'}
+              {data.entryUrl || ', '}
             </Field>
             {data.utmCampaign ? (
               <Field label="Campaign" icon={<Megaphone className="h-3.5 w-3.5" />}>
@@ -225,7 +226,7 @@ export function SessionProfile({ websiteId, sessionId }: { websiteId: string; se
           </div>
 
           {/* Tabs. Properties only exists when this session actually HAS
-              custom properties (set via conclick.identify()) — an always-on
+              custom properties (set via conclick.identify()), an always-on
               tab that's almost always empty just reads as broken. */}
           <div className="flex gap-6 border-b border-[hsl(0,0%,12%)] px-6">
             <TabButton active={tab === 'activity' || !hasProps} onClick={() => setTab('activity')}>

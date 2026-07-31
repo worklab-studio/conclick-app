@@ -84,7 +84,7 @@ export function AuthShell({
             </h2>
             <p className="mt-1.5 text-[13px] leading-relaxed text-white/60">
               {variant === 'register'
-                ? 'Analytics that tells you what to fix — not just what happened.'
+                ? 'Analytics that tells you what to fix, not just what happened.'
                 : 'Your dashboard is right where you left it.'}
             </p>
 

@@ -56,7 +56,7 @@ export function DashboardSetupBanner({
         </div>
         <div className="min-w-0 flex-1">
           <h3 className="text-sm font-semibold text-foreground">
-            Finish setup — install your tracking code
+            Finish setup, install your tracking code
           </h3>
           <p className="mt-0.5 text-sm text-muted-foreground">
             No data yet. Paste this into the <code className="text-foreground">&lt;head&gt;</code>{' '}

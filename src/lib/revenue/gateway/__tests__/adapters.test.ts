@@ -207,7 +207,7 @@ describe('paddle adapter', () => {
     expect(cb.amountMinor).toBe(-900n);
   });
 
-  it('chargeback reversals come back POSITIVE — a won dispute is no longer a loss', () => {
+  it('chargeback reversals come back POSITIVE, a won dispute is no longer a loss', () => {
     const reversal = paddleGatewayAdapter.parseEvent(
       paddleBody('adjustment.created', {
         id: 'adj_3',

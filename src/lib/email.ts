@@ -50,7 +50,7 @@ export async function sendTeamInviteEmail(
           This invitation expires in 7 days. If you weren't expecting it, you can ignore this email.
         </p>
         <hr style="border: none; border-top: 1px solid #e4e4e7; margin: 32px 0;" />
-        <p style="color: #a1a1aa; font-size: 12px;">Conclick — Analytics that respect privacy</p>
+        <p style="color: #a1a1aa; font-size: 12px;">Conclick, Analytics that respect privacy</p>
       </div>
     `,
   });
@@ -76,11 +76,11 @@ export async function sendOtpEmail(email: string, otp: string, type: string) {
   await resend.emails.send({
     from: FROM_EMAIL,
     to: email,
-    subject: `${otp} — ${purpose}`,
+    subject: `${otp}, ${purpose}`,
     html: `
       <div style="font-family:ui-sans-serif,system-ui,-apple-system,sans-serif;max-width:420px;margin:0 auto;padding:32px 24px;color:#18181b">
         <div style="font-size:18px;font-weight:700;margin-bottom:4px">Conclick</div>
-        <p style="font-size:14px;color:#52525b;margin:16px 0 20px">${purpose} with this code — it expires in 10 minutes.</p>
+        <p style="font-size:14px;color:#52525b;margin:16px 0 20px">${purpose} with this code, it expires in 10 minutes.</p>
         <div style="font-size:32px;font-weight:800;letter-spacing:10px;text-align:center;background:#f4f4f5;border-radius:12px;padding:18px 0">${otp}</div>
         <p style="font-size:12px;color:#a1a1aa;margin-top:20px">If you didn't request this, you can safely ignore this email.</p>
       </div>`,
@@ -252,7 +252,7 @@ export async function sendFounderDailyDigest(email: string, sites: DigestSite[])
           <tr><td style="padding:2px 0;">Pageviews</td><td style="text-align:right;">${s.pageviews}</td></tr>
           <tr><td style="padding:2px 0;">Payments</td><td style="text-align:right;">${s.payments}</td></tr>
           <tr><td style="padding:2px 0;">Revenue</td><td style="text-align:right;font-weight:600;color:#15803d;">${digestMoney(s.revenue, s.currency)}</td></tr>
-          <tr><td style="padding:2px 0;">Top source</td><td style="text-align:right;">${s.topSource || '—'}</td></tr>
+          <tr><td style="padding:2px 0;">Top source</td><td style="text-align:right;">${s.topSource || ', '}</td></tr>
         </table>
         ${
           s.leak
@@ -276,7 +276,7 @@ export async function sendFounderDailyDigest(email: string, sites: DigestSite[])
         </a>
         <hr style="border: none; border-top: 1px solid #e4e4e7; margin: 32px 0;" />
         <p style="color: #a1a1aa; font-size: 12px;">
-          Conclick — Analytics that respect privacy ·
+          Conclick, Analytics that respect privacy ·
           <a href="${appUrl}/account/preferences" style="color: #a1a1aa;">manage digest</a>
         </p>
       </div>
@@ -343,7 +343,7 @@ export function renderHypeDigest(
               x.s.kind === 'traffic'
                 ? `Overall traffic on <b>${site}</b> is ${x.s.multiple}× its usual (${x.s.today} visitors)`
                 : x.s.isNew
-                  ? `New traffic from <b>${label}</b> on ${site} — ${x.s.today} visits today`
+                  ? `New traffic from <b>${label}</b> on ${site}, ${x.s.today} visits today`
                   : `<b>${label}</b> sent ${x.s.multiple}× its usual to ${site} (${x.s.today} visits)`;
             return `<div style="background:#f5f3ff;border:1px solid #ddd6fe;border-radius:10px;padding:10px 12px;margin-bottom:8px;font-size:13px;color:#4c1d95;">📈 ${text}</div>`;
           })
@@ -403,7 +403,7 @@ export function renderHypeDigest(
       <tr>
         ${statTile('Visitors', t.visitors.toLocaleString('en-US'), deltaChip(snapshot.deltas.vsYesterdayPct))}
         ${statTile('Pageviews', t.pageviews.toLocaleString('en-US'))}
-        ${statTile('Revenue', t.revenueMinor > 0 ? digestMoney(t.revenueMinor, t.currency) : '—')}
+        ${statTile('Revenue', t.revenueMinor > 0 ? digestMoney(t.revenueMinor, t.currency) : ', ')}
       </tr>
     </table>
     ${compareLine}
@@ -414,7 +414,7 @@ export function renderHypeDigest(
   </td></tr>
   <tr><td style="padding:18px 28px;border-top:1px solid #f1f1f4;">
     <p style="font-size:12px;color:#a1a1aa;margin:0;line-height:1.6;">
-      Conclick — privacy-friendly analytics. You get this because daily summaries are on.<br/>
+      Conclick, privacy-friendly analytics. You get this because daily summaries are on.<br/>
       <a href="${unsubscribeUrl}" style="color:#a1a1aa;">Unsubscribe</a> ·
       <a href="${appUrl}/account" style="color:#a1a1aa;">Notification settings</a>
     </p>
@@ -463,7 +463,7 @@ export function buildDigestText(
   const t = snapshot.totals;
   const lines: string[] = [];
   lines.push(
-    `Conclick — ${snapshot.dateLabel}`,
+    `Conclick, ${snapshot.dateLabel}`,
     '',
     narrative.subject,
     '',
@@ -489,7 +489,7 @@ export function buildDigestText(
   lines.push(
     `Visitors: ${t.visitors.toLocaleString('en-US')}${dyd != null ? ` (${dyd >= 0 ? '+' : ''}${dyd}% vs yesterday)` : ''}`,
     `Pageviews: ${t.pageviews.toLocaleString('en-US')}`,
-    `Revenue: ${t.revenueMinor > 0 ? digestMoney(t.revenueMinor, t.currency) : '—'}`,
+    `Revenue: ${t.revenueMinor > 0 ? digestMoney(t.revenueMinor, t.currency) : ', '}`,
   );
   if (snapshot.deltas.vsLastWeekPct != null)
     lines.push(

@@ -109,7 +109,7 @@ const CATALOG: CardDef[] = [
   {
     id: 'dodo',
     name: 'Dodo Payments',
-    desc: 'Live revenue with per-visitor attribution — checkout links are tagged automatically.',
+    desc: 'Live revenue with per-visitor attribution, checkout links are tagged automatically.',
     category: 'payments',
     tile: '#101013',
     Mark: DodoMark,
@@ -173,13 +173,13 @@ const SECTIONS: { id: Category; title: string; scope: string; sub: string }[] = 
     id: 'payments',
     title: 'Payments',
     scope: 'Per product',
-    sub: 'Each product connects its own gateway — revenue is attributed to that product’s traffic and never mixed.',
+    sub: 'Each product connects its own gateway, revenue is attributed to that product’s traffic and never mixed.',
   },
   {
     id: 'search',
     title: 'Search & analytics',
     scope: 'Per product',
-    sub: 'Read-only Google access per product — revoke anytime from settings or your Google account.',
+    sub: 'Read-only Google access per product, revoke anytime from settings or your Google account.',
   },
 ];
 
@@ -234,12 +234,12 @@ export function IntegrationsSettings() {
     const s = params.get('slack');
     if (!s) return;
     if (s === 'connected') {
-      toast('Slack connected — sent a welcome message to your channel.');
+      toast('Slack connected, sent a welcome message to your channel.');
       refetchChannels();
     } else if (s === 'not-configured') {
       toast('Slack isn’t set up on the server yet.');
     } else if (s === 'error') {
-      toast('Slack connection failed — please try again.');
+      toast('Slack connection failed, please try again.');
     }
     window.history.replaceState(null, '', '/account?tab=integrations');
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -346,8 +346,8 @@ export function IntegrationsSettings() {
       );
       toast(
         enabled
-          ? `${def.name} resumed — events will ingest again.`
-          : `${def.name} paused — incoming events are ignored until you resume.`,
+          ? `${def.name} resumed, events will ingest again.`
+          : `${def.name} paused, incoming events are ignored until you resume.`,
       );
     } catch (e: any) {
       toast(e?.message || 'Could not update the integration.');
@@ -394,7 +394,7 @@ export function IntegrationsSettings() {
     try {
       const config = type === 'telegram' ? { botToken, chatId } : { url };
       await post('/account/notification-channels', { type, config });
-      toast('Channel connected — a test message just landed there.');
+      toast('Channel connected, a test message just landed there.');
       setUrl('');
       setBotToken('');
       setChatId('');
@@ -440,20 +440,20 @@ export function IntegrationsSettings() {
       const res = await get(`/websites/${w.id}/google`, { lists: '1' });
       const hasLists = !!(res.gscSites?.length || res.ga4Properties?.length);
       if (!hasLists) {
-        toast(`No shared properties for ${w.name} yet — add the reader email above, then retry.`);
+        toast(`No shared properties for ${w.name} yet, add the reader email above, then retry.`);
       } else if (res.suggested?.gscSiteUrl || res.suggested?.ga4PropertyId) {
         await post(`/websites/${w.id}/google`, {
           gscSiteUrl: res.suggested.gscSiteUrl,
           ga4PropertyId: res.suggested.ga4PropertyId,
         });
-        toast(`Connected ${w.name} — using the property you shared.`);
+        toast(`Connected ${w.name}, using the property you shared.`);
       } else {
         // Shared, but no domain match — finish the pick in the product's settings.
-        toast('Properties found — choose which in the website’s Settings → Google.');
+        toast('Properties found, choose which in the website’s Settings → Google.');
         router.push(`/websites/${w.id}/settings`);
       }
     } catch (e: any) {
-      toast(e?.message || 'Could not reach Google — try again.');
+      toast(e?.message || 'Could not reach Google, try again.');
     } finally {
       setBusy(null);
       refetchOverview();
@@ -704,7 +704,7 @@ export function IntegrationsSettings() {
 
       {CATALOG.filter(visible).length === 0 && (
         <div className="mt-10 rounded-xl border border-dashed border-[hsl(0,0%,16%)] p-10 text-center text-sm text-muted-foreground">
-          Nothing matches — try a different search or filter.
+          Nothing matches, try a different search or filter.
         </div>
       )}
 
@@ -720,8 +720,8 @@ export function IntegrationsSettings() {
                 </DialogTitle>
                 <DialogDescription className="text-[12.5px] text-muted-foreground">
                   {manageDef.category === 'messaging'
-                    ? 'Workspace-wide — every connected channel receives the digests and alerts you enable.'
-                    : 'Per product — each product has its own connection.'}
+                    ? 'Workspace-wide, every connected channel receives the digests and alerts you enable.'
+                    : 'Per product, each product has its own connection.'}
                 </DialogDescription>
               </DialogHeader>
 
@@ -830,7 +830,7 @@ export function IntegrationsSettings() {
                         </Button>
                       </div>
                       <p className="text-[11px] text-muted-foreground">
-                        We send a test message before saving — a dead webhook is never stored.
+                        We send a test message before saving, a dead webhook is never stored.
                       </p>
                     </div>
                   )}
@@ -954,8 +954,8 @@ export function IntegrationsSettings() {
                           </button>
                         ))}
                       <p className="text-[11px] text-muted-foreground">
-                        You&apos;ll pick {manageDef.name} and finish in the product&apos;s settings
-                        — keys are validated live and stored encrypted.
+                        You&apos;ll pick {manageDef.name} and finish in the product&apos;s settings.
+                        Keys are validated live and stored encrypted.
                       </p>
                     </div>
                   )}
@@ -1010,8 +1010,8 @@ export function IntegrationsSettings() {
 
                   {overview?.googleConfigured === false ? (
                     <p className="text-[11.5px] text-amber-400/90">
-                      Google reader isn&apos;t set up on the server yet (GOOGLE_SERVICE_ACCOUNT_KEY)
-                      — connecting will be enabled once it is.
+                      Google reader isn&apos;t set up on the server yet
+                      (GOOGLE_SERVICE_ACCOUNT_KEY). Connecting will be enabled once it is.
                     </p>
                   ) : websites.filter(w => !w.google).length > 0 ? (
                     <div className="space-y-2.5">
@@ -1019,7 +1019,7 @@ export function IntegrationsSettings() {
                         Connect a product
                       </div>
 
-                      {/* The reader to add — shown once; same email for every product. */}
+                      {/* The reader to add, shown once; same email for every product. */}
                       <div className="rounded-lg border border-[hsl(0,0%,13%)] bg-[hsl(0,0%,9%)] p-3">
                         <div className="mb-2 text-[11px] text-muted-foreground">
                           Add this read-only reader in your{' '}
@@ -1087,7 +1087,7 @@ export function IntegrationsSettings() {
                           </button>
                         ))}
                       <p className="text-[11px] text-muted-foreground">
-                        Read-only — we only read the property you share, and you revoke by removing
+                        Read-only, we only read the property you share, and you revoke by removing
                         the reader in Google. No sign-in, no token.
                       </p>
                     </div>

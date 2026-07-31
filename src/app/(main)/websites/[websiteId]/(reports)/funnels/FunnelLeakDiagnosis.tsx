@@ -95,7 +95,7 @@ export function FunnelLeakDiagnosis({
 
   return (
     <div className="mt-3 animate-in fade-in overflow-hidden rounded-xl border border-[hsl(0,0%,12%)] bg-[hsl(0,0%,8%)] duration-300">
-      {/* Header — the leak summary, always visible */}
+      {/* Header, the leak summary, always visible */}
       <button
         type="button"
         onClick={() => canDiagnose && setOpen(o => !o)}

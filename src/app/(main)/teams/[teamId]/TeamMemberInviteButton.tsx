@@ -41,7 +41,7 @@ export function TeamMemberInviteButton({ teamId }: { teamId: string }) {
       queryClient.invalidateQueries({ queryKey: ['teams:invites', teamId] });
       toast(
         res?.emailSent === false
-          ? 'Invite created, but the email could not be sent — check the Resend domain.'
+          ? 'Invite created, but the email could not be sent, check the Resend domain.'
           : 'Invitation sent.',
       );
       setOpen(false);

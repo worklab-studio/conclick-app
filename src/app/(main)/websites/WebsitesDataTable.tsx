@@ -285,7 +285,7 @@ export function WebsitesDataTable({ userId, teamId }: { userId?: string; teamId?
 
   const renderGreeting = () => (
     <div className="text-zinc-400 text-lg">
-      Hey <span className="text-zinc-200 font-medium">{username}</span> — here&apos;s {range.phrase}
+      Hey <span className="text-zinc-200 font-medium">{username}</span>, here&apos;s {range.phrase}
       {websiteIds.length
         ? ` across ${websiteIds.length} ${websiteIds.length === 1 ? 'site' : 'sites'}`
         : ''}

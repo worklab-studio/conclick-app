@@ -24,7 +24,7 @@ export const FUNNEL_TEMPLATES: FunnelTemplate[] = [
     name: 'Signup funnel',
     label: 'Signup',
     icon: 'signup',
-    window: 10080, // 7 days — signup decisions take time
+    window: 10080, // 7 days, signup decisions take time
     steps: [
       { label: 'Landing', patterns: [/^\/$/, /home/, /index/] },
       { label: 'Pricing / features', patterns: [/pricing/, /plans?/, /features?/] },
@@ -39,7 +39,7 @@ export const FUNNEL_TEMPLATES: FunnelTemplate[] = [
     name: 'Checkout funnel',
     label: 'Checkout',
     icon: 'cart',
-    window: 60, // 1 hour — checkout is a single session
+    window: 60, // 1 hour, checkout is a single session
     steps: [
       { label: 'Product', patterns: [/product/, /shop/, /store/, /item/] },
       { label: 'Cart', patterns: [/cart/, /basket/, /bag/] },

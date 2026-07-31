@@ -20,7 +20,7 @@ import prisma from '@/lib/prisma';
 const VIEWPORT_W = 1280;
 const VIEWPORT_H = 900;
 const SCALE = 1.5; // crisp on retina without huge rasters on a 1GB machine
-const MAX_HEIGHT = 12000; // CSS px cap — long landing pages run 8-11k incl. footer
+const MAX_HEIGHT = 12000; // CSS px cap, long landing pages run 8-11k incl. footer
 const SCALE_DROP_HEIGHT = 8000; // beyond this, raster at 1.25x to keep memory bounded
 const NAV_TIMEOUT = 20_000;
 const CACHE_TTL = 24 * 60 * 60 * 1000;

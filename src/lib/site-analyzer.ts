@@ -167,7 +167,7 @@ export async function analyzeSite(rawDomain: string): Promise<SiteSuggestions> {
   const url = `https://${domain}/`;
   const home = await fetchHtml(url);
   if (home === null) {
-    return empty(url, "Couldn't reach your site to read it — check the domain is public.");
+    return empty(url, "Couldn't reach your site to read it, check the domain is public.");
   }
 
   const homeData = parsePage(home, domain);
@@ -255,7 +255,7 @@ export async function analyzeSite(rawDomain: string): Promise<SiteSuggestions> {
       note:
         goals.length || funnels.length
           ? undefined
-          : "We read your site but couldn't spot obvious CTAs — add steps manually, or turn on Autocapture and revisit.",
+          : "We read your site but couldn't spot obvious CTAs, add steps manually, or turn on Autocapture and revisit.",
     },
   };
 }

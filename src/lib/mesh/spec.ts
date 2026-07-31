@@ -109,11 +109,11 @@ function between(rnd: () => number, min: number, max: number): number {
 // anchored upper-right so it never sits under the word, which renders
 // bottom-left. The rest are jittered around these anchors.
 const ANCHORS: Array<[number, number]> = [
-  [0.74, 0.26], // 0 — brand, top right
-  [0.18, 0.2], // 1 — top left
-  [0.5, 0.78], // 2 — bottom center
-  [0.92, 0.72], // 3 — bottom right
-  [0.06, 0.62], // 4 — left, low
+  [0.74, 0.26], // 0, brand, top right
+  [0.18, 0.2], // 1, top left
+  [0.5, 0.78], // 2, bottom center
+  [0.92, 0.72], // 3, bottom right
+  [0.06, 0.62], // 4, left, low
 ];
 
 /**

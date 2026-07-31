@@ -65,7 +65,7 @@ export function DashboardSectionsPanel({ websiteId }: { websiteId: string }) {
     <DashboardTabContext.Provider value={{ openClickMap }}>
       <div className="overflow-hidden rounded-xl border border-[hsl(0,0%,12%)] bg-[hsl(0,0%,8%)]">
         <div className="flex items-center gap-1 overflow-x-auto border-b border-[hsl(0,0%,12%)] p-2">
-          {/* SEO is owner-only (live Search Console data) — hidden on public shares. */}
+          {/* SEO is owner-only (live Search Console data), hidden on public shares. */}
           {TABS.filter(t => !(isShare && t.id === 'seo')).map(t => {
             const Icon = t.icon;
             const active = t.id === tab;
@@ -90,7 +90,7 @@ export function DashboardSectionsPanel({ websiteId }: { websiteId: string }) {
         </div>
 
         {/* min-height keeps the panel from collapsing while the next tab/filter
-            loads — otherwise the document shortens and the scroll position jumps.
+            loads, otherwise the document shortens and the scroll position jumps.
             Keyed on the tab so each switch replays the entrance animation. */}
         <div
           key={tab}
@@ -128,7 +128,7 @@ export function DashboardSectionsPanel({ websiteId }: { websiteId: string }) {
           )}
         </div>
 
-        {/* Lets a visitor/customer row click open the session profile from here —
+        {/* Lets a visitor/customer row click open the session profile from here, 
           owner view only; the public share is read-only. */}
         {!isShare && <SessionModal websiteId={websiteId} />}
       </div>

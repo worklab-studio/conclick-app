@@ -85,8 +85,25 @@ const titleCase = (s: string) => s.replace(/[-_]+/g, ' ').replace(/\b\w/g, c => 
  * would silently glue two sentences together.
  */
 const ABBREVIATIONS = new Set([
-  'mr', 'mrs', 'ms', 'dr', 'prof', 'inc', 'ltd', 'co', 'corp', 'vs', 'etc',
-  'eg', 'ie', 'fig', 'approx', 'est', 'jr', 'sr', 'al',
+  'mr',
+  'mrs',
+  'ms',
+  'dr',
+  'prof',
+  'inc',
+  'ltd',
+  'co',
+  'corp',
+  'vs',
+  'etc',
+  'eg',
+  'ie',
+  'fig',
+  'approx',
+  'est',
+  'jr',
+  'sr',
+  'al',
 ]);
 
 /**
@@ -315,7 +332,7 @@ function CuratedLinks({ links, self }: { links: InternalLink[]; self: string }) 
       aria-label="More on this"
       className="mt-16 rounded-2xl border border-white/10 bg-white/[0.03] p-5 sm:p-6"
     >
-      {/* div, not a heading — template chrome shouldn't pollute the content
+      {/* div, not a heading, template chrome shouldn't pollute the content
           outline, same call RelatedLinks makes for "Read next". */}
       <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#8b88cf]">
         More on this
@@ -386,7 +403,13 @@ function Lede({ text }: { text: string }) {
   );
 }
 
-export function ContentArticle({ entry: e, children }: { entry: ContentEntry; children?: ReactNode }) {
+export function ContentArticle({
+  entry: e,
+  children,
+}: {
+  entry: ContentEntry;
+  children?: ReactNode;
+}) {
   const path = `/${pathForType(e.type, e.slug)}`;
   const crumb = CRUMB[e.type];
   const isComp = e.type === 'comparison' || e.type === 'alternative';
@@ -426,13 +449,16 @@ export function ContentArticle({ entry: e, children }: { entry: ContentEntry; ch
         <div
           aria-hidden
           className="pointer-events-none absolute inset-x-0 top-0 h-[480px]"
-          style={{ background: 'radial-gradient(50% 100% at 50% 0%, rgba(108,99,201,0.18), rgba(108,99,201,0) 70%)' }}
+          style={{
+            background:
+              'radial-gradient(50% 100% at 50% 0%, rgba(108,99,201,0.18), rgba(108,99,201,0) 70%)',
+          }}
         />
         {/* Same width+padding ramp as the mesh wrapper and the body container
             below (max-w-3xl / lg:max-w-6xl, px-6 sm:px-8) so the eyebrow,
             headline, standfirst and byline all sit on the prose column's left
             edge. The three used to disagree on BOTH max-width (3xl/5xl/6xl) and
-            padding (the hero alone had no sm:px-8) — invisible only while every
+            padding (the hero alone had no sm:px-8), invisible only while every
             hero child centred itself independently. Keeping the max-w-3xl floor
             rather than a flat max-w-6xl is deliberate: dropping it would stretch
             the tablet reading measure from 704px to ~957px. */}
@@ -454,7 +480,7 @@ export function ContentArticle({ entry: e, children }: { entry: ContentEntry; ch
           <SectionEyebrow label={crumb.eyebrow} />
           {/* mt-6 (not mt-5) and sm:text-[44px] match the /blogs index rhythm so
               the index and the article read as one product. 44px stays below the
-              index's 52px on purpose — the index is the cover, this is the
+              index's 52px on purpose, the index is the cover, this is the
               story. The mobile step stays at 30px: article titles run long and
               32px costs a whole extra line in a 325px content box.
 
@@ -470,13 +496,13 @@ export function ContentArticle({ entry: e, children }: { entry: ContentEntry; ch
           {/* The dek is metaDescription, not tldr: tldr now carries THE SHORT
               VERSION box below, and running the same sentences twice on one page
               is the kind of duplication that reads as filler to both humans and
-              extractors. metaDescription is already written to be exactly this —
+              extractors. metaDescription is already written to be exactly this, 
               one ~155-char summary line.
 
               Uncapped, like the h1 above it. A ~155-char line at 15px runs to
               about two lines at the full 952px content width, so the usual
               long-measure readability objection does not bite on a string this
-              short — and a narrower dek under a full-width headline reads as
+              short, and a narrower dek under a full-width headline reads as
               the indent the operator asked us to remove. */}
           <p className="mt-6 text-[15px] leading-relaxed text-zinc-400">{e.metaDescription}</p>
 
@@ -503,7 +529,7 @@ export function ContentArticle({ entry: e, children }: { entry: ContentEntry; ch
               spans the same span as the mesh art and as the article+index row
               below, so it reads as the divider closing the hero rather than a
               short line floating mid-page. The folio lands on that same right
-              edge, which is where the index rail ends — the alignment that makes
+              edge, which is where the index rail ends, the alignment that makes
               a lone "6 min read" (e.category is empty on 44 of the 68 pages)
               look placed rather than stranded. */}
           <div className="mt-8 flex flex-wrap items-center justify-between gap-x-6 gap-y-3 border-t border-white/[0.07] pt-6">
@@ -531,13 +557,13 @@ export function ContentArticle({ entry: e, children }: { entry: ContentEntry; ch
         </div>
       </section>
 
-      {/* Mesh hero — byte-for-byte the art on this page's OG card, so the link
+      {/* Mesh hero, byte-for-byte the art on this page's OG card, so the link
           preview and the page a reader lands on are visibly the same object. */}
       <div className="mx-auto w-full max-w-3xl px-6 pt-10 sm:px-8 lg:max-w-6xl">
         <MeshHero slug={meshKeyFor(e)} word={heroWordFor(e)} priority />
       </div>
 
-      {/* Body + sticky TOC — wider container so the content fills the frame
+      {/* Body + sticky TOC, wider container so the content fills the frame
           instead of leaving large empty gutters left and right. */}
       <div className="mx-auto w-full max-w-3xl px-6 py-14 sm:px-8 lg:max-w-6xl">
         <div className="lg:flex lg:gap-14">
@@ -557,7 +583,7 @@ export function ContentArticle({ entry: e, children }: { entry: ContentEntry; ch
                 {/* Left-aligned with the rest of the page now the hero is: a
                     centred FAQ heading would be the only centred block left on
                     an otherwise flush-left article. LeadMagnetCTA below keeps
-                    its own text-center on purpose — it is a self-contained card
+                    its own text-center on purpose, it is a self-contained card
                     and is also rendered from prose.tsx. */}
                 <div>
                   <SectionEyebrow icon={HelpCircle} label="FAQ" />
@@ -578,7 +604,7 @@ export function ContentArticle({ entry: e, children }: { entry: ContentEntry; ch
             {/* Citations sit above the author card: the claim, then who made it. */}
             <Sources sources={e.sources} />
 
-            {/* Author bio — E-E-A-T */}
+            {/* Author bio, E-E-A-T */}
             <div className="mt-12 flex items-start gap-4 rounded-xl border border-white/10 bg-white/[0.02] p-5">
               <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#6C63C9]/20 text-base font-semibold text-[#c7c5ec]">
                 {founderAuthor.name.charAt(0)}
@@ -591,7 +617,9 @@ export function ContentArticle({ entry: e, children }: { entry: ContentEntry; ch
                   </a>
                 </div>
                 <div className="text-xs text-zinc-500">{founderAuthor.role}</div>
-                <p className="mt-2 text-[13px] leading-relaxed text-zinc-400">{founderAuthor.bio}</p>
+                <p className="mt-2 text-[13px] leading-relaxed text-zinc-400">
+                  {founderAuthor.bio}
+                </p>
               </div>
             </div>
 
@@ -613,7 +641,7 @@ export function ContentArticle({ entry: e, children }: { entry: ContentEntry; ch
               collapses it to content height and `sticky top-24` silently stops
               working after ~500px of scroll. Same for any overflow-hidden on an
               ancestor. The `>= 3` guard stays even though every current page has
-              4+ h2s — it is what stops an empty 224px column plus a 56px gap
+              4+ h2s, it is what stops an empty 224px column plus a 56px gap
               from eating horizontal space on some future short page. */}
           {toc.length >= 3 && (
             <aside className="hidden lg:block lg:w-56 lg:shrink-0">

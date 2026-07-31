@@ -57,7 +57,7 @@ Add this snippet once to the <head> of every page (use the site-wide layout/temp
 ${script}
 
 Rules:
-- Skip if this exact snippet already exists — never add it twice.
+- Skip if this exact snippet already exists, never add it twice.
 - Keep the defer attribute.
 - Next.js/React: root layout head. Plain HTML: every page's <head>.
 
@@ -521,7 +521,7 @@ export function WebsiteAddModalContent({
       <div className="space-y-5">
         <StepBar step={Step.VERIFY} />
 
-        {/* Slim identity line — the reassurance, not a hero card. */}
+        {/* Slim identity line, the reassurance, not a hero card. */}
         <div className="flex items-center gap-2.5">
           <SiteIcon
             domain={createdWebsite?.domain}
@@ -543,7 +543,7 @@ export function WebsiteAddModalContent({
           </span>
         </div>
 
-        {/* One install path on screen at a time — the segment IS the heading. */}
+        {/* One install path on screen at a time, the segment IS the heading. */}
         <div
           className="flex rounded-lg border border-zinc-800 bg-[#18181b] p-1"
           role="tablist"
@@ -624,7 +624,7 @@ export function WebsiteAddModalContent({
         ) : (
           <div className="min-h-[176px] space-y-3">
             <p className="text-sm text-muted-foreground">
-              Pick your agent — a complete install prompt lands on your clipboard.
+              Pick your agent, a complete install prompt lands on your clipboard.
             </p>
             <div className="grid grid-cols-5 gap-2">
               {AI_TOOLS.map(tool => (
@@ -654,7 +654,7 @@ export function WebsiteAddModalContent({
               ))}
             </div>
             <p className="text-xs leading-relaxed text-muted-foreground">
-              The prompt carries your exact snippet, placement rules and a verify step — paste it
+              The prompt carries your exact snippet, placement rules and a verify step, paste it
               into the agent and it does the rest.
             </p>
           </div>
@@ -675,7 +675,7 @@ export function WebsiteAddModalContent({
           </div>
         ) : (
           /* The live line: one quiet sentence, not a panel. It IS the
-             verification — polling flips the modal to success on its own. */
+             verification, polling flips the modal to success on its own. */
           <div className="flex items-center gap-3 border-t border-zinc-800/70 pt-4">
             <span className="relative flex h-3 w-3 shrink-0 items-center justify-center">
               {verifyOutcome === 'error' ? (
@@ -691,17 +691,17 @@ export function WebsiteAddModalContent({
               {verifyOutcome === 'error' ? (
                 <>
                   Couldn&apos;t reach{' '}
-                  <span className="text-zinc-300">{createdWebsite?.domain}</span> — check it&apos;s
+                  <span className="text-zinc-300">{createdWebsite?.domain}</span>, check it&apos;s
                   public, then try again.
                 </>
               ) : verifyOutcome === 'notFound' ? (
                 <>
-                  Not seeing the snippet yet — make sure it&apos;s before{' '}
+                  Not seeing the snippet yet, make sure it&apos;s before{' '}
                   <code className="text-zinc-300">&lt;/head&gt;</code>, deployed, and a page was
                   opened once.
                 </>
               ) : (
-                <>Listening for your first visit — this updates by itself.</>
+                <>Listening for your first visit, this updates by itself.</>
               )}
             </p>
           </div>

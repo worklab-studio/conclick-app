@@ -43,16 +43,18 @@ export async function GET() {
     </item>`;
   };
 
-  const lastBuild = items.length ? rfc822(items[0].dateModified || items[0].datePublished) : new Date().toUTCString();
+  const lastBuild = items.length
+    ? rfc822(items[0].dateModified || items[0].datePublished)
+    : new Date().toUTCString();
 
   const body = `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
-    <title>${cdata('Conclick — Blog & Guides')}</title>
+    <title>${cdata('Conclick, Blog & Guides')}</title>
     <link>${base}/blogs</link>
     <atom:link href="${self}" rel="self" type="application/rss+xml" />
     <description>${cdata(
-      'Privacy-first analytics, heatmaps, funnels, and revenue attribution — written for bootstrapped founders and small SaaS teams.',
+      'Privacy-first analytics, heatmaps, funnels, and revenue attribution, written for bootstrapped founders and small SaaS teams.',
     )}</description>
     <language>en</language>
     <lastBuildDate>${lastBuild}</lastBuildDate>

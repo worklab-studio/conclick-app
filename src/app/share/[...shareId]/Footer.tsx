@@ -28,7 +28,7 @@ export function Footer() {
                   Analytics your visitors can trust
                 </h2>
                 <p className="mx-auto max-w-md text-[15px] leading-relaxed text-muted-foreground">
-                  Privacy-first web analytics — no cookies, no creepy tracking. Real-time visitors,
+                  Privacy-first web analytics, no cookies, no creepy tracking. Real-time visitors,
                   revenue, funnels, and full user journeys in one beautiful dashboard.
                 </p>
               </div>

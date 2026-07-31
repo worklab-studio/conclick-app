@@ -84,7 +84,12 @@ function categoryFor(e: ContentEntry): string {
  * is stripped to [a-z0-9-] rather than trusted.
  */
 function idSafe(s: string): string {
-  return s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'x';
+  return (
+    s
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '') || 'x'
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -188,9 +193,14 @@ export function BlogIndex({ eyebrow, titleLead, titleSerif, intro }: BlogIndexPr
     const row = counts.get(c.catId);
     if (row) row.rest += 1;
   }
-  const categories = [...counts.values()].sort((a, b) => b.total - a.total || a.label.localeCompare(b.label));
+  const categories = [...counts.values()].sort(
+    (a, b) => b.total - a.total || a.label.localeCompare(b.label),
+  );
 
-  const tabs = [{ label: 'All', id: 'all', total: cards.length }, ...categories.map(c => ({ label: c.label, id: c.id, total: c.total }))];
+  const tabs = [
+    { label: 'All', id: 'all', total: cards.length },
+    ...categories.map(c => ({ label: c.label, id: c.id, total: c.total })),
+  ];
 
   // Pre-render each card's mesh hero on the server, then hand the finished nodes
   // to BlogBoard (a client component) as props. The hero stays a server render;
@@ -263,7 +273,10 @@ export function BlogIndex({ eyebrow, titleLead, titleSerif, intro }: BlogIndexPr
         <div
           aria-hidden
           className="pointer-events-none absolute inset-x-0 top-0 h-[360px]"
-          style={{ background: 'radial-gradient(50% 100% at 50% 0%, rgba(108,99,201,0.16), rgba(108,99,201,0) 70%)' }}
+          style={{
+            background:
+              'radial-gradient(50% 100% at 50% 0%, rgba(108,99,201,0.16), rgba(108,99,201,0) 70%)',
+          }}
         />
         {/* Same container as the content grid below (max-w-6xl, px-6 sm:px-8) so
             the eyebrow/headline left edge lines up with the filter row and cards
@@ -290,7 +303,9 @@ export function BlogIndex({ eyebrow, titleLead, titleSerif, intro }: BlogIndexPr
               rail is just the second column and scrolls with everything else. */}
           <div>
             <section className="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
-              <h2 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-zinc-500">Fast facts</h2>
+              <h2 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-zinc-500">
+                Fast facts
+              </h2>
               <ol className="mt-4 space-y-5">
                 {blogFacts.map((f, i) => {
                   const linked = f.href && livePaths.has(f.href);
@@ -304,7 +319,9 @@ export function BlogIndex({ eyebrow, titleLead, titleSerif, intro }: BlogIndexPr
                         {String(i + 1).padStart(2, '0')}
                       </span>
                       <div className="min-w-0">
-                        <div className="text-[13px] font-semibold leading-snug text-white">{f.stat}</div>
+                        <div className="text-[13px] font-semibold leading-snug text-white">
+                          {f.stat}
+                        </div>
                         <p className="mt-1 text-[12.5px] leading-relaxed text-zinc-400">{f.text}</p>
                         {linked && (
                           <a
@@ -324,7 +341,9 @@ export function BlogIndex({ eyebrow, titleLead, titleSerif, intro }: BlogIndexPr
 
             {topicPills.length > 0 && (
               <section className="mt-6 rounded-2xl border border-white/10 bg-white/[0.03] p-5">
-                <h2 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-zinc-500">Topics</h2>
+                <h2 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-zinc-500">
+                  Topics
+                </h2>
                 <div className="mt-4 flex flex-wrap gap-2">
                   {topicPills.map(t =>
                     glossarySlugs.has(t) ? (
@@ -356,8 +375,9 @@ export function BlogIndex({ eyebrow, titleLead, titleSerif, intro }: BlogIndexPr
                 </span>
               </h2>
               <p className="mt-2 text-[12.5px] leading-relaxed text-zinc-300">
-                Conclick ties every Stripe, Paddle, Polar, Lemon Squeezy and Dodo payment back to the source, campaign
-                and funnel that earned it — with heatmaps and auto-detected funnels in the same dashboard.
+                Conclick ties every Stripe, Paddle, Polar, Lemon Squeezy and Dodo payment back to
+                the source, campaign and funnel that earned it, with heatmaps and auto-detected
+                funnels in the same dashboard.
               </p>
               <a
                 href={`${APP}/register`}
@@ -365,7 +385,9 @@ export function BlogIndex({ eyebrow, titleLead, titleSerif, intro }: BlogIndexPr
               >
                 Add My Website <ArrowRight className="h-4 w-4" />
               </a>
-              <p className="mt-2.5 text-[11.5px] text-zinc-400">14-day free trial. No card required.</p>
+              <p className="mt-2.5 text-[11.5px] text-zinc-400">
+                14-day free trial. No card required.
+              </p>
             </section>
           </div>
         </aside>

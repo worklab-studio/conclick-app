@@ -112,7 +112,7 @@ export function scoreConversionEvent(name: string, count: number, maxCount: numb
   let base: number;
   if (hasWord(label, CONVERSION)) base = 100;
   else if (hasWord(label, CONSIDERATION)) base = 40;
-  else base = 5; // unknown but non-noise — still a valid destination, just low priority
+  else base = 5; // unknown but non-noise, still a valid destination, just low priority
   if (/^submitted:/i.test(name)) base *= 1.5; // forms convert harder than clicks
   base += Math.round((count / Math.max(maxCount, 1)) * 25); // popularity bonus 0..25
   if (CHECKOUT_PATHS.some(c => label.includes(c.replace('/', '')))) base += 15;

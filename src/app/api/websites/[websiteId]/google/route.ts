@@ -24,7 +24,7 @@ import {
 // enforced here on both listing and save. Settings surface: every method needs
 // website-update permission (never reachable via a public share token).
 
-const GA4_LIST_CAP = 40; // stream lookups per list call — bounds Google calls
+const GA4_LIST_CAP = 40; // stream lookups per list call, bounds Google calls
 
 async function websiteHost(websiteId: string): Promise<string> {
   const website = await prisma.client.website.findUnique({

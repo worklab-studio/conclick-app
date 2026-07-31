@@ -15,7 +15,7 @@ export default function PrivacyPage() {
 
       <LegalH2>Privacy-first by design</LegalH2>
       <LegalP>
-        {`Conclick is built to measure websites without invading visitors' privacy. By default we set no advertising cookies, perform no cross-site or cross-device tracking, and never sell personal data. A visitor's IP address is used only momentarily to derive a coarse location (country and region) and a per-day session identifier — it is not stored.`}
+        {`Conclick is built to measure websites without invading visitors' privacy. By default we set no advertising cookies, perform no cross-site or cross-device tracking, and never sell personal data. A visitor's IP address is used only momentarily to derive a coarse location (country and region) and a per-day session identifier, it is not stored.`}
       </LegalP>
 
       <LegalH2>Data we process for website analytics</LegalH2>
@@ -25,18 +25,18 @@ export default function PrivacyPage() {
 
       <LegalH2>Data we collect to operate Conclick</LegalH2>
       <LegalP>
-        {`To provide the product to account holders (acting as a data controller) we collect: your name and email address (via our authentication provider), authentication identifiers, the billing details needed to process your subscription (handled by our payment processor — we never store full card numbers), the configuration of any notification channels you connect (Slack, Discord or Telegram delivery targets, stored encrypted), and, only if you choose to connect Google, OAuth tokens granting read-only access to your Google Search Console and Google Analytics data (stored encrypted).`}
+        {`To provide the product to account holders (acting as a data controller) we collect: your name and email address (via our authentication provider), authentication identifiers, the billing details needed to process your subscription (handled by our payment processor, we never store full card numbers), the configuration of any notification channels you connect (Slack, Discord or Telegram delivery targets, stored encrypted), and, only if you choose to connect Google, OAuth tokens granting read-only access to your Google Search Console and Google Analytics data (stored encrypted).`}
       </LegalP>
 
       <LegalH2>Service providers</LegalH2>
       <LegalP>{`We share data only with the providers needed to run Conclick:`}</LegalP>
       <LegalUL>
-        <li>Google — optional “Sign in with Google” authentication.</li>
-        <li>Dodo Payments — subscription billing and payment processing.</li>
-        <li>Resend — transactional and digest email.</li>
-        <li>Google — Search Console and Analytics data you authorize us to read (read-only).</li>
-        <li>Slack, Discord and Telegram — delivering the notifications you configure.</li>
-        <li>Fly.io — application hosting and database infrastructure.</li>
+        <li>Google, optional “Sign in with Google” authentication.</li>
+        <li>Dodo Payments, subscription billing and payment processing.</li>
+        <li>Resend, transactional and digest email.</li>
+        <li>Google, Search Console and Analytics data you authorize us to read (read-only).</li>
+        <li>Slack, Discord and Telegram, delivering the notifications you configure.</li>
+        <li>Fly.io, application hosting and database infrastructure.</li>
       </LegalUL>
 
       <LegalH2>Google user data</LegalH2>
@@ -62,7 +62,7 @@ export default function PrivacyPage() {
 
       <LegalH2>Security</LegalH2>
       <LegalP>
-        {`Sensitive credentials — payment, notification and Google tokens — are encrypted at rest. All traffic is served over TLS, and access to production systems is restricted.`}
+        {`Sensitive credentials, payment, notification and Google tokens, are encrypted at rest. All traffic is served over TLS, and access to production systems is restricted.`}
       </LegalP>
 
       <LegalH2>Your choices and rights</LegalH2>

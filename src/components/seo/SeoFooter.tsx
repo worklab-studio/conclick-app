@@ -76,7 +76,8 @@ export function SeoFooter() {
             See which traffic actually makes you money
           </p>
           <p className="mx-auto mt-4 max-w-md text-sm text-zinc-400">
-            Analytics, heatmaps, funnels, and revenue in one privacy-first dashboard. Free for 14 days, no card.
+            Analytics, heatmaps, funnels, and revenue in one privacy-first dashboard. Free for 14
+            days, no card.
           </p>
           <div className="mt-8">
             <HeroWebsiteInput />
@@ -84,7 +85,7 @@ export function SeoFooter() {
         </div>
       </section>
 
-      {/* Footer — same structure as the Framer homepage footer */}
+      {/* Footer, same structure as the Framer homepage footer */}
       <div className="border-t border-white/[0.07] px-8 py-14">
         <div className="flex flex-col gap-12 md:flex-row md:justify-between">
           <a href={site} className="flex h-fit items-center gap-2" aria-label="Conclick home">
@@ -98,7 +99,10 @@ export function SeoFooter() {
                 <ul className="space-y-3">
                   {c.links.map((l, i) => (
                     <li key={i}>
-                      <a href={l.href} className="text-sm text-zinc-400 transition-colors hover:text-white">
+                      <a
+                        href={l.href}
+                        className="text-sm text-zinc-400 transition-colors hover:text-white"
+                      >
                         {l.label}
                       </a>
                     </li>

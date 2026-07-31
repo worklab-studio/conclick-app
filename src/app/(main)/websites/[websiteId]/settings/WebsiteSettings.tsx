@@ -63,7 +63,7 @@ export function WebsiteSettings({ websiteId }: { websiteId: string; openExternal
 
       <Card id="google" className="scroll-mt-20 dark:border-[hsl(0,0%,12%)] dark:bg-[hsl(0,0%,8%)]">
         <CardHeader>
-          <CardTitle>Google — Search Console &amp; Analytics import</CardTitle>
+          <CardTitle>Google, Search Console &amp; Analytics import</CardTitle>
         </CardHeader>
         <CardContent>
           <GoogleIntegrationForm websiteId={websiteId} />

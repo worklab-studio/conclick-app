@@ -45,7 +45,7 @@ const HATCH =
 export default function SeoLayout({ children }: { children: ReactNode }) {
   return (
     <div className="relative min-h-screen bg-black text-white">
-      {/* Fixed hatched gutters — exactly like the homepage. */}
+      {/* Fixed hatched gutters, exactly like the homepage. */}
       <div
         aria-hidden
         className="pointer-events-none fixed inset-0 z-0"
