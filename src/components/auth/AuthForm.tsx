@@ -2,18 +2,22 @@
 
 import { useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Loader2 } from 'lucide-react';
+import { ArrowLeft, Eye, EyeOff, Loader2 } from 'lucide-react';
 import { authClient } from '@/lib/auth-client';
 
 type View = 'login' | 'register' | 'verify' | 'forgot' | 'reset';
 
 const inputCls =
   'w-full rounded-lg border border-zinc-800 bg-zinc-900/60 px-3.5 py-2.5 text-sm text-white ' +
-  'placeholder:text-zinc-600 outline-none transition-colors focus:border-indigo-500/60';
+  'placeholder:text-zinc-600 outline-none transition-colors focus:border-indigo-500/70 ' +
+  'focus:ring-2 focus:ring-indigo-500/20';
+
+const labelCls = 'mb-1.5 block text-xs font-medium text-zinc-400';
 
 const primaryCls =
   'flex w-full items-center justify-center gap-2 rounded-lg bg-indigo-500 px-4 py-2.5 text-sm ' +
-  'font-semibold text-white transition-colors hover:bg-indigo-400 disabled:opacity-50';
+  'font-semibold text-white transition-colors hover:bg-indigo-400 focus-visible:outline-none ' +
+  'focus-visible:ring-2 focus-visible:ring-indigo-400/60 disabled:opacity-50';
 
 function GoogleMark() {
   return (
@@ -38,9 +42,95 @@ function GoogleMark() {
   );
 }
 
+/** Password input with a visibility toggle (web.dev sign-in best practice). */
+function PasswordField({
+  id,
+  label,
+  value,
+  onChange,
+  autoComplete,
+  minLength,
+  hint,
+}: {
+  id: string;
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  autoComplete: 'current-password' | 'new-password';
+  minLength?: number;
+  hint?: string;
+}) {
+  const [shown, setShown] = useState(false);
+  return (
+    <div>
+      <label htmlFor={id} className={labelCls}>
+        {label}
+      </label>
+      <div className="relative">
+        <input
+          id={id}
+          name={id}
+          className={`${inputCls} pr-11`}
+          type={shown ? 'text' : 'password'}
+          required
+          minLength={minLength}
+          value={value}
+          onChange={e => onChange(e.target.value)}
+          autoComplete={autoComplete}
+          aria-describedby={hint ? `${id}-hint` : undefined}
+        />
+        <button
+          type="button"
+          onClick={() => setShown(s => !s)}
+          className="absolute right-1 top-1/2 -translate-y-1/2 rounded-md p-2 text-zinc-500 transition-colors hover:text-zinc-300"
+          aria-label={shown ? 'Hide password' : 'Show password on screen'}
+        >
+          {shown ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+        </button>
+      </div>
+      {hint ? (
+        <p id={`${id}-hint`} className="mt-1 text-[11px] text-zinc-600">
+          {hint}
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
+/** Six-digit code field — one-time-code autocomplete lets browsers offer the
+ *  emailed code directly, and numeric inputmode gives the right keypad. */
+function OtpField({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  return (
+    <div>
+      <label htmlFor="one-time-code" className={labelCls}>
+        6-digit code
+      </label>
+      <input
+        id="one-time-code"
+        name="one-time-code"
+        className={`${inputCls} text-center text-xl font-bold tracking-[0.5em]`}
+        inputMode="numeric"
+        pattern="[0-9]{6}"
+        maxLength={6}
+        required
+        autoComplete="one-time-code"
+        enterKeyHint="go"
+        placeholder="••••••"
+        value={value}
+        onChange={e => onChange(e.target.value.replace(/\D/g, ''))}
+        autoFocus
+      />
+    </div>
+  );
+}
+
 /**
  * The whole owned-auth surface: Google, email/password, OTP email
  * verification, and OTP password reset — no third-party widgets.
+ *
+ * Every field carries a real <label for>, a stable id/name, and the exact
+ * autocomplete token browsers and password managers expect. Without those,
+ * managers guess — which is how a share URL once landed in the email box.
  */
 export function AuthForm({
   mode,
@@ -90,7 +180,10 @@ export function AuthForm({
 
   const login = async (e: React.FormEvent) => {
     e.preventDefault();
+    setBusy(true);
+    setError(null);
     const res = await authClient.signIn.email({ email, password });
+    setBusy(false);
     if (res.error) {
       // Unverified accounts get bounced to the OTP screen instead of an error.
       if (res.error.status === 403) {
@@ -100,7 +193,7 @@ export function AuthForm({
         setNotice('Check your email — we sent you a 6-digit code.');
         return;
       }
-      setError(res.error.message || 'Invalid email or password.');
+      setError(res.error.message || 'That email and password don’t match.');
       return;
     }
     router.push(callbackURL);
@@ -160,29 +253,38 @@ export function AuthForm({
     if (ok) setNotice('New code sent.');
   };
 
-  const title =
+  const heading =
     view === 'login'
-      ? 'Welcome back'
+      ? { title: 'Welcome back', sub: 'Sign in to your dashboard.' }
       : view === 'register'
-        ? 'Create your account'
+        ? { title: 'Start tracking in minutes', sub: 'Free 14-day trial. No card required.' }
         : view === 'verify'
-          ? 'Verify your email'
+          ? { title: 'Verify your email', sub: `We sent a code to ${email}` }
           : view === 'forgot'
-            ? 'Reset your password'
-            : 'Choose a new password';
+            ? { title: 'Reset your password', sub: 'We’ll email you a 6-digit code.' }
+            : { title: 'Choose a new password', sub: `Code sent to ${email}` };
+
+  const isStep = view === 'verify' || view === 'forgot' || view === 'reset';
 
   return (
-    <div className="w-[380px] max-w-full rounded-2xl border border-zinc-800/80 bg-zinc-950/80 p-6 shadow-2xl backdrop-blur">
-      <h1 className="text-center text-lg font-semibold text-white">{title}</h1>
-      {view === 'login' || view === 'register' ? (
-        <p className="mt-1 text-center text-xs text-zinc-500">
-          Analytics that tells you what to fix.
-        </p>
-      ) : (
-        <p className="mt-1 text-center text-xs text-zinc-500">
-          {view === 'forgot' ? 'We’ll email you a 6-digit code.' : `Sent to ${email}`}
-        </p>
-      )}
+    <div>
+      {isStep ? (
+        <button
+          type="button"
+          onClick={() => {
+            setView(mode);
+            setError(null);
+            setNotice(null);
+            setOtp('');
+          }}
+          className="mb-4 inline-flex items-center gap-1.5 text-xs text-zinc-500 transition-colors hover:text-zinc-300"
+        >
+          <ArrowLeft className="h-3.5 w-3.5" /> Back
+        </button>
+      ) : null}
+
+      <h1 className="text-xl font-semibold tracking-tight text-white">{heading.title}</h1>
+      <p className="mt-1 text-[13px] text-zinc-500">{heading.sub}</p>
 
       {googleEnabled && (view === 'login' || view === 'register') && (
         <>
@@ -190,11 +292,11 @@ export function AuthForm({
             type="button"
             onClick={google}
             disabled={busy}
-            className={`${primaryCls} mt-5 !bg-white !text-zinc-900 hover:!bg-zinc-100`}
+            className="mt-6 flex w-full items-center justify-center gap-2.5 rounded-lg border border-zinc-800 bg-zinc-900/60 px-4 py-2.5 text-sm font-medium text-zinc-100 transition-colors hover:border-zinc-700 hover:bg-zinc-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400/60 disabled:opacity-50"
           >
             <GoogleMark /> Continue with Google
           </button>
-          <div className="my-4 flex items-center gap-3 text-[11px] uppercase tracking-wide text-zinc-600">
+          <div className="my-5 flex items-center gap-3 text-[11px] uppercase tracking-wide text-zinc-600">
             <span className="h-px flex-1 bg-zinc-800" /> or{' '}
             <span className="h-px flex-1 bg-zinc-800" />
           </div>
@@ -202,23 +304,30 @@ export function AuthForm({
       )}
 
       {view === 'login' && (
-        <form onSubmit={login} className="space-y-3">
-          <input
-            className={inputCls}
-            type="email"
-            required
-            placeholder="you@company.com"
-            value={email}
-            onChange={e => setEmail(e.target.value)}
-            autoComplete="email"
-          />
-          <input
-            className={inputCls}
-            type="password"
-            required
-            placeholder="Password"
+        <form onSubmit={login} className={`space-y-4 ${googleEnabled ? '' : 'mt-6'}`}>
+          <div>
+            <label htmlFor="email" className={labelCls}>
+              Email
+            </label>
+            <input
+              id="email"
+              name="email"
+              className={inputCls}
+              type="email"
+              required
+              placeholder="you@company.com"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              autoComplete="username"
+              enterKeyHint="next"
+              autoFocus
+            />
+          </div>
+          <PasswordField
+            id="current-password"
+            label="Password"
             value={password}
-            onChange={e => setPassword(e.target.value)}
+            onChange={setPassword}
             autoComplete="current-password"
           />
           <button type="submit" disabled={busy} className={primaryCls}>
@@ -227,15 +336,16 @@ export function AuthForm({
           <div className="flex items-center justify-between text-xs">
             <button
               type="button"
-              className="text-zinc-500 hover:text-zinc-300"
+              className="text-zinc-500 transition-colors hover:text-zinc-300"
               onClick={() => {
                 setView('forgot');
                 setError(null);
+                setNotice(null);
               }}
             >
               Forgot password?
             </button>
-            <a className="text-indigo-300 hover:text-indigo-200" href="/register">
+            <a className="text-indigo-300 transition-colors hover:text-indigo-200" href="/register">
               Create an account
             </a>
           </div>
@@ -243,40 +353,55 @@ export function AuthForm({
       )}
 
       {view === 'register' && (
-        <form onSubmit={register} className="space-y-3">
-          <input
-            className={inputCls}
-            type="text"
-            placeholder="Your name"
-            value={name}
-            onChange={e => setName(e.target.value)}
-            autoComplete="name"
-          />
-          <input
-            className={inputCls}
-            type="email"
-            required
-            placeholder="you@company.com"
-            value={email}
-            onChange={e => setEmail(e.target.value)}
-            autoComplete="email"
-          />
-          <input
-            className={inputCls}
-            type="password"
-            required
-            minLength={8}
-            placeholder="Password (8+ characters)"
+        <form onSubmit={register} className={`space-y-4 ${googleEnabled ? '' : 'mt-6'}`}>
+          <div>
+            <label htmlFor="name" className={labelCls}>
+              Name <span className="font-normal text-zinc-600">(optional)</span>
+            </label>
+            <input
+              id="name"
+              name="name"
+              className={inputCls}
+              type="text"
+              placeholder="Alex Rivera"
+              value={name}
+              onChange={e => setName(e.target.value)}
+              autoComplete="name"
+              enterKeyHint="next"
+            />
+          </div>
+          <div>
+            <label htmlFor="email" className={labelCls}>
+              Work email
+            </label>
+            <input
+              id="email"
+              name="email"
+              className={inputCls}
+              type="email"
+              required
+              placeholder="you@company.com"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              autoComplete="username"
+              enterKeyHint="next"
+            />
+          </div>
+          <PasswordField
+            id="new-password"
+            label="Password"
             value={password}
-            onChange={e => setPassword(e.target.value)}
+            onChange={setPassword}
             autoComplete="new-password"
+            minLength={8}
+            hint="At least 8 characters."
           />
           <button type="submit" disabled={busy} className={primaryCls}>
             {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : null} Create account
           </button>
           <div className="text-center text-xs text-zinc-500">
             Already have an account?{' '}
-            <a className="text-indigo-300 hover:text-indigo-200" href="/login">
+            <a className="text-indigo-300 transition-colors hover:text-indigo-200" href="/login">
               Sign in
             </a>
           </div>
@@ -284,78 +409,59 @@ export function AuthForm({
       )}
 
       {view === 'verify' && (
-        <form onSubmit={verify} className="mt-4 space-y-3">
-          <input
-            className={`${inputCls} text-center text-xl font-bold tracking-[0.5em]`}
-            inputMode="numeric"
-            pattern="[0-9]{6}"
-            maxLength={6}
-            required
-            placeholder="••••••"
-            value={otp}
-            onChange={e => setOtp(e.target.value.replace(/\D/g, ''))}
-            autoFocus
-          />
+        <form onSubmit={verify} className="mt-5 space-y-4">
+          <OtpField value={otp} onChange={setOtp} />
           <button type="submit" disabled={busy || otp.length !== 6} className={primaryCls}>
-            {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : null} Verify
+            {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : null} Verify and continue
           </button>
           <button
             type="button"
             disabled={busy}
             onClick={() => resend('email-verification')}
-            className="w-full text-center text-xs text-zinc-500 hover:text-zinc-300"
+            className="w-full text-center text-xs text-zinc-500 transition-colors hover:text-zinc-300"
           >
-            Resend code
+            Didn’t get it? Resend code
           </button>
         </form>
       )}
 
       {view === 'forgot' && (
-        <form onSubmit={sendReset} className="mt-4 space-y-3">
-          <input
-            className={inputCls}
-            type="email"
-            required
-            placeholder="you@company.com"
-            value={email}
-            onChange={e => setEmail(e.target.value)}
-            autoComplete="email"
-          />
+        <form onSubmit={sendReset} className="mt-5 space-y-4">
+          <div>
+            <label htmlFor="email" className={labelCls}>
+              Email
+            </label>
+            <input
+              id="email"
+              name="email"
+              className={inputCls}
+              type="email"
+              required
+              placeholder="you@company.com"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              autoComplete="username"
+              enterKeyHint="go"
+              autoFocus
+            />
+          </div>
           <button type="submit" disabled={busy} className={primaryCls}>
             {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : null} Send code
-          </button>
-          <button
-            type="button"
-            className="w-full text-center text-xs text-zinc-500 hover:text-zinc-300"
-            onClick={() => setView('login')}
-          >
-            Back to sign in
           </button>
         </form>
       )}
 
       {view === 'reset' && (
-        <form onSubmit={doReset} className="mt-4 space-y-3">
-          <input
-            className={`${inputCls} text-center text-xl font-bold tracking-[0.5em]`}
-            inputMode="numeric"
-            pattern="[0-9]{6}"
-            maxLength={6}
-            required
-            placeholder="••••••"
-            value={otp}
-            onChange={e => setOtp(e.target.value.replace(/\D/g, ''))}
-            autoFocus
-          />
-          <input
-            className={inputCls}
-            type="password"
-            required
-            minLength={8}
-            placeholder="New password (8+ characters)"
+        <form onSubmit={doReset} className="mt-5 space-y-4">
+          <OtpField value={otp} onChange={setOtp} />
+          <PasswordField
+            id="new-password"
+            label="New password"
             value={password}
-            onChange={e => setPassword(e.target.value)}
+            onChange={setPassword}
             autoComplete="new-password"
+            minLength={8}
+            hint="At least 8 characters."
           />
           <button type="submit" disabled={busy || otp.length !== 6} className={primaryCls}>
             {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : null} Set new password
@@ -364,15 +470,26 @@ export function AuthForm({
             type="button"
             disabled={busy}
             onClick={() => resend('forget-password')}
-            className="w-full text-center text-xs text-zinc-500 hover:text-zinc-300"
+            className="w-full text-center text-xs text-zinc-500 transition-colors hover:text-zinc-300"
           >
-            Resend code
+            Didn’t get it? Resend code
           </button>
         </form>
       )}
 
-      {error ? <p className="mt-3 text-center text-xs text-rose-400">{error}</p> : null}
-      {notice ? <p className="mt-3 text-center text-xs text-emerald-400/90">{notice}</p> : null}
+      {/* Live region so screen readers announce failures and confirmations. */}
+      <div aria-live="polite" className="empty:hidden">
+        {error ? (
+          <p className="mt-4 rounded-lg border border-rose-500/25 bg-rose-500/10 px-3 py-2 text-center text-xs text-rose-300">
+            {error}
+          </p>
+        ) : null}
+        {notice ? (
+          <p className="mt-4 rounded-lg border border-emerald-500/20 bg-emerald-500/10 px-3 py-2 text-center text-xs text-emerald-300">
+            {notice}
+          </p>
+        ) : null}
+      </div>
 
       <p className="mt-5 text-center text-[10px] leading-relaxed text-zinc-600">
         By continuing you agree to our{' '}
