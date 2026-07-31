@@ -87,6 +87,55 @@ export async function sendOtpEmail(email: string, otp: string, type: string) {
   });
 }
 
+export async function sendSnippetToDeveloper({
+  to,
+  fromName,
+  websiteId,
+  domain,
+}: {
+  to: string;
+  fromName: string;
+  websiteId: string;
+  domain: string;
+}) {
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://app.conclick.io';
+  const snippet = `<script defer src="${appUrl}/script.js" data-website-id="${websiteId}"></script>`;
+
+  if (process.env.NODE_ENV !== 'production' && !process.env.RESEND_API_KEY) {
+    // eslint-disable-next-line no-console
+    console.log(`[snippet-email] would send install instructions for ${domain} to ${to}`);
+    return;
+  }
+  const resend = resendClient();
+  if (!resend) return;
+
+  await resend.emails.send({
+    from: FROM_EMAIL,
+    to,
+    replyTo: undefined,
+    subject: `Please add one line to ${domain}`,
+    html: `
+      <div style="font-family:ui-sans-serif,system-ui,-apple-system,sans-serif;max-width:520px;margin:0 auto;padding:32px 24px;color:#18181b">
+        <p style="font-size:15px;line-height:1.6;margin:0 0 16px">Hi,</p>
+        <p style="font-size:15px;line-height:1.6;margin:0 0 16px">
+          ${escapeHtml(fromName)} is setting up analytics for
+          <strong>${escapeHtml(domain)}</strong> and needs this one line added to the site.
+        </p>
+        <p style="font-size:14px;line-height:1.6;margin:0 0 8px;color:#52525b">
+          Paste it just before the closing &lt;/head&gt; tag, on every page:
+        </p>
+        <pre style="background:#f4f4f5;border-radius:10px;padding:14px;font-size:12px;overflow-x:auto;white-space:pre-wrap;word-break:break-all;margin:0 0 18px">${escapeHtml(snippet)}</pre>
+        <p style="font-size:14px;line-height:1.6;margin:0 0 16px;color:#52525b">
+          That is the whole job. It loads asynchronously, sets no cookies, and adds well under
+          two kilobytes. Data appears the moment the first page loads.
+        </p>
+        <p style="font-size:12px;color:#a1a1aa;margin:24px 0 0">
+          Sent from Conclick because ${escapeHtml(fromName)} asked us to.
+        </p>
+      </div>`,
+  });
+}
+
 export async function sendPasswordResetEmail(email: string, resetToken: string) {
   const resetUrl = `${process.env.NEXT_PUBLIC_APP_URL}/reset-password?token=${resetToken}`;
 

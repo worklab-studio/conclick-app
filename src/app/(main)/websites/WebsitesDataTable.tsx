@@ -18,6 +18,7 @@ import {
 import { SortableContext, arrayMove, rectSortingStrategy, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { WebsiteAddButton } from './WebsiteAddButton';
+import { OnboardingEmptyState } from './OnboardingEmptyState';
 import { DateFilter } from '@/components/input/DateFilter';
 import { parseDateRange } from '@/lib/date';
 import { Globe } from 'lucide-react';
@@ -301,22 +302,24 @@ export function WebsitesDataTable({ userId, teamId }: { userId?: string; teamId?
     </div>
   );
 
-  const renderEmpty = () => (
-    <div className="flex flex-col items-center justify-center min-h-[400px] text-center p-8 border border-dashed border-zinc-800 rounded-2xl bg-zinc-950/50 mt-6">
-      <div className="bg-indigo-500/10 p-6 rounded-full mb-6 ring-1 ring-indigo-500/20 shadow-[0_0_15px_rgba(99,102,241,0.15)]">
-        <Globe className="text-indigo-500" size={64} strokeWidth={1.5} />
-      </div>
-      <h3 className="text-2xl font-bold text-white mb-3">No websites found</h3>
-      <p className="text-zinc-400 max-w-md mb-8 text-lg leading-relaxed">
-        Add your first website to track its analytics and revenue.
-        <br />
-        <span className="text-sm opacity-70">It only takes a few seconds to get started.</span>
-      </p>
-      <div className="transform scale-110">
+  // A brand new personal account has nothing to look at here, and a bare
+  // "no websites" wall is where signups died. Send them into the guided setup,
+  // which reads their site and shows real value before asking for an install.
+  const renderEmpty = () =>
+    teamId ? (
+      <div className="mt-6 flex min-h-[400px] flex-col items-center justify-center rounded-2xl border border-dashed border-zinc-800 bg-zinc-950/50 p-8 text-center">
+        <div className="mb-6 rounded-full bg-indigo-500/10 p-6 ring-1 ring-indigo-500/20">
+          <Globe className="text-indigo-500" size={64} strokeWidth={1.5} />
+        </div>
+        <h3 className="mb-3 text-2xl font-bold text-white">No websites yet</h3>
+        <p className="mb-8 max-w-md text-lg leading-relaxed text-zinc-400">
+          Add a website to this team to start tracking its analytics and revenue.
+        </p>
         <WebsiteAddButton teamId={teamId} />
       </div>
-    </div>
-  );
+    ) : (
+      <OnboardingEmptyState />
+    );
 
   return (
     <DataGrid
