@@ -24,7 +24,17 @@ export const auth = betterAuth({
     modelName: 'authSession',
     cookieCache: { enabled: true, maxAge: 60 }, // cut per-request DB hits
   },
-  account: { modelName: 'authAccount' },
+  account: {
+    modelName: 'authAccount',
+    accountLinking: {
+      // Google verifies its own emails, so trust it to attach to an existing
+      // account with the same address. Without this, a user who signed up
+      // with a password and later clicks "Continue with Google" (or the
+      // reverse) hits an "account not linked" dead end.
+      enabled: true,
+      trustedProviders: ['google'],
+    },
+  },
   verification: { modelName: 'authVerification' },
   emailAndPassword: {
     enabled: true,
