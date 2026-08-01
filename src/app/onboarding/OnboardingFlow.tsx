@@ -57,41 +57,37 @@ function StepRail({ step }: { step: Step }) {
     { key: 'install', label: 'Start tracking' },
   ];
   const activeIndex = items.findIndex(i => i.key === (step === 'done' ? 'install' : step));
+
+  // Only the current step is spelled out. Showing all three labels forced the
+  // rail wider than the narrow steps of the wizard, and every label wrapped.
   return (
-    <>
-      {/* Compact on phones: the full rail wraps to three ragged lines there. */}
-      <span className="text-[11px] font-medium text-zinc-500 sm:hidden">
-        Step {activeIndex + 1} of {items.length}
-        <span className="ml-1.5 text-zinc-300">{items[activeIndex]?.label}</span>
-      </span>
-      <ol className="hidden items-center gap-2 text-[11px] font-medium sm:flex">
-        {items.map((item, i) => {
-          const done = i < activeIndex;
-          const active = i === activeIndex;
-          return (
-            <li key={item.key} className="flex items-center gap-2">
-              <span
-                className={`flex items-center gap-1.5 rounded-full px-2.5 py-1 transition-colors ${
-                  active
-                    ? 'bg-white text-zinc-900'
-                    : done
-                      ? 'bg-emerald-500/15 text-emerald-300'
-                      : 'bg-white/[0.05] text-zinc-500'
-                }`}
-              >
-                {done ? (
-                  <Check className="h-3 w-3" />
-                ) : (
-                  <span className="text-[10px] font-bold">{i + 1}</span>
-                )}
-                {item.label}
-              </span>
-              {i < items.length - 1 ? <span className="h-px w-4 bg-white/10" /> : null}
-            </li>
-          );
-        })}
-      </ol>
-    </>
+    <div className="flex shrink-0 items-center gap-1.5">
+      {items.map((item, i) => {
+        const done = i < activeIndex;
+        const active = i === activeIndex;
+        return (
+          <div key={item.key} className="flex items-center gap-1.5">
+            <span
+              className={`flex items-center gap-1.5 rounded-full text-[11px] font-medium transition-all ${
+                active
+                  ? 'bg-white px-2.5 py-1 text-zinc-900'
+                  : done
+                    ? 'h-5 w-5 justify-center bg-emerald-500/20 text-emerald-300'
+                    : 'h-5 w-5 justify-center bg-white/[0.06] text-zinc-500'
+              }`}
+            >
+              {done ? (
+                <Check className="h-3 w-3" />
+              ) : (
+                <span className="text-[10px] font-bold">{i + 1}</span>
+              )}
+              {active ? <span className="whitespace-nowrap">{item.label}</span> : null}
+            </span>
+            {i < items.length - 1 ? <span className="h-px w-3 bg-white/10" /> : null}
+          </div>
+        );
+      })}
+    </div>
   );
 }
 
@@ -173,11 +169,9 @@ function DomainStep({
 }) {
   return (
     <div className="w-full">
-      <h1 className="text-[22px] font-bold tracking-tight text-white">
-        What are we tracking today?
-      </h1>
-      <p className="mt-1.5 text-sm text-zinc-400">
-        Type your domain and Conclick will read the site and set itself up. Nothing to install yet.
+      <h1 className="text-[20px] font-bold tracking-tight text-white">What are we tracking?</h1>
+      <p className="mt-1.5 text-[13px] leading-relaxed text-zinc-400">
+        Type your domain. Conclick reads the site and sets itself up, with nothing to install yet.
       </p>
 
       <form
@@ -190,7 +184,7 @@ function DomainStep({
         <label htmlFor="site-domain" className="mb-1.5 block text-xs font-medium text-zinc-400">
           Website address
         </label>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
           <div className="relative flex-1">
             <span className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-sm text-zinc-600">
               https://
@@ -208,18 +202,22 @@ function DomainStep({
               spellCheck={false}
             />
           </div>
-          <button type="submit" disabled={busy || !value.trim()} className={primaryBtn}>
+          <button
+            type="submit"
+            disabled={busy || !value.trim()}
+            className={`${primaryBtn} sm:w-auto sm:px-5`}
+          >
             {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-            {busy ? 'Reading' : 'Analyze'}
+            {busy ? 'Reading your site' : 'Analyze'}
           </button>
         </div>
         {error ? <p className="mt-2 text-xs text-rose-400">{error}</p> : null}
       </form>
 
-      <div className="mt-6 flex items-start gap-2.5 rounded-lg bg-white/[0.03] px-3.5 py-3 text-[12px] leading-relaxed text-zinc-500">
+      <div className="mt-5 flex items-start gap-2.5 rounded-lg bg-white/[0.03] px-3.5 py-2.5 text-[11.5px] leading-relaxed text-zinc-500">
         <Sparkles className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#8b88cf]" />
-        We look at your public homepage the way a visitor would, find the buttons and pages worth
-        measuring, and suggest the funnels to watch. It takes a few seconds.
+        We read your homepage like a visitor would, find the buttons and pages worth measuring, and
+        map your first funnel.
       </div>
     </div>
   );
@@ -227,11 +225,11 @@ function DomainStep({
 
 /* -------------------------------- step 2 --------------------------------- */
 
-function StatChip({ label, value }: { label: string; value: string }) {
+function StatRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-lg border border-white/[0.06] bg-white/[0.03] px-3 py-2">
-      <div className="text-[15px] font-bold leading-tight text-white">{value}</div>
-      <div className="text-[10.5px] uppercase tracking-wide text-zinc-500">{label}</div>
+    <div className="flex items-baseline justify-between gap-3 border-b border-white/[0.05] py-2 last:border-b-0">
+      <span className="text-[11.5px] text-zinc-500">{label}</span>
+      <span className="text-[14px] font-bold tabular-nums text-white">{value}</span>
     </div>
   );
 }
@@ -253,12 +251,14 @@ function AnalysisStep({
 }) {
   const { state, domain, goals, funnels, tech } = analysis;
 
+  // The domain is the emphasis, so it gets its own line rather than wrapping
+  // mid-phrase at whatever width the panel happens to be.
   const headline =
     state === 'unreachable'
-      ? `We could not read ${domain} from here`
+      ? 'We could not read this site from here'
       : state === 'rich'
-        ? `Here is what Conclick will track on ${domain}`
-        : `Conclick is ready for ${domain}`;
+        ? 'Here is what we will track'
+        : 'Conclick is ready for this site';
 
   const sub =
     state === 'unreachable'
@@ -310,10 +310,7 @@ function AnalysisStep({
           {seoLoading && !seo ? (
             <div className="mt-4">
               <div className="mb-2 h-3 w-24 animate-pulse rounded bg-white/[0.06]" />
-              <div className="grid grid-cols-2 gap-2">
-                <div className="h-[52px] animate-pulse rounded-lg bg-white/[0.04]" />
-                <div className="h-[52px] animate-pulse rounded-lg bg-white/[0.04]" />
-              </div>
+              <div className="h-[104px] animate-pulse rounded-lg bg-white/[0.04]" />
             </div>
           ) : null}
 
@@ -322,15 +319,15 @@ function AnalysisStep({
               <div className="mb-2 text-[11px] uppercase tracking-wide text-zinc-600">
                 {seo.isEarlyStage ? 'Your starting point' : 'Search profile'}
               </div>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="rounded-lg border border-white/[0.06] bg-white/[0.03] px-3 py-0.5">
                 {seo.domainRank !== null ? (
-                  <StatChip label="Domain rank" value={nf.format(seo.domainRank)} />
+                  <StatRow label="Domain rank" value={nf.format(seo.domainRank)} />
                 ) : null}
                 {seo.referringDomains !== null ? (
-                  <StatChip label="Referring domains" value={nf.format(seo.referringDomains)} />
+                  <StatRow label="Referring domains" value={nf.format(seo.referringDomains)} />
                 ) : null}
                 {seo.backlinks !== null ? (
-                  <StatChip label="Backlinks" value={nf.format(seo.backlinks)} />
+                  <StatRow label="Backlinks" value={nf.format(seo.backlinks)} />
                 ) : null}
               </div>
               {seo.isEarlyStage ? (
@@ -348,7 +345,8 @@ function AnalysisStep({
           <h1 className="text-[19px] font-bold leading-snug tracking-tight text-white">
             {headline}
           </h1>
-          <p className="mt-1.5 text-[13px] leading-relaxed text-zinc-400">{sub}</p>
+          <div className="mt-1 truncate text-[13px] font-medium text-[#b9b5f0]">{domain}</div>
+          <p className="mt-2 text-[12.5px] leading-relaxed text-zinc-400">{sub}</p>
 
           {state === 'rich' && goals.length > 0 ? (
             <div className="mt-5">
@@ -455,6 +453,14 @@ function InstallStep({
 }) {
   const { post } = useApi();
   const [guide, setGuide] = useState<InstallGuide>(() => guideForPlatform(tech?.platform));
+
+  // Put the detected platform first. It was appearing wherever the static list
+  // happened to place it, which on Astro meant the one tab that matters was
+  // stranded on a second row below eleven that do not.
+  const guides = useMemo(() => {
+    const detected = guideForPlatform(tech?.platform);
+    return [detected, ...GUIDES.filter(g => g.id !== detected.id)];
+  }, [tech?.platform]);
   const [copied, setCopied] = useState(false);
   const [sendState, setSendState] = useState<'idle' | 'open' | 'sending' | 'sent' | 'error'>(
     'idle',
@@ -508,9 +514,9 @@ function InstallStep({
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h1 className="text-[19px] font-bold tracking-tight text-white">
-            Add one line to {domain}
+            Add one line to your site
           </h1>
-          <p className="mt-1 text-[13px] text-zinc-400">
+          <p className="mt-1 text-[12.5px] text-zinc-400">
             {tech?.platformLabel && tech.platform !== 'custom'
               ? `We detected ${tech.platformLabel}, so these are the exact steps for it.`
               : 'Paste this in the head of your site, once, on every page.'}
@@ -523,19 +529,22 @@ function InstallStep({
       </div>
 
       {/* platform tabs */}
-      <div className="mt-5 flex flex-wrap gap-1.5">
-        {GUIDES.map(g => (
+      <div className="mt-4 flex flex-wrap gap-1">
+        {guides.map(g => (
           <button
             key={g.id}
             type="button"
             onClick={() => setGuide(g)}
-            className={`rounded-full border px-3 py-1.5 text-[12px] font-medium transition-colors ${
+            className={`rounded-full border px-2.5 py-1 text-[11.5px] font-medium transition-colors ${
               guide.id === g.id
                 ? 'border-zinc-600 bg-zinc-800 text-white'
                 : 'border-zinc-800 bg-transparent text-zinc-400 hover:text-zinc-200'
             }`}
           >
             {g.label}
+            {g.id === guideForPlatform(tech?.platform).id && tech?.platform !== 'custom' ? (
+              <span className="ml-1 text-[9px] uppercase tracking-wide opacity-60">detected</span>
+            ) : null}
           </button>
         ))}
       </div>
@@ -657,12 +666,16 @@ export function OnboardingFlow({
   appUrl,
   initialDomain,
   onFinished,
+  onStepChange,
 }: {
   appUrl: string;
   /** Prefill, e.g. the ?site= handed over by the marketing site. */
   initialDomain?: string;
   /** Called when the user lands in the product; the modal host closes on this. */
   onFinished?: (websiteId: string | null) => void;
+  /** Lets the host size the panel to the step: one field needs far less room
+   *  than the two column analysis. */
+  onStepChange?: (step: Step) => void;
 }) {
   const router = useRouter();
   const params = useSearchParams();
@@ -677,6 +690,10 @@ export function OnboardingFlow({
   const [live, setLive] = useState(false);
   const [seo, setSeo] = useState<Seo | null>(null);
   const [seoLoading, setSeoLoading] = useState(false);
+
+  useEffect(() => {
+    onStepChange?.(step);
+  }, [step, onStepChange]);
 
   const analyze = async () => {
     const value = domain.trim();
@@ -762,8 +779,11 @@ export function OnboardingFlow({
     <div className="w-full">
       {/* Header: brand is already visible behind the modal, so only the step
           rail earns its place here. */}
-      <div className="mb-5 flex items-center justify-between gap-4">
-        <h2 className="text-[13px] font-semibold text-zinc-300">Set up your website</h2>
+      {/* pr-8 keeps the rail clear of the dialog's absolute close button. */}
+      <div className="mb-5 flex items-center justify-between gap-4 pr-8">
+        <h2 className="hidden whitespace-nowrap text-[13px] font-semibold text-zinc-400 sm:block">
+          Set up your website
+        </h2>
         <StepRail step={step} />
       </div>
 

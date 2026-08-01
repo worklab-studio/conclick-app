@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useModified } from '@/components/hooks';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
@@ -26,6 +27,16 @@ export function OnboardingModal({
 }) {
   const router = useRouter();
   const { touch } = useModified();
+  const [step, setStep] = useState<'domain' | 'analysis' | 'install' | 'done'>('domain');
+
+  // The panel is sized to the step. One field stretched across 940px looked
+  // stranded; the two column analysis genuinely needs the room.
+  const width =
+    step === 'analysis'
+      ? 'sm:max-w-[920px]'
+      : step === 'install'
+        ? 'sm:max-w-[680px]'
+        : 'sm:max-w-[520px]';
 
   const handleFinished = (websiteId: string | null) => {
     onOpenChange(false);
@@ -37,12 +48,18 @@ export function OnboardingModal({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog
+      open={open}
+      onOpenChange={next => {
+        if (!next) setStep('domain');
+        onOpenChange(next);
+      }}
+    >
       <DialogContent
         // focus:outline-none: the dialog itself takes focus on open, and its
         // default ring drew a bright blue border around the whole panel that
         // read as an error state.
-        className="max-h-[92vh] w-[calc(100vw-2rem)] max-w-[940px] overflow-y-auto border-white/[0.08] bg-[hsl(0,0%,6.5%)] p-5 focus:outline-none sm:p-6"
+        className={`max-h-[92vh] w-[calc(100vw-2rem)] max-w-none overflow-y-auto border-white/[0.08] bg-[hsl(0,0%,6.5%)] p-5 transition-[max-width] duration-300 ease-out focus:outline-none sm:p-6 ${width}`}
         // The wizard owns focus: send it to the domain field rather than the
         // close button, since typing a domain is the only thing to do here.
         onOpenAutoFocus={e => {
@@ -53,7 +70,12 @@ export function OnboardingModal({
         }}
       >
         <DialogTitle className="sr-only">Set up your website</DialogTitle>
-        <OnboardingFlow appUrl={appUrl} initialDomain={initialDomain} onFinished={handleFinished} />
+        <OnboardingFlow
+          appUrl={appUrl}
+          initialDomain={initialDomain}
+          onFinished={handleFinished}
+          onStepChange={setStep}
+        />
       </DialogContent>
     </Dialog>
   );
