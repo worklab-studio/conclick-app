@@ -100,8 +100,11 @@ export default function middleware(req: NextRequest) {
   if (PROTECTED_PREFIXES.some(p => pathname === p || pathname.startsWith(p + '/'))) {
     if (!getSessionCookie(req)) {
       const url = req.nextUrl.clone();
+      // Carry the query along: a marketing link like /onboarding?site=acme.com
+      // must survive the login hop, or the domain we were handed is lost.
+      const target = pathname + (req.nextUrl.search || '');
       url.pathname = '/login';
-      url.search = pathname === '/dashboard' ? '' : `?next=${encodeURIComponent(pathname)}`;
+      url.search = pathname === '/dashboard' ? '' : `?next=${encodeURIComponent(target)}`;
       return NextResponse.redirect(url);
     }
   }
