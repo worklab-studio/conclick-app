@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import {
   ArrowRight,
   Check,
+  ChevronDown,
   Copy,
   ExternalLink,
   Loader2,
@@ -457,6 +458,7 @@ function InstallStep({
   // Put the detected platform first. It was appearing wherever the static list
   // happened to place it, which on Astro meant the one tab that matters was
   // stranded on a second row below eleven that do not.
+  const detectedId = guideForPlatform(tech?.platform).id;
   const guides = useMemo(() => {
     const detected = guideForPlatform(tech?.platform);
     return [detected, ...GUIDES.filter(g => g.id !== detected.id)];
@@ -511,46 +513,33 @@ function InstallStep({
 
   return (
     <div className="w-full">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h1 className="text-[19px] font-bold tracking-tight text-white">
-            Add one line to your site
-          </h1>
-          <p className="mt-1 text-[12.5px] text-zinc-400">
-            {tech?.platformLabel && tech.platform !== 'custom'
-              ? `We detected ${tech.platformLabel}, so these are the exact steps for it.`
-              : 'Paste this in the head of your site, once, on every page.'}
-          </p>
-        </div>
-        <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/25 bg-amber-500/10 px-2.5 py-1 text-[11px] font-medium text-amber-200">
-          <Radio className="h-3 w-3 animate-pulse" />
-          Listening for your first visit
-        </span>
-      </div>
+      <h1 className="text-[19px] font-bold tracking-tight text-white">Add one line to your site</h1>
 
-      {/* platform tabs */}
-      <div className="mt-4 flex flex-wrap gap-1">
-        {guides.map(g => (
-          <button
-            key={g.id}
-            type="button"
-            onClick={() => setGuide(g)}
-            className={`rounded-full border px-2.5 py-1 text-[11.5px] font-medium transition-colors ${
-              guide.id === g.id
-                ? 'border-zinc-600 bg-zinc-800 text-white'
-                : 'border-zinc-800 bg-transparent text-zinc-400 hover:text-zinc-200'
-            }`}
+      {/* One select instead of twelve chips: the chips wrapped to two rows and
+          made the densest screen in the product denser still. The detected
+          platform is preselected, so most people never open this. */}
+      <div className="mt-2.5 flex flex-wrap items-center gap-2 text-[12.5px] text-zinc-400">
+        <span>Instructions for</span>
+        <div className="relative">
+          <select
+            aria-label="Your platform"
+            value={guide.id}
+            onChange={e => setGuide(guides.find(g => g.id === e.target.value) || guide)}
+            className="appearance-none rounded-lg border border-zinc-800 bg-zinc-900/70 py-1.5 pl-3 pr-8 text-[12.5px] font-medium text-white outline-none transition-colors hover:border-zinc-700 focus:border-indigo-500/70"
           >
-            {g.label}
-            {g.id === guideForPlatform(tech?.platform).id && tech?.platform !== 'custom' ? (
-              <span className="ml-1 text-[9px] uppercase tracking-wide opacity-60">detected</span>
-            ) : null}
-          </button>
-        ))}
+            {guides.map(g => (
+              <option key={g.id} value={g.id}>
+                {g.label}
+                {g.id === detectedId && tech?.platform !== 'custom' ? '  (detected)' : ''}
+              </option>
+            ))}
+          </select>
+          <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-zinc-500" />
+        </div>
       </div>
 
       {/* snippet */}
-      <div className="mt-4 overflow-hidden rounded-xl border border-white/[0.07] bg-[hsl(0,0%,4%)]">
+      <div className="mt-5 overflow-hidden rounded-xl border border-white/[0.07] bg-[hsl(0,0%,4%)]">
         <div className="flex items-center justify-between border-b border-white/[0.06] px-3.5 py-2">
           <span className="text-[11px] uppercase tracking-wide text-zinc-600">Your snippet</span>
           <button
@@ -570,7 +559,7 @@ function InstallStep({
       </div>
 
       {/* steps */}
-      <ol className="mt-4 space-y-2">
+      <ol className="mt-5 space-y-2.5">
         {guide.steps.map((s, i) => (
           <li key={i} className="flex gap-2.5 text-[12.5px] leading-relaxed text-zinc-300">
             <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-white/[0.07] text-[10px] font-bold text-zinc-400">
@@ -582,7 +571,7 @@ function InstallStep({
       </ol>
 
       {guide.caveat ? (
-        <p className="mt-3 flex items-start gap-2 rounded-lg border border-amber-500/20 bg-amber-500/[0.07] px-3 py-2 text-[11.5px] text-amber-200/90">
+        <p className="mt-2.5 flex items-start gap-2 pl-6 text-[11.5px] leading-relaxed text-amber-200/70">
           <TriangleAlert className="mt-0.5 h-3.5 w-3.5 shrink-0" />
           {guide.caveat}
         </p>
@@ -600,7 +589,7 @@ function InstallStep({
       ) : null}
 
       {/* escape hatches */}
-      <div className="mt-6 border-t border-white/[0.06] pt-5">
+      <div className="mt-6 border-t border-white/[0.06] pt-4">
         {sendState === 'sent' ? (
           <div className="flex items-center gap-2 rounded-lg border border-emerald-500/20 bg-emerald-500/10 px-3.5 py-2.5 text-[12.5px] text-emerald-200">
             <Check className="h-4 w-4 shrink-0" />
@@ -642,16 +631,21 @@ function InstallStep({
             ) : null}
           </form>
         ) : (
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+            <span className="inline-flex items-center gap-1.5 text-[11.5px] font-medium text-amber-200/90">
+              <Radio className="h-3.5 w-3.5 animate-pulse" />
+              Listening for your first visit
+            </span>
+            <span className="hidden h-3 w-px bg-white/10 sm:block" />
             <button type="button" onClick={() => setSendState('open')} className={ghostBtn}>
-              <Mail className="h-4 w-4" /> Send this to my developer
+              <Mail className="h-4 w-4" /> Send to my developer
             </button>
             <button
               type="button"
               onClick={onSkip}
               className="text-xs text-zinc-500 hover:text-zinc-300"
             >
-              I will do this later, show me around
+              I will do this later
             </button>
           </div>
         )}
@@ -827,10 +821,12 @@ export function OnboardingFlow({
         <p className="mt-4 text-center text-xs text-rose-400">{error}</p>
       ) : null}
 
-      <div className="mt-5 flex items-center justify-center gap-2 text-[11px] text-zinc-600">
-        <ShieldAlert className="h-3.5 w-3.5" />
-        We only read publicly available pages, exactly like a visitor would.
-      </div>
+      {step === 'domain' || step === 'analysis' ? (
+        <div className="mt-5 flex items-center justify-center gap-2 text-[11px] text-zinc-600">
+          <ShieldAlert className="h-3.5 w-3.5" />
+          We only read publicly available pages, exactly like a visitor would.
+        </div>
+      ) : null}
     </div>
   );
 }
