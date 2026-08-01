@@ -50,9 +50,9 @@ export const GUIDES: InstallGuide[] = [
     steps: [
       'Install a header script plugin such as WPCode, or open your theme header.',
       'Paste the snippet just before the closing </head> tag.',
-      'Save and clear any caching plugin.',
+      'Save your changes.',
     ],
-    caveat: 'If you use a caching plugin, purge the cache so visitors get the new page.',
+    caveat: 'Running a caching plugin? Purge the cache so visitors get the updated page.',
   },
   {
     id: 'shopify',

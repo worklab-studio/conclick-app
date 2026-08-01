@@ -11,7 +11,6 @@ import {
   ExternalLink,
   Loader2,
   Mail,
-  Radio,
   ShieldAlert,
   Sparkles,
   TriangleAlert,
@@ -571,10 +570,15 @@ function InstallStep({
       </ol>
 
       {guide.caveat ? (
-        <p className="mt-2.5 flex items-start gap-2 pl-6 text-[11.5px] leading-relaxed text-amber-200/70">
-          <TriangleAlert className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-          {guide.caveat}
-        </p>
+        <div className="ml-[26px] mt-3 flex items-start gap-2 rounded-lg border-l-2 border-amber-500/40 bg-amber-500/[0.06] py-2 pl-3 pr-3">
+          <TriangleAlert className="mt-[3px] h-3.5 w-3.5 shrink-0 text-amber-400/80" />
+          <div>
+            <div className="text-[11px] font-semibold uppercase tracking-wide text-amber-300/80">
+              One thing to watch
+            </div>
+            <p className="mt-0.5 text-[12px] leading-relaxed text-zinc-300">{guide.caveat}</p>
+          </div>
+        </div>
       ) : null}
 
       {guide.docsUrl ? (
@@ -631,22 +635,37 @@ function InstallStep({
             ) : null}
           </form>
         ) : (
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-            <span className="inline-flex items-center gap-1.5 text-[11.5px] font-medium text-amber-200/90">
-              <Radio className="h-3.5 w-3.5 animate-pulse" />
-              Listening for your first visit
-            </span>
-            <span className="hidden h-3 w-px bg-white/10 sm:block" />
-            <button type="button" onClick={() => setSendState('open')} className={ghostBtn}>
-              <Mail className="h-4 w-4" /> Send to my developer
-            </button>
-            <button
-              type="button"
-              onClick={onSkip}
-              className="text-xs text-zinc-500 hover:text-zinc-300"
-            >
-              I will do this later
-            </button>
+          <div className="space-y-3.5">
+            {/* Status first, on its own line: it is information about what the
+                page is doing, not a third button competing with the actions. */}
+            <div className="flex items-start gap-2">
+              <span className="relative mt-[5px] flex h-2 w-2 shrink-0">
+                <span className="absolute h-full w-full animate-ping rounded-full bg-amber-400 opacity-60" />
+                <span className="relative h-2 w-2 rounded-full bg-amber-400" />
+              </span>
+              <div>
+                <div className="text-[12.5px] font-medium text-zinc-200">
+                  Listening for your first visit
+                </div>
+                <div className="text-[11.5px] text-zinc-500">
+                  Leave this open. The moment the snippet fires, this page will say so.
+                </div>
+              </div>
+            </div>
+
+            {/* Then the actions, with one clear primary and one quiet way out. */}
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+              <button type="button" onClick={() => setSendState('open')} className={ghostBtn}>
+                <Mail className="h-4 w-4" /> Send to my developer
+              </button>
+              <button
+                type="button"
+                onClick={onSkip}
+                className="text-xs text-zinc-500 underline-offset-2 transition-colors hover:text-zinc-300 hover:underline"
+              >
+                I will do this later
+              </button>
+            </div>
           </div>
         )}
       </div>
