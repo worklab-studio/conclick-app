@@ -1,7 +1,9 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { ArrowRight, Globe, MousePointerClick, Sparkles, TrendingDown } from 'lucide-react';
+import { OnboardingModal } from './OnboardingModal';
 
 const PREVIEW = [
   {
@@ -33,7 +35,17 @@ const PREVIEW = [
  * setup, which reads their site and proves value before any install.
  */
 export function OnboardingEmptyState() {
-  const router = useRouter();
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://app.conclick.io';
+  const params = useSearchParams();
+  const [open, setOpen] = useState(false);
+
+  // Deep link support: /websites?setup=1 (and the old /onboarding route, which
+  // redirects here) opens the wizard straight away.
+  const deepLinked = params.get('setup') === '1';
+  const initialDomain = params.get('site') || undefined;
+  useEffect(() => {
+    if (deepLinked) setOpen(true);
+  }, [deepLinked]);
 
   return (
     <div className="mt-6 overflow-hidden rounded-2xl border border-white/[0.07] bg-[hsl(0,0%,6.5%)]">
@@ -65,7 +77,7 @@ export function OnboardingEmptyState() {
 
             <button
               type="button"
-              onClick={() => router.push('/onboarding')}
+              onClick={() => setOpen(true)}
               className="mt-7 inline-flex items-center justify-center gap-2 rounded-lg bg-indigo-500 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-indigo-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400/60"
             >
               Analyze my website <ArrowRight className="h-4 w-4" />
@@ -97,6 +109,13 @@ export function OnboardingEmptyState() {
           </ul>
         </div>
       </div>
+
+      <OnboardingModal
+        open={open}
+        onOpenChange={setOpen}
+        appUrl={appUrl}
+        initialDomain={initialDomain}
+      />
     </div>
   );
 }

@@ -1,16 +1,17 @@
-import { Metadata } from 'next';
-import { Suspense } from 'react';
-import { OnboardingFlow } from './OnboardingFlow';
+import { redirect } from 'next/navigation';
 
-export default function Page() {
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://app.conclick.io';
-  return (
-    <Suspense>
-      <OnboardingFlow appUrl={appUrl} />
-    </Suspense>
-  );
+/**
+ * The wizard now lives in a dialog on the websites page rather than on its own
+ * route. This redirect keeps existing links working, including the marketing
+ * site's ?site= handoff, by forwarding straight into the modal.
+ */
+export default async function Page({
+  searchParams,
+}: {
+  searchParams: Promise<{ site?: string | string[] }>;
+}) {
+  const { site } = await searchParams;
+  const domain = Array.isArray(site) ? site[0] : site;
+  const query = domain ? `&site=${encodeURIComponent(domain)}` : '';
+  redirect(`/websites?setup=1${query}`);
 }
-
-export const metadata: Metadata = {
-  title: 'Set up your website',
-};

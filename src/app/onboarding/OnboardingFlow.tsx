@@ -16,7 +16,6 @@ import {
   TriangleAlert,
 } from 'lucide-react';
 import { useApi } from '@/components/hooks';
-import { Logo } from '@/components/logo';
 import { GUIDES, guideForPlatform, snippetFor, type InstallGuide } from '@/lib/install-guides';
 import type { DetectedTech } from '@/lib/tech-detect';
 
@@ -41,8 +40,9 @@ interface Seo {
 
 const nf = new Intl.NumberFormat('en');
 
-const card =
-  'rounded-2xl border border-white/[0.07] bg-[hsl(0,0%,6.5%)] shadow-[0_24px_70px_-24px_rgba(0,0,0,0.9)]';
+// Inside the modal the dialog already provides the surface, so the step
+// containers stay transparent and only structural cards keep a border.
+const card = 'rounded-xl border border-white/[0.07] bg-white/[0.02]';
 const primaryBtn =
   'inline-flex items-center justify-center gap-2 rounded-lg bg-indigo-500 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-indigo-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400/60 disabled:opacity-50';
 const ghostBtn =
@@ -172,7 +172,7 @@ function DomainStep({
   error: string | null;
 }) {
   return (
-    <div className={`${card} mx-auto w-full max-w-[520px] p-7 sm:p-8`}>
+    <div className="w-full">
       <h1 className="text-[22px] font-bold tracking-tight text-white">
         What are we tracking today?
       </h1>
@@ -277,7 +277,7 @@ function AnalysisStep({
   ];
 
   return (
-    <div className={`${card} mx-auto w-full max-w-[880px] overflow-hidden`}>
+    <div className={`${card} w-full overflow-hidden`}>
       <div className="grid gap-0 md:grid-cols-[minmax(0,0.85fr)_minmax(0,1fr)]">
         {/* left: their site + stack + seo */}
         <div className="border-b border-white/[0.06] p-6 md:border-b-0 md:border-r">
@@ -485,7 +485,7 @@ function InstallStep({
 
   if (live) {
     return (
-      <div className={`${card} mx-auto w-full max-w-[560px] p-8 text-center`}>
+      <div className="w-full py-6 text-center">
         <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-500/15 text-emerald-300 ring-1 ring-inset ring-emerald-500/30">
           <Check className="h-6 w-6" />
         </div>
@@ -504,7 +504,7 @@ function InstallStep({
   }
 
   return (
-    <div className={`${card} mx-auto w-full max-w-[820px] p-6 sm:p-7`}>
+    <div className="w-full">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h1 className="text-[19px] font-bold tracking-tight text-white">
@@ -653,13 +653,23 @@ function InstallStep({
 
 /* --------------------------------- flow ---------------------------------- */
 
-export function OnboardingFlow({ appUrl }: { appUrl: string }) {
+export function OnboardingFlow({
+  appUrl,
+  initialDomain,
+  onFinished,
+}: {
+  appUrl: string;
+  /** Prefill, e.g. the ?site= handed over by the marketing site. */
+  initialDomain?: string;
+  /** Called when the user lands in the product; the modal host closes on this. */
+  onFinished?: (websiteId: string | null) => void;
+}) {
   const router = useRouter();
   const params = useSearchParams();
   const { post, get } = useApi();
 
   const [step, setStep] = useState<Step>('domain');
-  const [domain, setDomain] = useState(params.get('site') || '');
+  const [domain, setDomain] = useState(initialDomain || params.get('site') || '');
   const [analysis, setAnalysis] = useState<Analysis | null>(null);
   const [websiteId, setWebsiteId] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -741,19 +751,19 @@ export function OnboardingFlow({ appUrl }: { appUrl: string }) {
   }, [step, websiteId, live, get]);
 
   const goToDashboard = () => {
+    if (onFinished) {
+      onFinished(websiteId);
+      return;
+    }
     router.push(websiteId ? `/websites/${websiteId}` : '/websites');
   };
 
   return (
-    <div
-      className="min-h-screen w-full px-4 py-8 sm:px-6"
-      style={{
-        background:
-          'radial-gradient(1100px 520px at 50% -10%, rgba(94,91,164,0.12), transparent 62%), hsl(0, 0%, 4%)',
-      }}
-    >
-      <div className="mx-auto mb-8 flex max-w-[880px] items-center justify-between gap-4">
-        <Logo className="h-7 w-auto" />
+    <div className="w-full">
+      {/* Header: brand is already visible behind the modal, so only the step
+          rail earns its place here. */}
+      <div className="mb-5 flex items-center justify-between gap-4">
+        <h2 className="text-[13px] font-semibold text-zinc-300">Set up your website</h2>
         <StepRail step={step} />
       </div>
 
@@ -794,10 +804,10 @@ export function OnboardingFlow({ appUrl }: { appUrl: string }) {
       ) : null}
 
       {error && step !== 'domain' ? (
-        <p className="mx-auto mt-4 max-w-[880px] text-center text-xs text-rose-400">{error}</p>
+        <p className="mt-4 text-center text-xs text-rose-400">{error}</p>
       ) : null}
 
-      <div className="mx-auto mt-8 flex max-w-[880px] items-center justify-center gap-2 text-[11px] text-zinc-600">
+      <div className="mt-5 flex items-center justify-center gap-2 text-[11px] text-zinc-600">
         <ShieldAlert className="h-3.5 w-3.5" />
         We only read publicly available pages, exactly like a visitor would.
       </div>
