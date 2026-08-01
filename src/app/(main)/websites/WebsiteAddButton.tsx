@@ -11,8 +11,10 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 export function WebsiteAddButton({ teamId, onSave }: { teamId: string; onSave?: () => void }) {
+  const router = useRouter();
   const { formatMessage, labels, messages } = useMessages();
   const { toast } = useToast();
   const { touch } = useModified();
@@ -32,6 +34,22 @@ export function WebsiteAddButton({ teamId, onSave }: { teamId: string; onSave?: 
       setHasSaved(false);
     }
   };
+
+  // Personal websites go through the guided wizard, the same one the empty
+  // state opens. Having two different "add a website" experiences depending on
+  // whether you already had one was the inconsistency here. Teams keep the
+  // plain form, since the wizard has no team concept.
+  if (!teamId) {
+    return (
+      <Button
+        className="gap-2 border-0 bg-[#5e5ba4] text-white hover:bg-[#4e4b95]"
+        onClick={() => router.push('/websites?setup=1', { scroll: false })}
+      >
+        <Plus className="h-4 w-4" />
+        {formatMessage(labels.addWebsite)}
+      </Button>
+    );
+  }
 
   return (
     <Dialog open={open} onOpenChange={val => !val && handleClose()}>

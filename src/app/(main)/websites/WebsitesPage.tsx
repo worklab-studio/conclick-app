@@ -1,6 +1,8 @@
 'use client';
+import { Suspense } from 'react';
 import { WebsitesDataTable } from './WebsitesDataTable';
 import { WebsiteAddButton } from './WebsiteAddButton';
+import { OnboardingModal } from './OnboardingModal';
 import { useMessages, useNavigation } from '@/components/hooks';
 
 export function WebsitesPage() {
@@ -18,6 +20,14 @@ export function WebsitesPage() {
         </div>
         <WebsitesDataTable teamId={teamId} />
       </div>
+
+      {/* One wizard for the whole page, opened by the ?setup= param from the
+          empty state, the header button, or an unfinished site's card. */}
+      {!teamId ? (
+        <Suspense>
+          <OnboardingModal />
+        </Suspense>
+      ) : null}
     </div>
   );
 }

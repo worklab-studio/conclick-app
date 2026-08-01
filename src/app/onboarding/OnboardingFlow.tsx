@@ -678,26 +678,37 @@ function InstallStep({
 export function OnboardingFlow({
   appUrl,
   initialDomain,
+  resumeWebsite,
   onFinished,
   onStepChange,
+  onWebsiteCreated,
 }: {
   appUrl: string;
   /** Prefill, e.g. the ?site= handed over by the marketing site. */
   initialDomain?: string;
+  /** Jump straight to the install step for a site that already exists, so
+   *  someone who closed the wizard mid-setup can pick the snippet back up
+   *  instead of starting over or hunting through settings. */
+  resumeWebsite?: { id: string; domain: string } | null;
   /** Called when the user lands in the product; the modal host closes on this. */
   onFinished?: (websiteId: string | null) => void;
   /** Lets the host size the panel to the step: one field needs far less room
    *  than the two column analysis. */
   onStepChange?: (step: Step) => void;
+  /** Fired the moment a site exists, so the host can refresh the list behind
+   *  the modal even if the wizard is later abandoned. */
+  onWebsiteCreated?: (websiteId: string) => void;
 }) {
   const router = useRouter();
   const params = useSearchParams();
   const { post, get } = useApi();
 
-  const [step, setStep] = useState<Step>('domain');
-  const [domain, setDomain] = useState(initialDomain || params.get('site') || '');
+  const [step, setStep] = useState<Step>(resumeWebsite ? 'install' : 'domain');
+  const [domain, setDomain] = useState(
+    resumeWebsite?.domain || initialDomain || params.get('site') || '',
+  );
   const [analysis, setAnalysis] = useState<Analysis | null>(null);
-  const [websiteId, setWebsiteId] = useState<string | null>(null);
+  const [websiteId, setWebsiteId] = useState<string | null>(resumeWebsite?.id || null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [live, setLive] = useState(false);
@@ -707,6 +718,20 @@ export function OnboardingFlow({
   useEffect(() => {
     onStepChange?.(step);
   }, [step, onStepChange]);
+
+  useEffect(() => {
+    if (!resumeWebsite?.domain) return;
+    let active = true;
+    post('/onboarding/analyze', { domain: resumeWebsite.domain })
+      .then((res: Analysis) => {
+        if (active && res?.tech) setAnalysis(res);
+      })
+      .catch(() => undefined);
+    return () => {
+      active = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [resumeWebsite?.domain]);
 
   const analyze = async () => {
     const value = domain.trim();
@@ -742,12 +767,32 @@ export function OnboardingFlow({
     if (!analysis) return;
     setBusy(true);
     try {
+      // Reuse a site the user already has for this domain. Without this,
+      // running the wizard twice (easy to do after abandoning it) silently
+      // created a second card for the same site.
+      const existing: any = await get('/me/websites', { search: analysis.domain, pageSize: 25 })
+        .then((r: any) =>
+          (r?.data || []).find(
+            (w: any) => (w.domain || '').toLowerCase() === analysis.domain.toLowerCase(),
+          ),
+        )
+        .catch(() => null);
+
+      if (existing?.id) {
+        setWebsiteId(existing.id);
+        onWebsiteCreated?.(existing.id);
+        setStep('install');
+        setBusy(false);
+        return;
+      }
+
       const site: any = await post('/websites', {
         name: analysis.brand?.title?.slice(0, 100) || analysis.domain,
         domain: analysis.domain,
       });
       if (site?.id) {
         setWebsiteId(site.id);
+        onWebsiteCreated?.(site.id);
         setStep('install');
       } else {
         throw new Error('no id');

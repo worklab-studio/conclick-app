@@ -375,12 +375,24 @@ export function WebsiteCard({
             <div className="relative h-[60px] w-full">
               <div className="absolute inset-x-0 bottom-4 border-t border-dashed border-zinc-700/50" />
               <div className="absolute inset-0 flex items-center justify-center gap-1.5 text-muted-foreground">
-                <Globe className="h-3.5 w-3.5 opacity-60" />
-                <span className="text-xs">
-                  {connected === false
-                    ? 'Add your tracking code to start'
-                    : `No visits in ${r.phrase}`}
-                </span>
+                {connected === false ? (
+                  // Was dead text, which left anyone who closed the wizard
+                  // mid-setup with no way back to their snippet.
+                  <Link
+                    href={`/websites?setup=${website.id}`}
+                    scroll={false}
+                    onClick={e => e.stopPropagation()}
+                    className="inline-flex items-center gap-1.5 rounded-lg border border-amber-500/25 bg-amber-500/10 px-3 py-1.5 text-xs font-medium text-amber-200 transition-colors hover:border-amber-500/40 hover:bg-amber-500/15"
+                  >
+                    <Globe className="h-3.5 w-3.5" />
+                    Finish setup, add your tracking code
+                  </Link>
+                ) : (
+                  <>
+                    <Globe className="h-3.5 w-3.5 opacity-60" />
+                    <span className="text-xs">{`No visits in ${r.phrase}`}</span>
+                  </>
+                )}
               </div>
             </div>
           )}
