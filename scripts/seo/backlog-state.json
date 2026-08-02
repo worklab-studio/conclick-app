@@ -126,6 +126,19 @@
       "slug": "best-ai-website-analytics",
       "published_at": "2026-07-30T04:07:11.671Z"
     },
+    "best attribution software for saas": {
+      "status": "skipped",
+      "reason": "cannibalises guides/revenue-attribution-tools (same tools + same buyer intent)"
+    },
+    "best data analytics tools": {
+      "status": "skipped",
+      "reason": "too broad/off-category: data analytics = BI/warehouse, not web analytics; would cannibalise existing web-analytics roundups"
+    },
+    "best heatmap tool for analytics": {
+      "status": "published",
+      "slug": "best-heatmap-tool-for-analytics",
+      "published_at": "2026-08-02T04:10:34.768Z"
+    },
     "best way to scroll through thick data": {
       "status": "needs-human"
     },
