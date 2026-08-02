@@ -1,4 +1,8 @@
 html body {
-  --primary-color: #147af3;
+  /* Conclick violet, not the upstream Umami blue (#147af3). react-zen reads
+     this token in 34 places (calendar selection, primary buttons, toggle
+     groups, focus rings), so it is the single switch that stops those controls
+     rendering in another product's accent colour. */
+  --primary-color: #5e5ba4;
   --primary-font-color: var(--light-color);
 }

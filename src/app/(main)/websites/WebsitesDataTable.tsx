@@ -282,15 +282,29 @@ export function WebsitesDataTable({ userId, teamId }: { userId?: string; teamId?
     return map;
   }, [batch]);
 
-  const username = user?.displayName || user?.username || 'User';
+  // First name only, and title-cased: the raw record is whatever someone typed
+  // at signup ("deepak yadav"), and greeting them with it verbatim reads like a
+  // mail merge rather than a product.
+  const rawName = user?.displayName || user?.username || '';
+  const firstName = rawName.trim().split(/[\s@]+/)[0] || '';
+  const greetingName = firstName ? firstName.charAt(0).toUpperCase() + firstName.slice(1) : 'there';
 
-  const renderGreeting = () => (
-    <div className="text-zinc-400 text-lg">
-      Hey <span className="text-zinc-200 font-medium">{username}</span>, here&apos;s {range.phrase}
-      {websiteIds.length
-        ? ` across ${websiteIds.length} ${websiteIds.length === 1 ? 'site' : 'sites'}`
-        : ''}
-      .
+  // With no websites there is no window to report on, so the greeting states
+  // the next step instead of promising numbers the page cannot show.
+  const renderGreeting = ({ isEmpty }: { isEmpty: boolean }) => (
+    <div className="text-lg text-zinc-400">
+      Hey <span className="font-medium text-zinc-200">{greetingName}</span>,{' '}
+      {isEmpty ? (
+        <>let&apos;s get your first site connected.</>
+      ) : (
+        <>
+          here&apos;s {range.phrase}
+          {websiteIds.length
+            ? ` across ${websiteIds.length} ${websiteIds.length === 1 ? 'site' : 'sites'}`
+            : ''}
+          .
+        </>
+      )}
     </div>
   );
 
@@ -326,6 +340,7 @@ export function WebsitesDataTable({ userId, teamId }: { userId?: string; teamId?
       query={queryResult}
       allowSearch
       allowPaging
+      hideControlsWhenEmpty
       renderGreeting={renderGreeting}
       renderActions={renderActions}
       renderEmpty={renderEmpty}

@@ -23,8 +23,14 @@ export interface DataGridProps {
   allowPaging?: boolean;
   autoFocus?: boolean;
   renderActions?: () => ReactNode;
-  renderGreeting?: () => ReactNode;
+  renderGreeting?: (opts: { isEmpty: boolean }) => ReactNode;
   renderEmpty?: () => ReactNode;
+  /**
+   * Drop the search box and action controls once we know the list is empty.
+   * A filter that can only ever filter nothing is noise, and it makes a first
+   * run look like a broken dashboard rather than a starting point.
+   */
+  hideControlsWhenEmpty?: boolean;
   children: ReactNode | ((data: any) => ReactNode);
 }
 
@@ -37,6 +43,7 @@ export function DataGrid({
   renderActions,
   renderGreeting,
   renderEmpty = () => <Empty />,
+  hideControlsWhenEmpty,
   children,
 }: DataGridProps) {
   const { formatMessage, labels } = useMessages();
@@ -65,24 +72,32 @@ export function DataGrid({
 
   const isEmpty = !data || (Array.isArray(data) ? data.length === 0 : data.count === 0);
 
+  // Only once the query has actually resolved, so the controls don't flash in
+  // and out while the first page loads. A live search term keeps them mounted
+  // even with no results, otherwise there is no way to clear the search.
+  const confirmedEmpty = !isLoading && !!data && isEmpty && !search;
+  const showControls = allowSearch && !(hideControlsWhenEmpty && confirmedEmpty);
+
   return (
     <Column gap="4" minHeight="300px">
-      {allowSearch && (
+      {(renderGreeting || showControls) && (
         <Row alignItems="center" justifyContent="space-between" wrap="wrap" gap>
-          {renderGreeting && renderGreeting()}
-          <div className="flex items-center gap-4 w-full md:w-auto md:ml-auto mt-4 md:mt-0">
-            <div className="w-full md:w-64">
-              <SearchField
-                className="rounded-lg border-none bg-background dark:bg-[hsl(0,0%,8%)] ring-0 outline-none w-full"
-                value={search}
-                onSearch={handleSearch}
-                delay={searchDelay || DEFAULT_SEARCH_DELAY}
-                autoFocus={autoFocus}
-                placeholder={formatMessage(labels.search)}
-              />
+          {renderGreeting?.({ isEmpty: confirmedEmpty })}
+          {showControls && (
+            <div className="flex items-center gap-4 w-full md:w-auto md:ml-auto mt-4 md:mt-0">
+              <div className="w-full md:w-64">
+                <SearchField
+                  className="rounded-lg border-none bg-background dark:bg-[hsl(0,0%,8%)] ring-0 outline-none w-full"
+                  value={search}
+                  onSearch={handleSearch}
+                  delay={searchDelay || DEFAULT_SEARCH_DELAY}
+                  autoFocus={autoFocus}
+                  placeholder={formatMessage(labels.search)}
+                />
+              </div>
+              {renderActions?.()}
             </div>
-            {renderActions?.()}
-          </div>
+          )}
         </Row>
       )}
       <LoadingPanel
