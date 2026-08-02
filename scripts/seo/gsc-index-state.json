@@ -491,6 +491,12 @@
       "coverageState": "Discovered - currently not indexed",
       "lastCrawlTime": null,
       "at": "2026-07-30T08:59:58.366Z"
+    },
+    "https://conclick.io/alternatives/best-heatmap-tool-for-analytics": {
+      "indexed": false,
+      "coverageState": "Discovered - currently not indexed",
+      "lastCrawlTime": null,
+      "at": "2026-08-02T08:57:00.639Z"
     }
   }
 }

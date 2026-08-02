@@ -95,7 +95,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "What it misses: no heatmaps and no session recordings, and per their docs as of July 2026 both funnel analysis and ecommerce revenue tracking are Business-plan features where you define the steps and attach the monetary value yourself, with no payment-processor connection behind them. If your main question is 'which traffic makes money,' Plausible answers it only as well as you instrumented it. If your question is 'how many people visited my blog this week,' it answers that very well."
+      "text": "What it misses: no heatmaps and no session recordings, and per their docs as of July 2026 both funnel analysis and ecommerce revenue tracking are Business-plan features where you define the steps and attach the monetary value yourself, with no payment-processor connection behind them. If your main question is 'which traffic makes money,' Plausible answers it only as well as you instrumented it. If your question is 'how many people visited my blog this week,' it answers that very well. If you like Plausible's simplicity but suspect you will outgrow its traffic-only view, I put the [best Plausible alternatives](/alternatives/plausible) side by side in a separate roundup."
     },
     {
       "type": "h2",

@@ -66,7 +66,7 @@ const entry: ContentEntry = {
     },
     {
       type: 'p',
-      text: 'You run a content site or a personal blog with no checkout. Pick Plausible and move on. There is no revenue to attribute, so the extra layers would sit unused. A clean pageview dashboard is the whole job, and paying for more than that is waste. Fathom is the other tool founders weigh in this same minimalist lane, so if you want a second option to compare, I put [Conclick vs Fathom](/vs/fathom) through the same honest breakdown.',
+      text: 'You run a content site or a personal blog with no checkout. Pick Plausible and move on. There is no revenue to attribute, so the extra layers would sit unused. A clean pageview dashboard is the whole job, and paying for more than that is waste. Fathom is the other tool founders weigh in this same minimalist lane, so if you want a second option to compare, I put [Conclick vs Fathom](/vs/fathom) through the same honest breakdown, and rounded up the [best Plausible alternatives](/alternatives/plausible) if you want the full field instead of one head-to-head.',
     },
     {
       type: 'p',
