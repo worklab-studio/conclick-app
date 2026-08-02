@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useApi } from '@/components/hooks/useApi';
 import { useTimezone } from '@/components/hooks';
 import { Button } from '@/components/ui/button';
+import { CodeSnippet } from '@/components/common/CodeSnippet';
 import { Check, Code2, Copy, ExternalLink } from 'lucide-react';
 
 /**
@@ -64,9 +65,9 @@ export function DashboardSetupBanner({
             analytics start flowing automatically.
           </p>
           <div className="mt-3 flex items-stretch gap-2">
-            <code className="flex-1 overflow-x-auto whitespace-nowrap rounded-md border border-[hsl(0,0%,14%)] bg-[#0f0f12] px-3 py-2 font-mono text-xs text-zinc-300">
-              {snippet}
-            </code>
+            <div className="flex-1 overflow-x-auto rounded-md border border-[hsl(0,0%,14%)] bg-[#0f0f12] px-3 py-2">
+              <CodeSnippet code={snippet} className="text-xs" />
+            </div>
             <Button variant="outline" size="icon" onClick={copy} className="shrink-0">
               {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
             </Button>

@@ -97,7 +97,7 @@ export default function InvitePage() {
             : 'This invitation is no longer valid.';
     return (
       <Card>
-        <AlertCircle className="mx-auto mb-4 h-10 w-10 text-amber-400" />
+        <AlertCircle className="mx-auto mb-4 h-10 w-10 text-rose-400" />
         <h1 className="text-lg font-semibold text-foreground">Invitation unavailable</h1>
         <p className="mt-2 text-sm text-muted-foreground">{msg}</p>
         <a

@@ -27,7 +27,7 @@ const TYPE_META: Record<string, { label: string; icon: any; what: string }> = {
  *
  * Color is EARNED by evidence, not sprayed by type: a signal seen in one
  * session renders neutral (could be one confused person); it only takes an
- * amber accent at 2+ sessions and rose at 3+ sessions or any multi-session
+ * orange accent at 2+ sessions and rose at 3+ sessions or any multi-session
  * rage. The tracker itself (v2) only reports clicks the page demonstrably
  * ignored — DOM-mutation / navigation / scroll / text-selection all exonerate
  * — so what reaches this table is already high-precision.
@@ -63,7 +63,7 @@ export function FrictionInline({ websiteId }: { websiteId: string }) {
   };
   const ACCENT: Record<string, string> = {
     high: 'bg-rose-400',
-    medium: 'bg-amber-400',
+    medium: 'bg-orange-400',
     low: 'bg-zinc-700',
   };
   const strong = rows.filter(r => severity(r) !== 'low').length;

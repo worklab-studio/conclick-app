@@ -264,12 +264,12 @@ export function SeoInline({ websiteId }: { websiteId: string }) {
           </div>
 
           {opportunity ? (
-            <div className="mt-4 flex gap-2.5 rounded-xl border border-amber-500/35 bg-amber-500/[0.07] px-4 py-3 text-[12.5px] leading-relaxed text-amber-200">
-              <Lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-amber-300" />
+            <div className="mt-4 flex gap-2.5 rounded-xl border border-[#5e5ba4]/35 bg-[#5e5ba4]/[0.10] px-4 py-3 text-[12.5px] leading-relaxed text-[#cdcbe8]">
+              <Lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-[#b9b5f0]" />
               <span>
-                <span className="font-semibold text-amber-100">Opportunity:</span> “
-                {opportunity.query}” gets{' '}
-                <span className="font-semibold text-amber-100">
+                <span className="font-semibold text-white">Opportunity:</span> “{opportunity.query}”
+                gets{' '}
+                <span className="font-semibold text-white">
                   {fmt(opportunity.impressions)} impressions
                 </span>{' '}
                 at position {opportunity.position.toFixed(1)},{' '}

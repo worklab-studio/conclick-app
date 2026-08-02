@@ -104,7 +104,7 @@ export function PlanCards({ compact = false }: { compact?: boolean }) {
       </div>
 
       {error ? (
-        <div className="mt-3.5 rounded-lg border border-amber-500/25 bg-amber-500/10 px-3.5 py-2.5 text-center text-xs text-amber-200">
+        <div className="mt-3.5 rounded-lg border border-rose-500/25 bg-rose-500/10 px-3.5 py-2.5 text-center text-xs text-rose-200">
           We could not open checkout just now. Please try again, or email{' '}
           <a
             href="mailto:hello@conclick.io?subject=Checkout%20problem"

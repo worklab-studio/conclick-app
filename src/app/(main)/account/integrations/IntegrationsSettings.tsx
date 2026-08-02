@@ -1009,7 +1009,7 @@ export function IntegrationsSettings() {
                   ))}
 
                   {overview?.googleConfigured === false ? (
-                    <p className="text-[11.5px] text-amber-400/90">
+                    <p className="text-[11.5px] text-zinc-500">
                       Google reader isn&apos;t set up on the server yet
                       (GOOGLE_SERVICE_ACCOUNT_KEY). Connecting will be enabled once it is.
                     </p>

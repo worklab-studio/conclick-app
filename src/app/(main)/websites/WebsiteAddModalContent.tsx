@@ -440,7 +440,7 @@ export function WebsiteAddModalContent({
                     </div>
                     <div className="truncate text-xs text-muted-foreground">{existing.domain}</div>
                   </div>
-                  <span className="ml-auto shrink-0 rounded-full bg-amber-500/10 px-2 py-0.5 text-[10px] font-medium text-amber-400 ring-1 ring-inset ring-amber-500/20">
+                  <span className="ml-auto shrink-0 rounded-full bg-zinc-800/70 px-2 py-0.5 text-[10px] font-medium text-zinc-400 ring-1 ring-inset ring-white/[0.08]">
                     Already added
                   </span>
                 </div>

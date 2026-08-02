@@ -25,7 +25,7 @@ const tabOf = (category: string) =>
 
 const PALETTE = [
   '#8ab4f8',
-  '#f59e0b',
+  '#f87171',
   '#34d399',
   '#f472b6',
   '#a78bfa',

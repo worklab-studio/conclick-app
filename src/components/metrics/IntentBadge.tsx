@@ -2,7 +2,8 @@
 
 import type { IntentResult, IntentLevel } from '@/lib/intent-score';
 
-// Green → red by buying likelihood.
+// Emerald to grey by buying likelihood. No yellow anywhere in the product, and
+// cold reads better as grey than red: no buying signal is not an error.
 const STYLES: Record<IntentLevel, { dot: string; text: string; bg: string; ring: string }> = {
   hot: {
     dot: 'bg-emerald-400',
@@ -11,22 +12,22 @@ const STYLES: Record<IntentLevel, { dot: string; text: string; bg: string; ring:
     ring: 'ring-emerald-500/25',
   },
   warm: {
-    dot: 'bg-yellow-300',
-    text: 'text-yellow-200',
-    bg: 'bg-yellow-500/10',
-    ring: 'ring-yellow-500/25',
-  },
-  cool: {
-    dot: 'bg-orange-400',
-    text: 'text-orange-300',
+    dot: 'bg-orange-300',
+    text: 'text-orange-200',
     bg: 'bg-orange-500/10',
     ring: 'ring-orange-500/25',
   },
+  cool: {
+    dot: 'bg-rose-400',
+    text: 'text-rose-300',
+    bg: 'bg-rose-500/10',
+    ring: 'ring-rose-500/25',
+  },
   cold: {
-    dot: 'bg-red-400',
-    text: 'text-red-300',
-    bg: 'bg-red-500/10',
-    ring: 'ring-red-500/25',
+    dot: 'bg-zinc-500',
+    text: 'text-zinc-400',
+    bg: 'bg-zinc-500/10',
+    ring: 'ring-zinc-500/25',
   },
 };
 

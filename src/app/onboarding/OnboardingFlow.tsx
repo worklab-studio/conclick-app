@@ -16,6 +16,7 @@ import {
   TriangleAlert,
 } from 'lucide-react';
 import { useApi } from '@/components/hooks';
+import { CodeSnippet } from '@/components/common/CodeSnippet';
 import { GUIDES, guideForPlatform, snippetFor, type InstallGuide } from '@/lib/install-guides';
 import type { DetectedTech } from '@/lib/tech-detect';
 
@@ -550,11 +551,7 @@ function InstallStep({
             {copied ? 'Copied' : 'Copy'}
           </button>
         </div>
-        {/* Wraps rather than scrolls: a snippet clipped at the right edge looks
-            broken and hides the part people need to check. */}
-        <pre className="whitespace-pre-wrap break-all px-3.5 py-3 text-[11.5px] leading-relaxed text-indigo-200">
-          <code>{snippet}</code>
-        </pre>
+        <CodeSnippet code={snippet} className="px-3.5 py-3 text-[11.5px]" />
       </div>
 
       {/* steps */}
@@ -570,10 +567,10 @@ function InstallStep({
       </ol>
 
       {guide.caveat ? (
-        <div className="ml-[26px] mt-3 flex items-start gap-2 rounded-lg border-l-2 border-amber-500/40 bg-amber-500/[0.06] py-2 pl-3 pr-3">
-          <TriangleAlert className="mt-[3px] h-3.5 w-3.5 shrink-0 text-amber-400/80" />
+        <div className="ml-[26px] mt-3 flex items-start gap-2 rounded-lg border-l-2 border-white/[0.12] bg-white/[0.03] py-2 pl-3 pr-3">
+          <TriangleAlert className="mt-[3px] h-3.5 w-3.5 shrink-0 text-zinc-500" />
           <div>
-            <div className="text-[11px] font-semibold uppercase tracking-wide text-amber-300/80">
+            <div className="text-[11px] font-semibold uppercase tracking-wide text-zinc-400">
               One thing to watch
             </div>
             <p className="mt-0.5 text-[12px] leading-relaxed text-zinc-300">{guide.caveat}</p>
@@ -640,8 +637,8 @@ function InstallStep({
                 page is doing, not a third button competing with the actions. */}
             <div className="flex items-start gap-2">
               <span className="relative mt-[5px] flex h-2 w-2 shrink-0">
-                <span className="absolute h-full w-full animate-ping rounded-full bg-amber-400 opacity-60" />
-                <span className="relative h-2 w-2 rounded-full bg-amber-400" />
+                <span className="absolute h-full w-full animate-ping rounded-full bg-[#8f8bd8] opacity-60" />
+                <span className="relative h-2 w-2 rounded-full bg-[#8f8bd8]" />
               </span>
               <div>
                 <div className="text-[12.5px] font-medium text-zinc-200">

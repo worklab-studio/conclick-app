@@ -202,13 +202,13 @@ export const CHART_COLORS = [
   '#44b556',
   '#e68619',
   '#e34850',
-  '#f7bd12',
+  '#14b8a6',
   '#01bad7',
   '#6734bc',
   '#89c541',
-  '#ffc301',
+  '#0ea5e9',
   '#ec1562',
-  '#ffec16',
+  '#f87171',
 ];
 
 export const DOMAIN_REGEX =

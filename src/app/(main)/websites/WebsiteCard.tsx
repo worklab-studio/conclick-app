@@ -12,7 +12,15 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useToast } from '@umami/react-zen';
 import { keepPreviousData } from '@tanstack/react-query';
-import { Settings, MoreHorizontal, LayoutDashboard, Code, Trash2, Globe } from 'lucide-react';
+import {
+  Settings,
+  MoreHorizontal,
+  LayoutDashboard,
+  Code,
+  Trash2,
+  Globe,
+  ArrowRight,
+} from 'lucide-react';
 import Link from 'next/link';
 import { useNavigation } from '@/components/hooks';
 import { useApi } from '@/components/hooks/useApi';
@@ -254,8 +262,10 @@ export function WebsiteCard({
               {website.domain}
             </Link>
             {connected === false ? (
-              <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-amber-500/10 px-2 py-0.5 text-[10px] font-medium text-amber-400 ring-1 ring-inset ring-amber-500/20">
-                <span className="h-1.5 w-1.5 rounded-full bg-amber-400" />
+              // Quiet on purpose: the action row below is the call to action,
+              // so this only needs to state the fact once.
+              <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-zinc-800/70 px-2 py-0.5 text-[10px] font-medium text-zinc-400">
+                <span className="h-1.5 w-1.5 rounded-full bg-[#8f8bd8]" />
                 Not connected
               </span>
             ) : (
@@ -371,28 +381,36 @@ export function WebsiteCard({
                 </AreaChart>
               </ResponsiveContainer>
             </div>
+          ) : connected === false ? (
+            // A site with no snippet has no chart to stand in for, so the whole
+            // sparkline slot becomes the next step instead. It used to be a
+            // small pill floating in the middle of a dashed placeholder axis,
+            // which read as an error stuck to a broken graph.
+            <Link
+              href={`/websites?setup=${website.id}`}
+              scroll={false}
+              onClick={e => e.stopPropagation()}
+              className="group/setup flex h-[60px] w-full items-center gap-3 rounded-lg border border-[#5e5ba4]/25 bg-[#5e5ba4]/[0.08] px-3.5 transition-colors hover:border-[#5e5ba4]/45 hover:bg-[#5e5ba4]/[0.14]"
+            >
+              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#5e5ba4]/20 text-[#b9b5f0]">
+                <Code className="h-4 w-4" />
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block truncate text-[12.5px] font-medium text-zinc-100">
+                  Tracking code not added yet
+                </span>
+                <span className="block truncate text-[11.5px] text-zinc-500">
+                  Add one line and your data starts arriving
+                </span>
+              </span>
+              <ArrowRight className="h-4 w-4 shrink-0 text-[#b9b5f0] transition-transform group-hover/setup:translate-x-0.5" />
+            </Link>
           ) : (
             <div className="relative h-[60px] w-full">
               <div className="absolute inset-x-0 bottom-4 border-t border-dashed border-zinc-700/50" />
               <div className="absolute inset-0 flex items-center justify-center gap-1.5 text-muted-foreground">
-                {connected === false ? (
-                  // Was dead text, which left anyone who closed the wizard
-                  // mid-setup with no way back to their snippet.
-                  <Link
-                    href={`/websites?setup=${website.id}`}
-                    scroll={false}
-                    onClick={e => e.stopPropagation()}
-                    className="inline-flex items-center gap-1.5 rounded-lg border border-amber-500/25 bg-amber-500/10 px-3 py-1.5 text-xs font-medium text-amber-200 transition-colors hover:border-amber-500/40 hover:bg-amber-500/15"
-                  >
-                    <Globe className="h-3.5 w-3.5" />
-                    Finish setup, add your tracking code
-                  </Link>
-                ) : (
-                  <>
-                    <Globe className="h-3.5 w-3.5 opacity-60" />
-                    <span className="text-xs">{`No visits in ${r.phrase}`}</span>
-                  </>
-                )}
+                <Globe className="h-3.5 w-3.5 opacity-60" />
+                <span className="text-xs">{`No visits in ${r.phrase}`}</span>
               </div>
             </div>
           )}

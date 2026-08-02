@@ -118,7 +118,7 @@ export function GoogleIntegrationForm({ websiteId }: { websiteId: string }) {
 
   if (!status.configured) {
     return (
-      <p className="text-xs text-amber-300/80">
+      <p className="text-xs text-zinc-500">
         Google reader isn&apos;t set up on this server yet (GOOGLE_SERVICE_ACCOUNT_KEY).
       </p>
     );

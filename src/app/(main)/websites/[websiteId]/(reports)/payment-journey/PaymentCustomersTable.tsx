@@ -92,7 +92,7 @@ export function PaymentCustomersTable({ data }: { data?: any[]; displayMode?: st
                     >
                       {row.displayName || friendlyName(seed)}
                     </span>
-                    <span className="shrink-0 rounded-md bg-amber-500/10 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-400 ring-1 ring-inset ring-amber-500/20">
+                    <span className="shrink-0 rounded-md bg-emerald-500/10 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-300 ring-1 ring-inset ring-emerald-500/25">
                       Customer
                     </span>
                   </div>

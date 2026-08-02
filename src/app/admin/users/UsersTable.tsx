@@ -29,7 +29,7 @@ export function UsersTable({
     try {
       await post(`/admin/users/${userId}/lifetime`, {});
       router.refresh(); // Refresh to show new status
-    } catch (e) {
+    } catch {
       alert('Failed to grant lifetime access');
     }
   };
@@ -42,12 +42,18 @@ export function UsersTable({
             <div className="flex items-center gap-2">
               <Link href={`/admin/users/${row.id}`}>{row.username}</Link>
               {row.subscriptionPlan === 'lifetime' && (
-                <Badge variant="secondary" className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white border-0 text-[10px] px-1.5 py-0 h-5">
+                <Badge
+                  variant="secondary"
+                  className="bg-gradient-to-r from-[#8f8bd8] to-[#5e5ba4] text-white border-0 text-[10px] px-1.5 py-0 h-5"
+                >
                   LIFETIME
                 </Badge>
               )}
               {row.subscriptionStatus === 'trial' && (
-                <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-5 text-muted-foreground border-yellow-500/50">
+                <Badge
+                  variant="outline"
+                  className="text-[10px] px-1.5 py-0 h-5 text-muted-foreground border-white/20"
+                >
                   TRIAL
                 </Badge>
               )}
@@ -86,7 +92,7 @@ export function UsersTable({
                     <MenuItem onAction={() => grantLifetime(id)}>
                       <Row alignItems="center" gap>
                         <Icon>
-                          <Star className="w-4 h-4 text-yellow-500" />
+                          <Star className="w-4 h-4 text-[#b9b5f0]" />
                         </Icon>
                         <Text>Grant Lifetime</Text>
                       </Row>
