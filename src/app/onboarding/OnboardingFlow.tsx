@@ -832,13 +832,12 @@ export function OnboardingFlow({
 
   return (
     <div className="w-full">
-      {/* Header: brand is already visible behind the modal, so only the step
-          rail earns its place here. */}
-      {/* pr-8 keeps the rail clear of the dialog's absolute close button. */}
-      <div className="mb-5 flex items-center justify-between gap-4 pr-8">
-        <h2 className="hidden whitespace-nowrap text-[13px] font-semibold text-zinc-400 sm:block">
-          Set up your website
-        </h2>
+      {/* Header: the rail leads, so progress is the first thing read and it
+          sits nowhere near the dialog's absolute close button. The old
+          right-hand placement crowded that button, and the "Set up your
+          website" caption it was balanced against only repeated what the
+          heading below already says. */}
+      <div className="mb-5 flex items-center pr-8">
         <StepRail step={step} />
       </div>
 
