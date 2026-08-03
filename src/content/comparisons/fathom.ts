@@ -38,7 +38,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "Fathom also has a strong track record and a mature customer base including a lot of agencies and developers who don't run e-commerce or SaaS products. If you're building a portfolio site, a content publication, a documentation site, or anything where the question is 'are people reading this?' rather than 'are people buying this?', Fathom is a cleaner choice. You're not paying for or navigating features you'll never use."
+      "text": "Fathom also has a strong track record and a mature customer base including a lot of agencies and developers who don't run e-commerce or SaaS products. If you're building a portfolio site, a content publication, a documentation site, or anything where the question is 'are people reading this?' rather than 'are people buying this?', Fathom is a cleaner choice. You're not paying for or navigating features you'll never use. If Fathom is on your shortlist and you want to see the rest of the minimalist field beside it, I put the [best Fathom alternatives](/alternatives/fathom) through the same lens."
     },
     {
       "type": "p",

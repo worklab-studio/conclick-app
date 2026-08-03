@@ -57,7 +57,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "It doesn't do revenue attribution, heatmaps, or funnels. That's the trade. If those things don't matter yet (maybe you're pre-revenue, or your checkout is simple enough that you know which channels work), Fathom is a perfectly honest choice. Pricing starts around $14/month."
+      "text": "It doesn't do revenue attribution, heatmaps, or funnels. That's the trade. If those things don't matter yet (maybe you're pre-revenue, or your checkout is simple enough that you know which channels work), Fathom is a perfectly honest choice. Pricing starts around $14/month. If Fathom itself becomes your front-runner, I break down the [Fathom alternatives](/alternatives/fathom) worth weighing beside it in a dedicated roundup."
     },
     {
       "type": "h2",

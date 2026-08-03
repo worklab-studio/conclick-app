@@ -82,7 +82,7 @@ const entry: ContentEntry = {
  {
  "type": "ul",
  "items": [
- "You run a small SaaS or ecommerce site and mainly need to know which traffic, campaign, and page produce revenue: Conclick fits. If you are weighing product analytics more broadly, [Conclick vs Mixpanel](/vs/mixpanel) covers that ground too.",
+ "You run a small SaaS or ecommerce site and mainly need to know which traffic, campaign, and page produce revenue: Conclick fits. If you are weighing product analytics more broadly, [Conclick vs Mixpanel](/vs/mixpanel) covers that ground too, and if Mixpanel is your front-runner, the [alternatives to Mixpanel](/alternatives/mixpanel) roundup weighs the rest of the field beside it.",
  "You take payments through Stripe, Paddle, Polar, Lemon Squeezy, or Dodo and want revenue tied to its source automatically: Conclick.",
  "You have a product team running retention cohorts, in-app funnels, and experiments across a real application: Amplitude, and its free two-million-event tier is a fine place to begin.",
  "You need in-app session replay of user sessions: the replay bundled into every paid tier is the stronger pick.",

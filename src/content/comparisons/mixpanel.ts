@@ -54,7 +54,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "The honest summary: Mixpanel is a powerful tool built for teams. Conclick is built for founders. Neither is the wrong answer. They're answers to different questions."
+      "text": "The honest summary: Mixpanel is a powerful tool built for teams. Conclick is built for founders. Neither is the wrong answer. They're answers to different questions. And if you have already decided Mixpanel is more platform than your stage needs, I lined up the [best Mixpanel alternatives](/alternatives/mixpanel) so you can compare the realistic options side by side instead of defaulting to the biggest name."
     },
     {
       "type": "h2",

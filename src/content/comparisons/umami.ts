@@ -47,7 +47,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "If you are a developer who self-hosts as a matter of principle, or you are running a content site where revenue attribution is irrelevant, Umami is a completely reasonable choice and I would not try to talk you out of it."
+      "text": "If you are a developer who self-hosts as a matter of principle, or you are running a content site where revenue attribution is irrelevant, Umami is a completely reasonable choice and I would not try to talk you out of it. If you are still narrowing the field, I compared it against the other self-hosted and privacy-first trackers in a [best Umami alternatives](/alternatives/umami) roundup."
     },
     {
       "type": "h2",
