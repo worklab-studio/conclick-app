@@ -139,6 +139,14 @@
       "slug": "best-heatmap-tool-for-analytics",
       "published_at": "2026-08-02T04:10:34.768Z"
     },
+    "best heatmap tool for websites": {
+      "status": "skipped",
+      "reason": "cannibalises existing guide best-heatmap-tool-for-analytics (same query/intent, high token overlap)"
+    },
+    "best subscription analytics reports": {
+      "status": "skipped",
+      "reason": "off-product/needs-human: MRR-subscription reporting (ChartMogul/Baremetrics category); Conclick does revenue attribution not subscription/churn reporting, and a credible roundup needs competitor MRR-tool data we do not have"
+    },
     "best way to scroll through thick data": {
       "status": "needs-human"
     },
@@ -252,6 +260,11 @@
       "slug": "cookie-banners-killing-your-data",
       "reason": "live page /blogs/cookie-banners-killing-your-data",
       "published_at": "2026-07-26T08:39:45.421Z"
+    },
+    "cookieless analytics tools": {
+      "status": "published",
+      "slug": "cookieless-analytics-tools",
+      "published_at": "2026-08-12T07:13:43.750Z"
     },
     "cookieless session replay": {
       "status": "skipped",

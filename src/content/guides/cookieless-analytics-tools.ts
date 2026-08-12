@@ -1,0 +1,232 @@
+import type { ContentEntry } from '../schema';
+
+const entry: ContentEntry = {
+  "type": "guide",
+  "slug": "cookieless-analytics-tools",
+  "h1": "The cookieless analytics tools I trust, and what each one actually stores",
+  "metaTitle": "Cookieless Analytics Tools: What They Actually Store",
+  "metaDescription": "Not every cookieless analytics tool stores nothing on the device. I compare seven privacy-first options by what each writes to the browser, sourced to their docs.",
+  "tldr": "The best cookieless analytics tools in 2026 are Plausible, Fathom, Pirsch, GoatCounter, Cloudflare Web Analytics, Umami and Conclick, but they are not equal. Some store nothing in the browser while others, including Conclick, write a persistent localStorage id to power funnels and journeys. Pick by what you need to measure and what you are able to store.",
+  "intro": "I run a cookieless analytics tool, and I built it on an engine I did not write, so I have read more privacy policies than is healthy. The word cookieless gets stretched to mean everything from stores literally nothing to no third-party cookie, but a device id sitting in localStorage. Those are not the same promise, and the difference decides whether you owe your visitors a consent prompt.",
+  "sections": [
+    {
+      "type": "h2",
+      "text": "What cookieless actually means",
+      "id": "what-cookieless-actually-means"
+    },
+    {
+      "type": "p",
+      "text": "Cookieless means the tracking code sets no cookies. That is all it means. It does not promise the tool stores nothing on the visitor's device, and it does not promise you never owe a consent prompt. Three very different designs all wear the label. The first stores nothing in the browser and works out who is unique on the server, usually by hashing the visitor's IP address and user agent with a salt that is thrown away every day. The second sets no cookie but writes a small persistent id to localStorage so it can recognise a returning visitor across sessions. The third avoids storage and leans on browser fingerprinting, which is the version privacy regulators like least."
+    },
+    {
+      "type": "p",
+      "text": "That middle design is where honesty matters, because I ship it. Conclick sets no cookies, yet its script writes a value called conclick.vid to localStorage so funnels, user journeys and returning-visitor counts actually work. That is still cookieless. It is not stateless. If you want the full background on the category, I wrote a plain-language explainer on [what cookieless analytics is](/glossary/cookieless-analytics) and where the trade-offs land."
+    },
+    {
+      "type": "h2",
+      "text": "The cookieless analytics tools I trust in 2026",
+      "id": "the-cookieless-analytics-tools-i-trust-in-2026"
+    },
+    {
+      "type": "p",
+      "text": "Every tool below sets no cookies in its tracking script, has a real user base, and publishes how it counts people so you can check the claim rather than take my word. I have grouped them by what they store, because that is the line that actually decides your consent story and your data quality, not the marketing copy on a homepage."
+    },
+    {
+      "type": "ul",
+      "items": [
+        "Stores nothing in the browser: Plausible, Cloudflare Web Analytics and GoatCounter. Uniqueness is worked out server-side and forgotten within hours.",
+        "Cookieless with a short-lived, server-side hash: Pirsch and Fathom anonymise the visitor into a rotating value rather than a stored id.",
+        "Cookieless but writes a localStorage id: Conclick, to power funnels, journeys and heatmap sessions. Umami sets no cookies in its tracker and is the engine Conclick is built on."
+      ]
+    },
+    {
+      "type": "h3",
+      "text": "Plausible: the calm, truly stateless default",
+      "id": "plausible-the-calm-truly-stateless-default"
+    },
+    {
+      "type": "p",
+      "text": "Plausible sets no cookies and, by its own account, stores nothing in the browser. Per https://plausible.io/data-policy it counts a unique visitor with hash(daily_salt + domain + ip_address + user_agent), rotates and deletes that salt every 24 hours, and keeps neither raw IPs nor user agents. The result is a fast script and a dashboard your team can read on a phone. The trade is behavioural depth: it is a traffic tool, so heatmaps and revenue attribution sit outside its scope. My honest [Conclick vs Plausible writeup](/alternatives/plausible) covers where that scope ends if you sell something."
+    },
+    {
+      "type": "h3",
+      "text": "Fathom: cookieless with the cleanest onboarding",
+      "id": "fathom-cookieless-with-the-cleanest-onboarding"
+    },
+    {
+      "type": "p",
+      "text": "Fathom sets no cookies and anonymises IP addresses and other visitor data rather than storing an identifier, per usefathom.com. Its pitch is that you can run analytics without the cookie-consent interruption, though whether a banner is genuinely optional still depends on your jurisdiction and what else you store on the page. Fathom is polished, fast, and aimed at people who want numbers without a manual. If you mostly need clean traffic reporting with bounce context, it does that job with very little setup."
+    },
+    {
+      "type": "h3",
+      "text": "Pirsch: cookie-free, built for developers",
+      "id": "pirsch-cookie-free-built-for-developers"
+    },
+    {
+      "type": "p",
+      "text": "Pirsch is cookie-free and generates a 16-digit visitor id from the IP address, user agent, date and a per-site salt when the request arrives, per https://pirsch.io/privacy. The IP is never persisted, and the date baked into the hash means a visitor cannot be recognised beyond 24 hours. It is a developer-friendly tool with a clean API. Returning-visitor accuracy is the honest cost of that design, because a hash that resets every day cannot tell a loyal reader from a stranger across a week. My [Conclick vs Pirsch comparison](/vs/pirsch) goes deeper on the trade."
+    },
+    {
+      "type": "h3",
+      "text": "GoatCounter and Cloudflare: the store-nothing minimalists",
+      "id": "goatcounter-and-cloudflare-the-store-nothing-minimalists"
+    },
+    {
+      "type": "p",
+      "text": "GoatCounter sets no cookies and keeps nothing in the browser. To spot repeat visits within a session it holds a site plus IP plus user-agent mapping in memory for up to eight hours as a random generated string, never written to its database, per https://www.goatcounter.com/help/privacy. Cloudflare Web Analytics goes further and uses no client-side state at all, no cookies or localStorage, and avoids fingerprinting people by IP or user agent, per https://www.cloudflare.com/web-analytics/. Both are excellent when you want an honest visit count and nothing to explain to a privacy reviewer. Both are deliberately minimal, so funnels, goals and heatmaps are jobs for a different tool."
+    },
+    {
+      "type": "h3",
+      "text": "Umami and Conclick: cookieless when you need behaviour and money",
+      "id": "umami-and-conclick-cookieless-when-you-need-behaviour-and-mo"
+    },
+    {
+      "type": "p",
+      "text": "Umami is MIT-licensed, sets no cookies in its tracking code per its FAQ, and is the open-source engine Conclick is built on, so treat my read as informed rather than neutral. Umami stays intentionally lean: it counts traffic and, since recent versions, click and scroll heatmaps, while funnels stay simple and revenue attribution stays out of scope. Conclick takes that engine and adds real-screenshot heatmaps, auto-detected funnels, visual journeys, and revenue attribution that ties a Stripe, Paddle, Polar, Lemon Squeezy or Dodo payment back to the traffic that earned it. The honest cost of those features is the localStorage id I mentioned: to follow a visitor through a funnel, something has to remember them between pages. If you want the wider field, here is my roundup of [open-source analytics tools](/guides/open-source-web-analytics-tools)."
+    },
+    {
+      "type": "h2",
+      "text": "Do cookieless tools still need a consent banner?",
+      "id": "do-cookieless-tools-still-need-a-consent-banner"
+    },
+    {
+      "type": "p",
+      "text": "Not automatically. In the EU and UK the rule that governs banners is the ePrivacy Directive, carried into UK law as PECR, and it covers storing or gaining access to information on a user's device, not cookies specifically. A localStorage id is stored information, so a cookieless tool that writes one can still fall within the same consent rules a cookie would. This is exactly why the store-nothing designs have the cleanest position: if a tool keeps no identifier on the device and processes only aggregate counts, there is far less for a consent requirement to bite on. Whether you need a banner depends on your jurisdiction, what the tool stores, and what else runs on your page, so treat this as a prompt to check rather than legal advice."
+    },
+    {
+      "type": "p",
+      "text": "The store-nothing tools give you the strongest hand because there is no device identifier to argue about. Tools that keep an id, including mine, sit a step closer to the line, and the honest move is to disclose what you store in your privacy notice and decide with your own counsel. I go into the practical side in my [GDPR-compliant analytics guide](/glossary/gdpr-compliant-analytics), and if you want the case against slapping a banner on everything by reflex, I made it in [why cookie banners hurt your data](/blogs/cookie-banners-killing-your-data)."
+    },
+    {
+      "type": "callout",
+      "text": "The useful question is never is it cookieless. Almost everything is now. The question is what does it store on my visitor's device, and can I live with the trade that storing nothing forces onto my reports."
+    },
+    {
+      "type": "h2",
+      "text": "What you give up by going cookieless",
+      "id": "what-you-give-up-by-going-cookieless"
+    },
+    {
+      "type": "p",
+      "text": "Cookieless tracking carries trade-offs, and pretending otherwise is how you end up distrusting your own numbers. Without a durable identifier, returning-visitor and loyalty metrics get softer, and the store-nothing designs that reset every day will not follow a person across a week. Cross-device journeys are effectively gone, because there is no shared key to stitch a phone session to a laptop session. And the deeper the behavioural feature, from funnels to journeys to session-level heatmaps, the more likely the tool needs to store something, which is the tension this whole category lives inside. The right tool is the one whose trade matches the question you actually need answered."
+    },
+    {
+      "type": "h2",
+      "text": "How to choose a cookieless analytics tool",
+      "id": "how-to-choose-a-cookieless-analytics-tool"
+    },
+    {
+      "type": "p",
+      "text": "Here is the decision I would make, out loud. If you run a content site or a marketing page and you want clean counts with the least to explain, pick a store-nothing tool: Plausible, Cloudflare Web Analytics or GoatCounter. If you are a developer who wants an API and a cookie-free hash you can reason about, Pirsch or Fathom fit well. If you sell something and the real question is which traffic makes money and where people fall out of a funnel, you need behavioural depth, which means a tool that stores a small identifier, and that is the shape of Conclick. Start with what you must measure, then accept the storage that job requires, rather than the other way around."
+    },
+    {
+      "type": "p",
+      "text": "Whatever you choose, read the tool's own data policy before you install it, not a listicle summarising it. Every tool here publishes exactly what it stores, and the ten minutes it takes to read that page is the cheapest privacy diligence you will ever do."
+    }
+  ],
+  "faq": [
+    {
+      "question": "Are cookieless analytics tools GDPR compliant?",
+      "answer": "Most well-designed cookieless analytics tools are built to be GDPR-friendly, but cookieless does not automatically equal compliant. Compliance depends on what the tool stores, where the data is processed, and whether you disclose it. Tools that keep no device identifier and process only aggregate data, like Plausible and Cloudflare Web Analytics, have the simplest compliance story."
+    },
+    {
+      "question": "Do cookieless tools still need a consent banner?",
+      "answer": "Sometimes, because EU and UK rules cover storing or accessing any information on a device, not only cookies. A cookieless tool that writes a localStorage id can still fall under those rules, while a tool that stores nothing on the device usually has a much stronger case for skipping the prompt. Confirm with your own counsel for your jurisdiction."
+    },
+    {
+      "question": "Which cookieless analytics tool stores nothing in the browser?",
+      "answer": "Plausible, Cloudflare Web Analytics and GoatCounter store nothing in the visitor's browser: no cookies and no localStorage. They work out uniqueness on the server with short-lived hashes or in-memory mappings that are discarded within hours. If storing zero data on the device is your priority, start with those three."
+    },
+    {
+      "question": "Is Google Analytics cookieless?",
+      "answer": "No, Google Analytics 4 relies on cookies by default and asks you to implement Consent Mode to handle refusals. You can reduce its cookie use, but it is not a cookieless tool in the way Plausible or Fathom are. That cookie dependence is a big reason teams go looking for a privacy-first option in the first place."
+    },
+    {
+      "question": "Is cookieless tracking accurate?",
+      "answer": "Cookieless tracking is accurate for the metrics it is designed for, like pageviews, referrers and top pages, and it often counts better than cookie-based tools because ad blockers target the usual scripts. Where it is weaker is durable identity: returning-visitor and cross-device numbers get softer without a stored id. Match the tool to the metric you actually rely on."
+    },
+    {
+      "question": "What is the best free cookieless analytics tool?",
+      "answer": "For a genuinely free, store-nothing option, Cloudflare Web Analytics and GoatCounter are the strongest picks, and Umami is free to self-host if you can run it. Paid tools like Plausible, Fathom and Conclick add polish, support, and in Conclick's case funnels and revenue attribution. Free is a real answer when you only need clean counts."
+    }
+  ],
+  "heroWord": "cookieless.",
+  "category": "Privacy",
+  "topics": [
+    "cookieless",
+    "privacy",
+    "gdpr",
+    "analytics"
+  ],
+  "sources": [
+    {
+      "label": "Plausible data policy: cookieless counting and the daily-rotating salt",
+      "url": "https://plausible.io/data-policy"
+    },
+    {
+      "label": "Pirsch privacy policy: cookie-free hashing and 24-hour visitor id",
+      "url": "https://pirsch.io/privacy"
+    },
+    {
+      "label": "GoatCounter privacy documentation: no cookies, no browser storage",
+      "url": "https://www.goatcounter.com/help/privacy"
+    },
+    {
+      "label": "Cloudflare Web Analytics: no client-side state, no fingerprinting",
+      "url": "https://www.cloudflare.com/web-analytics/"
+    },
+    {
+      "label": "Fathom Analytics: cookieless, anonymised visitor data",
+      "url": "https://usefathom.com/"
+    },
+    {
+      "label": "Umami documentation FAQ: no cookies in the tracking code",
+      "url": "https://docs.umami.is/docs/faq"
+    }
+  ],
+  "internalLinks": [
+    {
+      "href": "/glossary/cookieless-analytics",
+      "label": "Cookieless analytics, defined",
+      "group": "glossary"
+    },
+    {
+      "href": "/glossary/gdpr-compliant-analytics",
+      "label": "GDPR-compliant analytics",
+      "group": "glossary"
+    },
+    {
+      "href": "/blogs/cookie-banners-killing-your-data",
+      "label": "Why cookie banners hurt your data",
+      "group": "blog"
+    },
+    {
+      "href": "/guides/open-source-web-analytics-tools",
+      "label": "Open-source analytics tools",
+      "group": "guide"
+    },
+    {
+      "href": "/alternatives/plausible",
+      "label": "Conclick vs Plausible",
+      "group": "alternative"
+    },
+    {
+      "href": "/vs/pirsch",
+      "label": "Conclick vs Pirsch",
+      "group": "comparison"
+    }
+  ],
+  "relatedTools": [
+    "utm-builder"
+  ],
+  "leadMagnet": {
+    "kind": "addWebsite",
+    "headline": "Put this into practice",
+    "sub": "Conclick gives you privacy-first analytics, heatmaps, funnels, and revenue attribution in one. Free for 14 days, no card.",
+    "ctaLabel": "Add My Website"
+  },
+  "datePublished": "2026-08-12",
+  "dateModified": "2026-08-12"
+};
+
+export default entry;

@@ -51,6 +51,7 @@ import glossary_what_is_llms_txt from './glossary/what-is-llms-txt';
 import guides_add_analytics_to_nextjs from './guides/add-analytics-to-nextjs';
 import guides_best_ai_website_analytics from './guides/best-ai-website-analytics';
 import guides_conversion_funnel_software_pricing from './guides/conversion-funnel-software-pricing';
+import guides_cookieless_analytics_tools from './guides/cookieless-analytics-tools';
 import guides_do_heatmaps_need_cookie_consent from './guides/do-heatmaps-need-cookie-consent';
 import guides_filter_bot_traffic_from_analytics from './guides/filter-bot-traffic-from-analytics';
 import guides_ga4_migration_guide from './guides/ga4-migration-guide';
@@ -125,6 +126,7 @@ const ENTRIES: ContentEntry[] = [
   guides_add_analytics_to_nextjs,
   guides_best_ai_website_analytics,
   guides_conversion_funnel_software_pricing,
+  guides_cookieless_analytics_tools,
   guides_do_heatmaps_need_cookie_consent,
   guides_filter_bot_traffic_from_analytics,
   guides_ga4_migration_guide,

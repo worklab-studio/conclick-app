@@ -34,7 +34,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "For a typical ecommerce flow that looks like: product page, add to cart, cart view, shipping details, payment details, order confirmation. For a SaaS purchase it might be pricing page, plan select, account creation, card entry, activation. Your exact steps do not matter. What matters is that each one is a separate event you can put a number on."
+      "text": "For a typical ecommerce flow that looks like: product page, add to cart, cart view, shipping details, payment details, order confirmation. For a SaaS purchase it might be pricing page, plan select, account creation, card entry, activation. Your exact steps do not matter. What matters is that each one is a separate event you can put a number on. If you run a store, this funnel work is one slice of the wider job of [ecommerce analytics](/for/ecommerce): tying each of those steps back to the traffic and the revenue behind it."
     },
     {
       "type": "p",

@@ -110,7 +110,7 @@ const entry: ContentEntry = {
     },
     {
       "type": "p",
-      "text": "If you already treat Stripe as the money ledger and use your analytics purely for behaviour, you are most of the way there. The remaining work is tying each payment back to a source without depending on a script that a third of your buyers are actively blocking."
+      "text": "If you already treat Stripe as the money ledger and use your analytics purely for behaviour, you are most of the way there. The remaining work is tying each payment back to a source without depending on a script that a third of your buyers are actively blocking. If you sell physical or digital goods, I walk through that revenue-first picture end to end in [analytics for ecommerce](/for/ecommerce)."
     },
     {
       "type": "h2",

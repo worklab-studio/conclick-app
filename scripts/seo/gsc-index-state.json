@@ -3,206 +3,206 @@
     "https://conclick.io": {
       "indexed": true,
       "coverageState": "Submitted and indexed",
-      "lastCrawlTime": "2026-07-25T02:22:10Z",
-      "at": "2026-07-26T10:51:06.953Z"
+      "lastCrawlTime": "2026-08-11T14:52:06Z",
+      "at": "2026-08-12T06:43:03.334Z"
     },
     "https://conclick.io/pricing": {
       "indexed": true,
       "coverageState": "Submitted and indexed",
       "lastCrawlTime": "2026-07-25T05:48:11Z",
-      "at": "2026-07-26T10:51:13.706Z"
+      "at": "2026-08-12T06:43:10.616Z"
     },
     "https://conclick.io/about": {
       "indexed": false,
       "coverageState": "Discovered - currently not indexed",
       "lastCrawlTime": null,
-      "at": "2026-07-26T10:51:20.436Z"
+      "at": "2026-08-12T06:43:17.969Z"
     },
     "https://conclick.io/contact": {
       "indexed": true,
       "coverageState": "Submitted and indexed",
       "lastCrawlTime": "2026-07-24T19:22:49Z",
-      "at": "2026-07-26T10:51:27.430Z"
+      "at": "2026-08-12T06:43:25.513Z"
     },
     "https://conclick.io/compare": {
-      "indexed": false,
-      "coverageState": "Discovered - currently not indexed",
-      "lastCrawlTime": null,
-      "at": "2026-07-26T10:51:34.175Z"
+      "indexed": true,
+      "coverageState": "Submitted and indexed",
+      "lastCrawlTime": "2026-07-26T21:18:40Z",
+      "at": "2026-08-12T06:43:33.354Z"
     },
     "https://conclick.io/alternatives": {
       "indexed": true,
       "coverageState": "Submitted and indexed",
-      "lastCrawlTime": "2026-07-24T20:19:04Z",
-      "at": "2026-07-26T10:51:41.307Z"
+      "lastCrawlTime": "2026-08-02T13:26:46Z",
+      "at": "2026-08-12T06:43:41.742Z"
     },
     "https://conclick.io/glossary": {
       "indexed": true,
       "coverageState": "Submitted and indexed",
-      "lastCrawlTime": "2026-07-24T23:20:15Z",
-      "at": "2026-07-26T10:51:48.382Z"
+      "lastCrawlTime": "2026-08-01T06:11:46Z",
+      "at": "2026-08-12T06:43:49.269Z"
     },
     "https://conclick.io/for": {
       "indexed": true,
       "coverageState": "Submitted and indexed",
       "lastCrawlTime": "2026-07-25T01:29:05Z",
-      "at": "2026-07-26T10:51:55.334Z"
+      "at": "2026-08-12T06:43:56.566Z"
     },
     "https://conclick.io/guides": {
       "indexed": true,
       "coverageState": "Submitted and indexed",
-      "lastCrawlTime": "2026-07-24T18:20:40Z",
-      "at": "2026-07-26T10:52:02.074Z"
+      "lastCrawlTime": "2026-07-30T11:42:42Z",
+      "at": "2026-08-12T06:44:04.429Z"
     },
     "https://conclick.io/blogs": {
-      "indexed": false,
-      "coverageState": "Discovered - currently not indexed",
-      "lastCrawlTime": null,
-      "at": "2026-07-26T10:52:08.824Z"
+      "indexed": true,
+      "coverageState": "Submitted and indexed",
+      "lastCrawlTime": "2026-08-01T16:25:50Z",
+      "at": "2026-08-12T07:11:45.598Z"
     },
     "https://conclick.io/tools": {
       "indexed": false,
       "coverageState": "Discovered - currently not indexed",
       "lastCrawlTime": null,
-      "at": "2026-07-26T10:52:15.535Z"
+      "at": "2026-08-12T07:11:53.629Z"
     },
     "https://conclick.io/alternatives/fathom": {
-      "indexed": false,
-      "coverageState": "URL is unknown to Google",
-      "lastCrawlTime": null,
-      "at": "2026-07-26T10:52:22.283Z"
+      "indexed": true,
+      "coverageState": "Submitted and indexed",
+      "lastCrawlTime": "2026-07-27T01:01:10Z",
+      "at": "2026-08-12T07:12:01.796Z"
     },
     "https://conclick.io/alternatives/google-analytics": {
       "indexed": true,
       "coverageState": "Submitted and indexed",
-      "lastCrawlTime": "2026-07-25T03:21:51Z",
-      "at": "2026-07-26T10:52:29.247Z"
+      "lastCrawlTime": "2026-08-03T03:33:21Z",
+      "at": "2026-08-12T07:12:09.280Z"
     },
     "https://conclick.io/alternatives/hotjar": {
-      "indexed": false,
-      "coverageState": "Discovered - currently not indexed",
-      "lastCrawlTime": null,
-      "at": "2026-07-26T10:52:35.956Z"
+      "indexed": true,
+      "coverageState": "Submitted and indexed",
+      "lastCrawlTime": "2026-08-02T04:41:47Z",
+      "at": "2026-08-12T07:12:16.323Z"
     },
     "https://conclick.io/alternatives/matomo": {
       "indexed": true,
       "coverageState": "Submitted and indexed",
       "lastCrawlTime": "2026-07-25T07:16:45Z",
-      "at": "2026-07-26T10:52:42.897Z"
+      "at": "2026-08-12T07:12:24.283Z"
     },
     "https://conclick.io/alternatives/mixpanel": {
-      "indexed": false,
-      "coverageState": "Discovered - currently not indexed",
-      "lastCrawlTime": null,
-      "at": "2026-07-26T10:52:49.796Z"
+      "indexed": true,
+      "coverageState": "Submitted and indexed",
+      "lastCrawlTime": "2026-07-26T20:50:43Z",
+      "at": "2026-08-12T07:12:32.267Z"
     },
     "https://conclick.io/alternatives/plausible": {
-      "indexed": false,
-      "coverageState": "Discovered - currently not indexed",
-      "lastCrawlTime": null,
-      "at": "2026-07-26T10:52:56.918Z"
+      "indexed": true,
+      "coverageState": "Submitted and indexed",
+      "lastCrawlTime": "2026-07-27T00:24:38Z",
+      "at": "2026-08-12T07:12:40.253Z"
     },
     "https://conclick.io/alternatives/posthog": {
-      "indexed": false,
-      "coverageState": "Discovered - currently not indexed",
-      "lastCrawlTime": null,
-      "at": "2026-07-26T10:53:03.761Z"
+      "indexed": true,
+      "coverageState": "Submitted and indexed",
+      "lastCrawlTime": "2026-07-31T17:49:55Z",
+      "at": "2026-08-12T07:12:47.436Z"
     },
     "https://conclick.io/alternatives/umami": {
       "indexed": true,
       "coverageState": "Submitted and indexed",
-      "lastCrawlTime": "2026-07-25T02:44:26Z",
-      "at": "2026-07-26T10:53:10.688Z"
+      "lastCrawlTime": "2026-08-01T15:10:49Z",
+      "at": "2026-08-12T07:12:54.929Z"
     },
     "https://conclick.io/blogs/ab-testing-with-low-traffic": {
-      "indexed": false,
-      "coverageState": "Discovered - currently not indexed",
-      "lastCrawlTime": null,
-      "at": "2026-07-26T10:53:17.600Z"
+      "indexed": true,
+      "coverageState": "Submitted and indexed",
+      "lastCrawlTime": "2026-07-26T13:10:58Z",
+      "at": "2026-08-12T07:13:04.968Z"
     },
     "https://conclick.io/blogs/analytics-a-pre-revenue-startup-needs": {
       "indexed": false,
       "coverageState": "Discovered - currently not indexed",
       "lastCrawlTime": null,
-      "at": "2026-07-26T10:53:24.321Z"
+      "at": "2026-08-12T07:13:11.999Z"
     },
     "https://conclick.io/blogs/analytics-stack-for-bootstrappers": {
       "indexed": false,
       "coverageState": "Discovered - currently not indexed",
       "lastCrawlTime": null,
-      "at": "2026-07-26T10:53:31.049Z"
+      "at": "2026-08-12T07:13:19.683Z"
     },
     "https://conclick.io/blogs/attribution-is-guessing": {
-      "indexed": false,
-      "coverageState": "Discovered - currently not indexed",
-      "lastCrawlTime": null,
-      "at": "2026-07-26T10:53:37.934Z"
+      "indexed": true,
+      "coverageState": "Submitted and indexed",
+      "lastCrawlTime": "2026-07-27T13:44:25Z",
+      "at": "2026-08-12T07:13:26.965Z"
     },
     "https://conclick.io/blogs/click-map-vs-funnel": {
       "indexed": true,
       "coverageState": "Submitted and indexed",
-      "lastCrawlTime": "2026-07-25T07:58:39Z",
-      "at": "2026-07-26T10:53:44.858Z"
+      "lastCrawlTime": "2026-07-26T14:16:32Z",
+      "at": "2026-08-12T07:13:34.264Z"
     },
     "https://conclick.io/blogs/cookie-banners-killing-your-data": {
-      "indexed": false,
-      "coverageState": "Discovered - currently not indexed",
-      "lastCrawlTime": null,
-      "at": "2026-07-26T10:53:51.741Z"
+      "indexed": true,
+      "coverageState": "Submitted and indexed",
+      "lastCrawlTime": "2026-08-01T01:24:41Z",
+      "at": "2026-08-12T07:13:43.763Z"
     },
     "https://conclick.io/blogs/gave-up-on-ga4": {
-      "indexed": false,
-      "coverageState": "Discovered - currently not indexed",
-      "lastCrawlTime": null,
-      "at": "2026-07-26T10:54:28.986Z"
+      "indexed": true,
+      "coverageState": "Submitted and indexed",
+      "lastCrawlTime": "2026-08-02T10:56:49Z",
+      "at": "2026-08-12T07:13:51.141Z"
     },
     "https://conclick.io/blogs/metrics-early-saas-should-watch": {
-      "indexed": false,
-      "coverageState": "Discovered - currently not indexed",
-      "lastCrawlTime": null,
-      "at": "2026-07-26T10:54:35.907Z"
+      "indexed": true,
+      "coverageState": "Submitted and indexed",
+      "lastCrawlTime": "2026-08-01T03:43:11Z",
+      "at": "2026-08-12T07:13:58.296Z"
     },
     "https://conclick.io/blogs/per-event-pricing-trap": {
       "indexed": false,
-      "coverageState": "Discovered - currently not indexed",
+      "coverageState": "URL is unknown to Google",
       "lastCrawlTime": null,
-      "at": "2026-07-26T10:54:42.976Z"
+      "at": "2026-08-12T07:14:05.388Z"
     },
     "https://conclick.io/blogs/switching-analytics-gotchas": {
       "indexed": true,
       "coverageState": "Submitted and indexed",
-      "lastCrawlTime": "2026-07-25T17:17:36Z",
-      "at": "2026-07-26T10:54:50.161Z"
+      "lastCrawlTime": "2026-08-02T02:14:29Z",
+      "at": "2026-08-12T07:14:12.525Z"
     },
     "https://conclick.io/blogs/vanity-metrics-are-lying": {
-      "indexed": false,
-      "coverageState": "Discovered - currently not indexed",
-      "lastCrawlTime": null,
-      "at": "2026-07-26T10:54:57.259Z"
+      "indexed": true,
+      "coverageState": "Submitted and indexed",
+      "lastCrawlTime": "2026-08-02T11:37:31Z",
+      "at": "2026-08-12T07:14:19.765Z"
     },
     "https://conclick.io/blogs/why-revenue-attribution-matters": {
-      "indexed": false,
-      "coverageState": "Duplicate, Google chose different canonical than user",
-      "lastCrawlTime": "2026-07-25T23:04:43Z",
-      "at": "2026-07-26T10:55:04.146Z"
+      "indexed": true,
+      "coverageState": "Submitted and indexed",
+      "lastCrawlTime": "2026-08-09T13:27:00Z",
+      "at": "2026-08-12T07:14:26.973Z"
     },
     "https://conclick.io/vs/clarity": {
       "indexed": true,
       "coverageState": "Submitted and indexed",
-      "lastCrawlTime": "2026-07-24T20:37:50Z",
-      "at": "2026-07-26T10:55:11.099Z"
+      "lastCrawlTime": "2026-07-31T20:19:55Z",
+      "at": "2026-08-12T07:14:34.638Z"
     },
     "https://conclick.io/vs/datafast": {
-      "indexed": false,
-      "coverageState": "Discovered - currently not indexed",
-      "lastCrawlTime": null,
-      "at": "2026-07-26T10:55:18.001Z"
+      "indexed": true,
+      "coverageState": "Submitted and indexed",
+      "lastCrawlTime": "2026-08-01T18:55:53Z",
+      "at": "2026-08-12T07:14:42.231Z"
     },
     "https://conclick.io/vs/fathom": {
-      "indexed": false,
-      "coverageState": "Discovered - currently not indexed",
-      "lastCrawlTime": null,
-      "at": "2026-07-26T10:55:24.709Z"
+      "indexed": true,
+      "coverageState": "Submitted and indexed",
+      "lastCrawlTime": "2026-08-02T15:56:48Z",
+      "at": "2026-08-12T07:14:50.041Z"
     },
     "https://conclick.io/vs/google-analytics": {
       "indexed": false,
